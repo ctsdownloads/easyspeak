@@ -124,10 +124,10 @@ distrobox create --name easyspeak --image fedora:41
 distrobox enter easyspeak
 
 # DISTROBOX: Install build dependencies and audio
-sudo dnf install portaudio-devel python3-devel gcc pulseaudio-utils cairo-devel gobject-introspection-devel
+sudo dnf install portaudio-devel python3-devel gcc pulseaudio-utils alsa-plugins-pulseaudio
 
 # DISTROBOX: Install Python packages
-pip install faster-whisper openwakeword numpy pyaudio PyGObject --break-system-packages
+pip install faster-whisper openwakeword numpy pyaudio --break-system-packages
 
 # DISTROBOX: Exit back to host
 exit
@@ -145,10 +145,14 @@ cd easyspeak
 ```bash
 mkdir -p ~/.local/share/gnome-shell/extensions/easyspeak-grid@local
 cp extension.js metadata.json ~/.local/share/gnome-shell/extensions/easyspeak-grid@local/
-gnome-extensions enable easyspeak-grid@local
 ```
 
-Log out and back in for the extension to load.
+**Log out and back in** (GNOME Shell must restart to detect new extensions).
+
+Then enable:
+```bash
+gnome-extensions enable easyspeak-grid@local
+```
 
 ### 6. Enable Accessibility - HOST
 
