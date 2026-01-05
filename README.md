@@ -124,7 +124,7 @@ distrobox create --name easyspeak --image fedora:41
 distrobox enter easyspeak
 
 # DISTROBOX: Install build dependencies and audio
-sudo dnf install portaudio-devel python3-devel gcc pulseaudio-utils
+sudo dnf install portaudio-devel python3-devel gcc pulseaudio-utils cairo-devel gobject-introspection-devel
 
 # DISTROBOX: Install Python packages
 pip install faster-whisper openwakeword numpy pyaudio PyGObject --break-system-packages
