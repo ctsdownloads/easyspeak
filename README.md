@@ -73,6 +73,8 @@ Tested on Fedora (via distrobox) and Bluefin.
 - **HOST** = Your main system (run commands in a normal terminal)
 - **DISTROBOX** = A container that shares your home folder but has its own packages. Required because Python 3.14 (Fedora 43+) breaks a key dependency.
 
+**Why the audio setup looks weird:** Your host uses PipeWire, but PyAudio (in distrobox) uses ALSA. The `alsa-plugins-pulseaudio` package bridges ALSA→PulseAudio protocol, and PipeWire speaks PulseAudio. Chain: PyAudio→ALSA→plugin→PipeWire.
+
 All commands run on **host** unless marked otherwise.
 
 ### 1. System Packages (Fedora) - HOST
@@ -85,6 +87,12 @@ sudo dnf install \
   python3-gobject \
   qutebrowser \
   glib2
+# pipewire-utils: pw-play for TTS audio playback
+# wireplumber: wpctl for volume control
+# at-spi2-core: accessibility framework for dictation
+# python3-gobject: AT-SPI dictation script runs on host via distrobox-host-exec
+# qutebrowser: browser plugin IPC control
+# glib2: gdbus/gsettings for GNOME Shell communication
 ```
 
 Most are pre-installed on Fedora/Bluefin GNOME. The command skips existing packages.
@@ -124,10 +132,22 @@ distrobox create --name easyspeak --image fedora:41
 distrobox enter easyspeak
 
 # DISTROBOX: Install build dependencies and audio
-sudo dnf install portaudio-devel python3-devel gcc pulseaudio-utils alsa-plugins-pulseaudio
+sudo dnf install \
+  portaudio-devel \
+  python3-devel \
+  gcc \
+  pulseaudio-utils \
+  alsa-plugins-pulseaudio
+# portaudio-devel, python3-devel, gcc: build pyaudio from source
+# pulseaudio-utils: provides paplay for wake sound
+# alsa-plugins-pulseaudio: PyAudio uses ALSA, this bridges to host's PipeWire
 
 # DISTROBOX: Install Python packages
 pip install faster-whisper openwakeword numpy pyaudio --break-system-packages
+# faster-whisper: speech-to-text (uses PyAV internally, broken on Python 3.14)
+# openwakeword: "Hey Jarvis" detection
+# numpy: audio processing
+# pyaudio: microphone input
 
 # DISTROBOX: Exit back to host
 exit
@@ -419,6 +439,14 @@ gsettings set org.gnome.desktop.interface toolkit-accessibility true
 **Wake word not detecting**
 - Check microphone: `arecord -d 3 test.wav && aplay test.wav`
 - Adjust `WAKE_THRESHOLD` in core.py (lower = more sensitive)
+
+**Audio errors (Invalid sample rate, ALSA errors)**
+
+Missing audio bridge in distrobox:
+```bash
+distrobox enter easyspeak
+sudo dnf install alsa-plugins-pulseaudio
+```
 
 **Commands misheard**
 - Adjust `SILENCE_THRESHOLD` in core.py
