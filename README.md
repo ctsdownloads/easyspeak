@@ -40,7 +40,21 @@ Built for people with RSI, accessibility needs, hands-busy workflows, or anyone 
 
 ## Demo
 
-<!-- Add a GIF or video here -->
+**Terminal output:**
+
+![Terminal](images/1.png)
+
+**Mouse grid (full screen):**
+
+![Grid full](images/2.png)
+
+**Mouse grid (zoomed):**
+
+![Grid zoomed](images/3.png)
+
+**Browser mode:**
+
+![Browser](images/4.png)
 
 ## Requirements
 
