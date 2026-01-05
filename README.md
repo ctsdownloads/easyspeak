@@ -26,6 +26,8 @@ Built for people with RSI, accessibility needs, hands-busy workflows, or anyone 
 
 ## Features
 
+Current and in active development:
+
 - **Wake word activation** - Hands-free with "Hey Jarvis"
 - **Mouse grid** - Navigate anywhere on screen with voice ("grid", "3 7 5", "click")
 - **Head tracking** - Control cursor with head movement (experimental)
@@ -63,13 +65,13 @@ Built for people with RSI, accessibility needs, hands-busy workflows, or anyone 
 - Working microphone
 - ~2GB disk space for models
 
-Tested on Fedora and Bluefin.
+Tested on Fedora (via distrobox) and Bluefin.
 
 ## Installation
 
 **Terminology:**
 - **HOST** = Your main system (run commands in a normal terminal)
-- **DISTROBOX** = A container that shares your home folder but has its own packages. Used on immutable systems like Bluefin where you can't install development libraries directly.
+- **DISTROBOX** = A container that shares your home folder but has its own packages. Required because Python 3.14 (Fedora 43+) breaks a key dependency.
 
 All commands run on **host** unless marked otherwise.
 
@@ -78,13 +80,11 @@ All commands run on **host** unless marked otherwise.
 ```bash
 sudo dnf install \
   pipewire-utils \
-  pulseaudio-utils \
   wireplumber \
   at-spi2-core \
   python3-gobject \
   qutebrowser \
-  glib2 \
-  ffmpeg
+  glib2
 ```
 
 Most are pre-installed on Fedora/Bluefin GNOME. The command skips existing packages.
@@ -113,33 +113,24 @@ wget -O en_US-amy-medium.onnx.json \
 
 ### 3. Distrobox Setup - HOST then DISTROBOX
 
-**Required for Bluefin/immutable Fedora.** Skip this step on traditional Fedora - see step 3b instead.
+**Why distrobox?** Python 3.14 (Fedora 43+) breaks PyAV, a faster-whisper dependency. The fix isn't released yet. Distrobox with Fedora 41 gives Python 3.12 where everything works. Even on older Fedora, distrobox keeps your system clean.
 
 ```bash
 # HOST: Install distrobox
 sudo dnf install distrobox
 
-# HOST: Create and enter container
-distrobox create --name easyspeak --image fedora:latest
+# HOST: Create container with Fedora 41 (Python 3.12)
+distrobox create --name easyspeak --image fedora:41
 distrobox enter easyspeak
 
-# DISTROBOX: Install build dependencies
-sudo dnf install portaudio-devel python3-devel gcc
+# DISTROBOX: Install build dependencies and audio
+sudo dnf install portaudio-devel python3-devel gcc pulseaudio-utils
 
 # DISTROBOX: Install Python packages
 pip install faster-whisper openwakeword numpy pyaudio PyGObject --break-system-packages
 
 # DISTROBOX: Exit back to host
 exit
-```
-
-### 3b. Traditional Fedora (no distrobox) - HOST
-
-**Skip this if you did step 3.** For traditional Fedora, install directly on host:
-
-```bash
-sudo dnf install portaudio-devel python3-devel gcc
-pip install faster-whisper openwakeword numpy pyaudio PyGObject --break-system-packages
 ```
 
 ### 4. Clone Repository - HOST
@@ -167,15 +158,8 @@ gsettings set org.gnome.desktop.interface toolkit-accessibility true
 
 ## Usage
 
-**With distrobox (Bluefin/immutable):**
 ```bash
 distrobox enter easyspeak
-cd ~/easyspeak
-python core.py
-```
-
-**Without distrobox (traditional Fedora):**
-```bash
 cd ~/easyspeak
 python core.py
 ```
@@ -440,6 +424,16 @@ gsettings set org.gnome.desktop.interface toolkit-accessibility true
 ```bash
 chmod +x ~/.local/bin/piper/piper
 chmod +x ~/.local/bin/piper/espeak-ng
+```
+
+**pip install fails with PyAV/Cython errors**
+
+You're probably running on host instead of inside distrobox, or using wrong Fedora image:
+```bash
+# Make sure you're using Fedora 41 image
+distrobox create --name easyspeak --image fedora:41
+distrobox enter easyspeak
+# Then install dependencies inside distrobox
 ```
 
 ## Contributing
