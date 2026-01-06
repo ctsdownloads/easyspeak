@@ -26,49 +26,20 @@ import time
 
 core = None
 
-# Phonetic alphabet for hints
-PHONETIC = {
-    # Single letters - say the letter itself
-    "a": "a", "b": "b", "c": "c", "d": "d", "e": "e", "f": "f", "g": "g",
-    "h": "h", "i": "i", "j": "j", "k": "k", "l": "l", "m": "m", "n": "n",
-    "o": "o", "p": "p", "q": "q", "r": "r", "s": "s", "t": "t", "u": "u",
-    "v": "v", "w": "w", "x": "x", "y": "y", "z": "z",
-    # NATO-ish phonetic words
-    "alpha": "a", "air": "a", "able": "a", "adam": "a",
-    "bravo": "b", "bat": "b", "boy": "b", "baker": "b",
-    "charlie": "c", "cap": "c", "cat": "c", "cast": "c",
-    "delta": "d", "drum": "d", "dog": "d", "david": "d",
-    "echo": "e", "each": "e", "easy": "e", "edward": "e",
-    "foxtrot": "f", "fine": "f", "fox": "f", "frank": "f",
-    "golf": "g", "gust": "g", "george": "g",
-    "hotel": "h", "harp": "h", "have": "h", "henry": "h", "hard": "h",
-    "india": "i", "sit": "i", "item": "i", "ida": "i",
-    "juliet": "j", "junk": "j", "john": "j", "jack": "j",
-    "kilo": "k", "crunch": "k", "king": "k", "kite": "k",
-    "lima": "l", "look": "l", "love": "l", "larry": "l",
-    "mike": "m", "made": "m", "mary": "m", "man": "m",
-    "november": "n", "near": "n", "nate": "n", "nancy": "n",
-    "oscar": "o", "odd": "o", "oak": "o",
-    "papa": "p", "pit": "p", "peter": "p", "paul": "p",
-    "quebec": "q", "quench": "q", "queen": "q", "quest": "q",
-    "romeo": "r", "red": "r", "roger": "r", "robert": "r",
-    "sierra": "s", "sun": "s", "sam": "s", "sugar": "s",
-    "tango": "t", "trap": "t", "tom": "t", "tiger": "t",
-    "uniform": "u", "urge": "u", "uncle": "u",
-    "victor": "v", "vest": "v", "very": "v", "van": "v",
-    "whiskey": "w", "whale": "w", "william": "w", "walk": "w",
-    "xray": "x", "plex": "x", "x-ray": "x", "extra": "x",
-    "yankee": "y", "yank": "y", "yellow": "y", "young": "y",
-    "zulu": "z", "zip": "z", "zebra": "z",
-    # Numbers for multi-char hints like "1d", "1a"
-    "one": "1", "two": "2", "three": "3", "four": "4", "five": "5",
-    "six": "6", "seven": "7", "eight": "8", "nine": "9",
-    "zero": "0", "oh": "0", "o": "0",
-    "1": "1", "2": "2", "3": "3", "4": "4", "5": "5",
-    "6": "6", "7": "7", "8": "8", "9": "9", "0": "0",
-    # Common mishearings for numbers
-    "to": "2", "too": "2", "for": "4", "fore": "4",
-    "won": "1", "wan": "1", "tu": "2",
+# Number words for hint selection
+HINT_NUMBERS = {
+    "zero": "0", "oh": "0",
+    "one": "1", "won": "1", "wan": "1",
+    "two": "2", "to": "2", "too": "2", "tu": "2",
+    "three": "3", "tree": "3", "free": "3",
+    "four": "4", "for": "4", "fore": "4",
+    "five": "5",
+    "six": "6", "sex": "6",
+    "seven": "7",
+    "eight": "8", "ate": "8",
+    "nine": "9", "nein": "9",
+    "0": "0", "1": "1", "2": "2", "3": "3", "4": "4",
+    "5": "5", "6": "6", "7": "7", "8": "8", "9": "9",
 }
 
 BOOKMARKS = {
@@ -112,18 +83,18 @@ def qb_open(url):
     """Open URL in qutebrowser"""
     core.host_run(["qutebrowser", url])
 
-def parse_phonetic(cmd):
-    """Extract hint numbers from phonetic words - ONLY from known words"""
+def parse_hint_numbers(cmd):
+    """Extract hint numbers from spoken words"""
     clean = re.sub(r'[.,!?\-]', ' ', cmd.lower())
     words = clean.split()
-    letters = []
+    digits = []
     for word in words:
-        if word in PHONETIC:
-            letters.append(PHONETIC[word])
-    return "".join(letters)
+        if word in HINT_NUMBERS:
+            digits.append(HINT_NUMBERS[word])
+    return "".join(digits)
 
 def looks_like_hint(cmd):
-    """Check if command looks like a hint number (short, mostly digits/phonetic)"""
+    """Check if command looks like a hint number (short, mostly digits/number words)"""
     clean = re.sub(r'[.,!?\-\s]', '', cmd.lower())
     # Must be short
     if len(clean) > 6:
@@ -131,9 +102,9 @@ def looks_like_hint(cmd):
     # Direct digits like "02", "92"
     if clean.replace('o', '0').isdigit():
         return True
-    # Check if all words are phonetic
+    # Check if all words are number words
     words = cmd.lower().split()
-    if len(words) <= 3 and all(w.strip(".,!?") in PHONETIC for w in words):
+    if len(words) <= 3 and all(w.strip(".,!?") in HINT_NUMBERS for w in words):
         return True
     return False
 
@@ -260,7 +231,7 @@ def listen_for_hint(core):
         qb("fake-key <Escape>")
     else:
         # Try phonetic fallback
-        hint = parse_phonetic(cmd_lower)
+        hint = parse_hint_numbers(cmd_lower)
         if hint:
             print(f"  🔤 Phonetic: '{cmd_lower}' → '{hint}'")
             qb(f"hint-follow {hint}")
@@ -502,7 +473,7 @@ def handle_browser_command(cmd_lower, core):
             return True
         
         # Try phonetic parsing
-        hint = parse_phonetic(cmd_lower)
+        hint = parse_hint_numbers(cmd_lower)
         if hint and hint.isdigit():
             print(f"  🔤 Phonetic parsed: '{cmd_lower}' → '{hint}'")
             qb(f"hint-follow {hint}")
