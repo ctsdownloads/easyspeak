@@ -253,6 +253,7 @@ class EasySpeak:
                         break
                     
                     self.wakeword.reset()
+                    audio_buffer = []  # Clear buffer to prevent re-trigger
                     
                     # Audio feedback - wake acknowledged
                     subprocess.run(["paplay", "/usr/share/sounds/freedesktop/stereo/message.oga"], capture_output=True)
