@@ -148,6 +148,15 @@ gnome-extensions enable easyspeak-grid@local
 gsettings set org.gnome.desktop.interface toolkit-accessibility true
 ```
 
+### 7. Configure Qutebrowser
+
+EasySpeak uses number hints (not letters). Configure qutebrowser:
+
+```bash
+mkdir -p ~/.config/qutebrowser
+echo "c.hints.chars = '0123456789'" >> ~/.config/qutebrowser/config.py
+```
+
 ## Usage
 
 ```bash
