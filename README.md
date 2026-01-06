@@ -150,13 +150,13 @@ gsettings set org.gnome.desktop.interface toolkit-accessibility true
 
 ## Usage
 
-Activate the virtual environment, then run:
 ```bash
+cd easyspeak
 source ~/easyspeak-venv/bin/activate
 python core.py
 ```
 
-You need to activate the venv each time you open a new terminal.
+Activate the venv each time you open a new terminal.
 
 Say "Hey Jarvis" followed by a command.
 
