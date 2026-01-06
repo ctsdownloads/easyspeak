@@ -71,8 +71,6 @@ def setup(c):
 
 
 def host_run(cmd):
-    if os.path.exists("/run/.containerenv"):
-        cmd = ["distrobox-host-exec"] + cmd
     return subprocess.run(cmd, capture_output=True, text=True)
 
 

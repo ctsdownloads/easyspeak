@@ -23,12 +23,13 @@ from openwakeword.model import Model as WakeWordModel
 # CONFIGURATION
 # =============================================================================
 
-WAKE_WORD = "hey_jarvis"  # OpenWakeWord model name (closest to "computer")
+WAKE_WORD = "hey_jarvis"  # OpenWakeWord model name
 PIPER_MODEL = os.path.expanduser("~/.local/share/piper/en_US-amy-medium.onnx")
-WHISPER_MODEL = "base.en"  # Better accuracy than tiny.en
-SILENCE_THRESHOLD = 300  # Lower = more sensitive to speech
-SILENCE_DURATION = 0.3   # Faster cutoff
-WAKE_THRESHOLD = 0.5     # Wake word confidence threshold
+WHISPER_MODEL = "base.en"
+SILENCE_THRESHOLD = 300
+SILENCE_DURATION = 0.3
+WAKE_THRESHOLD = 0.5
+WAKE_COOLDOWN = 3.0  # Seconds to ignore wake word after trigger
 
 # Prompt to help Whisper recognize common commands
 COMMAND_PROMPT = "numbers, scroll, click, open, close, back, forward, volume, brightness, stop"
@@ -44,6 +45,7 @@ class EasySpeak:
         self.wakeword = None
         self.audio = None
         self.stream = None
+        self.last_wake_time = 0
     
     # --- Utilities for plugins ---
     
@@ -86,9 +88,7 @@ class EasySpeak:
             try:
                 module = importlib.import_module(module_name)
                 
-                # Validate plugin has required attributes
                 if hasattr(module, "NAME") and hasattr(module, "handle"):
-                    # Call setup if exists
                     if hasattr(module, "setup"):
                         module.setup(self)
                     
@@ -109,7 +109,6 @@ class EasySpeak:
     
     def route_command(self, cmd):
         """Route command to appropriate plugin. Returns False to exit."""
-        # Strip wake word if it bled into the command
         cmd = cmd.lower()
         for wake in ["hey jarvis", "hey jarvis,", "hey, jarvis", "hey, jarvis,", 
                      "hey jarvis.", "jarvis", "jarvis,"]:
@@ -117,20 +116,18 @@ class EasySpeak:
         cmd = cmd.strip(".,!? ")
         
         if not cmd:
-            return True  # Empty after stripping, ignore
+            return True
         
-        # Check each plugin
         for plugin in self.plugins:
             try:
                 result = plugin.handle(cmd, self)
                 if result is True:
-                    return True  # Handled, continue running
+                    return True
                 elif result is False:
-                    return False  # Exit signal
+                    return False
             except Exception as e:
                 print(f"Plugin error ({plugin.NAME}): {e}")
         
-        # No plugin handled it
         self.speak("I didn't understand. Say help for commands.")
         return True
     
@@ -144,11 +141,11 @@ class EasySpeak:
         silent_chunks = 0
         chunks_needed = int(SILENCE_DURATION * 16000 / 1600)
         
-        for i in range(int(5 * 16000 / 1600)):  # Max 5 seconds
+        for i in range(int(5 * 16000 / 1600)):
             pcm = self.stream.read(1600, exception_on_overflow=False)
             frames.append(pcm)
             
-            if i >= 5:  # Min 0.5 seconds
+            if i >= 5:
                 if self.is_silence(np.frombuffer(pcm, dtype=np.int16)):
                     silent_chunks += 1
                     if silent_chunks >= chunks_needed:
@@ -174,7 +171,6 @@ class EasySpeak:
             wf.writeframes(audio_data)
             wf.close()
             
-            # Use provided prompt or default command prompt
             use_prompt = prompt if prompt else COMMAND_PROMPT
             segments, _ = self.whisper.transcribe(f.name, initial_prompt=use_prompt, beam_size=1, vad_filter=True)
             text = " ".join([s.text for s in segments]).strip()
@@ -209,7 +205,7 @@ class EasySpeak:
         self.audio = pyaudio.PyAudio()
         self.stream = self.audio.open(
             format=pyaudio.paInt16, channels=1, rate=16000,
-            input=True, frames_per_buffer=1280  # OpenWakeWord needs 1280
+            input=True, frames_per_buffer=1280
         )
         
         try:
@@ -220,48 +216,45 @@ class EasySpeak:
                 pcm = self.stream.read(1280, exception_on_overflow=False)
                 audio_data = np.frombuffer(pcm, dtype=np.int16)
                 
-                # Keep rolling buffer of recent audio
                 audio_buffer.append(pcm)
-                if len(audio_buffer) > 50:  # ~4 seconds
+                if len(audio_buffer) > 50:
                     audio_buffer.pop(0)
                 
-                # Check wake word
                 prediction = self.wakeword.predict(audio_data)
                 score = prediction.get(WAKE_WORD, 0)
                 
                 if score > WAKE_THRESHOLD:
-                    # DEBUG: Save audio that triggered this and log
-                    if not hasattr(self, '_debug_count'):
-                        self._debug_count = 0
-                        self._debug_files = []
+                    # Cooldown check - ignore if triggered recently
+                    now = time.time()
+                    if now - self.last_wake_time < WAKE_COOLDOWN:
+                        continue
+                    self.last_wake_time = now
                     
-                    self._debug_count += 1
-                    debug_file = f"/tmp/wake_debug_{self._debug_count}.raw"
-                    with open(debug_file, 'wb') as f:
-                        # Save recent buffer (last ~4 sec) not just current frame
-                        for chunk in audio_buffer:
-                            f.write(chunk)
-                    self._debug_files.append(debug_file)
-                    print(f"[DEBUG] Trigger {self._debug_count}/3 - {time.time():.3f} - score: {score:.3f}")
+                    print(f"🎤 Wake! (confidence: {score:.2f})")
                     
-                    if self._debug_count >= 3:
-                        print("\n[DEBUG] 3 triggers captured. Playing back each...")
-                        for i, f in enumerate(self._debug_files, 1):
-                            print(f"\n[DEBUG] Playing trigger {i}: {f}")
-                            subprocess.run(["aplay", "-f", "S16_LE", "-r", "16000", "-c", "1", f])
-                        print("\n[DEBUG] Done. Exiting.")
-                        break
-                    
+                    # Reset everything
                     self.wakeword.reset()
-                    audio_buffer = []  # Clear buffer to prevent re-trigger
+                    audio_buffer = []
+                    try:
+                        self.stream.read(self.stream.get_read_available(), exception_on_overflow=False)
+                    except:
+                        pass
                     
-                    # Audio feedback - wake acknowledged
+                    # Audio feedback first
                     subprocess.run(["paplay", "/usr/share/sounds/freedesktop/stereo/message.oga"], capture_output=True)
                     
-                    # Immediately record what follows (user may already be speaking)
-                    audio = self.record_until_silence()
+                    # Flush any audio captured during beep
+                    try:
+                        self.stream.read(self.stream.get_read_available(), exception_on_overflow=False)
+                    except:
+                        pass
                     
-                    if len(audio) > 3200:  # More than 0.1 sec of audio
+                    # Wait for user to start speaking (up to 5 seconds)
+                    first = self.wait_for_speech(timeout=5)
+                    
+                    if first:
+                        # User started speaking, record until they stop
+                        audio = first + self.record_until_silence()
                         cmd = self.transcribe(audio)
                         if cmd:
                             print(f"👂 {cmd}")
@@ -273,26 +266,7 @@ class EasySpeak:
                             except:
                                 pass
                     else:
-                        # No command heard, play beep and wait
-                        subprocess.run(["paplay", "/usr/share/sounds/freedesktop/stereo/message.oga"], 
-                                       capture_output=True)
-                        self.stream.read(self.stream.get_read_available(), exception_on_overflow=False)
-                        first = self.wait_for_speech(timeout=5)
-                        
-                        if first:
-                            audio = first + self.record_until_silence()
-                            cmd = self.transcribe(audio)
-                            if cmd:
-                                print(f"👂 {cmd}")
-                                if not self.route_command(cmd.lower().strip(".,!? ")):
-                                    break
-                                self.wakeword.reset()
-                                try:
-                                    self.stream.read(self.stream.get_read_available(), exception_on_overflow=False)
-                                except:
-                                    pass
-                        else:
-                            self.speak("I didn't hear anything.")
+                        self.speak("I didn't hear anything.")
                     
                     audio_buffer = []
                     print("Listening for wake word...")

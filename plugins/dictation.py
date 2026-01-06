@@ -76,10 +76,8 @@ print("NO_FOCUS")
 '''
 
 def insert_text(text):
-    """Insert text via AT-SPI on host"""
+    """Insert text via AT-SPI"""
     cmd = ["python3", "-c", ATSPI_INSERT_SCRIPT, text]
-    if os.path.exists("/run/.containerenv"):
-        cmd = ["distrobox-host-exec"] + cmd
     result = subprocess.run(cmd, capture_output=True, text=True)
     return "OK" in result.stdout
 
