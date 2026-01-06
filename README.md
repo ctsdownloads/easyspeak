@@ -124,8 +124,8 @@ wget -O en_US-amy-medium.onnx.json \
 ### 4. Clone Repository
 
 ```bash
-git clone https://github.com/ctsdownloads/easyspeak.git
-cd easyspeak
+git clone https://github.com/ctsdownloads/easyspeak.git ~/easyspeak
+cd ~/easyspeak
 ```
 
 ### 5. GNOME Shell Extension
@@ -151,9 +151,9 @@ gsettings set org.gnome.desktop.interface toolkit-accessibility true
 ## Usage
 
 ```bash
-cd easyspeak
-source ~/easyspeak-venv/bin/activate
-python core.py
+source ~/easyspeak-venv/bin/activate  # Now python = venv's python3.13
+cd ~/easyspeak                         # Go to your code
+python core.py                         # Runs with venv packages
 ```
 
 Activate the venv each time you open a new terminal.
