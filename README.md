@@ -42,6 +42,8 @@ Current and in active development:
 
 ## Demo
 
+Click the thumbnail to watch the demo video:
+
 [![Demo](https://img.youtube.com/vi/dl5m2Zo1oIE/maxresdefault.jpg)](https://www.youtube.com/watch?v=dl5m2Zo1oIE)
 
 **Terminal output:**
