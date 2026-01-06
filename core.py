@@ -230,8 +230,27 @@ class EasySpeak:
                 score = prediction.get(WAKE_WORD, 0)
                 
                 if score > WAKE_THRESHOLD:
-                    # DEBUG: Log timestamp and score
-                    print(f"[DEBUG] {time.time():.3f} - Wake triggered, score: {score:.3f}")
+                    # DEBUG: Save audio that triggered this and log
+                    if not hasattr(self, '_debug_count'):
+                        self._debug_count = 0
+                        self._debug_files = []
+                    
+                    self._debug_count += 1
+                    debug_file = f"/tmp/wake_debug_{self._debug_count}.raw"
+                    with open(debug_file, 'wb') as f:
+                        # Save recent buffer (last ~4 sec) not just current frame
+                        for chunk in audio_buffer:
+                            f.write(chunk)
+                    self._debug_files.append(debug_file)
+                    print(f"[DEBUG] Trigger {self._debug_count}/3 - {time.time():.3f} - score: {score:.3f}")
+                    
+                    if self._debug_count >= 3:
+                        print("\n[DEBUG] 3 triggers captured. Playing back each...")
+                        for i, f in enumerate(self._debug_files, 1):
+                            print(f"\n[DEBUG] Playing trigger {i}: {f}")
+                            subprocess.run(["aplay", "-f", "S16_LE", "-r", "16000", "-c", "1", f])
+                        print("\n[DEBUG] Done. Exiting.")
+                        break
                     
                     self.wakeword.reset()
                     
