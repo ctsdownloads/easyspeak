@@ -65,17 +65,15 @@ Current and in active development:
 - Working microphone
 - ~2GB disk space for models
 
-Tested on Bluefin and Fedora 43.
+Tested on Fedora 43.
 
 ## Installation
 
-**Fedora 43 users:** Your default `python3` is 3.14, which breaks dependencies. Install and use Python 3.13 instead:
+Fedora 43's default `python3` is 3.14, which breaks dependencies. Install Python 3.13:
 ```bash
 sudo dnf install python3.13
 python3.13 --version  # Verify it's installed
 ```
-
-**Bluefin / Fedora 42 or older:** Your `python3` is already 3.12 or 3.13. You're fine.
 
 ### 1. System Packages
 
@@ -97,15 +95,9 @@ sudo dnf install \
 
 ### 2. Python Packages
 
-**Fedora 43:** Default python3 is 3.14 (broken). Use python3.13:
 ```bash
 python3.13 -m ensurepip
 python3.13 -m pip install faster-whisper openwakeword numpy pyaudio --break-system-packages
-```
-
-**Bluefin / Fedora 42 or older:** python3 is already 3.12/3.13:
-```bash
-pip install faster-whisper openwakeword numpy pyaudio --break-system-packages
 ```
 
 ### 3. Piper TTS
@@ -157,14 +149,8 @@ gsettings set org.gnome.desktop.interface toolkit-accessibility true
 
 ## Usage
 
-**Fedora 43:**
 ```bash
 python3.13 core.py
-```
-
-**Bluefin / Fedora 42 or older:**
-```bash
-python3 core.py
 ```
 
 Say "Hey Jarvis" followed by a command.
@@ -439,7 +425,7 @@ chmod +x ~/.local/bin/piper/espeak-ng
 
 **pip install fails with PyAV/Cython errors**
 
-You're on Python 3.14. Use `python3.13` instead (Fedora 43 has it):
+You're on Python 3.14. Use `python3.13` instead:
 ```bash
 sudo dnf install python3.13
 python3.13 -m ensurepip
