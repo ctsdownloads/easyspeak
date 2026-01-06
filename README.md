@@ -42,19 +42,23 @@ Current and in active development:
 
 ## Demo
 
+**Video demo:**
+
+https://github.com/ctsdownloads/easyspeak/raw/main/images/demo.mp4
+
 **Terminal output:**
 
 ![Terminal](images/1.png)
 
-**Mouse grid (full screen):**
+**Mouse grid (Files):**
 
-![Grid full](images/2.png)
+![Grid Files](images/2.png)
 
-**Mouse grid (zoomed):**
+**Mouse grid (Browser):**
 
 ![Grid zoomed](images/3.png)
 
-**Browser mode:**
+**Browser (Numbers click navigation):**
 
 ![Browser](images/4.png)
 

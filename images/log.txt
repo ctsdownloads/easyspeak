@@ -1,0 +1,1562 @@
+# Commands to gather crash information:
+journalctl --user -b | grep -i -E "(nautilus|gnome-shell|crash|segfault)"
+coredumpctl info gnome-shell
+coredumpctl info nautilus
+Jan 06 01:10:59 fedora gnome-shell[4237]: Running GNOME Shell (using mutter 49.2) as a Wayland display server
+Jan 06 01:10:59 fedora gnome-shell[4237]: Enabling experimental feature 'scale-monitor-framebuffer'
+Jan 06 01:10:59 fedora gnome-shell[4237]: Enabling experimental feature 'xwayland-native-scaling'
+Jan 06 01:10:59 fedora gnome-shell[4237]: Thread 'KMS thread' will be using high priority scheduling
+Jan 06 01:10:59 fedora gnome-shell[4237]: Device '/dev/dri/card1' prefers shadow buffer
+Jan 06 01:10:59 fedora gnome-shell[4237]: Added device '/dev/dri/card1' (amdgpu) using atomic mode setting.
+Jan 06 01:10:59 fedora gnome-shell[4237]: Created gbm renderer for '/dev/dri/card1'
+Jan 06 01:10:59 fedora gnome-shell[4237]: GPU /dev/dri/card1 selected primary from builtin panel presence
+Jan 06 01:10:59 fedora gnome-shell[4237]: Obtained a high priority EGL context
+Jan 06 01:11:00 fedora gnome-shell[4237]: Using public X11 display :0, (using :1 for managed services)
+Jan 06 01:11:00 fedora gnome-shell[4237]: Using Wayland display name 'wayland-0'
+Jan 06 01:11:00 fedora gnome-shell[4237]: Unset XDG_SESSION_ID, getCurrentSessionProxy() called outside a user session. Asking logind directly.
+Jan 06 01:11:00 fedora gnome-shell[4237]: Registering session with GDM
+Jan 06 01:11:00 fedora gnome-shell[4237]: Error looking up permission: GDBus.Error:org.freedesktop.portal.Error.NotFound: No entry for geolocation
+Jan 06 01:11:00 fedora gnome-shell[4237]: Will monitor session 2
+Jan 06 01:11:00 fedora gnome-shell[4237]: Type GITypeInfo of property NM.Object::client does not match return type GITypeInfo of getter get_client. Falling back to slow path
+Jan 06 01:11:01 fedora gnome-shell[4237]: GNOME Shell started at Tue Jan 06 2026 01:11:00 GMT-0800 (Pacific Standard Time)
+Jan 06 01:11:11 fedora gnome-shell[4237]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 01:11:11 fedora systemd[3866]: Started dbus-:1.2-org.gnome.Nautilus@0.service.
+Jan 06 01:11:11 fedora org.gnome.Nautilus[6730]: Connecting to org.freedesktop.Tracker3.Miner.Files
+Jan 06 01:11:11 fedora org.gnome.Nautilus[6730]: Localsearch search engine has no connection
+Jan 06 01:11:11 fedora systemd[3866]: Started dbus-:1.2-org.gnome.NautilusPreviewer@0.service.
+Jan 06 01:11:11 fedora gnome-shell[4237]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 01:11:21 fedora systemd[3866]: dbus-:1.2-org.gnome.NautilusPreviewer@0.service: Consumed 197ms CPU time, 75.2M memory peak.
+Jan 06 01:12:55 fedora gnome-shell[4237]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 01:12:55 fedora systemd[3866]: Started dbus-:1.2-org.gnome.Nautilus@1.service.
+Jan 06 01:12:55 fedora org.gnome.Nautilus[8350]: Connecting to org.freedesktop.Tracker3.Miner.Files
+Jan 06 01:12:55 fedora org.gnome.Nautilus[8350]: Localsearch search engine has no connection
+Jan 06 01:12:55 fedora systemd[3866]: Started dbus-:1.2-org.gnome.NautilusPreviewer@1.service.
+Jan 06 01:12:55 fedora gnome-shell[4237]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 01:12:56 fedora systemd[3866]: Started app-gnome-org.mozilla.firefox-8564.scope - Application launched by gnome-shell.
+Jan 06 01:13:35 fedora gnome-shell[4237]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 01:13:35 fedora systemd[3866]: Started dbus-:1.2-org.gnome.Nautilus@2.service.
+Jan 06 01:13:35 fedora org.gnome.Nautilus[10347]: Connecting to org.freedesktop.Tracker3.Miner.Files
+Jan 06 01:13:35 fedora systemd[3866]: Started dbus-:1.2-org.gnome.NautilusPreviewer@2.service.
+Jan 06 01:13:35 fedora gnome-shell[4237]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 01:26:58 fedora systemd[3866]: Stopping app-gnome-org.mozilla.firefox-8564.scope - Application launched by gnome-shell...
+Jan 06 01:26:58 fedora gnome-shell[4237]: Owner of volume monitor org.gtk.vfs.GoaVolumeMonitor disconnected from the bus; removing drives/volumes/mounts
+Jan 06 01:26:58 fedora gnome-shell[4237]: Owner of volume monitor org.gtk.vfs.AfcVolumeMonitor disconnected from the bus; removing drives/volumes/mounts
+Jan 06 01:26:58 fedora gnome-shell[4237]: Owner of volume monitor org.gtk.vfs.GPhoto2VolumeMonitor disconnected from the bus; removing drives/volumes/mounts
+Jan 06 01:26:58 fedora gnome-shell[4237]: Owner of volume monitor org.gtk.vfs.MTPVolumeMonitor disconnected from the bus; removing drives/volumes/mounts
+Jan 06 01:26:58 fedora gnome-shell[4237]: Owner of volume monitor org.gtk.vfs.UDisks2VolumeMonitor disconnected from the bus; removing drives/volumes/mounts
+Jan 06 01:26:58 fedora systemd[3866]: Stopped app-gnome-org.mozilla.firefox-8564.scope - Application launched by gnome-shell.
+Jan 06 01:26:58 fedora gnome-shell[4237]: Shutting down GNOME Shell
+Jan 06 01:26:58 fedora gnome-shell[4237]: g_hash_table_iter_next: assertion 'ri->version == ri->hash_table->version' failed
+Jan 06 01:26:58 fedora gnome-shell-calendar-server[4315]: gnome-shell-calendar-server[4315]: Lost (or failed to acquire) the name org.gnome.Shell.CalendarServer - exiting
+Jan 06 01:27:09 fedora gnome-shell[16334]: Running GNOME Shell (using mutter 49.2) as a Wayland display server
+Jan 06 01:27:09 fedora gnome-shell[16334]: Enabling experimental feature 'scale-monitor-framebuffer'
+Jan 06 01:27:09 fedora gnome-shell[16334]: Enabling experimental feature 'xwayland-native-scaling'
+Jan 06 01:27:09 fedora gnome-shell[16334]: Thread 'KMS thread' will be using high priority scheduling
+Jan 06 01:27:09 fedora gnome-shell[16334]: Device '/dev/dri/card1' prefers shadow buffer
+Jan 06 01:27:09 fedora gnome-shell[16334]: Added device '/dev/dri/card1' (amdgpu) using atomic mode setting.
+Jan 06 01:27:09 fedora gnome-shell[16334]: Created gbm renderer for '/dev/dri/card1'
+Jan 06 01:27:09 fedora gnome-shell[16334]: GPU /dev/dri/card1 selected primary from builtin panel presence
+Jan 06 01:27:09 fedora gnome-shell[16334]: Obtained a high priority EGL context
+Jan 06 01:27:09 fedora gnome-shell[16334]: Using public X11 display :0, (using :1 for managed services)
+Jan 06 01:27:09 fedora gnome-shell[16334]: Using Wayland display name 'wayland-0'
+Jan 06 01:27:09 fedora gnome-shell[16334]: Unset XDG_SESSION_ID, getCurrentSessionProxy() called outside a user session. Asking logind directly.
+Jan 06 01:27:10 fedora gnome-shell[16334]: Registering session with GDM
+Jan 06 01:27:10 fedora gnome-shell[16334]: Error looking up permission: GDBus.Error:org.freedesktop.portal.Error.NotFound: No entry for geolocation
+Jan 06 01:27:10 fedora gnome-shell[16334]: Will monitor session 8
+Jan 06 01:27:10 fedora gnome-shell[16334]: Type GITypeInfo of property NM.Object::client does not match return type GITypeInfo of getter get_client. Falling back to slow path
+Jan 06 01:27:10 fedora gnome-shell[16334]: GNOME Shell started at Tue Jan 06 2026 01:27:10 GMT-0800 (Pacific Standard Time)
+Jan 06 01:27:12 fedora gnome-shell[16334]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 01:27:12 fedora systemd[3866]: Started dbus-:1.2-org.gnome.Nautilus@0.service.
+Jan 06 01:27:12 fedora org.gnome.Nautilus[18373]: Connecting to org.freedesktop.Tracker3.Miner.Files
+Jan 06 01:27:12 fedora org.gnome.Nautilus[18373]: Localsearch search engine has no connection
+Jan 06 01:27:12 fedora systemd[3866]: Started dbus-:1.2-org.gnome.NautilusPreviewer@0.service.
+Jan 06 01:27:13 fedora gnome-shell[16334]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 01:27:28 fedora systemd[3866]: Started app-gnome-org.mozilla.firefox-19938.scope - Application launched by gnome-shell.
+Jan 06 01:27:43 fedora gnome-shell[16334]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 01:27:43 fedora systemd[3866]: Started dbus-:1.2-org.gnome.Nautilus@1.service.
+Jan 06 01:27:43 fedora org.gnome.Nautilus[20649]: Connecting to org.freedesktop.Tracker3.Miner.Files
+Jan 06 01:27:43 fedora org.gnome.Nautilus[20649]: Localsearch search engine has no connection
+Jan 06 01:27:43 fedora systemd[3866]: Started dbus-:1.2-org.gnome.NautilusPreviewer@1.service.
+Jan 06 01:27:43 fedora gnome-shell[16334]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 01:35:04 fedora gnome-shell[16334]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 01:35:04 fedora systemd[3866]: Started dbus-:1.2-org.gnome.Nautilus@2.service.
+Jan 06 01:35:04 fedora org.gnome.Nautilus[21639]: Connecting to org.freedesktop.Tracker3.Miner.Files
+Jan 06 01:35:05 fedora org.gnome.Nautilus[21639]: Localsearch search engine has no connection
+Jan 06 01:35:05 fedora systemd[3866]: Started dbus-:1.2-org.gnome.NautilusPreviewer@2.service.
+Jan 06 01:35:05 fedora gnome-shell[16334]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 01:42:08 fedora systemd[3866]: Started app-gnome-gnome\x2dpower\x2dpanel-23663.scope - Application launched by gnome-shell.
+Jan 06 01:48:31 fedora gnome-shell[16334]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 01:48:31 fedora systemd[3866]: Started dbus-:1.2-org.gnome.Nautilus@3.service.
+Jan 06 01:48:31 fedora org.gnome.Nautilus[26854]: Connecting to org.freedesktop.Tracker3.Miner.Files
+Jan 06 01:48:31 fedora systemd[3866]: Started dbus-:1.2-org.gnome.NautilusPreviewer@3.service.
+Jan 06 01:48:31 fedora gnome-shell[16334]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 01:48:32 fedora systemd[3866]: Started app-gnome-org.pulseaudio.pavucontrol-27988.scope - Application launched by gnome-shell.
+Jan 06 01:54:17 fedora gnome-shell[16334]: Type GITypeInfo of property AccountsService.User::password-mode does not match return type GITypeInfo of getter get_password_mode. Falling back to slow path
+Jan 06 02:00:09 fedora systemd[3866]: Started dbus-:1.2-org.gnome.Nautilus@4.service.
+Jan 06 02:00:09 fedora org.gnome.Nautilus[29579]: Connecting to org.freedesktop.Tracker3.Miner.Files
+Jan 06 02:00:09 fedora systemd[3866]: Started dbus-:1.2-org.gnome.NautilusPreviewer@4.service.
+Jan 06 02:46:18 fedora systemd[3866]: Started dbus-:1.2-org.gnome.Nautilus@5.service.
+Jan 06 02:46:18 fedora org.gnome.Nautilus[32742]: Connecting to org.freedesktop.Tracker3.Miner.Files
+Jan 06 02:46:18 fedora systemd[3866]: Started dbus-:1.2-org.gnome.NautilusPreviewer@5.service.
+Jan 06 02:47:41 fedora gnome-shell[16334]: EasySpeak: Grid shown 1440x960 at (0,0)
+Jan 06 02:49:15 fedora systemd[3866]: Started dbus-:1.2-org.gnome.NautilusPreviewer@6.service.
+Jan 06 02:49:55 fedora gnome-shell[16334]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 02:49:55 fedora systemd[3866]: Started dbus-:1.2-org.gnome.Nautilus@6.service.
+Jan 06 02:49:55 fedora org.gnome.Nautilus[34957]: Connecting to org.freedesktop.Tracker3.Miner.Files
+Jan 06 02:49:55 fedora systemd[3866]: Started dbus-:1.2-org.gnome.NautilusPreviewer@7.service.
+Jan 06 02:49:56 fedora gnome-shell[16334]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 02:49:56 fedora gnome-shell[16334]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 02:50:39 fedora gnome-shell[35858]: The XKEYBOARD keymap compiler (xkbcomp) reports:
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86OK
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86GoTo
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86VendorLogo
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaSelectProgramGuide
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaSelectProgramGuide
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaSelectHome
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaLanguageMenu
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaTitleMenu
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86AudioChannelMode
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaSelectPC
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaSelectTV
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaSelectCable
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaSelectVCR
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaSelectVCRPlus
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaSelectSatellite
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaSelectCD
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaSelectTape
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaSelectRadio
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaSelectTuner
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaPlayer
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaSelectTeletext
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaSelectAuxiliary
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86MediaPlaySlow
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86NumberEntryMode
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86RefreshRateToggle
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86Accessibility
+Jan 06 02:50:39 fedora gnome-shell[35858]: > Warning:          Could not resolve keysym XF86DoNotDisturb
+Jan 06 02:50:39 fedora gnome-shell[35858]: Errors from xkbcomp are not fatal to the X server
+Jan 06 02:50:39 fedora gnome-shell[35859]: The XKEYBOARD keymap compiler (xkbcomp) reports:
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Unsupported maximum keycode 708, clipping.
+Jan 06 02:50:39 fedora gnome-shell[35859]: >                   X11 cannot support keycodes above 255.
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Virtual modifier Hyper multiply defined
+Jan 06 02:50:39 fedora gnome-shell[35859]: >                   Using 0, ignoring 0
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Virtual modifier ScrollLock multiply defined
+Jan 06 02:50:39 fedora gnome-shell[35859]: >                   Using 0, ignoring 0
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86OK
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86GoTo
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86VendorLogo
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaSelectProgramGuide
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaSelectProgramGuide
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaSelectHome
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaLanguageMenu
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaTitleMenu
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86AudioChannelMode
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaSelectPC
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaSelectTV
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaSelectCable
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaSelectVCR
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaSelectVCRPlus
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaSelectSatellite
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaSelectTape
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaSelectRadio
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaSelectTuner
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaPlayer
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaSelectTeletext
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaSelectAuxiliary
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86MediaPlaySlow
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86NumberEntryMode
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86RefreshRateToggle
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86Accessibility
+Jan 06 02:50:39 fedora gnome-shell[35859]: > Warning:          Could not resolve keysym XF86DoNotDisturb
+Jan 06 02:50:39 fedora gnome-shell[35859]: Errors from xkbcomp are not fatal to the X server
+Jan 06 02:51:31 fedora gnome-shell[16334]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 02:51:31 fedora systemd[3866]: Started dbus-:1.2-org.gnome.Nautilus@7.service.
+Jan 06 02:51:31 fedora org.gnome.Nautilus[37051]: Connecting to org.freedesktop.Tracker3.Miner.Files
+Jan 06 02:51:31 fedora org.gnome.Nautilus[37051]: Localsearch search engine has no connection
+Jan 06 02:51:31 fedora systemd[3866]: Started dbus-:1.2-org.gnome.NautilusPreviewer@8.service.
+Jan 06 02:55:26 fedora systemd[3866]: Started dbus-:1.2-org.gnome.NautilusPreviewer@9.service.
+Jan 06 02:56:54 fedora systemd[3866]: Started dbus-:1.2-org.gnome.Nautilus@8.service.
+Jan 06 02:56:54 fedora org.gnome.Nautilus[41018]: Connecting to org.freedesktop.Tracker3.Miner.Files
+Jan 06 02:56:55 fedora systemd[3866]: Started dbus-:1.2-org.gnome.NautilusPreviewer@10.service.
+Jan 06 02:57:34 fedora gnome-shell[16334]: JS ERROR: Error: Impossible to remove untracked message
+Jan 06 03:25:17 fedora gnome-shell[16334]: EasySpeak: Grid shown 1440x960 at (0,0)
+Jan 06 03:27:20 fedora gnome-shell[16334]: JS ERROR: Error: Impossible to remove untracked message
+Jan 06 03:29:20 fedora gnome-shell[16334]: JS ERROR: Error: Impossible to remove untracked message
+Jan 06 03:29:59 fedora gnome-shell[16334]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 03:29:59 fedora gnome-shell[16334]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 03:30:15 fedora systemd[3866]: dbus-:1.2-org.gnome.Nautilus@8.service: Consumed 3.379s CPU time, 166.6M memory peak.
+Jan 06 03:30:44 fedora gnome-shell[16334]: EasySpeak: Grid shown 1440x960 at (0,0)
+Jan 06 03:32:14 fedora gnome-shell[16334]: EasySpeak: Grid shown 1440x960 at (0,0)
+Jan 06 03:32:47 fedora systemd[3866]: Started dbus-:1.2-org.gnome.NautilusPreviewer@11.service.
+Jan 06 03:32:59 fedora gnome-shell[16334]: EasySpeak: Grid shown 1440x960 at (0,0)
+Jan 06 03:33:53 fedora gnome-shell[16334]: EasySpeak: Grid shown 1440x960 at (0,0)
+Jan 06 03:34:33 fedora gnome-shell[16334]: EasySpeak: Grid shown 1440x960 at (0,0)
+Jan 06 03:34:47 fedora gnome-shell[16334]: **
+Jan 06 03:34:47 fedora gnome-shell[16334]: libmutter:ERROR:../src/core/window.c:1608:meta_window_unmanage: assertion failed: (window->display->focus_window != window)
+Jan 06 03:34:47 fedora gnome-shell[16334]: Bail out! libmutter:ERROR:../src/core/window.c:1608:meta_window_unmanage: assertion failed: (window->display->focus_window != window)
+Jan 06 03:34:47 fedora gnome-shell[16334]: == Stack trace for context 0x55ee49d4af80 ==
+Jan 06 03:34:47 fedora gnome-shell[16334]: #0   55ee49e16c78 i   resource:///org/gnome/shell/ui/init.js:21 (3970ac28d8d0 @ 48)
+Jan 06 03:34:48 fedora systemd-coredump[51740]: Process 16334 (gnome-shell) of user 1000 dumped core.
+                                                Module /usr/bin/gnome-shell from rpm gnome-shell-49.2-2.fc43.x86_64
+                                                Module libgvc.so from rpm gnome-shell-49.2-2.fc43.x86_64
+                                                Module libst-17.so from rpm gnome-shell-49.2-2.fc43.x86_64
+                                                Module libgnome-shell-menu.so from rpm gnome-shell-49.2-2.fc43.x86_64
+                                                Module libshell-17.so from rpm gnome-shell-49.2-2.fc43.x86_64
+                                                #2  0x000055ee27a4cec7 dump_gjs_stack_on_signal_handler (/usr/bin/gnome-shell + 0x1ec7)
+                                                #38 0x000055ee27a4c335 main (/usr/bin/gnome-shell + 0x1335)
+                                                #41 0x000055ee27a4c775 _start (/usr/bin/gnome-shell + 0x1775)
+Jan 06 03:34:48 fedora gnome-shell[35846]: (EE) failed to read Wayland events: Broken pipe
+Jan 06 03:34:48 fedora systemd[3866]: Stopping app-gnome-org.mozilla.firefox-19938.scope - Application launched by gnome-shell...
+Jan 06 03:34:48 fedora systemd[3866]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/1000/gnome-shell-disable-extensions).
+Jan 06 03:34:48 fedora systemd[3866]: Stopped app-gnome-org.mozilla.firefox-19938.scope - Application launched by gnome-shell.
+Jan 06 03:34:48 fedora gnome-shell-calendar-server[16405]: gnome-shell-calendar-server[16405]: Lost (or failed to acquire) the name org.gnome.Shell.CalendarServer - exiting
+Jan 06 03:34:54 fedora gnome-shell[54499]: Running GNOME Shell (using mutter 49.2) as a Wayland display server
+Jan 06 03:34:54 fedora gnome-shell[54499]: Enabling experimental feature 'scale-monitor-framebuffer'
+Jan 06 03:34:54 fedora gnome-shell[54499]: Enabling experimental feature 'xwayland-native-scaling'
+Jan 06 03:34:54 fedora gnome-shell[54499]: Thread 'KMS thread' will be using high priority scheduling
+Jan 06 03:34:54 fedora gnome-shell[54499]: Device '/dev/dri/card1' prefers shadow buffer
+Jan 06 03:34:54 fedora gnome-shell[54499]: Added device '/dev/dri/card1' (amdgpu) using atomic mode setting.
+Jan 06 03:34:54 fedora gnome-shell[54499]: Created gbm renderer for '/dev/dri/card1'
+Jan 06 03:34:54 fedora gnome-shell[54499]: GPU /dev/dri/card1 selected primary from builtin panel presence
+Jan 06 03:34:54 fedora gnome-shell[54499]: Obtained a high priority EGL context
+Jan 06 03:34:55 fedora gnome-shell[54499]: Using public X11 display :0, (using :1 for managed services)
+Jan 06 03:34:55 fedora gnome-shell[54499]: Using Wayland display name 'wayland-0'
+Jan 06 03:34:55 fedora gnome-shell[54499]: Unset XDG_SESSION_ID, getCurrentSessionProxy() called outside a user session. Asking logind directly.
+Jan 06 03:34:55 fedora gnome-shell[54499]: Registering session with GDM
+Jan 06 03:34:55 fedora gnome-shell[54499]: Error looking up permission: GDBus.Error:org.freedesktop.portal.Error.NotFound: No entry for geolocation
+Jan 06 03:34:55 fedora gnome-shell[54499]: Will monitor session 11
+Jan 06 03:34:55 fedora gnome-shell[54499]: Type GITypeInfo of property NM.Object::client does not match return type GITypeInfo of getter get_client. Falling back to slow path
+Jan 06 03:34:56 fedora gnome-shell[54499]: GNOME Shell started at Tue Jan 06 2026 03:34:55 GMT-0800 (Pacific Standard Time)
+Jan 06 03:36:28 fedora gnome-abrt[57156]: Lock file '.lock' was locked by process 58318, but it crashed?
+Jan 06 03:37:20 fedora systemd[3866]: Started dbus-:1.2-org.gnome.Nautilus@0.service.
+Jan 06 03:37:20 fedora org.gnome.Nautilus[59173]: Connecting to org.freedesktop.Tracker3.Miner.Files
+Jan 06 03:37:21 fedora systemd[3866]: Started dbus-:1.2-org.gnome.NautilusPreviewer@0.service.
+Jan 06 03:37:33 fedora gnome-shell[54499]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 03:37:33 fedora gnome-shell[54499]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 03:37:34 fedora systemd[3866]: Started app-gnome-org.mozilla.firefox-59966.scope - Application launched by gnome-shell.
+Jan 06 03:37:58 fedora gnome-shell[54499]: EasySpeak: Grid shown 1440x960 at (0,0)
+Jan 06 03:38:29 fedora gnome-shell[54499]: EasySpeak: Grid shown 1440x960 at (0,0)
+Jan 06 03:38:45 fedora gnome-shell[54499]: **
+Jan 06 03:38:45 fedora gnome-shell[54499]: libmutter:ERROR:../src/core/window.c:1608:meta_window_unmanage: assertion failed: (window->display->focus_window != window)
+Jan 06 03:38:45 fedora gnome-shell[54499]: Bail out! libmutter:ERROR:../src/core/window.c:1608:meta_window_unmanage: assertion failed: (window->display->focus_window != window)
+Jan 06 03:38:45 fedora gnome-shell[54499]: == Stack trace for context 0x56108cebdf70 ==
+Jan 06 03:38:45 fedora gnome-shell[54499]: #0   56108cf89778 i   resource:///org/gnome/shell/ui/init.js:21 (5c1fb68d8d0 @ 48)
+Jan 06 03:38:45 fedora systemd-coredump[61503]: Process 54499 (gnome-shell) of user 1000 dumped core.
+                                                Module /usr/bin/gnome-shell from rpm gnome-shell-49.2-2.fc43.x86_64
+                                                Module libgvc.so from rpm gnome-shell-49.2-2.fc43.x86_64
+                                                Module libst-17.so from rpm gnome-shell-49.2-2.fc43.x86_64
+                                                Module libgnome-shell-menu.so from rpm gnome-shell-49.2-2.fc43.x86_64
+                                                Module libshell-17.so from rpm gnome-shell-49.2-2.fc43.x86_64
+                                                #2  0x00005610625e6ec7 dump_gjs_stack_on_signal_handler (/usr/bin/gnome-shell + 0x1ec7)
+                                                #38 0x00005610625e6335 main (/usr/bin/gnome-shell + 0x1335)
+                                                #41 0x00005610625e6775 _start (/usr/bin/gnome-shell + 0x1775)
+Jan 06 03:38:45 fedora org.gnome.Nautilus[59173]: Lost connection to Wayland compositor.
+Jan 06 03:38:45 fedora systemd[3866]: dbus-:1.2-org.gnome.Nautilus@0.service: Main process exited, code=exited, status=1/FAILURE
+Jan 06 03:38:45 fedora systemd[3866]: dbus-:1.2-org.gnome.Nautilus@0.service: Failed with result 'exit-code'.
+Jan 06 03:38:45 fedora systemd[3866]: Stopping app-gnome-org.mozilla.firefox-59966.scope - Application launched by gnome-shell...
+Jan 06 03:38:45 fedora systemd[3866]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/1000/gnome-shell-disable-extensions).
+Jan 06 03:38:45 fedora systemd[3866]: Stopped app-gnome-org.mozilla.firefox-59966.scope - Application launched by gnome-shell.
+Jan 06 03:38:45 fedora gnome-shell-calendar-server[54565]: gnome-shell-calendar-server[54565]: Lost (or failed to acquire) the name org.gnome.Shell.CalendarServer - exiting
+Jan 06 03:38:45 fedora systemd[3866]: dbus-:1.2-org.mozilla.firefox.SearchProvider@0.service: Unit process 59721 (crashhelper) remains running after unit stopped.
+Jan 06 03:39:01 fedora gnome-shell[64385]: Running GNOME Shell (using mutter 49.2) as a Wayland display server
+Jan 06 03:39:01 fedora gnome-shell[64385]: Enabling experimental feature 'scale-monitor-framebuffer'
+Jan 06 03:39:01 fedora gnome-shell[64385]: Enabling experimental feature 'xwayland-native-scaling'
+Jan 06 03:39:01 fedora gnome-shell[64385]: Thread 'KMS thread' will be using high priority scheduling
+Jan 06 03:39:01 fedora gnome-shell[64385]: Device '/dev/dri/card1' prefers shadow buffer
+Jan 06 03:39:01 fedora gnome-shell[64385]: Added device '/dev/dri/card1' (amdgpu) using atomic mode setting.
+Jan 06 03:39:01 fedora gnome-shell[64385]: Created gbm renderer for '/dev/dri/card1'
+Jan 06 03:39:01 fedora gnome-shell[64385]: GPU /dev/dri/card1 selected primary from builtin panel presence
+Jan 06 03:39:01 fedora gnome-shell[64385]: Obtained a high priority EGL context
+Jan 06 03:39:01 fedora gnome-shell[64385]: Using public X11 display :0, (using :1 for managed services)
+Jan 06 03:39:01 fedora gnome-shell[64385]: Using Wayland display name 'wayland-0'
+Jan 06 03:39:01 fedora gnome-shell[64385]: Unset XDG_SESSION_ID, getCurrentSessionProxy() called outside a user session. Asking logind directly.
+Jan 06 03:39:01 fedora gnome-shell[64385]: Registering session with GDM
+Jan 06 03:39:01 fedora gnome-shell[64385]: Error looking up permission: GDBus.Error:org.freedesktop.portal.Error.NotFound: No entry for geolocation
+Jan 06 03:39:01 fedora gnome-shell[64385]: Will monitor session 14
+Jan 06 03:39:02 fedora gnome-shell[64385]: Type GITypeInfo of property NM.Object::client does not match return type GITypeInfo of getter get_client. Falling back to slow path
+Jan 06 03:39:02 fedora gnome-shell[64385]: GNOME Shell started at Tue Jan 06 2026 03:39:01 GMT-0800 (Pacific Standard Time)
+Jan 06 03:42:36 fedora gnome-shell[64385]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 03:42:36 fedora systemd[63992]: Started dbus-:1.2-org.gnome.Nautilus@0.service.
+Jan 06 03:42:36 fedora org.gnome.Nautilus[68084]: Connecting to org.freedesktop.Tracker3.Miner.Files
+Jan 06 03:42:36 fedora org.gnome.Nautilus[68084]: Localsearch search engine has no connection
+Jan 06 03:42:36 fedora org.gnome.Nautilus[68084]: Localsearch search engine has no connection
+Jan 06 03:42:36 fedora gnome-shell[64385]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 03:42:36 fedora systemd[63992]: Started dbus-:1.2-org.gnome.NautilusPreviewer@0.service.
+Jan 06 03:43:04 fedora gnome-shell[64385]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 03:43:04 fedora systemd[63992]: Started dbus-:1.2-org.gnome.Nautilus@1.service.
+Jan 06 03:43:04 fedora org.gnome.Nautilus[69528]: Connecting to org.freedesktop.Tracker3.Miner.Files
+Jan 06 03:43:04 fedora systemd[63992]: Started dbus-:1.2-org.gnome.NautilusPreviewer@1.service.
+Jan 06 03:43:04 fedora gnome-shell[64385]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 03:43:04 fedora gnome-shell[64385]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 03:43:05 fedora gnome-shell[64385]: Received error from D-Bus search provider org.gnome.Boxes.desktop: Gio.IOErrorEnum: Cannot invoke method; proxy is for the well-known name org.gnome.Boxes.SearchProvider without an owner, and proxy was constructed with the G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START flag
+Jan 06 03:43:05 fedora gnome-shell[64385]: Received error from D-Bus search provider org.gnome.Software.desktop: Gio.DBusError: GDBus.Error:org.freedesktop.DBus.Error.NoReply: Remote peer disconnected
+Jan 06 03:47:46 fedora systemd[63992]: Started dbus-:1.2-org.gnome.Nautilus@2.service.
+Jan 06 03:47:46 fedora org.gnome.Nautilus[70709]: Connecting to org.freedesktop.Tracker3.Miner.Files
+Jan 06 03:47:47 fedora systemd[63992]: Started dbus-:1.2-org.gnome.NautilusPreviewer@2.service.
+           PID: 16334 (gnome-shell)
+           UID: 1000 (matt)
+           GID: 1000 (matt)
+        Signal: 6 (ABRT)
+     Timestamp: Tue 2026-01-06 03:34:47 PST (13min ago)
+  Command Line: /usr/bin/gnome-shell
+    Executable: /usr/bin/gnome-shell
+ Control Group: /user.slice/user-1000.slice/user@1000.service/session.slice/org.gnome.Shell@wayland.service
+          Unit: user@1000.service
+     User Unit: org.gnome.Shell@wayland.service
+         Slice: user-1000.slice
+     Owner UID: 1000 (matt)
+       Boot ID: ab5a298a1ce74f07b869a49292e8b3df
+    Machine ID: e9635f6a95eb42eb8c70542d9aa78e43
+      Hostname: fedora
+       Storage: /var/lib/systemd/coredump/core.gnome-shell.1000.ab5a298a1ce74f07b869a49292e8b3df.16334.1767699287000000.zst (present)
+  Size on Disk: 22.1M
+       Package: gnome-shell/49.2-2.fc43
+      build-id: c523ef99a8b318adf74973d94181530fea2e4329
+       Message: Process 16334 (gnome-shell) of user 1000 dumped core.
+                
+                Module /usr/bin/gnome-shell from rpm gnome-shell-49.2-2.fc43.x86_64
+                Module libmpg123.so.0 from rpm mpg123-1.32.10-2.fc43.x86_64
+                Module libopus.so.0 from rpm opus-1.5.2-3.fc43.x86_64
+                Module libvorbisenc.so.2 from rpm libvorbis-1.3.7-13.fc43.x86_64
+                Module libFLAC.so.14 from rpm flac-1.5.0-5.fc43.x86_64
+                Module libgsm.so.1 from rpm gsm-1.0.23-1.fc43.x86_64
+                Module libsndfile.so.1 from rpm libsndfile-1.2.2-10.fc43.x86_64
+                Module libpulsecommon-17.0.so from rpm pulseaudio-17.0-7.fc43.x86_64
+                Module libpulse-mainloop-glib.so.0 from rpm pulseaudio-17.0-7.fc43.x86_64
+                Module libpulse.so.0 from rpm pulseaudio-17.0-7.fc43.x86_64
+                Module libgvc.so from rpm gnome-shell-49.2-2.fc43.x86_64
+                Module libpipewire-module-session-manager.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libpipewire-module-metadata.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libpipewire-module-adapter.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libpipewire-module-client-device.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libpipewire-module-client-node.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libpipewire-module-protocol-native.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libpipewire-module-rt.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libspa-dbus.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libgioremote-volume-monitor.so from rpm gvfs-1.58.0-1.fc43.x86_64
+                Module libnss_systemd.so.2 from rpm systemd-258.3-2.fc43.x86_64
+                Module libcrypt.so.2 from rpm libxcrypt-4.5.2-1.fc43.x86_64
+                Module libaccountsservice.so.0 from rpm accountsservice-23.13.9-9.fc43.x86_64
+                Module libgeocode-glib-2.so.0 from rpm geocode-glib-3.26.4-14.fc43.x86_64
+                Module libgweather-4.so.0 from rpm libgweather-4.4.4-3.fc43.x86_64
+                Module libgdm.so.1 from rpm gdm-49.2-2.fc43.x86_64
+                Module libgeoclue-2.so.0 from rpm geoclue2-2.8.0-1.fc43.x86_64
+                Module libnghttp2.so.14 from rpm nghttp2-1.66.0-2.fc43.x86_64
+                Module libpsl.so.5 from rpm libpsl-0.21.5-6.fc43.x86_64
+                Module libsoup-3.0.so.0 from rpm libsoup3-3.6.5-8.fc43.x86_64
+                Module libibus-1.0.so.5 from rpm ibus-1.5.33-4.fc43.x86_64
+                Module libmalcontent-0.so.0 from rpm malcontent-0.13.0-3.fc43.x86_64
+                Module libgnome-bg-4.so.2 from rpm gnome-desktop3-44.4-1.fc43.x86_64
+                Module libcrypto.so.3 from rpm openssl-3.5.4-1.fc43.x86_64
+                Module libkeyutils.so.1 from rpm keyutils-1.6.3-6.fc43.x86_64
+                Module libkrb5support.so.0 from rpm krb5-1.21.3-7.fc43.x86_64
+                Module libcom_err.so.2 from rpm e2fsprogs-1.47.3-2.fc43.x86_64
+                Module libk5crypto.so.3 from rpm krb5-1.21.3-7.fc43.x86_64
+                Module libkrb5.so.3 from rpm krb5-1.21.3-7.fc43.x86_64
+                Module libsharpyuv.so.0 from rpm libwebp-1.6.0-2.fc43.x86_64
+                Module libgstaudio-1.0.so.0 from rpm gstreamer1-plugins-base-1.26.9-1.fc43.x86_64
+                Module libavahi-client.so.3 from rpm avahi-0.9~rc2-6.fc43.x86_64
+                Module libavahi-common.so.3 from rpm avahi-0.9~rc2-6.fc43.x86_64
+                Module libgssapi_krb5.so.2 from rpm krb5-1.21.3-7.fc43.x86_64
+                Module libjbig.so.2.1 from rpm jbigkit-2.1-32.fc43.x86_64
+                Module libLerc.so.4 from rpm liblerc-4.0.0-9.fc43.x86_64
+                Module libwebp.so.7 from rpm libwebp-1.6.0-2.fc43.x86_64
+                Module libsqlite3.so.0 from rpm sqlite-3.50.2-2.fc43.x86_64
+                Module libjson-glib-1.0.so.0 from rpm json-glib-1.10.8-4.fc43.x86_64
+                Module libdav1d.so.7 from rpm dav1d-1.5.2-1.fc43.x86_64
+                Module libwayland-cursor.so.0 from rpm wayland-1.24.0-1.fc43.x86_64
+                Module libdw.so.1 from rpm elfutils-0.194-1.fc43.x86_64
+                Module libunwind.so.8 from rpm libunwind-1.8.1-3.fc43.x86_64
+                Module liborc-0.4.so.0 from rpm orc-0.4.41-2.fc43.x86_64
+                Module libgstbase-1.0.so.0 from rpm gstreamer1-1.26.9-1.fc43.x86_64
+                Module libgstpbutils-1.0.so.0 from rpm gstreamer1-plugins-base-1.26.9-1.fc43.x86_64
+                Module libgsttag-1.0.so.0 from rpm gstreamer1-plugins-base-1.26.9-1.fc43.x86_64
+                Module libcups.so.2 from rpm cups-2.4.16-4.fc43.x86_64
+                Module libcairo-script-interpreter.so.2 from rpm cairo-1.18.4-2.fc43.x86_64
+                Module libwayland-egl.so.1 from rpm wayland-1.24.0-1.fc43.x86_64
+                Module libjpeg.so.62 from rpm libjpeg-turbo-3.1.2-1.fc43.x86_64
+                Module libtiff.so.6 from rpm libtiff-4.7.1-1.fc43.x86_64
+                Module libvulkan.so.1 from rpm vulkan-loader-1.4.328.1-1.fc43.x86_64
+                Module libtinysparql-3.0.so.0 from rpm tinysparql-3.10.1-5.fc43.x86_64
+                Module librsvg-2.so.2 from rpm librsvg2-2.61.0-3.fc43.x86_64
+                Module libgstallocators-1.0.so.0 from rpm gstreamer1-plugins-base-1.26.9-1.fc43.x86_64
+                Module libgstgl-1.0.so.0 from rpm gstreamer1-plugins-base-1.26.9-1.fc43.x86_64
+                Module libgstreamer-1.0.so.0 from rpm gstreamer1-1.26.9-1.fc43.x86_64
+                Module libgstvideo-1.0.so.0 from rpm gstreamer1-plugins-base-1.26.9-1.fc43.x86_64
+                Module libgstplay-1.0.so.0 from rpm gstreamer1-plugins-bad-free-1.26.9-1.fc43.x86_64
+                Module libepoxy.so.0 from rpm libepoxy-1.5.10-11.fc43.x86_64
+                Module libharfbuzz-subset.so.0 from rpm harfbuzz-11.5.1-1.fc43.x86_64
+                Module libgtk-4.so.1 from rpm gtk4-4.20.3-1.fc43.x86_64
+                Module libupower-glib.so.3 from rpm upower-1.91.0-1.fc43.x86_64
+                Module libgnome-bluetooth-3.0.so.13 from rpm gnome-bluetooth-47.1-3.fc43.x86_64
+                Module libspa-journal.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libspa-support.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module dri_gbm.so from rpm mesa-25.2.7-3.fc43.x86_64
+                Module libpciaccess.so.0 from rpm libpciaccess-0.16-16.fc43.x86_64
+                Module libedit.so.0 from rpm libedit-3.1-57.20251016cvs.fc43.x86_64
+                Module libdrm_intel.so.1 from rpm libdrm-2.4.128-3.fc43.x86_64
+                Module libelf.so.1 from rpm elfutils-0.194-1.fc43.x86_64
+                Module libdrm_amdgpu.so.1 from rpm libdrm-2.4.128-3.fc43.x86_64
+                Module libxshmfence.so.1 from rpm libxshmfence-1.3.2-7.fc43.x86_64
+                Module libxcb-sync.so.1 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libsensors.so.4 from rpm lm_sensors-3.6.0-23.fc43.x86_64
+                Module libSPIRV-Tools.so from rpm spirv-tools-2025.4-1.fc43.x86_64
+                Module libzstd.so.1 from rpm zstd-1.5.7-2.fc43.x86_64
+                Module libxcb-present.so.0 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libxcb-dri3.so.0 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libwayland-client.so.0 from rpm wayland-1.24.0-1.fc43.x86_64
+                Module libxcb-xfixes.so.0 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libxcb-randr.so.0 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libgallium-25.2.7.so from rpm mesa-25.2.7-3.fc43.x86_64
+                Module libEGL_mesa.so.0 from rpm mesa-25.2.7-3.fc43.x86_64
+                Module libdconfsettings.so from rpm dconf-0.49.0-1.fc43.x86_64
+                Module libgvfscommon.so from rpm gvfs-1.58.0-1.fc43.x86_64
+                Module libgvfsdbus.so from rpm gvfs-1.58.0-1.fc43.x86_64
+                Module libbrotlicommon.so.1 from rpm brotli-1.2.0-1.fc43.x86_64
+                Module liblzma.so.5 from rpm xz-5.8.1-4.fc43.x86_64
+                Module libogg.so.0 from rpm libogg-1.3.6-2.fc43.x86_64
+                Module libvorbis.so.0 from rpm libvorbis-1.3.7-13.fc43.x86_64
+                Module libdatrie.so.1 from rpm libdatrie-0.2.13-12.fc43.x86_64
+                Module libicudata.so.77 from rpm icu-77.1-1.fc43.x86_64
+                Module libbrotlidec.so.1 from rpm brotli-1.2.0-1.fc43.x86_64
+                Module libbz2.so.1 from rpm bzip2-1.0.8-21.fc43.x86_64
+                Module libxml2.so.2 from rpm libxml2-2.12.10-5.fc43.x86_64
+                Module libgmp.so.10 from rpm gmp-6.3.0-4.fc43.x86_64
+                Module libnettle.so.8 from rpm nettle-3.10.1-2.fc43.x86_64
+                Module libhogweed.so.6 from rpm nettle-3.10.1-2.fc43.x86_64
+                Module libtasn1.so.6 from rpm libtasn1-4.20.0-2.fc43.x86_64
+                Module libunistring.so.5 from rpm libunistring-1.1-10.fc43.x86_64
+                Module libidn2.so.0 from rpm libidn2-2.3.8-2.fc43.x86_64
+                Module libexpat.so.1 from rpm expat-2.7.3-1.fc43.x86_64
+                Module liblua-5.4.so from rpm lua-5.4.8-4.fc43.x86_64
+                Module libmtdev.so.1 from rpm mtdev-1.1.6-11.fc43.x86_64
+                Module libevdev.so.2 from rpm libevdev-1.13.6-1.fc43.x86_64
+                Module libxcb-util.so.1 from rpm xcb-util-0.4.1-8.fc43.x86_64
+                Module libltdl.so.7 from rpm libtool-2.5.4-8.fc43.x86_64
+                Module libtdb.so.1 from rpm libtdb-1.4.14-3.fc43.x86_64
+                Module libvorbisfile.so.3 from rpm libvorbis-1.3.7-13.fc43.x86_64
+                Module libGLX.so.0 from rpm libglvnd-1.7.0-8.fc43.x86_64
+                Module libGLdispatch.so.0 from rpm libglvnd-1.7.0-8.fc43.x86_64
+                Module libgraphite2.so.3 from rpm graphite2-1.3.14-19.fc43.x86_64
+                Module libthai.so.0 from rpm libthai-0.1.29-11.fc43.x86_64
+                Module libpangoft2-1.0.so.0 from rpm pango-1.57.0-1.fc43.x86_64
+                Module libtinfo.so.6 from rpm ncurses-6.5-7.20250614.fc43.x86_64
+                Module libicui18n.so.77 from rpm icu-77.1-1.fc43.x86_64
+                Module libicuuc.so.77 from rpm icu-77.1-1.fc43.x86_64
+                Module libblkid.so.1 from rpm util-linux-2.41.3-7.fc43.x86_64
+                Module libseccomp.so.2 from rpm libseccomp-2.6.0-2.fc43.x86_64
+                Module libxkbregistry.so.0 from rpm libxkbcommon-1.11.0-1.fc43.x86_64
+                Module libxcb-shm.so.0 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libxcb-render.so.0 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libXrender.so.1 from rpm libXrender-0.9.12-3.fc43.x86_64
+                Module libfreetype.so.6 from rpm freetype-2.13.3-3.fc43.x86_64
+                Module libfontconfig.so.1 from rpm fontconfig-2.17.0-3.fc43.x86_64
+                Module libpng16.so.16 from rpm libpng-1.6.53-1.fc43.x86_64
+                Module libcap.so.2 from rpm libcap-2.76-3.fc43.x86_64
+                Module libgnutls.so.30 from rpm gnutls-3.8.11-5.fc43.x86_64
+                Module libp11-kit.so.0 from rpm p11-kit-0.25.8-1.fc43.x86_64
+                Module libgck-2.so.2 from rpm gcr-4.4.0.1-4.fc43.x86_64
+                Module libpixman-1.so.0 from rpm pixman-0.46.2-2.fc43.x86_64
+                Module libGLESv2.so.2 from rpm libglvnd-1.7.0-8.fc43.x86_64
+                Module libdrm.so.2 from rpm libdrm-2.4.128-3.fc43.x86_64
+                Module libgbm.so.1 from rpm mesa-25.2.7-3.fc43.x86_64
+                Module libinput.so.10 from rpm libinput-1.30.1-1.fc43.x86_64
+                Module libXau.so.6 from rpm libXau-1.0.12-3.fc43.x86_64
+                Module libxcb-res.so.0 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libxcb.so.1 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libX11-xcb.so.1 from rpm libX11-1.8.12-1.fc43.x86_64
+                Module libXdamage.so.1 from rpm libXdamage-1.1.6-6.fc43.x86_64
+                Module libXcursor.so.1 from rpm libXcursor-1.2.3-3.fc43.x86_64
+                Module libXcomposite.so.1 from rpm libXcomposite-0.4.6-6.fc43.x86_64
+                Module libXinerama.so.1 from rpm libXinerama-1.1.5-9.fc43.x86_64
+                Module libXrandr.so.2 from rpm libXrandr-1.5.4-6.fc43.x86_64
+                Module libwacom.so.9 from rpm libwacom-2.17.0-1.fc43.x86_64
+                Module libudev.so.1 from rpm systemd-258.3-2.fc43.x86_64
+                Module libgudev-1.0.so.0 from rpm libgudev-238-8.fc43.x86_64
+                Module libdisplay-info.so.2 from rpm libdisplay-info-0.2.0-4.fc43.x86_64
+                Module libeis.so.1 from rpm libei-1.5.0-1.fc43.x86_64
+                Module libglycin-2.so.0 from rpm glycin-2.0.5-1.fc43.x86_64
+                Module libcolord.so.2 from rpm colord-1.4.8-2.fc43.x86_64
+                Module libXi.so.6 from rpm libXi-1.8.2-3.fc43.x86_64
+                Module libxkbcommon.so.0 from rpm libxkbcommon-1.11.0-1.fc43.x86_64
+                Module libGL.so.1 from rpm libglvnd-1.7.0-8.fc43.x86_64
+                Module libEGL.so.1 from rpm libglvnd-1.7.0-8.fc43.x86_64
+                Module libwayland-server.so.0 from rpm wayland-1.24.0-1.fc43.x86_64
+                Module libharfbuzz.so.0 from rpm harfbuzz-11.5.1-1.fc43.x86_64
+                Module libpango-1.0.so.0 from rpm pango-1.57.0-1.fc43.x86_64
+                Module libpangocairo-1.0.so.0 from rpm pango-1.57.0-1.fc43.x86_64
+                Module libfribidi.so.0 from rpm fribidi-1.0.16-3.fc43.x86_64
+                Module liblcms2.so.2 from rpm lcms2-2.16-6.fc43.x86_64
+                Module libreadline.so.8 from rpm readline-8.3-2.fc43.x86_64
+                Module libcairo-gobject.so.2 from rpm cairo-1.18.4-2.fc43.x86_64
+                Module libdbus-1.so.3 from rpm dbus-1.16.0-4.fc43.x86_64
+                Module libatk-1.0.so.0 from rpm at-spi2-core-2.58.2-1.fc43.x86_64
+                Module libatspi.so.0 from rpm at-spi2-core-2.58.2-1.fc43.x86_64
+                Module libpcre2-8.so.0 from rpm pcre2-10.47-1.fc43.x86_64
+                Module libffi.so.8 from rpm libffi-3.5.2-1.fc43.x86_64
+                Module libselinux.so.1 from rpm libselinux-3.9-5.fc43.x86_64
+                Module libmount.so.1 from rpm util-linux-2.41.3-7.fc43.x86_64
+                Module libz.so.1 from rpm zlib-ng-2.3.2-2.fc43.x86_64
+                Module libgmodule-2.0.so.0 from rpm glib2-2.86.3-1.fc43.x86_64
+                Module libXext.so.6 from rpm libXext-1.3.6-4.fc43.x86_64
+                Module libgnome-desktop-4.so.2 from rpm gnome-desktop3-44.4-1.fc43.x86_64
+                Module libXfixes.so.3 from rpm libXfixes-6.0.1-6.fc43.x86_64
+                Module libcairo.so.2 from rpm cairo-1.18.4-2.fc43.x86_64
+                Module libsecret-1.so.0 from rpm libsecret-0.21.7-7.fc43.x86_64
+                Module libnm.so.0 from rpm NetworkManager-1.54.3-2.fc43.x86_64
+                Module libpipewire-0.3.so.0 from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libsystemd.so.0 from rpm systemd-258.3-2.fc43.x86_64
+                Module libgcr-4.so.4 from rpm gcr-4.4.0.1-4.fc43.x86_64
+                Module libpolkit-gobject-1.so.0 from rpm polkit-126-6.fc43.x86_64
+                Module libpolkit-agent-1.so.0 from rpm polkit-126-6.fc43.x86_64
+                Module libmutter-cogl-17.so.0 from rpm mutter-49.2-2.fc43.x86_64
+                Module libX11.so.6 from rpm libX11-1.8.12-1.fc43.x86_64
+                Module libgraphene-1.0.so.0 from rpm graphene-1.10.8-2.fc43.x86_64
+                Module libmutter-mtk-17.so.0 from rpm mutter-49.2-2.fc43.x86_64
+                Module libgdk_pixbuf-2.0.so.0 from rpm gdk-pixbuf2-2.44.4-1.fc43.x86_64
+                Module libst-17.so from rpm gnome-shell-49.2-2.fc43.x86_64
+                Module libgnome-shell-menu.so from rpm gnome-shell-49.2-2.fc43.x86_64
+                Module libmutter-17.so.0 from rpm mutter-49.2-2.fc43.x86_64
+                Module libgirepository-2.0.so.0 from rpm glib2-2.86.3-1.fc43.x86_64
+                Module libmutter-clutter-17.so.0 from rpm mutter-49.2-2.fc43.x86_64
+                Module libgjs.so.0 from rpm gjs-1.86.0-1.fc43.x86_64
+                Module libatk-bridge-2.0.so.0 from rpm at-spi2-core-2.58.2-1.fc43.x86_64
+                Module libglib-2.0.so.0 from rpm glib2-2.86.3-1.fc43.x86_64
+                Module libgobject-2.0.so.0 from rpm glib2-2.86.3-1.fc43.x86_64
+                Module libgio-2.0.so.0 from rpm glib2-2.86.3-1.fc43.x86_64
+                Module libshell-17.so from rpm gnome-shell-49.2-2.fc43.x86_64
+                Stack trace of thread 16334:
+                #0  0x00007f09fb4813cc __pthread_kill_implementation (libc.so.6 + 0x743cc)
+                #1  0x00007f09fb42715e raise (libc.so.6 + 0x1a15e)
+                #2  0x000055ee27a4cec7 dump_gjs_stack_on_signal_handler (/usr/bin/gnome-shell + 0x1ec7)
+                #3  0x00007f09fb427290 __restore_rt (libc.so.6 + 0x1a290)
+                #4  0x00007f09fb4813cc __pthread_kill_implementation (libc.so.6 + 0x743cc)
+                #5  0x00007f09fb42715e raise (libc.so.6 + 0x1a15e)
+                #6  0x00007f09fb40e6d0 abort (libc.so.6 + 0x16d0)
+                #7  0x00007f09fbc66482 g_assertion_message.cold (libglib-2.0.so.0 + 0x2482)
+                #8  0x00007f09fbcd7727 g_assertion_message_expr (libglib-2.0.so.0 + 0x73727)
+                #9  0x00007f09fb6c314e meta_window_unmanage (libmutter-17.so.0 + 0xc314e)
+                #10 0x00007f09fb736348 meta_wayland_shell_surface_destroy_window (libmutter-17.so.0 + 0x136348)
+                #11 0x00007f09fb74340d xdg_toplevel_destructor (libmutter-17.so.0 + 0x14340d)
+                #12 0x00007f09f92a3930 remove_and_destroy_resource (libwayland-server.so.0 + 0x6930)
+                #13 0x00007f09fa9e9056 ffi_call_unix64 (libffi.so.8 + 0x8056)
+                #14 0x00007f09fa9e4d16 ffi_call_int.lto_priv.0 (libffi.so.8 + 0x3d16)
+                #15 0x00007f09fa9e77ae ffi_call (libffi.so.8 + 0x67ae)
+                #16 0x00007f09f929f440 wl_closure_invoke.constprop.0 (libwayland-server.so.0 + 0x2440)
+                #17 0x00007f09f92a4aa0 wl_client_connection_data (libwayland-server.so.0 + 0x7aa0)
+                #18 0x00007f09f92a2f52 wl_event_loop_dispatch (libwayland-server.so.0 + 0x5f52)
+                #19 0x00007f09fb71939b wayland_event_source_dispatch.lto_priv.0 (libmutter-17.so.0 + 0x11939b)
+                #20 0x00007f09fbca52a3 g_main_context_dispatch_unlocked.lto_priv.0 (libglib-2.0.so.0 + 0x412a3)
+                #21 0x00007f09fbcae1f8 g_main_context_iterate_unlocked.isra.0 (libglib-2.0.so.0 + 0x4a1f8)
+                #22 0x00007f09fbcae49f g_main_loop_run (libglib-2.0.so.0 + 0x4a49f)
+                #23 0x00007f09fb6a6cea meta_context_run_main_loop (libmutter-17.so.0 + 0xa6cea)
+                #24 0x00007f09fa9e9056 ffi_call_unix64 (libffi.so.8 + 0x8056)
+                #25 0x00007f09fa9e4d16 ffi_call_int.lto_priv.0 (libffi.so.8 + 0x3d16)
+                #26 0x00007f09fa9e77ae ffi_call (libffi.so.8 + 0x67ae)
+                #27 0x00007f09fbab1aba _ZN3Gjs8Function6invokeEP9JSContextRKN2JS8CallArgsENS3_6HandleIP8JSObjectEEP11_GIArgument.localalias.lto_priv.0 (libgj>
+                #28 0x00007f09fbab24fc _ZN3Gjs8Function4callEP9JSContextjPN2JS5ValueE (libgjs.so.0 + 0x5c4fc)
+                #29 0x00007f09f942c484 _ZN2js23InternalCallOrConstructEP9JSContextRKN2JS8CallArgsENS_14MaybeConstructENS_10CallReasonE (libmozjs-140.so.0 + 0>
+                #30 0x00007f09f943cb71 _ZN2js9InterpretEP9JSContextRNS_8RunStateE (libmozjs-140.so.0 + 0x3cb71)
+                #31 0x00007f09f942bb9c _ZN2js9RunScriptEP9JSContextRNS_8RunStateE (libmozjs-140.so.0 + 0x2bb9c)
+                #32 0x00007f09f942c34b _ZN2js23InternalCallOrConstructEP9JSContextRKN2JS8CallArgsENS_14MaybeConstructENS_10CallReasonE (libmozjs-140.so.0 + 0>
+                #33 0x00007f09f942c9bc _ZN2js4CallEP9JSContextN2JS6HandleINS2_5ValueEEES5_RKNS_13AnyInvokeArgsENS2_13MutableHandleIS4_EENS_10CallReasonE (lib>
+                #34 0x00007f09f95073d2 _ZN2JS4CallEP9JSContextNS_6HandleINS_5ValueEEES4_RKNS_16HandleValueArrayENS_13MutableHandleIS3_EE (libmozjs-140.so.0 +>
+                #35 0x00007f09fbb14752 _ZN17GjsContextPrivate18run_main_loop_hookEv (libgjs.so.0 + 0xbe752)
+                #36 0x00007f09fbb1cd7f gjs_context_eval_module (libgjs.so.0 + 0xc6d7f)
+                #37 0x00007f09fbb1cee2 gjs_context_eval_module_file (libgjs.so.0 + 0xc6ee2)
+                #38 0x000055ee27a4c335 main (/usr/bin/gnome-shell + 0x1335)
+                #39 0x00007f09fb4105b5 __libc_start_call_main (libc.so.6 + 0x35b5)
+                #40 0x00007f09fb410668 __libc_start_main@@GLIBC_2.34 (libc.so.6 + 0x3668)
+                #41 0x000055ee27a4c775 _start (/usr/bin/gnome-shell + 0x1775)
+                
+                Stack trace of thread 16344:
+                #0  0x00007f09fb50034d syscall (libc.so.6 + 0xf334d)
+                #1  0x00007f09fbcd052b g_cond_wait (libglib-2.0.so.0 + 0x6c52b)
+                #2  0x00007f09fbc6e1ac g_async_queue_pop_intern_unlocked (libglib-2.0.so.0 + 0xa1ac)
+                #3  0x00007f09fbcd9b74 g_thread_pool_spawn_thread (libglib-2.0.so.0 + 0x75b74)
+                #4  0x00007f09fbcd96c2 g_thread_proxy (libglib-2.0.so.0 + 0x756c2)
+                #5  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #6  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16347:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47bc84 __syscall_cancel (libc.so.6 + 0x6ec84)
+                #3  0x00007f09fb4f56c6 ppoll (libc.so.6 + 0xe86c6)
+                #4  0x00007f09fbcae2e0 g_main_context_iterate_unlocked.isra.0 (libglib-2.0.so.0 + 0x4a2e0)
+                #5  0x00007f09fbcae49f g_main_loop_run (libglib-2.0.so.0 + 0x4a49f)
+                #6  0x00007f09fbf01f92 gdbus_shared_thread_func.lto_priv.0 (libgio-2.0.so.0 + 0xe8f92)
+                #7  0x00007f09fbcd96c2 g_thread_proxy (libglib-2.0.so.0 + 0x756c2)
+                #8  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #9  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16351:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09f955c64e _ZN2js12HelperThread10ThreadMainEPNS_18InternalThreadPoolEPS0_ (libmozjs-140.so.0 + 0x15c64e)
+                #5  0x00007f09f95691d1 _ZN2js6detail16ThreadTrampolineIRFvPNS_18InternalThreadPoolEPNS_12HelperThreadEEJRS3_S5_EE5StartEPv (libmozjs-140.so.0>
+                #6  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16349:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09f955c64e _ZN2js12HelperThread10ThreadMainEPNS_18InternalThreadPoolEPS0_ (libmozjs-140.so.0 + 0x15c64e)
+                #5  0x00007f09f95691d1 _ZN2js6detail16ThreadTrampolineIRFvPNS_18InternalThreadPoolEPNS_12HelperThreadEEJRS3_S5_EE5StartEPv (libmozjs-140.so.0>
+                #6  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16352:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09f955c64e _ZN2js12HelperThread10ThreadMainEPNS_18InternalThreadPoolEPS0_ (libmozjs-140.so.0 + 0x15c64e)
+                #5  0x00007f09f95691d1 _ZN2js6detail16ThreadTrampolineIRFvPNS_18InternalThreadPoolEPNS_12HelperThreadEEJRS3_S5_EE5StartEPv (libmozjs-140.so.0>
+                #6  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16348:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47bc84 __syscall_cancel (libc.so.6 + 0x6ec84)
+                #3  0x00007f09fb4f56c6 ppoll (libc.so.6 + 0xe86c6)
+                #4  0x00007f09fbcae2e0 g_main_context_iterate_unlocked.isra.0 (libglib-2.0.so.0 + 0x4a2e0)
+                #5  0x00007f09fbcae3a3 g_main_context_iteration (libglib-2.0.so.0 + 0x4a3a3)
+                #6  0x00007f09fbff3e4d dconf_gdbus_worker_thread (libdconfsettings.so + 0x4e4d)
+                #7  0x00007f09fbcd96c2 g_thread_proxy (libglib-2.0.so.0 + 0x756c2)
+                #8  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #9  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16345:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47bc84 __syscall_cancel (libc.so.6 + 0x6ec84)
+                #3  0x00007f09fb4f56c6 ppoll (libc.so.6 + 0xe86c6)
+                #4  0x00007f09fbcae2e0 g_main_context_iterate_unlocked.isra.0 (libglib-2.0.so.0 + 0x4a2e0)
+                #5  0x00007f09fbcae3a3 g_main_context_iteration (libglib-2.0.so.0 + 0x4a3a3)
+                #6  0x00007f09fbcae3f1 glib_worker_main (libglib-2.0.so.0 + 0x4a3f1)
+                #7  0x00007f09fbcd96c2 g_thread_proxy (libglib-2.0.so.0 + 0x756c2)
+                #8  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #9  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16350:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09f955c64e _ZN2js12HelperThread10ThreadMainEPNS_18InternalThreadPoolEPS0_ (libmozjs-140.so.0 + 0x15c64e)
+                #5  0x00007f09f95691d1 _ZN2js6detail16ThreadTrampolineIRFvPNS_18InternalThreadPoolEPNS_12HelperThreadEEJRS3_S5_EE5StartEPv (libmozjs-140.so.0>
+                #6  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16353:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09f955c64e _ZN2js12HelperThread10ThreadMainEPNS_18InternalThreadPoolEPS0_ (libmozjs-140.so.0 + 0x15c64e)
+                #5  0x00007f09f95691d1 _ZN2js6detail16ThreadTrampolineIRFvPNS_18InternalThreadPoolEPNS_12HelperThreadEEJRS3_S5_EE5StartEPv (libmozjs-140.so.0>
+                #6  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16355:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09f955c64e _ZN2js12HelperThread10ThreadMainEPNS_18InternalThreadPoolEPS0_ (libmozjs-140.so.0 + 0x15c64e)
+                #5  0x00007f09f95691d1 _ZN2js6detail16ThreadTrampolineIRFvPNS_18InternalThreadPoolEPNS_12HelperThreadEEJRS3_S5_EE5StartEPv (libmozjs-140.so.0>
+                #6  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16356:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09f955c64e _ZN2js12HelperThread10ThreadMainEPNS_18InternalThreadPoolEPS0_ (libmozjs-140.so.0 + 0x15c64e)
+                #5  0x00007f09f95691d1 _ZN2js6detail16ThreadTrampolineIRFvPNS_18InternalThreadPoolEPNS_12HelperThreadEEJRS3_S5_EE5StartEPv (libmozjs-140.so.0>
+                #6  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16354:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09f955c64e _ZN2js12HelperThread10ThreadMainEPNS_18InternalThreadPoolEPS0_ (libmozjs-140.so.0 + 0x15c64e)
+                #5  0x00007f09f95691d1 _ZN2js6detail16ThreadTrampolineIRFvPNS_18InternalThreadPoolEPNS_12HelperThreadEEJRS3_S5_EE5StartEPv (libmozjs-140.so.0>
+                #6  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16371:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09bd34bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f09bd30553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f09bd34be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16372:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09bd34bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f09bd30553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f09bd34be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16378:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09bd34bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f09bd30553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f09bd34be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16381:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09bd34bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f09bd30553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f09bd34be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16370:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09bd34bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f09bd30553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f09bd34be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16384:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47bc84 __syscall_cancel (libc.so.6 + 0x6ec84)
+                #3  0x00007f09fb4f56c6 ppoll (libc.so.6 + 0xe86c6)
+                #4  0x00007f09fbcae2e0 g_main_context_iterate_unlocked.isra.0 (libglib-2.0.so.0 + 0x4a2e0)
+                #5  0x00007f09fbcae49f g_main_loop_run (libglib-2.0.so.0 + 0x4a49f)
+                #6  0x00007f09fb7943c9 input_thread (libmutter-17.so.0 + 0x1943c9)
+                #7  0x00007f09fbcd96c2 g_thread_proxy (libglib-2.0.so.0 + 0x756c2)
+                #8  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #9  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16362:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47bc84 __syscall_cancel (libc.so.6 + 0x6ec84)
+                #3  0x00007f09fb4f56c6 ppoll (libc.so.6 + 0xe86c6)
+                #4  0x00007f09fbcae2e0 g_main_context_iterate_unlocked.isra.0 (libglib-2.0.so.0 + 0x4a2e0)
+                #5  0x00007f09fbcae49f g_main_loop_run (libglib-2.0.so.0 + 0x4a49f)
+                #6  0x00007f09fb794730 thread_impl_func (libmutter-17.so.0 + 0x194730)
+                #7  0x00007f09fbcd96c2 g_thread_proxy (libglib-2.0.so.0 + 0x756c2)
+                #8  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #9  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16382:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09bd34bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f09bd30553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f09bd34be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16366:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09bd34bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f09bd30553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f09bd34be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16383:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09bd34bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f09bd30553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f09bd34be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16449:
+                #0  0x00007f09f89475f3 _ZN8async_io7reactor11ReactorLock5react17h9abaee047cffebb9E (libglycin-2.so.0 + 0x1475f3)
+                #1  0x00007f09f893f9dd _ZN21async_global_executor9threading16thread_main_loop17hae0e5ce6a6cc39ceE (libglycin-2.so.0 + 0x13f9dd)
+                #2  0x00007f09f893ded9 _ZN3std3sys9backtrace28__rust_begin_short_backtrace17hb30945a6b937a52cE (libglycin-2.so.0 + 0x13ded9)
+                #3  0x00007f09f893dd7f _ZN4core3ops8function6FnOnce40call_once$u7b$$u7b$vtable.shim$u7d$$u7d$17hdf6cd496c66816e1E (libglycin-2.so.0 + 0x13dd7>
+                #4  0x00007f09f8a87061 _ZN3std3sys6thread4unix6Thread3new12thread_start17hafd1725dff990fdcE (libglycin-2.so.0 + 0x287061)
+                #5  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #6  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16368:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09bd34bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f09bd30553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f09bd34be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16367:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09bd34bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f09bd30553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f09bd34be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16379:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09bd34bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f09bd30553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f09bd34be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16369:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09bd34bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f09bd30553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f09bd34be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16380:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09bd34bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f09bd30553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f09bd34be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 16451:
+                #0  0x00007f09fb50034d syscall (libc.so.6 + 0xf334d)
+                #1  0x00007f09f8816a96 _ZN3std3sys4sync5mutex5futex5Mutex14lock_contended17h8ec8c7c87941430fE (libglycin-2.so.0 + 0x16a96)
+                #2  0x00007f09f8946f0a _ZN3std3sys9backtrace28__rust_begin_short_backtrace17hd3c1131e1105cd66E (libglycin-2.so.0 + 0x146f0a)
+                #3  0x00007f09f89468ac _ZN4core3ops8function6FnOnce40call_once$u7b$$u7b$vtable.shim$u7d$$u7d$17h1972e22b8ac164f7E (libglycin-2.so.0 + 0x1468a>
+                #4  0x00007f09f8a87061 _ZN3std3sys6thread4unix6Thread3new12thread_start17hafd1725dff990fdcE (libglycin-2.so.0 + 0x287061)
+                #5  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #6  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 17008:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47bc84 __syscall_cancel (libc.so.6 + 0x6ec84)
+                #3  0x00007f09fb502895 epoll_wait (libc.so.6 + 0xf5895)
+                #4  0x00007f09d00845f9 impl_pollfd_wait (libspa-support.so + 0x185f9)
+                #5  0x00007f09d00716ff loop_iterate (libspa-support.so + 0x56ff)
+                #6  0x00007f09fae6a4d4 do_loop (libpipewire-0.3.so.0 + 0x784d4)
+                #7  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 17044:
+                #0  0x00007f09fb50034d syscall (libc.so.6 + 0xf334d)
+                #1  0x00007f09fbcd052b g_cond_wait (libglib-2.0.so.0 + 0x6c52b)
+                #2  0x00007f09fbc6e1ac g_async_queue_pop_intern_unlocked (libglib-2.0.so.0 + 0xa1ac)
+                #3  0x00007f09fbc6e21c g_async_queue_pop (libglib-2.0.so.0 + 0xa21c)
+                #4  0x00007f09f80806c9 fc_thread_func (libpangoft2-1.0.so.0 + 0x46c9)
+                #5  0x00007f09fbcd96c2 g_thread_proxy (libglib-2.0.so.0 + 0x756c2)
+                #6  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 18101:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f09fb47e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f09bd34bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f09bd30553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f09bd34be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 22392:
+                #0  0x00007f09fb487982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f09fb47bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f09fb47bc84 __syscall_cancel (libc.so.6 + 0x6ec84)
+                #3  0x00007f09fb4f519e __poll (libc.so.6 + 0xe819e)
+                #4  0x00007f0973272f88 poll_func (libpulse.so.0 + 0x28f88)
+                #5  0x00007f097325c731 pa_mainloop_poll (libpulse.so.0 + 0x12731)
+                #6  0x00007f0973266f91 pa_mainloop_iterate (libpulse.so.0 + 0x1cf91)
+                #7  0x00007f0973267050 pa_mainloop_run (libpulse.so.0 + 0x1d050)
+                #8  0x00007f0973277f4d thread (libpulse.so.0 + 0x2df4d)
+                #9  0x00007f097320d8db internal_thread_func (libpulsecommon-17.0.so + 0x4d8db)
+                #10 0x00007f09fb47f464 start_thread (libc.so.6 + 0x72464)
+                #11 0x00007f09fb5025ac __clone3 (libc.so.6 + 0xf55ac)
+                ELF object binary architecture: AMD x86-64
+
+           PID: 54499 (gnome-shell)
+           UID: 1000 (matt)
+           GID: 1000 (matt)
+        Signal: 6 (ABRT)
+     Timestamp: Tue 2026-01-06 03:38:45 PST (9min ago)
+  Command Line: /usr/bin/gnome-shell
+    Executable: /usr/bin/gnome-shell
+ Control Group: /user.slice/user-1000.slice/user@1000.service/session.slice/org.gnome.Shell@wayland.service
+          Unit: user@1000.service
+     User Unit: org.gnome.Shell@wayland.service
+         Slice: user-1000.slice
+     Owner UID: 1000 (matt)
+       Boot ID: ab5a298a1ce74f07b869a49292e8b3df
+    Machine ID: e9635f6a95eb42eb8c70542d9aa78e43
+      Hostname: fedora
+       Storage: /var/lib/systemd/coredump/core.gnome-shell.1000.ab5a298a1ce74f07b869a49292e8b3df.54499.1767699525000000.zst (present)
+  Size on Disk: 17.4M
+       Package: gnome-shell/49.2-2.fc43
+      build-id: c523ef99a8b318adf74973d94181530fea2e4329
+       Message: Process 54499 (gnome-shell) of user 1000 dumped core.
+                
+                Module /usr/bin/gnome-shell from rpm gnome-shell-49.2-2.fc43.x86_64
+                Module libmpg123.so.0 from rpm mpg123-1.32.10-2.fc43.x86_64
+                Module libopus.so.0 from rpm opus-1.5.2-3.fc43.x86_64
+                Module libvorbisenc.so.2 from rpm libvorbis-1.3.7-13.fc43.x86_64
+                Module libFLAC.so.14 from rpm flac-1.5.0-5.fc43.x86_64
+                Module libgsm.so.1 from rpm gsm-1.0.23-1.fc43.x86_64
+                Module libsndfile.so.1 from rpm libsndfile-1.2.2-10.fc43.x86_64
+                Module libpulsecommon-17.0.so from rpm pulseaudio-17.0-7.fc43.x86_64
+                Module libpulse-mainloop-glib.so.0 from rpm pulseaudio-17.0-7.fc43.x86_64
+                Module libpulse.so.0 from rpm pulseaudio-17.0-7.fc43.x86_64
+                Module libgvc.so from rpm gnome-shell-49.2-2.fc43.x86_64
+                Module libpipewire-module-session-manager.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libpipewire-module-metadata.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libpipewire-module-adapter.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libpipewire-module-client-device.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libpipewire-module-client-node.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libpipewire-module-protocol-native.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libpipewire-module-rt.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libspa-dbus.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libnss_systemd.so.2 from rpm systemd-258.3-2.fc43.x86_64
+                Module libgioremote-volume-monitor.so from rpm gvfs-1.58.0-1.fc43.x86_64
+                Module libcrypt.so.2 from rpm libxcrypt-4.5.2-1.fc43.x86_64
+                Module libaccountsservice.so.0 from rpm accountsservice-23.13.9-9.fc43.x86_64
+                Module libgeocode-glib-2.so.0 from rpm geocode-glib-3.26.4-14.fc43.x86_64
+                Module libgweather-4.so.0 from rpm libgweather-4.4.4-3.fc43.x86_64
+                Module libgdm.so.1 from rpm gdm-49.2-2.fc43.x86_64
+                Module libgeoclue-2.so.0 from rpm geoclue2-2.8.0-1.fc43.x86_64
+                Module libnghttp2.so.14 from rpm nghttp2-1.66.0-2.fc43.x86_64
+                Module libpsl.so.5 from rpm libpsl-0.21.5-6.fc43.x86_64
+                Module libsoup-3.0.so.0 from rpm libsoup3-3.6.5-8.fc43.x86_64
+                Module libibus-1.0.so.5 from rpm ibus-1.5.33-4.fc43.x86_64
+                Module libmalcontent-0.so.0 from rpm malcontent-0.13.0-3.fc43.x86_64
+                Module libgnome-bg-4.so.2 from rpm gnome-desktop3-44.4-1.fc43.x86_64
+                Module libcrypto.so.3 from rpm openssl-3.5.4-1.fc43.x86_64
+                Module libkeyutils.so.1 from rpm keyutils-1.6.3-6.fc43.x86_64
+                Module libkrb5support.so.0 from rpm krb5-1.21.3-7.fc43.x86_64
+                Module libcom_err.so.2 from rpm e2fsprogs-1.47.3-2.fc43.x86_64
+                Module libk5crypto.so.3 from rpm krb5-1.21.3-7.fc43.x86_64
+                Module libkrb5.so.3 from rpm krb5-1.21.3-7.fc43.x86_64
+                Module libsharpyuv.so.0 from rpm libwebp-1.6.0-2.fc43.x86_64
+                Module libgstaudio-1.0.so.0 from rpm gstreamer1-plugins-base-1.26.9-1.fc43.x86_64
+                Module libavahi-client.so.3 from rpm avahi-0.9~rc2-6.fc43.x86_64
+                Module libavahi-common.so.3 from rpm avahi-0.9~rc2-6.fc43.x86_64
+                Module libgssapi_krb5.so.2 from rpm krb5-1.21.3-7.fc43.x86_64
+                Module libjbig.so.2.1 from rpm jbigkit-2.1-32.fc43.x86_64
+                Module libLerc.so.4 from rpm liblerc-4.0.0-9.fc43.x86_64
+                Module libwebp.so.7 from rpm libwebp-1.6.0-2.fc43.x86_64
+                Module libsqlite3.so.0 from rpm sqlite-3.50.2-2.fc43.x86_64
+                Module libjson-glib-1.0.so.0 from rpm json-glib-1.10.8-4.fc43.x86_64
+                Module libdav1d.so.7 from rpm dav1d-1.5.2-1.fc43.x86_64
+                Module libwayland-cursor.so.0 from rpm wayland-1.24.0-1.fc43.x86_64
+                Module libdw.so.1 from rpm elfutils-0.194-1.fc43.x86_64
+                Module libunwind.so.8 from rpm libunwind-1.8.1-3.fc43.x86_64
+                Module liborc-0.4.so.0 from rpm orc-0.4.41-2.fc43.x86_64
+                Module libgstbase-1.0.so.0 from rpm gstreamer1-1.26.9-1.fc43.x86_64
+                Module libgstpbutils-1.0.so.0 from rpm gstreamer1-plugins-base-1.26.9-1.fc43.x86_64
+                Module libgsttag-1.0.so.0 from rpm gstreamer1-plugins-base-1.26.9-1.fc43.x86_64
+                Module libcups.so.2 from rpm cups-2.4.16-4.fc43.x86_64
+                Module libcairo-script-interpreter.so.2 from rpm cairo-1.18.4-2.fc43.x86_64
+                Module libwayland-egl.so.1 from rpm wayland-1.24.0-1.fc43.x86_64
+                Module libjpeg.so.62 from rpm libjpeg-turbo-3.1.2-1.fc43.x86_64
+                Module libtiff.so.6 from rpm libtiff-4.7.1-1.fc43.x86_64
+                Module libvulkan.so.1 from rpm vulkan-loader-1.4.328.1-1.fc43.x86_64
+                Module libtinysparql-3.0.so.0 from rpm tinysparql-3.10.1-5.fc43.x86_64
+                Module librsvg-2.so.2 from rpm librsvg2-2.61.0-3.fc43.x86_64
+                Module libgstallocators-1.0.so.0 from rpm gstreamer1-plugins-base-1.26.9-1.fc43.x86_64
+                Module libgstgl-1.0.so.0 from rpm gstreamer1-plugins-base-1.26.9-1.fc43.x86_64
+                Module libgstreamer-1.0.so.0 from rpm gstreamer1-1.26.9-1.fc43.x86_64
+                Module libgstvideo-1.0.so.0 from rpm gstreamer1-plugins-base-1.26.9-1.fc43.x86_64
+                Module libgstplay-1.0.so.0 from rpm gstreamer1-plugins-bad-free-1.26.9-1.fc43.x86_64
+                Module libepoxy.so.0 from rpm libepoxy-1.5.10-11.fc43.x86_64
+                Module libharfbuzz-subset.so.0 from rpm harfbuzz-11.5.1-1.fc43.x86_64
+                Module libgtk-4.so.1 from rpm gtk4-4.20.3-1.fc43.x86_64
+                Module libupower-glib.so.3 from rpm upower-1.91.0-1.fc43.x86_64
+                Module libgnome-bluetooth-3.0.so.13 from rpm gnome-bluetooth-47.1-3.fc43.x86_64
+                Module libspa-journal.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libspa-support.so from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module dri_gbm.so from rpm mesa-25.2.7-3.fc43.x86_64
+                Module libpciaccess.so.0 from rpm libpciaccess-0.16-16.fc43.x86_64
+                Module libedit.so.0 from rpm libedit-3.1-57.20251016cvs.fc43.x86_64
+                Module libdrm_intel.so.1 from rpm libdrm-2.4.128-3.fc43.x86_64
+                Module libelf.so.1 from rpm elfutils-0.194-1.fc43.x86_64
+                Module libdrm_amdgpu.so.1 from rpm libdrm-2.4.128-3.fc43.x86_64
+                Module libxshmfence.so.1 from rpm libxshmfence-1.3.2-7.fc43.x86_64
+                Module libxcb-sync.so.1 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libsensors.so.4 from rpm lm_sensors-3.6.0-23.fc43.x86_64
+                Module libSPIRV-Tools.so from rpm spirv-tools-2025.4-1.fc43.x86_64
+                Module libzstd.so.1 from rpm zstd-1.5.7-2.fc43.x86_64
+                Module libxcb-present.so.0 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libxcb-dri3.so.0 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libwayland-client.so.0 from rpm wayland-1.24.0-1.fc43.x86_64
+                Module libxcb-xfixes.so.0 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libxcb-randr.so.0 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libgallium-25.2.7.so from rpm mesa-25.2.7-3.fc43.x86_64
+                Module libEGL_mesa.so.0 from rpm mesa-25.2.7-3.fc43.x86_64
+                Module libdconfsettings.so from rpm dconf-0.49.0-1.fc43.x86_64
+                Module libgvfscommon.so from rpm gvfs-1.58.0-1.fc43.x86_64
+                Module libgvfsdbus.so from rpm gvfs-1.58.0-1.fc43.x86_64
+                Module libbrotlicommon.so.1 from rpm brotli-1.2.0-1.fc43.x86_64
+                Module liblzma.so.5 from rpm xz-5.8.1-4.fc43.x86_64
+                Module libogg.so.0 from rpm libogg-1.3.6-2.fc43.x86_64
+                Module libvorbis.so.0 from rpm libvorbis-1.3.7-13.fc43.x86_64
+                Module libdatrie.so.1 from rpm libdatrie-0.2.13-12.fc43.x86_64
+                Module libicudata.so.77 from rpm icu-77.1-1.fc43.x86_64
+                Module libbrotlidec.so.1 from rpm brotli-1.2.0-1.fc43.x86_64
+                Module libbz2.so.1 from rpm bzip2-1.0.8-21.fc43.x86_64
+                Module libxml2.so.2 from rpm libxml2-2.12.10-5.fc43.x86_64
+                Module libgmp.so.10 from rpm gmp-6.3.0-4.fc43.x86_64
+                Module libnettle.so.8 from rpm nettle-3.10.1-2.fc43.x86_64
+                Module libhogweed.so.6 from rpm nettle-3.10.1-2.fc43.x86_64
+                Module libtasn1.so.6 from rpm libtasn1-4.20.0-2.fc43.x86_64
+                Module libunistring.so.5 from rpm libunistring-1.1-10.fc43.x86_64
+                Module libidn2.so.0 from rpm libidn2-2.3.8-2.fc43.x86_64
+                Module libexpat.so.1 from rpm expat-2.7.3-1.fc43.x86_64
+                Module liblua-5.4.so from rpm lua-5.4.8-4.fc43.x86_64
+                Module libmtdev.so.1 from rpm mtdev-1.1.6-11.fc43.x86_64
+                Module libevdev.so.2 from rpm libevdev-1.13.6-1.fc43.x86_64
+                Module libxcb-util.so.1 from rpm xcb-util-0.4.1-8.fc43.x86_64
+                Module libltdl.so.7 from rpm libtool-2.5.4-8.fc43.x86_64
+                Module libtdb.so.1 from rpm libtdb-1.4.14-3.fc43.x86_64
+                Module libvorbisfile.so.3 from rpm libvorbis-1.3.7-13.fc43.x86_64
+                Module libGLX.so.0 from rpm libglvnd-1.7.0-8.fc43.x86_64
+                Module libGLdispatch.so.0 from rpm libglvnd-1.7.0-8.fc43.x86_64
+                Module libgraphite2.so.3 from rpm graphite2-1.3.14-19.fc43.x86_64
+                Module libthai.so.0 from rpm libthai-0.1.29-11.fc43.x86_64
+                Module libpangoft2-1.0.so.0 from rpm pango-1.57.0-1.fc43.x86_64
+                Module libtinfo.so.6 from rpm ncurses-6.5-7.20250614.fc43.x86_64
+                Module libicui18n.so.77 from rpm icu-77.1-1.fc43.x86_64
+                Module libicuuc.so.77 from rpm icu-77.1-1.fc43.x86_64
+                Module libblkid.so.1 from rpm util-linux-2.41.3-7.fc43.x86_64
+                Module libseccomp.so.2 from rpm libseccomp-2.6.0-2.fc43.x86_64
+                Module libxkbregistry.so.0 from rpm libxkbcommon-1.11.0-1.fc43.x86_64
+                Module libxcb-shm.so.0 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libxcb-render.so.0 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libXrender.so.1 from rpm libXrender-0.9.12-3.fc43.x86_64
+                Module libfreetype.so.6 from rpm freetype-2.13.3-3.fc43.x86_64
+                Module libfontconfig.so.1 from rpm fontconfig-2.17.0-3.fc43.x86_64
+                Module libpng16.so.16 from rpm libpng-1.6.53-1.fc43.x86_64
+                Module libcap.so.2 from rpm libcap-2.76-3.fc43.x86_64
+                Module libgnutls.so.30 from rpm gnutls-3.8.11-5.fc43.x86_64
+                Module libp11-kit.so.0 from rpm p11-kit-0.25.8-1.fc43.x86_64
+                Module libgck-2.so.2 from rpm gcr-4.4.0.1-4.fc43.x86_64
+                Module libpixman-1.so.0 from rpm pixman-0.46.2-2.fc43.x86_64
+                Module libGLESv2.so.2 from rpm libglvnd-1.7.0-8.fc43.x86_64
+                Module libdrm.so.2 from rpm libdrm-2.4.128-3.fc43.x86_64
+                Module libgbm.so.1 from rpm mesa-25.2.7-3.fc43.x86_64
+                Module libinput.so.10 from rpm libinput-1.30.1-1.fc43.x86_64
+                Module libXau.so.6 from rpm libXau-1.0.12-3.fc43.x86_64
+                Module libxcb-res.so.0 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libxcb.so.1 from rpm libxcb-1.17.0-6.fc43.x86_64
+                Module libX11-xcb.so.1 from rpm libX11-1.8.12-1.fc43.x86_64
+                Module libXdamage.so.1 from rpm libXdamage-1.1.6-6.fc43.x86_64
+                Module libXcursor.so.1 from rpm libXcursor-1.2.3-3.fc43.x86_64
+                Module libXcomposite.so.1 from rpm libXcomposite-0.4.6-6.fc43.x86_64
+                Module libXinerama.so.1 from rpm libXinerama-1.1.5-9.fc43.x86_64
+                Module libXrandr.so.2 from rpm libXrandr-1.5.4-6.fc43.x86_64
+                Module libwacom.so.9 from rpm libwacom-2.17.0-1.fc43.x86_64
+                Module libudev.so.1 from rpm systemd-258.3-2.fc43.x86_64
+                Module libgudev-1.0.so.0 from rpm libgudev-238-8.fc43.x86_64
+                Module libdisplay-info.so.2 from rpm libdisplay-info-0.2.0-4.fc43.x86_64
+                Module libeis.so.1 from rpm libei-1.5.0-1.fc43.x86_64
+                Module libglycin-2.so.0 from rpm glycin-2.0.5-1.fc43.x86_64
+                Module libcolord.so.2 from rpm colord-1.4.8-2.fc43.x86_64
+                Module libXi.so.6 from rpm libXi-1.8.2-3.fc43.x86_64
+                Module libxkbcommon.so.0 from rpm libxkbcommon-1.11.0-1.fc43.x86_64
+                Module libGL.so.1 from rpm libglvnd-1.7.0-8.fc43.x86_64
+                Module libEGL.so.1 from rpm libglvnd-1.7.0-8.fc43.x86_64
+                Module libwayland-server.so.0 from rpm wayland-1.24.0-1.fc43.x86_64
+                Module libharfbuzz.so.0 from rpm harfbuzz-11.5.1-1.fc43.x86_64
+                Module libpango-1.0.so.0 from rpm pango-1.57.0-1.fc43.x86_64
+                Module libpangocairo-1.0.so.0 from rpm pango-1.57.0-1.fc43.x86_64
+                Module libfribidi.so.0 from rpm fribidi-1.0.16-3.fc43.x86_64
+                Module liblcms2.so.2 from rpm lcms2-2.16-6.fc43.x86_64
+                Module libreadline.so.8 from rpm readline-8.3-2.fc43.x86_64
+                Module libcairo-gobject.so.2 from rpm cairo-1.18.4-2.fc43.x86_64
+                Module libdbus-1.so.3 from rpm dbus-1.16.0-4.fc43.x86_64
+                Module libatk-1.0.so.0 from rpm at-spi2-core-2.58.2-1.fc43.x86_64
+                Module libatspi.so.0 from rpm at-spi2-core-2.58.2-1.fc43.x86_64
+                Module libpcre2-8.so.0 from rpm pcre2-10.47-1.fc43.x86_64
+                Module libffi.so.8 from rpm libffi-3.5.2-1.fc43.x86_64
+                Module libselinux.so.1 from rpm libselinux-3.9-5.fc43.x86_64
+                Module libmount.so.1 from rpm util-linux-2.41.3-7.fc43.x86_64
+                Module libz.so.1 from rpm zlib-ng-2.3.2-2.fc43.x86_64
+                Module libgmodule-2.0.so.0 from rpm glib2-2.86.3-1.fc43.x86_64
+                Module libXext.so.6 from rpm libXext-1.3.6-4.fc43.x86_64
+                Module libgnome-desktop-4.so.2 from rpm gnome-desktop3-44.4-1.fc43.x86_64
+                Module libXfixes.so.3 from rpm libXfixes-6.0.1-6.fc43.x86_64
+                Module libcairo.so.2 from rpm cairo-1.18.4-2.fc43.x86_64
+                Module libsecret-1.so.0 from rpm libsecret-0.21.7-7.fc43.x86_64
+                Module libnm.so.0 from rpm NetworkManager-1.54.3-2.fc43.x86_64
+                Module libpipewire-0.3.so.0 from rpm pipewire-1.4.9-1.fc43.x86_64
+                Module libsystemd.so.0 from rpm systemd-258.3-2.fc43.x86_64
+                Module libgcr-4.so.4 from rpm gcr-4.4.0.1-4.fc43.x86_64
+                Module libpolkit-gobject-1.so.0 from rpm polkit-126-6.fc43.x86_64
+                Module libpolkit-agent-1.so.0 from rpm polkit-126-6.fc43.x86_64
+                Module libmutter-cogl-17.so.0 from rpm mutter-49.2-2.fc43.x86_64
+                Module libX11.so.6 from rpm libX11-1.8.12-1.fc43.x86_64
+                Module libgraphene-1.0.so.0 from rpm graphene-1.10.8-2.fc43.x86_64
+                Module libmutter-mtk-17.so.0 from rpm mutter-49.2-2.fc43.x86_64
+                Module libgdk_pixbuf-2.0.so.0 from rpm gdk-pixbuf2-2.44.4-1.fc43.x86_64
+                Module libst-17.so from rpm gnome-shell-49.2-2.fc43.x86_64
+                Module libgnome-shell-menu.so from rpm gnome-shell-49.2-2.fc43.x86_64
+                Module libmutter-17.so.0 from rpm mutter-49.2-2.fc43.x86_64
+                Module libgirepository-2.0.so.0 from rpm glib2-2.86.3-1.fc43.x86_64
+                Module libmutter-clutter-17.so.0 from rpm mutter-49.2-2.fc43.x86_64
+                Module libgjs.so.0 from rpm gjs-1.86.0-1.fc43.x86_64
+                Module libatk-bridge-2.0.so.0 from rpm at-spi2-core-2.58.2-1.fc43.x86_64
+                Module libglib-2.0.so.0 from rpm glib2-2.86.3-1.fc43.x86_64
+                Module libgobject-2.0.so.0 from rpm glib2-2.86.3-1.fc43.x86_64
+                Module libgio-2.0.so.0 from rpm glib2-2.86.3-1.fc43.x86_64
+                Module libshell-17.so from rpm gnome-shell-49.2-2.fc43.x86_64
+                Stack trace of thread 54499:
+                #0  0x00007f70942813cc __pthread_kill_implementation (libc.so.6 + 0x743cc)
+                #1  0x00007f709422715e raise (libc.so.6 + 0x1a15e)
+                #2  0x00005610625e6ec7 dump_gjs_stack_on_signal_handler (/usr/bin/gnome-shell + 0x1ec7)
+                #3  0x00007f7094227290 __restore_rt (libc.so.6 + 0x1a290)
+                #4  0x00007f70942813cc __pthread_kill_implementation (libc.so.6 + 0x743cc)
+                #5  0x00007f709422715e raise (libc.so.6 + 0x1a15e)
+                #6  0x00007f709420e6d0 abort (libc.so.6 + 0x16d0)
+                #7  0x00007f7094ad9482 g_assertion_message.cold (libglib-2.0.so.0 + 0x2482)
+                #8  0x00007f7094b4a727 g_assertion_message_expr (libglib-2.0.so.0 + 0x73727)
+                #9  0x00007f70944c314e meta_window_unmanage (libmutter-17.so.0 + 0xc314e)
+                #10 0x00007f7094536348 meta_wayland_shell_surface_destroy_window (libmutter-17.so.0 + 0x136348)
+                #11 0x00007f709454340d xdg_toplevel_destructor (libmutter-17.so.0 + 0x14340d)
+                #12 0x00007f7092110930 remove_and_destroy_resource (libwayland-server.so.0 + 0x6930)
+                #13 0x00007f7093859056 ffi_call_unix64 (libffi.so.8 + 0x8056)
+                #14 0x00007f7093854d16 ffi_call_int.lto_priv.0 (libffi.so.8 + 0x3d16)
+                #15 0x00007f70938577ae ffi_call (libffi.so.8 + 0x67ae)
+                #16 0x00007f709210c440 wl_closure_invoke.constprop.0 (libwayland-server.so.0 + 0x2440)
+                #17 0x00007f7092111aa0 wl_client_connection_data (libwayland-server.so.0 + 0x7aa0)
+                #18 0x00007f709210ff52 wl_event_loop_dispatch (libwayland-server.so.0 + 0x5f52)
+                #19 0x00007f709451939b wayland_event_source_dispatch.lto_priv.0 (libmutter-17.so.0 + 0x11939b)
+                #20 0x00007f7094b182a3 g_main_context_dispatch_unlocked.lto_priv.0 (libglib-2.0.so.0 + 0x412a3)
+                #21 0x00007f7094b211f8 g_main_context_iterate_unlocked.isra.0 (libglib-2.0.so.0 + 0x4a1f8)
+                #22 0x00007f7094b2149f g_main_loop_run (libglib-2.0.so.0 + 0x4a49f)
+                #23 0x00007f70944a6cea meta_context_run_main_loop (libmutter-17.so.0 + 0xa6cea)
+                #24 0x00007f7093859056 ffi_call_unix64 (libffi.so.8 + 0x8056)
+                #25 0x00007f7093854d16 ffi_call_int.lto_priv.0 (libffi.so.8 + 0x3d16)
+                #26 0x00007f70938577ae ffi_call (libffi.so.8 + 0x67ae)
+                #27 0x00007f7094924aba _ZN3Gjs8Function6invokeEP9JSContextRKN2JS8CallArgsENS3_6HandleIP8JSObjectEEP11_GIArgument.localalias.lto_priv.0 (libgj>
+                #28 0x00007f70949254fc _ZN3Gjs8Function4callEP9JSContextjPN2JS5ValueE (libgjs.so.0 + 0x5c4fc)
+                #29 0x00007f709222c484 _ZN2js23InternalCallOrConstructEP9JSContextRKN2JS8CallArgsENS_14MaybeConstructENS_10CallReasonE (libmozjs-140.so.0 + 0>
+                #30 0x00007f709223cb71 _ZN2js9InterpretEP9JSContextRNS_8RunStateE (libmozjs-140.so.0 + 0x3cb71)
+                #31 0x00007f709222bb9c _ZN2js9RunScriptEP9JSContextRNS_8RunStateE (libmozjs-140.so.0 + 0x2bb9c)
+                #32 0x00007f709222c34b _ZN2js23InternalCallOrConstructEP9JSContextRKN2JS8CallArgsENS_14MaybeConstructENS_10CallReasonE (libmozjs-140.so.0 + 0>
+                #33 0x00007f709222c9bc _ZN2js4CallEP9JSContextN2JS6HandleINS2_5ValueEEES5_RKNS_13AnyInvokeArgsENS2_13MutableHandleIS4_EENS_10CallReasonE (lib>
+                #34 0x00007f70923073d2 _ZN2JS4CallEP9JSContextNS_6HandleINS_5ValueEEES4_RKNS_16HandleValueArrayENS_13MutableHandleIS3_EE (libmozjs-140.so.0 +>
+                #35 0x00007f7094987752 _ZN17GjsContextPrivate18run_main_loop_hookEv (libgjs.so.0 + 0xbe752)
+                #36 0x00007f709498fd7f gjs_context_eval_module (libgjs.so.0 + 0xc6d7f)
+                #37 0x00007f709498fee2 gjs_context_eval_module_file (libgjs.so.0 + 0xc6ee2)
+                #38 0x00005610625e6335 main (/usr/bin/gnome-shell + 0x1335)
+                #39 0x00007f70942105b5 __libc_start_call_main (libc.so.6 + 0x35b5)
+                #40 0x00007f7094210668 __libc_start_main@@GLIBC_2.34 (libc.so.6 + 0x3668)
+                #41 0x00005610625e6775 _start (/usr/bin/gnome-shell + 0x1775)
+                
+                Stack trace of thread 54508:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427bc84 __syscall_cancel (libc.so.6 + 0x6ec84)
+                #3  0x00007f70942f56c6 ppoll (libc.so.6 + 0xe86c6)
+                #4  0x00007f7094b212e0 g_main_context_iterate_unlocked.isra.0 (libglib-2.0.so.0 + 0x4a2e0)
+                #5  0x00007f7094b213a3 g_main_context_iteration (libglib-2.0.so.0 + 0x4a3a3)
+                #6  0x00007f7094b213f1 glib_worker_main (libglib-2.0.so.0 + 0x4a3f1)
+                #7  0x00007f7094b4c6c2 g_thread_proxy (libglib-2.0.so.0 + 0x756c2)
+                #8  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #9  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54512:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f709235c64e _ZN2js12HelperThread10ThreadMainEPNS_18InternalThreadPoolEPS0_ (libmozjs-140.so.0 + 0x15c64e)
+                #5  0x00007f70923691d1 _ZN2js6detail16ThreadTrampolineIRFvPNS_18InternalThreadPoolEPNS_12HelperThreadEEJRS3_S5_EE5StartEPv (libmozjs-140.so.0>
+                #6  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54507:
+                #0  0x00007f709430034d syscall (libc.so.6 + 0xf334d)
+                #1  0x00007f7094b4352b g_cond_wait (libglib-2.0.so.0 + 0x6c52b)
+                #2  0x00007f7094ae11ac g_async_queue_pop_intern_unlocked (libglib-2.0.so.0 + 0xa1ac)
+                #3  0x00007f7094b4cb74 g_thread_pool_spawn_thread (libglib-2.0.so.0 + 0x75b74)
+                #4  0x00007f7094b4c6c2 g_thread_proxy (libglib-2.0.so.0 + 0x756c2)
+                #5  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #6  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54514:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f709235c64e _ZN2js12HelperThread10ThreadMainEPNS_18InternalThreadPoolEPS0_ (libmozjs-140.so.0 + 0x15c64e)
+                #5  0x00007f70923691d1 _ZN2js6detail16ThreadTrampolineIRFvPNS_18InternalThreadPoolEPNS_12HelperThreadEEJRS3_S5_EE5StartEPv (libmozjs-140.so.0>
+                #6  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54510:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427bc84 __syscall_cancel (libc.so.6 + 0x6ec84)
+                #3  0x00007f70942f56c6 ppoll (libc.so.6 + 0xe86c6)
+                #4  0x00007f7094b212e0 g_main_context_iterate_unlocked.isra.0 (libglib-2.0.so.0 + 0x4a2e0)
+                #5  0x00007f7094b2149f g_main_loop_run (libglib-2.0.so.0 + 0x4a49f)
+                #6  0x00007f7094d15f92 gdbus_shared_thread_func.lto_priv.0 (libgio-2.0.so.0 + 0xe8f92)
+                #7  0x00007f7094b4c6c2 g_thread_proxy (libglib-2.0.so.0 + 0x756c2)
+                #8  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #9  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54517:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f709235c64e _ZN2js12HelperThread10ThreadMainEPNS_18InternalThreadPoolEPS0_ (libmozjs-140.so.0 + 0x15c64e)
+                #5  0x00007f70923691d1 _ZN2js6detail16ThreadTrampolineIRFvPNS_18InternalThreadPoolEPNS_12HelperThreadEEJRS3_S5_EE5StartEPv (libmozjs-140.so.0>
+                #6  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54525:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f705934bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f705930553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f705934be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54518:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f709235c64e _ZN2js12HelperThread10ThreadMainEPNS_18InternalThreadPoolEPS0_ (libmozjs-140.so.0 + 0x15c64e)
+                #5  0x00007f70923691d1 _ZN2js6detail16ThreadTrampolineIRFvPNS_18InternalThreadPoolEPNS_12HelperThreadEEJRS3_S5_EE5StartEPv (libmozjs-140.so.0>
+                #6  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54521:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427bc84 __syscall_cancel (libc.so.6 + 0x6ec84)
+                #3  0x00007f70942f56c6 ppoll (libc.so.6 + 0xe86c6)
+                #4  0x00007f7094b212e0 g_main_context_iterate_unlocked.isra.0 (libglib-2.0.so.0 + 0x4a2e0)
+                #5  0x00007f7094b2149f g_main_loop_run (libglib-2.0.so.0 + 0x4a49f)
+                #6  0x00007f7094594730 thread_impl_func (libmutter-17.so.0 + 0x194730)
+                #7  0x00007f7094b4c6c2 g_thread_proxy (libglib-2.0.so.0 + 0x756c2)
+                #8  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #9  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54526:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f705934bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f705930553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f705934be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54535:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f705934bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f705930553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f705934be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54527:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f705934bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f705930553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f705934be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54519:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f709235c64e _ZN2js12HelperThread10ThreadMainEPNS_18InternalThreadPoolEPS0_ (libmozjs-140.so.0 + 0x15c64e)
+                #5  0x00007f70923691d1 _ZN2js6detail16ThreadTrampolineIRFvPNS_18InternalThreadPoolEPNS_12HelperThreadEEJRS3_S5_EE5StartEPv (libmozjs-140.so.0>
+                #6  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54530:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f705934bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f705930553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f705934be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54536:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f705934bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f705930553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f705934be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54537:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f705934bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f705930553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f705934be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54531:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f705934bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f705930553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f705934be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54538:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f705934bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f705930553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f705934be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54511:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427bc84 __syscall_cancel (libc.so.6 + 0x6ec84)
+                #3  0x00007f70942f56c6 ppoll (libc.so.6 + 0xe86c6)
+                #4  0x00007f7094b212e0 g_main_context_iterate_unlocked.isra.0 (libglib-2.0.so.0 + 0x4a2e0)
+                #5  0x00007f7094b213a3 g_main_context_iteration (libglib-2.0.so.0 + 0x4a3a3)
+                #6  0x00007f7095135e4d dconf_gdbus_worker_thread (libdconfsettings.so + 0x4e4d)
+                #7  0x00007f7094b4c6c2 g_thread_proxy (libglib-2.0.so.0 + 0x756c2)
+                #8  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #9  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54540:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f705934bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f705930553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f705934be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54529:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f705934bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f705930553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f705934be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54613:
+                #0  0x00007f70917475f3 _ZN8async_io7reactor11ReactorLock5react17h9abaee047cffebb9E (libglycin-2.so.0 + 0x1475f3)
+                #1  0x00007f709173f9dd _ZN21async_global_executor9threading16thread_main_loop17hae0e5ce6a6cc39ceE (libglycin-2.so.0 + 0x13f9dd)
+                #2  0x00007f709173ded9 _ZN3std3sys9backtrace28__rust_begin_short_backtrace17hb30945a6b937a52cE (libglycin-2.so.0 + 0x13ded9)
+                #3  0x00007f709173dd7f _ZN4core3ops8function6FnOnce40call_once$u7b$$u7b$vtable.shim$u7d$$u7d$17hdf6cd496c66816e1E (libglycin-2.so.0 + 0x13dd7>
+                #4  0x00007f7091887061 _ZN3std3sys6thread4unix6Thread3new12thread_start17hafd1725dff990fdcE (libglycin-2.so.0 + 0x287061)
+                #5  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #6  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54513:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f709235c64e _ZN2js12HelperThread10ThreadMainEPNS_18InternalThreadPoolEPS0_ (libmozjs-140.so.0 + 0x15c64e)
+                #5  0x00007f70923691d1 _ZN2js6detail16ThreadTrampolineIRFvPNS_18InternalThreadPoolEPNS_12HelperThreadEEJRS3_S5_EE5StartEPv (libmozjs-140.so.0>
+                #6  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54528:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f705934bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f705930553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f705934be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54515:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f709235c64e _ZN2js12HelperThread10ThreadMainEPNS_18InternalThreadPoolEPS0_ (libmozjs-140.so.0 + 0x15c64e)
+                #5  0x00007f70923691d1 _ZN2js6detail16ThreadTrampolineIRFvPNS_18InternalThreadPoolEPNS_12HelperThreadEEJRS3_S5_EE5StartEPv (libmozjs-140.so.0>
+                #6  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54539:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f705934bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f705930553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f705934be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54541:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427bc84 __syscall_cancel (libc.so.6 + 0x6ec84)
+                #3  0x00007f70942f56c6 ppoll (libc.so.6 + 0xe86c6)
+                #4  0x00007f7094b212e0 g_main_context_iterate_unlocked.isra.0 (libglib-2.0.so.0 + 0x4a2e0)
+                #5  0x00007f7094b2149f g_main_loop_run (libglib-2.0.so.0 + 0x4a49f)
+                #6  0x00007f70945943c9 input_thread (libmutter-17.so.0 + 0x1943c9)
+                #7  0x00007f7094b4c6c2 g_thread_proxy (libglib-2.0.so.0 + 0x756c2)
+                #8  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #9  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54516:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f709235c64e _ZN2js12HelperThread10ThreadMainEPNS_18InternalThreadPoolEPS0_ (libmozjs-140.so.0 + 0x15c64e)
+                #5  0x00007f70923691d1 _ZN2js6detail16ThreadTrampolineIRFvPNS_18InternalThreadPoolEPNS_12HelperThreadEEJRS3_S5_EE5StartEPv (libmozjs-140.so.0>
+                #6  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 54614:
+                #0  0x00007f709430034d syscall (libc.so.6 + 0xf334d)
+                #1  0x00007f7091616a96 _ZN3std3sys4sync5mutex5futex5Mutex14lock_contended17h8ec8c7c87941430fE (libglycin-2.so.0 + 0x16a96)
+                #2  0x00007f7091746f0a _ZN3std3sys9backtrace28__rust_begin_short_backtrace17hd3c1131e1105cd66E (libglycin-2.so.0 + 0x146f0a)
+                #3  0x00007f70917468ac _ZN4core3ops8function6FnOnce40call_once$u7b$$u7b$vtable.shim$u7d$$u7d$17h1972e22b8ac164f7E (libglycin-2.so.0 + 0x1468a>
+                #4  0x00007f7091887061 _ZN3std3sys6thread4unix6Thread3new12thread_start17hafd1725dff990fdcE (libglycin-2.so.0 + 0x287061)
+                #5  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #6  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 55140:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427bc84 __syscall_cancel (libc.so.6 + 0x6ec84)
+                #3  0x00007f7094302895 epoll_wait (libc.so.6 + 0xf5895)
+                #4  0x00007f705bfbb5f9 impl_pollfd_wait (libspa-support.so + 0x185f9)
+                #5  0x00007f705bfa86ff loop_iterate (libspa-support.so + 0x56ff)
+                #6  0x00007f7093cd14d4 do_loop (libpipewire-0.3.so.0 + 0x784d4)
+                #7  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 55219:
+                #0  0x00007f709430034d syscall (libc.so.6 + 0xf334d)
+                #1  0x00007f7094b4352b g_cond_wait (libglib-2.0.so.0 + 0x6c52b)
+                #2  0x00007f7094ae11ac g_async_queue_pop_intern_unlocked (libglib-2.0.so.0 + 0xa1ac)
+                #3  0x00007f7094ae121c g_async_queue_pop (libglib-2.0.so.0 + 0xa21c)
+                #4  0x00007f7090ef16c9 fc_thread_func (libpangoft2-1.0.so.0 + 0x46c9)
+                #5  0x00007f7094b4c6c2 g_thread_proxy (libglib-2.0.so.0 + 0x756c2)
+                #6  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #7  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 56209:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f705934bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f705930553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f705934be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                
+                Stack trace of thread 59415:
+                #0  0x00007f7094287982 __syscall_cancel_arch (libc.so.6 + 0x7a982)
+                #1  0x00007f709427bc3c __internal_syscall_cancel (libc.so.6 + 0x6ec3c)
+                #2  0x00007f709427c2ac __futex_abstimed_wait_common (libc.so.6 + 0x6f2ac)
+                #3  0x00007f709427e97e pthread_cond_wait@@GLIBC_2.3.2 (libc.so.6 + 0x7197e)
+                #4  0x00007f705934bf1d cnd_wait (libgallium-25.2.7.so + 0x54bf1d)
+                #5  0x00007f705930553c util_queue_thread_func (libgallium-25.2.7.so + 0x50553c)
+                #6  0x00007f705934be4c impl_thrd_routine (libgallium-25.2.7.so + 0x54be4c)
+                #7  0x00007f709427f464 start_thread (libc.so.6 + 0x72464)
+                #8  0x00007f70943025ac __clone3 (libc.so.6 + 0xf55ac)
+                ELF object binary architecture: AMD x86-64
+
+No coredumps found.
+matt@fedora:~$ 
+
+
