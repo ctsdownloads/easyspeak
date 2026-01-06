@@ -61,23 +61,22 @@ Current and in active development:
 ## Requirements
 
 - Linux with GNOME Shell 47+ on Wayland
-- Python 3.9+
+- Python 3.12 or 3.13 (not 3.14 - see installation notes)
 - Working microphone
 - ~2GB disk space for models
 
-Tested on Fedora (via distrobox) and Bluefin.
+Tested on Bluefin and Fedora 43.
 
 ## Installation
 
-**Terminology:**
-- **HOST** = Your main system (run commands in a normal terminal)
-- **DISTROBOX** = A container that shares your home folder but has its own packages. Required because Python 3.14 (Fedora 43+) breaks a key dependency.
+**Fedora 43 users:** Your default `python3` is 3.14, which breaks dependencies. But you have `python3.13` available - use that instead. Check with:
+```bash
+python3.13 --version
+```
 
-**Why the audio setup looks weird:** Your host uses PipeWire, but PyAudio (in distrobox) uses ALSA. The `alsa-plugins-pulseaudio` package bridges ALSA→PulseAudio protocol, and PipeWire speaks PulseAudio. Chain: PyAudio→ALSA→plugin→PipeWire.
+**Bluefin / Fedora 42 or older:** Your `python3` is already 3.12 or 3.13. You're fine.
 
-All commands run on **host** unless marked otherwise.
-
-### 1. System Packages (Fedora) - HOST
+### 1. System Packages
 
 ```bash
 sudo dnf install \
@@ -86,20 +85,29 @@ sudo dnf install \
   at-spi2-core \
   python3-gobject \
   qutebrowser \
-  glib2
-# pipewire-utils: pw-play for TTS audio playback
-# wireplumber: wpctl for volume control
-# at-spi2-core: accessibility framework for dictation
-# python3-gobject: AT-SPI dictation script runs on host via distrobox-host-exec
-# qutebrowser: browser plugin IPC control
-# glib2: gdbus/gsettings for GNOME Shell communication
+  glib2 \
+  ffmpeg-free \
+  pulseaudio-utils \
+  sound-theme-freedesktop \
+  portaudio-devel \
+  python3-devel \
+  gcc
 ```
 
-Most are pre-installed on Fedora/Bluefin GNOME. The command skips existing packages.
+### 2. Python Packages
 
-### 2. Piper TTS - HOST
+**Fedora 43:** Default python3 is 3.14 (broken). Use python3.13:
+```bash
+python3.13 -m ensurepip
+python3.13 -m pip install faster-whisper openwakeword numpy pyaudio --break-system-packages
+```
 
-Piper development moved to [OHF-Voice/piper1-gpl](https://github.com/OHF-Voice/piper1-gpl) but the new version is Python-only (no standalone binary). We use the last standalone binary from the original repo - it works fine and voice models are compatible.
+**Bluefin / Fedora 42 or older:** python3 is already 3.12/3.13:
+```bash
+pip install faster-whisper openwakeword numpy pyaudio --break-system-packages
+```
+
+### 3. Piper TTS
 
 ```bash
 mkdir -p ~/.local/bin
@@ -119,48 +127,14 @@ wget -O en_US-amy-medium.onnx.json \
   "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx.json"
 ```
 
-### 3. Distrobox Setup - HOST then DISTROBOX
-
-**Why distrobox?** Python 3.14 (Fedora 43+) breaks PyAV, a faster-whisper dependency. The fix isn't released yet. Distrobox with Fedora 41 gives Python 3.12 where everything works. Even on older Fedora, distrobox keeps your system clean.
-
-```bash
-# HOST: Install distrobox
-sudo dnf install distrobox
-
-# HOST: Create container with Fedora 41 (Python 3.12)
-distrobox create --name easyspeak --image fedora:41
-distrobox enter easyspeak
-
-# DISTROBOX: Install build dependencies and audio
-sudo dnf install \
-  portaudio-devel \
-  python3-devel \
-  gcc \
-  pulseaudio-utils \
-  alsa-plugins-pulseaudio
-# portaudio-devel, python3-devel, gcc: build pyaudio from source
-# pulseaudio-utils: provides paplay for wake sound
-# alsa-plugins-pulseaudio: PyAudio uses ALSA, this bridges to host's PipeWire
-
-# DISTROBOX: Install Python packages
-pip install faster-whisper openwakeword numpy pyaudio --break-system-packages
-# faster-whisper: speech-to-text (uses PyAV internally, broken on Python 3.14)
-# openwakeword: "Hey Jarvis" detection
-# numpy: audio processing
-# pyaudio: microphone input
-
-# DISTROBOX: Exit back to host
-exit
-```
-
-### 4. Clone Repository - HOST
+### 4. Clone Repository
 
 ```bash
 git clone https://github.com/ctsdownloads/easyspeak.git
 cd easyspeak
 ```
 
-### 5. GNOME Shell Extension - HOST
+### 5. GNOME Shell Extension
 
 ```bash
 mkdir -p ~/.local/share/gnome-shell/extensions/easyspeak-grid@local
@@ -174,7 +148,7 @@ Then enable:
 gnome-extensions enable easyspeak-grid@local
 ```
 
-### 6. Enable Accessibility - HOST
+### 6. Enable Accessibility
 
 ```bash
 gsettings set org.gnome.desktop.interface toolkit-accessibility true
@@ -182,10 +156,14 @@ gsettings set org.gnome.desktop.interface toolkit-accessibility true
 
 ## Usage
 
+**Fedora 43:**
 ```bash
-distrobox enter easyspeak
-cd ~/easyspeak
-python core.py
+python3.13 core.py
+```
+
+**Bluefin / Fedora 42 or older:**
+```bash
+python3 core.py
 ```
 
 Say "Hey Jarvis" followed by a command.
@@ -422,8 +400,6 @@ def handle(cmd, core):
 
 ## Troubleshooting
 
-All troubleshooting commands run on **host**.
-
 **"Failed to show grid - is extension enabled?"**
 ```bash
 gnome-extensions enable easyspeak-grid@local
@@ -440,12 +416,14 @@ gsettings set org.gnome.desktop.interface toolkit-accessibility true
 - Check microphone: `arecord -d 3 test.wav && aplay test.wav`
 - Adjust `WAKE_THRESHOLD` in core.py (lower = more sensitive)
 
-**Audio errors (Invalid sample rate, ALSA errors)**
+**Wake word triggers multiple times**
 
-Missing audio bridge in distrobox:
+Mic gain too high. Lower capture level:
 ```bash
-distrobox enter easyspeak
-sudo dnf install alsa-plugins-pulseaudio
+alsamixer
+# Press F6 to select your mic device
+# Press Tab to switch to Capture
+# Lower to ~70
 ```
 
 **Commands misheard**
@@ -460,12 +438,15 @@ chmod +x ~/.local/bin/piper/espeak-ng
 
 **pip install fails with PyAV/Cython errors**
 
-You're probably running on host instead of inside distrobox, or using wrong Fedora image:
+You're on Python 3.14. Use `python3.13` instead (Fedora 43 has it):
 ```bash
-# Make sure you're using Fedora 41 image
-distrobox create --name easyspeak --image fedora:41
-distrobox enter easyspeak
-# Then install dependencies inside distrobox
+python3.13 -m ensurepip
+python3.13 -m pip install faster-whisper openwakeword numpy pyaudio --break-system-packages
+```
+
+**No module named pip**
+```bash
+python3.13 -m ensurepip
 ```
 
 ## Contributing
