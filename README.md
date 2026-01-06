@@ -42,9 +42,7 @@ Current and in active development:
 
 ## Demo
 
-**Video demo:**
-
-https://github.com/ctsdownloads/easyspeak/raw/main/images/demo.mp4
+[![Demo](https://img.youtube.com/vi/dl5m2Zo1oIE/maxresdefault.jpg)](https://www.youtube.com/watch?v=dl5m2Zo1oIE)
 
 **Terminal output:**
 
