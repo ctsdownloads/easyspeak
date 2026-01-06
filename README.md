@@ -69,9 +69,10 @@ Tested on Bluefin and Fedora 43.
 
 ## Installation
 
-**Fedora 43 users:** Your default `python3` is 3.14, which breaks dependencies. But you have `python3.13` available - use that instead. Check with:
+**Fedora 43 users:** Your default `python3` is 3.14, which breaks dependencies. Install and use Python 3.13 instead:
 ```bash
-python3.13 --version
+sudo dnf install python3.13
+python3.13 --version  # Verify it's installed
 ```
 
 **Bluefin / Fedora 42 or older:** Your `python3` is already 3.12 or 3.13. You're fine.
@@ -440,6 +441,7 @@ chmod +x ~/.local/bin/piper/espeak-ng
 
 You're on Python 3.14. Use `python3.13` instead (Fedora 43 has it):
 ```bash
+sudo dnf install python3.13
 python3.13 -m ensurepip
 python3.13 -m pip install faster-whisper openwakeword numpy pyaudio --break-system-packages
 ```
