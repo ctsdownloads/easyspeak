@@ -458,6 +458,8 @@ Areas that need work:
 
 ## Planned Enhancements
 
+- Window controls (maximize, minimize)
+- Dictation focus detection fix
 - Further GNOME integration for desktop control
 - Verbal help per section (say "help browser" for spoken commands)
 - Auto-discover installed apps for launcher
