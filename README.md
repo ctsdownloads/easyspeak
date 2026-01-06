@@ -89,15 +89,16 @@ sudo dnf install \
   pulseaudio-utils \
   sound-theme-freedesktop \
   portaudio-devel \
-  python3-devel \
+  python3.13-devel \
   gcc
 ```
 
 ### 2. Python Packages
 
 ```bash
-python3.13 -m ensurepip
-python3.13 -m pip install faster-whisper openwakeword numpy pyaudio --break-system-packages
+python3.13 -m venv ~/easyspeak-venv
+source ~/easyspeak-venv/bin/activate
+pip install faster-whisper openwakeword numpy pyaudio
 ```
 
 ### 3. Piper TTS
@@ -149,9 +150,13 @@ gsettings set org.gnome.desktop.interface toolkit-accessibility true
 
 ## Usage
 
+Activate the virtual environment, then run:
 ```bash
-python3.13 core.py
+source ~/easyspeak-venv/bin/activate
+python core.py
 ```
+
+You need to activate the venv each time you open a new terminal.
 
 Say "Hey Jarvis" followed by a command.
 
@@ -377,11 +382,10 @@ def handle(cmd, core):
 
 **Core methods you can use:**
 - `core.speak("text")` - text-to-speech response
-- `core.host_run(["cmd", "arg"])` - run shell command on host (works from distrobox)
+- `core.host_run(["cmd", "arg"])` - run shell command
 - `core.transcribe(audio)` - transcribe audio to text
 - `core.wait_for_speech()` - wait for user to start speaking
 - `core.record_until_silence()` - record until user stops
-- `core.in_distrobox()` - returns True if running in distrobox
 
 **Loading order:** Plugins load alphabetically. Use number prefixes to control order (`00_mousegrid.py` loads before `apps.py`).
 
@@ -425,16 +429,12 @@ chmod +x ~/.local/bin/piper/espeak-ng
 
 **pip install fails with PyAV/Cython errors**
 
-You're on Python 3.14. Use `python3.13` instead:
+You're on Python 3.14. Use `python3.13` with a venv instead:
 ```bash
-sudo dnf install python3.13
-python3.13 -m ensurepip
-python3.13 -m pip install faster-whisper openwakeword numpy pyaudio --break-system-packages
-```
-
-**No module named pip**
-```bash
-python3.13 -m ensurepip
+sudo dnf install python3.13 python3.13-devel
+python3.13 -m venv ~/easyspeak-venv
+source ~/easyspeak-venv/bin/activate
+pip install faster-whisper openwakeword numpy pyaudio
 ```
 
 ## Contributing
