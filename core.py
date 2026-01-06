@@ -11,6 +11,7 @@ import tempfile
 import os
 import sys
 import importlib
+import time
 import numpy as np
 import pyaudio
 import wave
@@ -46,17 +47,14 @@ class EasySpeak:
     
     # --- Utilities for plugins ---
     
-    def in_distrobox(self):
-        return os.path.exists("/run/.containerenv")
-    
     def host_run(self, cmd, background=False):
-        if self.in_distrobox():
-            cmd = ["distrobox-host-exec"] + cmd
+        """Run a shell command."""
         if background:
             return subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return subprocess.run(cmd, capture_output=True, text=True)
     
     def speak(self, text):
+        """Text-to-speech output."""
         print(f"💬 {text}")
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
             output_file = f.name
@@ -66,12 +64,8 @@ class EasySpeak:
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         ).communicate(input=text.encode())
         
-        if self.in_distrobox():
-            subprocess.run(["distrobox-host-exec", "pw-play", output_file],
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        else:
-            subprocess.run(["ffplay", "-nodisp", "-autoexit", output_file],
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["ffplay", "-nodisp", "-autoexit", output_file],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         os.remove(output_file)
     
     # --- Plugin management ---
@@ -191,7 +185,6 @@ class EasySpeak:
     
     def run(self):
         print("Loading OpenWakeWord...")
-        # Empty list loads all pre-trained models including hey_jarvis
         self.wakeword = WakeWordModel()
         
         print("Loading Whisper...")
@@ -232,19 +225,18 @@ class EasySpeak:
                 if len(audio_buffer) > 50:  # ~4 seconds
                     audio_buffer.pop(0)
                 
-                # Check wake word (instant!)
+                # Check wake word
                 prediction = self.wakeword.predict(audio_data)
                 score = prediction.get(WAKE_WORD, 0)
                 
                 if score > WAKE_THRESHOLD:
-                    print(f"🎤 Wake! (confidence: {score:.2f})")
+                    # DEBUG: Log timestamp and score
+                    print(f"[DEBUG] {time.time():.3f} - Wake triggered, score: {score:.3f}")
+                    
                     self.wakeword.reset()
                     
                     # Audio feedback - wake acknowledged
                     subprocess.run(["paplay", "/usr/share/sounds/freedesktop/stereo/message.oga"], capture_output=True)
-                    
-                    # TODO: Audio ducking disabled - needs testing
-                    # Pause all media to prevent audio bleed
                     
                     # Immediately record what follows (user may already be speaking)
                     audio = self.record_until_silence()
@@ -255,9 +247,7 @@ class EasySpeak:
                             print(f"👂 {cmd}")
                             if not self.route_command(cmd.lower().strip(".,!? ")):
                                 break
-                            # Reset wakeword model after command (plugins may have used audio stream)
                             self.wakeword.reset()
-                            # Flush any stale audio
                             try:
                                 self.stream.read(self.stream.get_read_available(), exception_on_overflow=False)
                             except:
@@ -276,9 +266,7 @@ class EasySpeak:
                                 print(f"👂 {cmd}")
                                 if not self.route_command(cmd.lower().strip(".,!? ")):
                                     break
-                                # Reset wakeword model after command
                                 self.wakeword.reset()
-                                # Flush any stale audio
                                 try:
                                     self.stream.read(self.stream.get_read_available(), exception_on_overflow=False)
                                 except:
