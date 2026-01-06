@@ -154,7 +154,10 @@ EasySpeak uses number hints (not letters). Configure qutebrowser:
 
 ```bash
 mkdir -p ~/.config/qutebrowser
-echo "c.hints.chars = '0123456789'" >> ~/.config/qutebrowser/config.py
+cat > ~/.config/qutebrowser/config.py << 'EOF'
+config.load_autoconfig(False)
+c.hints.chars = '0123456789'
+EOF
 ```
 
 ## Usage
