@@ -455,19 +455,7 @@ pip install faster-whisper openwakeword numpy pyaudio
 
 ## Contributing
 
-Contributions welcome. Please open an issue first to discuss changes.
-
-Areas that need work:
-- More application integrations
-
-## Planned Enhancements
-
-- Window controls (maximize, minimize)
-- Dictation focus detection fix
-- Further GNOME integration for desktop control
-- Verbal help per section (say "help browser" for spoken commands)
-- Auto-discover installed apps for launcher
-- Clipboard commands (copy, paste)
+See [CONTRIBUTING](CONTRIBUTING.md).
 
 ## License
 

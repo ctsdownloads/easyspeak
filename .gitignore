@@ -20,12 +20,21 @@ wheels/
 .installed.cfg
 *.egg
 
+# Testing
+.coverage
+coverage.json
+coverage.xml
+htmlcov/
+junit-report.xml
+
 # Virtual environments
 .env
 .venv
 env/
 venv/
 ENV/
+.tox/
+requirements.txt
 
 # IDE
 .idea/
