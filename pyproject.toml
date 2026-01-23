@@ -1,0 +1,61 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=77", "setuptools_scm>=9"]
+
+[project]
+name = "easyspeak"
+dynamic = ["version"]
+description = "Voice control for Linux desktops. Fully local, no cloud, Wayland-native."
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
+authors = [
+  {name = "Matt Hartley", email = "matt@matthartley.com"},
+]
+maintainers = [
+  {name = "Matt Hartley", email = "matt@matthartley.com"},
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Desktop Environment :: Gnome",
+  "Topic :: Home Automation",
+  "Topic :: Scientific/Engineering :: Human Machine Interfaces",
+  "Topic :: Utilities",
+]
+keywords = [
+  "control",
+  "desktop",
+  "voice",
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=2.2.6",
+]
+
+[project.scripts]
+easyspeak = "core:main"
+
+[project.urls]
+"Source Code" = "https://github.com/ctsdownloads/easyspeak"
+
+[dependency-groups]
+dev = [
+  "coverage[toml]>=7.13.1",
+  "pytest>=9.0.2",
+  "ty>=0.0.13",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["tests"]
+
+[tool.setuptools_scm]
+local_scheme = "no-local-version"
