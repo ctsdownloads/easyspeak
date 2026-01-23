@@ -16,9 +16,9 @@ Areas that need work:
 
 ## Development
 
-This project sports a [Justfile](https://docs.astral.sh/uv/concepts/) to
-simplify all local development activities, and for running the same tasks
-in the CI pipeline.
+This project sports a [Justfile](https://just.systems/man/en/) to simplify
+all local development activities, and for running the same tasks in the CI
+pipeline.
 
 ```console
 just
@@ -36,8 +36,8 @@ UV_PYTHON=3.12 just pytest -q -x
 just clean
 ```
 
-The setup uses [uv](https://just.systems/man/en/) under the hood, which
-transparently manages virtual environments and package installation.
+The setup uses [uv](https://docs.astral.sh/uv/concepts/) under the hood,
+which transparently manages virtual environments and package installation.
 uv also allows you to install several Python versions on your computer in
 parallel. We use this to test against all supported Python versions.
 
@@ -46,8 +46,11 @@ parallel. We use this to test against all supported Python versions.
 You need to install `uv` and `just`, e.g.
 
 ```console
-$ python3 -m pip install uv
-$ uv tool install rust-just
+python3 -m pip install uv
+```
+
+```console
+uv tool install rust-just
 ```
 
 ## Packaging & Version Numbers

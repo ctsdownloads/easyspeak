@@ -1,4 +1,2 @@
 exclude MANIFEST.in justfile *.js *.json *.yml
-include LICENSE README.md
 prune images
-prune tests
