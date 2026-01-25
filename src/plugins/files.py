@@ -2,6 +2,8 @@
 Files Plugin - Open folders in file manager
 """
 
+import os
+
 NAME = "files"
 DESCRIPTION = "Folder navigation"
 
@@ -9,8 +11,6 @@ COMMANDS = [
     "open [folder] - open folder in file manager",
     "Folders: documents, downloads, pictures, music, videos, home, desktop",
 ]
-
-import os
 
 FOLDERS = {
     "documents": "~/Documents",

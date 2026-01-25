@@ -3,6 +3,11 @@ Head Tracking Plugin - Cursor control via SixDRepNet
 Uses 6D rotation representation for smooth head pose estimation
 """
 
+import math
+import subprocess
+import threading
+import time
+
 NAME = "headtrack"
 DESCRIPTION = "Head tracking for cursor control"
 PRIORITY = 0
@@ -18,12 +23,6 @@ COMMANDS = [
     "right click - right click",
     "recalibrate - reset center position",
 ]
-
-import subprocess
-import threading
-import os
-import time
-import math
 
 core = None
 tracking_active = False

@@ -212,7 +212,7 @@ class EasySpeak:
             print("No plugins loaded. Exiting.")
             return
 
-        print(f"""
+        print("""
 ╔══════════════════════════════════════════╗
 ║            EasySpeak                     ║
 ╠══════════════════════════════════════════╣

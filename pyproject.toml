@@ -63,6 +63,10 @@ show_missing = true
 [tool.coverage.run]
 source = ["src"]
 
+[tool.ruff.lint]
+# extend-select = ["ALL"]
+extend-ignore = ["D", "E722"]
+
 [tool.setuptools.package-dir]
 easyspeak = "src"
 

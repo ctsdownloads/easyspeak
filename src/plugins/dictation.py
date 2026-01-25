@@ -2,6 +2,9 @@
 Dictation Plugin - Voice to text via AT-SPI
 """
 
+import re
+import subprocess
+
 NAME = "dictation"
 DESCRIPTION = "Voice dictation into any text field"
 
@@ -12,10 +15,6 @@ COMMANDS = [
     "Structure: new sentence, new line, new paragraph, enter",
     "Symbols: apostrophe, quote, dash, hyphen, at sign, hashtag, percent, asterisk",
 ]
-
-import subprocess
-import os
-import re
 
 core = None
 

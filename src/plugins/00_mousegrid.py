@@ -7,6 +7,10 @@ Features:
 - Drag support: "mark" to start, "drag" to end
 """
 
+import atexit
+import re
+import subprocess
+
 NAME = "mousegrid"
 DESCRIPTION = "Voice-controlled mouse grid"
 PRIORITY = 1
@@ -22,11 +26,6 @@ COMMANDS = [
     "again - reopen grid at last position",
     "close/cancel - hide grid",
 ]
-
-import subprocess
-import os
-import atexit
-import re
 
 core = None
 grid_active = False

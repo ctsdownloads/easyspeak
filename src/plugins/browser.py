@@ -2,6 +2,9 @@
 Browser Plugin - Qutebrowser voice control via IPC
 """
 
+import re
+import time
+
 NAME = "browser"
 DESCRIPTION = "Qutebrowser voice control"
 
@@ -20,9 +23,6 @@ COMMANDS = [
     "go to [site] - open bookmarked site",
     "search [query] - search the web",
 ]
-
-import re
-import time
 
 core = None
 
