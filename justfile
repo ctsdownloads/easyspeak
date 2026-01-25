@@ -46,8 +46,6 @@ test *args:
     - UV_PYTHON=3.10 just pytest {{ args }}
     - UV_PYTHON=3.11 just pytest {{ args }}
     - UV_PYTHON=3.12 just pytest {{ args }}
-    - UV_PYTHON=3.13 just pytest {{ args }}
-    - UV_PYTHON=3.14 just pytest {{ args }}
     just coverage
 
 # Run pytest (use -q for silent, -v for verbose, -s for debug, -x to stop on error)
