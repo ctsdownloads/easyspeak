@@ -74,7 +74,7 @@ Tested on Fedora 43.
 
 ## Installation
 
-Fedora 43's default `python3` is 3.14. Unfortunately, we depend on a few Google packages that are not yet available for Python 3.13+.
+Fedora 43's default `python3` is 3.14. Unfortunately, we depend on a few Google packages that are not available for Python 3.13+ yet.
 
 ```bash
 sudo dnf install python3.12
