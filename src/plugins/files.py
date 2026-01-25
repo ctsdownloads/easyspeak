@@ -24,14 +24,16 @@ FOLDERS = {
 
 core = None
 
+
 def setup(c):
     global core
     core = c
 
+
 def open_folder(path, core):
     """Open folder in file manager"""
     expanded = os.path.expanduser(path)
-    
+
     file_managers = [
         ("nautilus", [expanded]),
         ("dolphin", [expanded]),
@@ -39,7 +41,7 @@ def open_folder(path, core):
         ("nemo", [expanded]),
         ("xdg-open", [expanded]),
     ]
-    
+
     for fm, args in file_managers:
         result = core.host_run(["which", fm])
         if result.returncode == 0:
@@ -47,13 +49,16 @@ def open_folder(path, core):
             return True
     return False
 
+
 def handle(cmd, core):
     for folder, path in FOLDERS.items():
-        if folder in cmd and ("open" in cmd or "go to" in cmd or "show" in cmd or "browse" in cmd):
+        if folder in cmd and (
+            "open" in cmd or "go to" in cmd or "show" in cmd or "browse" in cmd
+        ):
             if open_folder(path, core):
                 core.speak(f"Opening {folder}.")
             else:
                 core.speak("No file manager found.")
             return True
-    
+
     return None  # Not handled

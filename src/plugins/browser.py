@@ -28,18 +28,39 @@ core = None
 
 # Number words for hint selection
 HINT_NUMBERS = {
-    "zero": "0", "oh": "0",
-    "one": "1", "won": "1", "wan": "1",
-    "two": "2", "to": "2", "too": "2", "tu": "2",
-    "three": "3", "tree": "3", "free": "3",
-    "four": "4", "for": "4", "fore": "4",
+    "zero": "0",
+    "oh": "0",
+    "one": "1",
+    "won": "1",
+    "wan": "1",
+    "two": "2",
+    "to": "2",
+    "too": "2",
+    "tu": "2",
+    "three": "3",
+    "tree": "3",
+    "free": "3",
+    "four": "4",
+    "for": "4",
+    "fore": "4",
     "five": "5",
-    "six": "6", "sex": "6",
+    "six": "6",
+    "sex": "6",
     "seven": "7",
-    "eight": "8", "ate": "8",
-    "nine": "9", "nein": "9",
-    "0": "0", "1": "1", "2": "2", "3": "3", "4": "4",
-    "5": "5", "6": "6", "7": "7", "8": "8", "9": "9",
+    "eight": "8",
+    "ate": "8",
+    "nine": "9",
+    "nein": "9",
+    "0": "0",
+    "1": "1",
+    "2": "2",
+    "3": "3",
+    "4": "4",
+    "5": "5",
+    "6": "6",
+    "7": "7",
+    "8": "8",
+    "9": "9",
 }
 
 BOOKMARKS = {
@@ -74,18 +95,21 @@ def setup(c):
     global core
     core = c
 
+
 def qb(command):
     """Send command to qutebrowser via IPC"""
     print(f"  🌐 qutebrowser :{command}")
     core.host_run(["qutebrowser", f":{command}"])
 
+
 def qb_open(url):
     """Open URL in qutebrowser"""
     core.host_run(["qutebrowser", url])
 
+
 def parse_hint_numbers(cmd):
     """Extract hint numbers from spoken words"""
-    clean = re.sub(r'[.,!?\-]', ' ', cmd.lower())
+    clean = re.sub(r"[.,!?\-]", " ", cmd.lower())
     words = clean.split()
     digits = []
     for word in words:
@@ -93,14 +117,15 @@ def parse_hint_numbers(cmd):
             digits.append(HINT_NUMBERS[word])
     return "".join(digits)
 
+
 def looks_like_hint(cmd):
     """Check if command looks like a hint number (short, mostly digits/number words)"""
-    clean = re.sub(r'[.,!?\-\s]', '', cmd.lower())
+    clean = re.sub(r"[.,!?\-\s]", "", cmd.lower())
     # Must be short
     if len(clean) > 6:
         return False
     # Direct digits like "02", "92"
-    if clean.replace('o', '0').isdigit():
+    if clean.replace("o", "0").isdigit():
         return True
     # Check if all words are number words
     words = cmd.lower().split()
@@ -113,16 +138,30 @@ def parse_hint_number(cmd):
     """Parse spoken numbers into hint string. 'zero two' -> '02', 'ninety three' -> '93'"""
     # Number word mappings
     NUM_WORDS = {
-        "zero": "0", "oh": "0", "o": "0",
-        "one": "1", "won": "1", "wan": "1",
-        "two": "2", "to": "2", "too": "2", "tu": "2",
-        "three": "3", "tree": "3", "free": "3",
-        "four": "4", "for": "4", "fore": "4",
+        "zero": "0",
+        "oh": "0",
+        "o": "0",
+        "one": "1",
+        "won": "1",
+        "wan": "1",
+        "two": "2",
+        "to": "2",
+        "too": "2",
+        "tu": "2",
+        "three": "3",
+        "tree": "3",
+        "free": "3",
+        "four": "4",
+        "for": "4",
+        "fore": "4",
         "five": "5",
-        "six": "6", "sex": "6",
+        "six": "6",
+        "sex": "6",
         "seven": "7",
-        "eight": "8", "ate": "8",
-        "nine": "9", "nein": "9",
+        "eight": "8",
+        "ate": "8",
+        "nine": "9",
+        "nein": "9",
         # Tens
         "ten": "10",
         "eleven": "11",
@@ -134,13 +173,19 @@ def parse_hint_number(cmd):
         "seventeen": "17",
         "eighteen": "18",
         "nineteen": "19",
-        "twenty": "2", "thirty": "3", "forty": "4", "fifty": "5",
-        "sixty": "6", "seventy": "7", "eighty": "8", "ninety": "9",
+        "twenty": "2",
+        "thirty": "3",
+        "forty": "4",
+        "fifty": "5",
+        "sixty": "6",
+        "seventy": "7",
+        "eighty": "8",
+        "ninety": "9",
     }
-    
+
     result = []
-    words = re.sub(r'[.,!?\-]', ' ', cmd.lower()).split()
-    
+    words = re.sub(r"[.,!?\-]", " ", cmd.lower()).split()
+
     for word in words:
         # Direct digit
         if word.isdigit():
@@ -148,14 +193,14 @@ def parse_hint_number(cmd):
         # Word to digit
         elif word in NUM_WORDS:
             result.append(NUM_WORDS[word])
-    
+
     return "".join(result)
 
 
 def parse_spoken_url(spoken):
     """Convert spoken URL to actual URL. 'claude dot ai' -> 'https://claude.ai'"""
     url = spoken.lower().strip()
-    
+
     # Replace spoken elements
     url = url.replace(" dot ", ".")
     url = url.replace(" slash ", "/")
@@ -163,30 +208,30 @@ def parse_spoken_url(spoken):
     url = url.replace(" dash ", "-")
     url = url.replace(" hyphen ", "-")
     url = url.replace(" underscore ", "_")
-    
+
     # Remove remaining spaces
     url = url.replace(" ", "")
-    
+
     # Add https:// if no protocol
     if not url.startswith("http://") and not url.startswith("https://"):
         url = "https://" + url
-    
+
     return url
 
 
 def listen_for_hint(core):
     """Listen for hint number after showing hints"""
     print("  🔢 Say hint number (e.g. 'zero two'), 'exit links' to cancel")
-    
+
     # Small delay to let hints render
     time.sleep(0.3)
-    
+
     # Clear audio buffer
     try:
         core.stream.read(core.stream.get_read_available(), exception_on_overflow=False)
     except:
         pass
-    
+
     # Wait for speech
     first = core.wait_for_speech(timeout=10)
     if not first:
@@ -194,35 +239,47 @@ def listen_for_hint(core):
         qb("mode-leave")
         print("  [listen_for_hint returning - timeout]")
         return
-    
+
     audio = first + core.record_until_silence()
-    cmd = core.transcribe(audio, prompt="zero one two three four five six seven eight nine")
-    
+    cmd = core.transcribe(
+        audio, prompt="zero one two three four five six seven eight nine"
+    )
+
     if not cmd:
         print("  [listen_for_hint - no transcription, waiting again]")
         # Try one more time
         first = core.wait_for_speech(timeout=5)
         if first:
             audio = first + core.record_until_silence()
-            cmd = core.transcribe(audio, prompt="zero one two three four five six seven eight nine")
+            cmd = core.transcribe(
+                audio, prompt="zero one two three four five six seven eight nine"
+            )
         if not cmd:
             qb("mode-leave")
             print("  [listen_for_hint returning - no transcription]")
             return
-    
+
     cmd_lower = cmd.lower().strip(".,!? ")
     print(f"  ← {cmd_lower}")
-    
+
     # Cancel
-    if cmd_lower in ["exit links", "exit link", "cancel", "nevermind", "stop", "close", "exit"]:
+    if cmd_lower in [
+        "exit links",
+        "exit link",
+        "cancel",
+        "nevermind",
+        "stop",
+        "close",
+        "exit",
+    ]:
         qb("mode-leave")
         print("  ✗ Hints cancelled")
         print("  [listen_for_hint returning - cancelled]")
         return
-    
+
     # Parse hint number
     hint = parse_hint_number(cmd_lower)
-    
+
     if hint:
         print(f"  🔤 Hint: '{cmd_lower}' → '{hint}'")
         qb(f"hint-follow {hint}")
@@ -243,19 +300,19 @@ def listen_for_hint(core):
             print(f"  ↪ Not a hint, trying as command: '{cmd_lower}'")
             qb("mode-leave")
             handle_browser_command(cmd_lower, core)
-    
+
     print("  [listen_for_hint returning - complete]")
 
 
 def handle(cmd, core):
     cmd_lower = cmd.lower().strip(".,!? ")
-    
+
     # --- Enter browser mode (explicit) ---
     if cmd_lower in ["browser", "browser mode", "open browser", "launch browser"]:
         core.host_run(["qutebrowser"], background=True)
         browser_mode(core)
         return True
-    
+
     # --- Single browser commands → enters browser mode ---
     try:
         result = handle_browser_command(cmd_lower, core)
@@ -266,7 +323,7 @@ def handle(cmd, core):
     except Exception as e:
         print(f"  ! Browser error: {e}")
         return True
-    
+
     return None
 
 
@@ -275,38 +332,46 @@ def browser_mode(core):
     core.speak("Browser")
     print("=== BROWSER MODE ACTIVE ===")
     print("Say commands directly. 'exit browser' to leave.")
-    
+
     while True:
         try:
-            core.stream.read(core.stream.get_read_available(), exception_on_overflow=False)
+            core.stream.read(
+                core.stream.get_read_available(), exception_on_overflow=False
+            )
         except:
             pass
-        
+
         first = core.wait_for_speech(timeout=30)
         if not first:
             continue
-        
+
         audio = first + core.record_until_silence()
         cmd = core.transcribe(audio)
-        
+
         if not cmd:
             continue
-        
+
         cmd_lower = cmd.lower().strip(".,!? ")
         print(f"  [browser] {cmd_lower}")
-        
+
         # Exit browser mode - require explicit phrase
-        if cmd_lower in ["exit browser", "leave browser", "stop browser", "quit browser", "close browser"]:
+        if cmd_lower in [
+            "exit browser",
+            "leave browser",
+            "stop browser",
+            "quit browser",
+            "close browser",
+        ]:
             print("=== BROWSER MODE EXIT ===")
             return
-        
+
         # Grid triggers - escape to grid mode
         grid_triggers = {"grid", "grit", "grip", "mouse", "pointer", "cursor"}
         if any(w in cmd_lower for w in grid_triggers):
             print("=== BROWSER MODE EXIT → GRID ===")
             core.route_command(cmd_lower)
             return
-        
+
         # Handle browser command
         if not handle_browser_command(cmd_lower, core):
             print(f"  ? Unknown: {cmd_lower}")
@@ -314,60 +379,84 @@ def browser_mode(core):
 
 def handle_browser_command(cmd_lower, core):
     # --- Hints ---
-    if cmd_lower in ["numbers", "number", "hints", "hint", "show numbers", "show hints",
-                     "links", "link", "blanks", "blinks", "lynx", "lings", "lanes", "licks", "clicks"]:
+    if cmd_lower in [
+        "numbers",
+        "number",
+        "hints",
+        "hint",
+        "show numbers",
+        "show hints",
+        "links",
+        "link",
+        "blanks",
+        "blinks",
+        "lynx",
+        "lings",
+        "lanes",
+        "licks",
+        "clicks",
+    ]:
         qb("hint")
         listen_for_hint(core)
         return True
-    
-    if cmd_lower in ["numbers new", "number new", "hints new", "new numbers",
-                     "links new", "link new", "blanks new", "blinks new", "lynx new"]:
+
+    if cmd_lower in [
+        "numbers new",
+        "number new",
+        "hints new",
+        "new numbers",
+        "links new",
+        "link new",
+        "blanks new",
+        "blinks new",
+        "lynx new",
+    ]:
         qb("hint links tab")
         listen_for_hint(core)
         return True
-    
+
     # --- Navigation ---
     if cmd_lower in ["back", "go back", "previous page"]:
         qb("back")
         return True
-    
+
     if cmd_lower in ["forward", "go forward", "next page"]:
         qb("forward")
         return True
-    
+
     if cmd_lower in ["reload", "refresh", "reload page"]:
         qb("reload")
         return True
-    
+
     if cmd_lower in ["stop", "stop loading"]:
         qb("stop")
         return True
-    
+
     # --- Scrolling ---
     if cmd_lower in ["scroll down", "down"]:
         qb(f"jseval -q {SCROLL_DOWN_JS}")
         return True
-    
+
     if cmd_lower in ["scroll up", "up"]:
         qb(f"jseval -q {SCROLL_UP_JS}")
         return True
-    
+
     if "page" in cmd_lower and "down" in cmd_lower:
         qb(f"jseval -q {PAGE_DOWN_JS}")
         return True
-    
+
     if "page" in cmd_lower and "up" in cmd_lower:
         qb(f"jseval -q {PAGE_UP_JS}")
         return True
-    
+
     if cmd_lower in ["top", "go to top", "scroll to top"]:
         qb(f"jseval -q {SCROLL_TOP_JS}")
         return True
-    
+
     if cmd_lower in ["bottom", "go to bottom", "scroll to bottom"]:
         qb(f"jseval -q {SCROLL_BOTTOM_JS}")
         return True
-    
+
     # --- Tabs ---
     # Switch to specific tab by number
     if cmd_lower.startswith("tab "):
@@ -376,82 +465,84 @@ def handle_browser_command(cmd_lower, core):
         if tab_num and tab_num.isdigit():
             qb(f"tab-focus {tab_num}")
             return True
-    
+
     if cmd_lower in ["new tab", "open tab"]:
         qb("open -t about:blank")
         return True
-    
+
     if cmd_lower in ["close tab", "close this tab"]:
         qb("tab-close")
         return True
-    
+
     if cmd_lower in ["next tab", "tab right"]:
         qb("tab-next")
         return True
-    
+
     if cmd_lower in ["last tab", "previous tab", "tab left"]:
         qb("tab-prev")
         return True
-    
+
     if cmd_lower in ["undo tab", "restore tab", "reopen tab"]:
         qb("undo")
         return True
-    
+
     # --- Find ---
     if cmd_lower.startswith("find "):
         query = cmd_lower.replace("find ", "", 1).strip()
         if query:
             qb(f"search {query}")
             return True
-    
+
     if cmd_lower in ["find next", "next match"]:
         qb("search-next")
         return True
-    
+
     if cmd_lower in ["find previous", "previous match"]:
         qb("search-prev")
         return True
-    
+
     # --- Escape ---
     if cmd_lower in ["escape", "cancel", "nevermind"]:
         qb("mode-leave")
         return True
-    
+
     # --- Bookmarks ---
     # Save current page as quickmark
-    if ("bookmark this" in cmd_lower or "save this" in cmd_lower) and " as " in cmd_lower:
+    if (
+        "bookmark this" in cmd_lower or "save this" in cmd_lower
+    ) and " as " in cmd_lower:
         name = cmd_lower.split(" as ")[-1].strip()
         if name:
             qb(f"quickmark-save {name}")
             core.speak(f"Saved as {name}.")
             return True
-    
+
     # Load quickmark (user-saved)
     if cmd_lower.startswith("go to ") or cmd_lower.startswith("open "):
         target = cmd_lower.replace("go to ", "").replace("open ", "").strip()
-        
+
         # Check predefined bookmarks first
         for site, url in BOOKMARKS.items():
             if site == target:
                 qb_open(url)
                 core.speak(f"Opening {site}.")
                 return True
-        
+
         # Try as spoken URL (contains "dot")
         if "dot" in target or "." in target:
             url = parse_spoken_url(target)
             qb_open(url)
             core.speak(f"Opening {url}.")
             return True
-        
+
         # Don't catch generic "open X" - let other plugins handle it
         # Only use quickmark for explicit "go to X"
         if cmd_lower.startswith("go to "):
             qb(f"quickmark-load {target}")
             return True
-        
+
         return None  # Let another plugin handle "open X"
-    
+
     # --- Search ---
     if cmd_lower.startswith("search ") or cmd_lower.startswith("search for "):
         query = cmd_lower.replace("search for ", "").replace("search ", "").strip()
@@ -460,23 +551,23 @@ def handle_browser_command(cmd_lower, core):
             qb_open(url)
             core.speak(f"Searching for {query}.")
             return True
-    
+
     # --- Phonetic hint selection (LAST - only if nothing else matched) ---
     # Only try hint parsing if it actually looks like a hint
     if looks_like_hint(cmd_lower):
         # Direct digit input (e.g., "02", "92", "0-2")
-        stripped = re.sub(r'[^0-9a-z]', '', cmd_lower)
-        if stripped.replace('o', '0').isdigit():
-            hint = stripped.replace('o', '0')
+        stripped = re.sub(r"[^0-9a-z]", "", cmd_lower)
+        if stripped.replace("o", "0").isdigit():
+            hint = stripped.replace("o", "0")
             print(f"  🔤 Direct digits: '{cmd_lower}' → '{hint}'")
             qb(f"hint-follow {hint}")
             return True
-        
+
         # Try phonetic parsing
         hint = parse_hint_numbers(cmd_lower)
         if hint and hint.isdigit():
             print(f"  🔤 Phonetic parsed: '{cmd_lower}' → '{hint}'")
             qb(f"hint-follow {hint}")
             return True
-    
+
     return None
