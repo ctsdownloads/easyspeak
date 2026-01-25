@@ -8,6 +8,7 @@ Say "Hey Jarvis" and control your desktop with your voice.
 ![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)
 ![Desktop](https://img.shields.io/badge/desktop-GNOME%20%7C%20Wayland-green.svg)
 ![Status](https://img.shields.io/badge/status-Alpha-orange.svg)
+[![Pipeline](https://github.com/ctsdownloads/easyspeak/actions/workflows/pipeline.yml/badge.svg)](https://github.com/ctsdownloads/easyspeak/actions)
 
 > ⚠️ **Early development.** This project works but is not polished. Expect bugs, incomplete docs, and changes without notice.
 
