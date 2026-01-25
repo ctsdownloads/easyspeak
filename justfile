@@ -7,12 +7,19 @@
 
 # Run codestyle and safety checks, tests, packaging and cleanup
 [group('lifecycle')]
-all: format lint types requirements test package clean
+all: codestyle safety test package clean
 
 # Remove build artifacts and reports (use -v for verbose, -n for dry-run)
 [group('lifecycle')]
 clean *args:
     uvx pyclean . {{ args }} --debris all --erase tests/junit-report.xml --yes
+
+# Run all code style checks (format, lint, types)
+[group('codestyle')]
+codestyle:
+    -just format
+    -just lint
+    -just types
 
 # Consistent code style (use -- to apply, --diff to preview)
 [group('codestyle')]
@@ -29,10 +36,16 @@ lint *args=('--statistics'):
 types *args=('--output-format=concise'):
     uv run ty check {{ args }}
 
+# Run all safety checks (audit, requirements)
+[group('safety')]
+safety:
+    -just requirements
+    -just audit
+
 # Check project dependencies for known vulnerabilities
 [group('safety')]
-audit:
-    uv run --with pip-audit pip-audit --skip-editable
+audit *args:
+    uv run --with pip-audit pip-audit --progress-spinner off --skip-editable {{ args }}
 
 # Check project dependencies are up-to-date (uv.lock)
 [group('safety')]
@@ -43,11 +56,9 @@ requirements:
 # Run test suite against all supported Python versions, show coverage
 [group('tests')]
 test *args:
-    - UV_PYTHON=3.10 just pytest {{ args }}
-    - UV_PYTHON=3.11 just pytest {{ args }}
-    - UV_PYTHON=3.12 just pytest {{ args }}
-    - UV_PYTHON=3.13 just pytest {{ args }}
-    - UV_PYTHON=3.14 just pytest {{ args }}
+    -UV_PYTHON=3.10 just pytest {{ args }}
+    -UV_PYTHON=3.11 just pytest {{ args }}
+    -UV_PYTHON=3.12 just pytest {{ args }}
     just coverage
 
 # Run pytest (use -q for silent, -v for verbose, -s for debug, -x to stop on error)

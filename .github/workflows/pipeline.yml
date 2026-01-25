@@ -1,0 +1,51 @@
+name: Pipeline
+
+on:
+  pull_request:
+    branches:
+    - main
+    - dev
+  push:
+    branches:
+    - main
+    - dev
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        task:
+        - format
+        - lint
+        - types
+        - audit
+        - requirements
+        - package
+        - functional
+    steps:
+    - uses: actions/checkout@v6
+    - uses: astral-sh/setup-uv@v7
+      with:
+        python-version: '3.12'
+    - uses: extractions/setup-just@v3
+    - run: just ${{ matrix.task }}
+
+  test:
+    needs:
+    - check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+        - '3.10'
+        - '3.11'
+        - '3.12'
+    steps:
+    - uses: actions/checkout@v6
+    - uses: astral-sh/setup-uv@v7
+      with:
+        python-version: ${{ matrix.python-version }}
+    - uses: extractions/setup-just@v3
+    - run: just pytest
+    - run: just coverage

@@ -8,6 +8,7 @@ Say "Hey Jarvis" and control your desktop with your voice.
 ![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)
 ![Desktop](https://img.shields.io/badge/desktop-GNOME%20%7C%20Wayland-green.svg)
 ![Status](https://img.shields.io/badge/status-Alpha-orange.svg)
+[![Pipeline](https://github.com/ctsdownloads/easyspeak/actions/workflows/pipeline.yml/badge.svg)](https://github.com/ctsdownloads/easyspeak/actions)
 
 > ⚠️ **Early development.** This project works but is not polished. Expect bugs, incomplete docs, and changes without notice.
 
@@ -65,7 +66,7 @@ Click the thumbnail to watch the demo video:
 ## Requirements
 
 - Linux with GNOME Shell 47+ on Wayland
-- Python 3.12 or 3.13 (not 3.14 - see installation notes)
+- Python 3.12 (not 3.13 and 3.14 - see installation notes)
 - Working microphone
 - ~2GB disk space for models
 
@@ -73,10 +74,11 @@ Tested on Fedora 43.
 
 ## Installation
 
-Fedora 43's default `python3` is 3.14, which breaks dependencies. Install Python 3.13:
+Fedora 43's default `python3` is 3.14. Unfortunately, we depend on a few Google packages that are not available for Python 3.13+ yet.
+
 ```bash
-sudo dnf install python3.13
-python3.13 --version  # Verify it's installed
+sudo dnf install python3.12
+python3.12 --version  # Verify it's installed
 ```
 
 ### 1. System Packages
@@ -93,17 +95,27 @@ sudo dnf install \
   pulseaudio-utils \
   sound-theme-freedesktop \
   portaudio-devel \
-  python3.13-devel \
+  python3.12-devel \
   gcc
 ```
 
 ### 2. Python Packages
 
 ```bash
-python3.13 -m venv ~/easyspeak-venv
+python3.12 -m venv ~/easyspeak-venv
 source ~/easyspeak-venv/bin/activate
 pip install faster-whisper openwakeword numpy pyaudio
+cd ~/easyspeak
+pip install -e .
 ```
+
+If you use `uv` you can ignore the steps that create a virtual environment and simply run:
+
+```bash
+uv run easyspeak
+```
+
+uv will transparently create and update a virtual environment, and run easyspeak from in there.
 
 ### 3. Piper TTS
 
@@ -167,9 +179,8 @@ EOF
 ## Usage
 
 ```bash
-source ~/easyspeak-venv/bin/activate  # Now python = venv's python3.13
-cd ~/easyspeak                         # Go to your code
-python core.py                         # Runs with venv packages
+source ~/easyspeak-venv/bin/activate   # Now python = venv's python3.12
+easyspeak                              # the project execution script
 ```
 
 Activate the venv each time you open a new terminal.
@@ -338,20 +349,29 @@ These are just examples. Edit `apps.py` to add your own apps.
 
 ```
 easyspeak/
-├── core.py                 # Main application
-├── extension.js            # GNOME Shell extension
-├── metadata.json           # Extension metadata
-└── plugins/
-    ├── __init__.py
-    ├── 00_eyetrack.py      # Head tracking (experimental)
-    ├── 00_mousegrid.py     # Grid overlay mouse control
-    ├── apps.py             # Application launcher
-    ├── browser.py          # Qutebrowser control
-    ├── dictation.py        # Voice-to-text
-    ├── files.py            # Folder navigation
-    ├── media.py            # Playback controls
-    ├── system.py           # Volume, brightness, DND
-    └── zz_base.py          # Help and exit
+├── extension.js               # GNOME Shell extension
+├── metadata.json              # Extension metadata
+├── pyproject.toml
+├── [1;38;2;36;114;200msrc[0m
+│   ├── [1;38;2;36;114;200mcore[0m
+│   │   ├── __init__.py
+│   │   └── main.py             # Main application
+│   └── [1;38;2;36;114;200mplugins[0m
+│       ├── __init__.py
+│       ├── 00_eyetrack.py      # Head tracking (experimental)
+│       ├── 00_mousegrid.py     # Grid overlay mouse control
+│       ├── apps.py             # Application launcher
+│       ├── browser.py          # Qutebrowser control
+│       ├── dictation.py        # Voice-to-text
+│       ├── files.py            # Folder navigation
+│       ├── media.py            # Playback controls
+│       ├── system.py           # Volume, brightness, DND
+│       └── zz_base.py          # Help and exit
+└── [1;38;2;36;114;200mtests[0m
+    ├── [1;38;2;36;114;200mcore[0m
+    │   └── test_main.py
+    └── [1;38;2;36;114;200mplugins[0m
+        └── test_apps.py
 ```
 
 After installation, the extension is copied to:
@@ -445,12 +465,14 @@ chmod +x ~/.local/bin/piper/espeak-ng
 
 **pip install fails with PyAV/Cython errors**
 
-You're on Python 3.14. Use `python3.13` with a venv instead:
+You're on Python 3.14 or 3.13. Use `python3.12` with a venv instead:
 ```bash
-sudo dnf install python3.13 python3.13-devel
-python3.13 -m venv ~/easyspeak-venv
+sudo dnf install python3.12 python3.12-devel
+python3.12 -m venv ~/easyspeak-venv
 source ~/easyspeak-venv/bin/activate
 pip install faster-whisper openwakeword numpy pyaudio
+cd ~/easyspeak
+pip install -e .
 ```
 
 ## Contributing
