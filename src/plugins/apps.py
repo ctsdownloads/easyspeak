@@ -29,9 +29,11 @@ LOCAL_APPS = {
 
 core = None
 
+
 def setup(c):
     global core
     core = c
+
 
 def find_app(name, core):
     """Find app - returns (type, id)"""
@@ -39,15 +41,16 @@ def find_app(name, core):
         result = core.host_run(["flatpak", "info", FLATPAK_APPS[name]])
         if result.returncode == 0:
             return ("flatpak", FLATPAK_APPS[name])
-    
+
     if name in LOCAL_APPS:
         return ("local", LOCAL_APPS[name])
-    
+
     result = core.host_run(["which", name])
     if result.returncode == 0:
         return ("local", name)
-    
+
     return (None, None)
+
 
 def launch_app(name, core):
     app_type, app_id = find_app(name, core)
@@ -59,6 +62,7 @@ def launch_app(name, core):
         return True
     return False
 
+
 def close_app(name, core):
     app_type, app_id = find_app(name, core)
     if app_type == "flatpak":
@@ -69,9 +73,10 @@ def close_app(name, core):
         return True
     return False
 
+
 def handle(cmd, core):
     all_apps = list(FLATPAK_APPS.keys()) + list(LOCAL_APPS.keys())
-    
+
     for app in all_apps:
         if ("open" in cmd or "launch" in cmd) and app in cmd:
             if launch_app(app, core):
@@ -79,10 +84,10 @@ def handle(cmd, core):
             else:
                 core.speak(f"{app} not installed.")
             return True
-        
+
         if "close" in cmd and app in cmd:
             close_app(app, core)
             core.speak(f"Closing {app}.")
             return True
-    
+
     return None  # Not handled

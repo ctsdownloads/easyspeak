@@ -9,3 +9,5 @@ def test_main():
 
     with pytest.raises(ModuleNotFoundError, match=expected_error):
         from easyspeak.core import main
+
+    assert "EasySpeak" in dir(main)
