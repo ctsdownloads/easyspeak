@@ -31,10 +31,10 @@ format *args=('--check'):
 lint *args=('--statistics'):
     uvx ruff check {{ args }}
 
-# Static type checking (use -- for details, --quiet to silence)
+# Static type checking (use --pretty for error details)
 [group('codestyle')]
-types *args=('--output-format=concise'):
-    uv run --with=ty ty check {{ args }}
+types *args:
+    uv run --group=mypy mypy src {{ args }}
 
 # Run all safety checks (audit, requirements)
 [group('safety')]
