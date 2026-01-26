@@ -34,7 +34,7 @@ lint *args=('--statistics'):
 # Static type checking (use -- for details, --quiet to silence)
 [group('codestyle')]
 types *args=('--output-format=concise'):
-    uv run ty check {{ args }}
+    uv run --with=ty ty check {{ args }}
 
 # Run all safety checks (audit, requirements)
 [group('safety')]
@@ -45,7 +45,7 @@ safety:
 # Check project dependencies for known vulnerabilities
 [group('safety')]
 audit *args:
-    uv run --with pip-audit pip-audit --progress-spinner off --skip-editable {{ args }}
+    uv run --with=pip-audit pip-audit --progress-spinner=off --skip-editable {{ args }}
 
 # Check project dependencies are up-to-date (uv.lock)
 [group('safety')]
@@ -64,13 +64,13 @@ test *args:
 # Run pytest (use -q for silent, -v for verbose, -s for debug, -x to stop on error)
 [group('tests')]
 pytest *args:
-    uv run coverage run -m pytest {{ args }}
+    uv run --with=coverage[toml] --with=pytest coverage run -m pytest {{ args }}
 
 # Display test coverage report
 [group('tests')]
 coverage:
-    uv run coverage xml
-    uv run coverage report
+    uvx coverage[toml] xml
+    uvx coverage[toml] report
 
 # Run functional tests on a built package
 [group('tests')]
