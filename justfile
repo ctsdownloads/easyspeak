@@ -14,12 +14,11 @@ all: codestyle safety test package clean
 clean *args:
     uvx pyclean . {{ args }} --debris all --erase tests/junit-report.xml --yes
 
-# Run all code style checks (format, lint, types)
+# Run all code style checks (format, lint)
 [group('codestyle')]
 codestyle:
     -just format
     -just lint
-    -just types
 
 # Consistent code style (use -- to apply, --diff to preview)
 [group('codestyle')]
@@ -32,13 +31,14 @@ lint *args=('--statistics'):
     uvx ruff check {{ args }}
 
 # Static type checking (use --pretty for error details)
-[group('codestyle')]
+[group('safety')]
 types *args:
     uv run --group=mypy mypy src {{ args }}
 
-# Run all safety checks (audit, requirements)
+# Run all safety checks (types, requirements, audit)
 [group('safety')]
 safety:
+    -just types
     -just requirements
     -just audit
 
