@@ -351,7 +351,7 @@ dependencies = [
     { name = "openwakeword" },
 ]
 
-[package.dev-dependencies]
+[package.optional-dependencies]
 head-tracking = [
     { name = "opencv-python" },
     { name = "sixdrepnet" },
@@ -364,19 +364,14 @@ mypy = [
 [package.metadata]
 requires-dist = [
     { name = "faster-whisper", specifier = ">=1.2.1" },
+    { name = "mypy", marker = "extra == 'mypy'", specifier = ">=1.19.1" },
     { name = "numpy", specifier = ">=2.2.6" },
+    { name = "opencv-python", marker = "extra == 'head-tracking'", specifier = ">=4.13.0.90" },
     { name = "openwakeword", git = "https://github.com/dscripka/openWakeWord" },
+    { name = "sixdrepnet", marker = "extra == 'head-tracking'", specifier = ">=0.1.6" },
+    { name = "types-pyaudio", marker = "extra == 'mypy'", specifier = ">=0.2.16.20250801" },
 ]
-
-[package.metadata.requires-dev]
-head-tracking = [
-    { name = "opencv-python", specifier = ">=4.13.0.90" },
-    { name = "sixdrepnet", specifier = ">=0.1.6" },
-]
-mypy = [
-    { name = "mypy", specifier = ">=1.19.1" },
-    { name = "types-pyaudio", specifier = ">=0.2.16.20250801" },
-]
+provides-extras = ["head-tracking", "mypy"]
 
 [[package]]
 name = "exceptiongroup"

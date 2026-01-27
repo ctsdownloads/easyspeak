@@ -230,7 +230,7 @@ Chain numbers to go faster: **"3 6 3"** zooms three times at once.
 
 ### Head Tracking (Experimental)
 
-Requires webcam and additional dependencies (`pip install sixdrepnet opencv-python`).
+Requires webcam and additional dependencies (`pip install sixdrepnet opencv-python` or `pip install .[head-tracking]`, or run via `uv run --extra head-tracking easyspeak`).
 
 | Command | Action |
 |---------|--------|

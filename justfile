@@ -33,7 +33,7 @@ lint *args=('--statistics'):
 # Static type checking (use --pretty for error details)
 [group('safety')]
 types *args:
-    uv run --group=mypy mypy src {{ args }}
+    uv run --extra=mypy mypy src {{ args }}
 
 # Run all safety checks (types, requirements, audit)
 [group('safety')]
