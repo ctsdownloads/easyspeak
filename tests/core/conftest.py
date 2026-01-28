@@ -1,7 +1,8 @@
 """Pytest fixtures for core module tests."""
 
-import pytest
 from unittest.mock import Mock
+
+import pytest
 
 
 def create_mock_plugin(name="TestPlugin", **kwargs) -> Mock:

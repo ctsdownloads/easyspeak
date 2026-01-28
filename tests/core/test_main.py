@@ -1,9 +1,10 @@
 """Tests for the core main module."""
 
-import sys
 import subprocess
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
+
 import numpy as np
 
 # Mock all external dependencies before importing the module

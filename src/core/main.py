@@ -6,16 +6,17 @@ Loads plugins from plugins/ folder automatically.
 Uses OpenWakeWord for fast wake detection.
 """
 
-import subprocess
-import tempfile
-import os
-import sys
 import importlib
+import os
+import subprocess
+import sys
+import tempfile
 import time
-import numpy as np
-import pyaudio
 import wave
 from pathlib import Path
+
+import numpy as np
+import pyaudio
 from faster_whisper import WhisperModel
 from openwakeword.model import Model as WakeWordModel
 
@@ -157,8 +158,8 @@ class EasySpeak:
                 self.stream.get_read_available(),
                 exception_on_overflow=False,
             )
-        except:  # noqa: E722 - Intentionally catch all to prevent cleanup failures
-            pass
+        except:
+            pass  # intentionally catch all to prevent cleanup failures
 
     def is_silence(self, audio_chunk):
         return np.abs(audio_chunk).mean() < SILENCE_THRESHOLD
