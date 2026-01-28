@@ -13,7 +13,7 @@ resolution-markers = [
 
 [[package]]
 name = "ai-edge-litert"
-version = "2.1.1"
+version = "2.1.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "backports-strenum" },
@@ -25,15 +25,15 @@ dependencies = [
     { name = "typing-extensions" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/74/63/2361383f7554b2c623633af372db016766f55845610f34029cfaa870e855/ai_edge_litert-2.1.1-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:3ff9277963a0c13573bed3c16243420bc03c011bd3b4259e3f8b6a4395f8f0c6", size = 5694639, upload-time = "2026-01-27T09:44:37.326Z" },
-    { url = "https://files.pythonhosted.org/packages/40/65/3ac6c34ec7188e773c12bb13cac47dc09a4d10e3c6ef7ded2cb52ab03a91/ai_edge_litert-2.1.1-cp310-cp310-manylinux_2_27_aarch64.whl", hash = "sha256:4802c74607aed7c4179691f598442c8d15e911d7c36bcf1991c994a1b436dc06", size = 7787484, upload-time = "2026-01-27T09:26:37.523Z" },
-    { url = "https://files.pythonhosted.org/packages/cb/d6/5b08abdcad560546ad43902570267142898ce7f7758d5d628d1b645c656d/ai_edge_litert-2.1.1-cp310-cp310-manylinux_2_27_x86_64.whl", hash = "sha256:805b1727062f6fce17e40dcc0764de3db82380aa9dda64a567c36b721fc8baf6", size = 9570099, upload-time = "2026-01-27T09:20:21.853Z" },
-    { url = "https://files.pythonhosted.org/packages/1e/44/055e0fbffcfc7a4c58940cfa5625632f6a52b964173aad42417097f3179b/ai_edge_litert-2.1.1-cp311-cp311-macosx_12_0_arm64.whl", hash = "sha256:8c32214ee34202d8d46066f73c69ad0a258583852fb7d7ac55105683e3127028", size = 5695989, upload-time = "2026-01-27T09:44:39.077Z" },
-    { url = "https://files.pythonhosted.org/packages/37/5a/8f74e1311467204401e01b9acc265f4465929c17c23cf0c8ff1e3042fbe1/ai_edge_litert-2.1.1-cp311-cp311-manylinux_2_27_aarch64.whl", hash = "sha256:00508a1d289b5662f78a6f2779b2ed1e11b9fd83df39d384468ba6f9a16ce621", size = 7789836, upload-time = "2026-01-27T09:26:38.975Z" },
-    { url = "https://files.pythonhosted.org/packages/d0/34/57e8207c65210ea6b424c37d07885542188cf1efae00296d0c29024b6b07/ai_edge_litert-2.1.1-cp311-cp311-manylinux_2_27_x86_64.whl", hash = "sha256:bfeb8e026691afec82e2c17f7352607246d0b735aa7a0bc30640b0d4c4924c3d", size = 9572637, upload-time = "2026-01-27T09:20:23.604Z" },
-    { url = "https://files.pythonhosted.org/packages/ba/3b/bbeb4d89f4fada090e6101e604b7878a29c1bb7682f1be368fdf68467c24/ai_edge_litert-2.1.1-cp312-cp312-macosx_12_0_arm64.whl", hash = "sha256:1a4bfaf9dd66b6c147dde47bb983e325e8a4372375f5f3ce2453a23910ffe0e5", size = 5697059, upload-time = "2026-01-27T09:44:40.408Z" },
-    { url = "https://files.pythonhosted.org/packages/ed/25/779e5747344b34422edbd5fee0448679719729da39e8829bf617fb3e8845/ai_edge_litert-2.1.1-cp312-cp312-manylinux_2_27_aarch64.whl", hash = "sha256:f1254abbfe0faf3f3728ff684127cc6ef26064fe437226c9374fc5df784af8c2", size = 7790959, upload-time = "2026-01-27T09:26:40.818Z" },
-    { url = "https://files.pythonhosted.org/packages/ca/21/d9a24bd9a161f74e4a09be048978f5f021fc5733c22a0174ff603035bdb3/ai_edge_litert-2.1.1-cp312-cp312-manylinux_2_27_x86_64.whl", hash = "sha256:1e57407f317baffbe92b9eee9ad8f2201616cdb251e19d79a39497eace2ca7e5", size = 9575157, upload-time = "2026-01-27T09:20:25.213Z" },
+    { url = "https://files.pythonhosted.org/packages/6c/a5/0fbc63f8e076008481bc21af0d5085501555757194c7c1daaf2542cd7a82/ai_edge_litert-2.1.2-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:0a7dd5d3b7874ba66a382b261bffe2a3d9ef772b841f47aabed0982d6025e0e5", size = 13013547, upload-time = "2026-01-28T07:22:43.833Z" },
+    { url = "https://files.pythonhosted.org/packages/3e/50/c55cc44c71fce9ef9a567928cdb80f03719b4c5b8309cceb8fad8f549e52/ai_edge_litert-2.1.2-cp310-cp310-manylinux_2_27_aarch64.whl", hash = "sha256:164435bc7ab3426b0c23f4732bd4e2eb8f49d3dde1324901dca5d749cc65a9c9", size = 12631608, upload-time = "2026-01-28T07:05:36.745Z" },
+    { url = "https://files.pythonhosted.org/packages/c6/35/52fae12e74e9ee8c8e4e6a99cf478f3379e10a0a272e717b7915e2fa8922/ai_edge_litert-2.1.2-cp310-cp310-manylinux_2_27_x86_64.whl", hash = "sha256:e54c8a9006ccbe435a1b4cd91953ffc9bea41e42d7be886ca80a3f3192cdd30c", size = 16323818, upload-time = "2026-01-28T07:00:04.785Z" },
+    { url = "https://files.pythonhosted.org/packages/dd/f9/ba44382f353a2b845e9b6242750a7d56b0054ab6c6bcf53d20823bae58e4/ai_edge_litert-2.1.2-cp311-cp311-macosx_12_0_arm64.whl", hash = "sha256:07c3f442212de1859dddbcd51ff90f2fcb3048d940a1bddbd6f13b04e5a79083", size = 13014557, upload-time = "2026-01-28T07:22:46.904Z" },
+    { url = "https://files.pythonhosted.org/packages/ee/5a/57d9b8967fa5a2f3055ad3e7666446c8d2271446319e7f17c897b151544c/ai_edge_litert-2.1.2-cp311-cp311-manylinux_2_27_aarch64.whl", hash = "sha256:7dc4afc4b67797e77d879e35ad558e60f746be7c1e616a6653bd2cbf1ffef9ad", size = 12633093, upload-time = "2026-01-28T07:05:38.638Z" },
+    { url = "https://files.pythonhosted.org/packages/6a/a8/c8024c9657a76e3589cf2b8b21cbccdef0b9a64b74d98eebcabbbdfaeb7a/ai_edge_litert-2.1.2-cp311-cp311-manylinux_2_27_x86_64.whl", hash = "sha256:b3ff3b12df45dfc540934e33bde9af474b0b4c12c3bb6112b251aaae4d2930a0", size = 16326113, upload-time = "2026-01-28T07:00:07.441Z" },
+    { url = "https://files.pythonhosted.org/packages/6d/59/5f65a091340c6abf26c66a11fc0c8ecbd264e93ad7293aaf1f1b6892cc00/ai_edge_litert-2.1.2-cp312-cp312-macosx_12_0_arm64.whl", hash = "sha256:20c96357a7c61600e7ec94a8c131fee4c0a994132e5e6e436c7c7e93d3f31b22", size = 13016970, upload-time = "2026-01-28T07:22:48.654Z" },
+    { url = "https://files.pythonhosted.org/packages/7e/36/8ff07084091272db4df8de3859149be3913a6eaf2939575bb4200379b808/ai_edge_litert-2.1.2-cp312-cp312-manylinux_2_27_aarch64.whl", hash = "sha256:1b412368980b404aa051d09405abd473d3a15130db030938d26966f1a1e7c413", size = 12633952, upload-time = "2026-01-28T07:05:40.805Z" },
+    { url = "https://files.pythonhosted.org/packages/0f/05/072e76dfa2bfd6aa4c5751f1b6d5ad11f74bba70177ad4c973b49678d4c2/ai_edge_litert-2.1.2-cp312-cp312-manylinux_2_27_x86_64.whl", hash = "sha256:67db6de7c729bbe5a31c20adc573ce47b8aa6ea4b6bcfee0ab77ff1a51e20f2e", size = 16330794, upload-time = "2026-01-28T07:00:09.906Z" },
 ]
 
 [[package]]

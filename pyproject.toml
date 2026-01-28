@@ -75,7 +75,7 @@ warn_unreachable = true
 warn_unused_ignores = true
 
 [tool.ruff.lint]
-# extend-select = ["ALL"]
+extend-select = ["I"]  # "ALL" one day
 extend-ignore = ["D", "E722"]
 
 [tool.setuptools.package-dir]
