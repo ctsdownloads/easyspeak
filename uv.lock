@@ -13,7 +13,7 @@ resolution-markers = [
 
 [[package]]
 name = "ai-edge-litert"
-version = "2.1.0"
+version = "2.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "backports-strenum" },
@@ -25,12 +25,15 @@ dependencies = [
     { name = "typing-extensions" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a5/7a/6ea77fe405d76dcd1a95fceccd1018293603f551bf3645a382ef1fd470eb/ai_edge_litert-2.1.0-cp310-cp310-manylinux_2_27_aarch64.whl", hash = "sha256:780673591385c4646aa82b38daa2eed88bc26346e1aafbe9d0db7f0493d6ab54", size = 7779140, upload-time = "2025-12-17T19:20:49.668Z" },
-    { url = "https://files.pythonhosted.org/packages/20/4a/5f7848c8d21df432f44ebd36097406f66d98762295a4f11239f1d913f347/ai_edge_litert-2.1.0-cp310-cp310-manylinux_2_27_x86_64.whl", hash = "sha256:d054a2b3a65e2c2b4571a84ed33ba5da88e9d17872fd8753c1773ffb78351cb1", size = 9570097, upload-time = "2025-12-17T19:19:57.271Z" },
-    { url = "https://files.pythonhosted.org/packages/82/e7/73fff29c7a95a4f35953a027bdb174dd9ac08adbe8c2c322dee26d8f1d3f/ai_edge_litert-2.1.0-cp311-cp311-manylinux_2_27_aarch64.whl", hash = "sha256:92b24d2507fccf5680c26e712c156266dcf64a892df3921dd42f4a7d26527462", size = 7781185, upload-time = "2025-12-17T19:20:51.296Z" },
-    { url = "https://files.pythonhosted.org/packages/0d/d1/032cd1300a9b40da97e9f93781b3c2c5f104c22157695a3bb5bd5531821f/ai_edge_litert-2.1.0-cp311-cp311-manylinux_2_27_x86_64.whl", hash = "sha256:dcf7d79374ab467cec19f2edadd3beb243ad17833f8c5ad59bf76712bf1449b1", size = 9572637, upload-time = "2025-12-17T19:19:59.069Z" },
-    { url = "https://files.pythonhosted.org/packages/61/f6/1aeccf3034f95ec680a2e25f33582d4adf02c30b3462357511d529a2cad2/ai_edge_litert-2.1.0-cp312-cp312-manylinux_2_27_aarch64.whl", hash = "sha256:e06b7db05d3c5824fd4b56e2318f6858def718780cd90318626b4aa98db7583c", size = 7780984, upload-time = "2025-12-17T19:20:53.02Z" },
-    { url = "https://files.pythonhosted.org/packages/bb/16/0aface4ec3554304487d6436938684023c054828b4334f114f7db303b27a/ai_edge_litert-2.1.0-cp312-cp312-manylinux_2_27_x86_64.whl", hash = "sha256:48d7e6e81baa3581e6b48920a73ab897301cc48aa5b89abdd35d9f06df632d4a", size = 9575156, upload-time = "2025-12-17T19:20:00.647Z" },
+    { url = "https://files.pythonhosted.org/packages/74/63/2361383f7554b2c623633af372db016766f55845610f34029cfaa870e855/ai_edge_litert-2.1.1-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:3ff9277963a0c13573bed3c16243420bc03c011bd3b4259e3f8b6a4395f8f0c6", size = 5694639, upload-time = "2026-01-27T09:44:37.326Z" },
+    { url = "https://files.pythonhosted.org/packages/40/65/3ac6c34ec7188e773c12bb13cac47dc09a4d10e3c6ef7ded2cb52ab03a91/ai_edge_litert-2.1.1-cp310-cp310-manylinux_2_27_aarch64.whl", hash = "sha256:4802c74607aed7c4179691f598442c8d15e911d7c36bcf1991c994a1b436dc06", size = 7787484, upload-time = "2026-01-27T09:26:37.523Z" },
+    { url = "https://files.pythonhosted.org/packages/cb/d6/5b08abdcad560546ad43902570267142898ce7f7758d5d628d1b645c656d/ai_edge_litert-2.1.1-cp310-cp310-manylinux_2_27_x86_64.whl", hash = "sha256:805b1727062f6fce17e40dcc0764de3db82380aa9dda64a567c36b721fc8baf6", size = 9570099, upload-time = "2026-01-27T09:20:21.853Z" },
+    { url = "https://files.pythonhosted.org/packages/1e/44/055e0fbffcfc7a4c58940cfa5625632f6a52b964173aad42417097f3179b/ai_edge_litert-2.1.1-cp311-cp311-macosx_12_0_arm64.whl", hash = "sha256:8c32214ee34202d8d46066f73c69ad0a258583852fb7d7ac55105683e3127028", size = 5695989, upload-time = "2026-01-27T09:44:39.077Z" },
+    { url = "https://files.pythonhosted.org/packages/37/5a/8f74e1311467204401e01b9acc265f4465929c17c23cf0c8ff1e3042fbe1/ai_edge_litert-2.1.1-cp311-cp311-manylinux_2_27_aarch64.whl", hash = "sha256:00508a1d289b5662f78a6f2779b2ed1e11b9fd83df39d384468ba6f9a16ce621", size = 7789836, upload-time = "2026-01-27T09:26:38.975Z" },
+    { url = "https://files.pythonhosted.org/packages/d0/34/57e8207c65210ea6b424c37d07885542188cf1efae00296d0c29024b6b07/ai_edge_litert-2.1.1-cp311-cp311-manylinux_2_27_x86_64.whl", hash = "sha256:bfeb8e026691afec82e2c17f7352607246d0b735aa7a0bc30640b0d4c4924c3d", size = 9572637, upload-time = "2026-01-27T09:20:23.604Z" },
+    { url = "https://files.pythonhosted.org/packages/ba/3b/bbeb4d89f4fada090e6101e604b7878a29c1bb7682f1be368fdf68467c24/ai_edge_litert-2.1.1-cp312-cp312-macosx_12_0_arm64.whl", hash = "sha256:1a4bfaf9dd66b6c147dde47bb983e325e8a4372375f5f3ce2453a23910ffe0e5", size = 5697059, upload-time = "2026-01-27T09:44:40.408Z" },
+    { url = "https://files.pythonhosted.org/packages/ed/25/779e5747344b34422edbd5fee0448679719729da39e8829bf617fb3e8845/ai_edge_litert-2.1.1-cp312-cp312-manylinux_2_27_aarch64.whl", hash = "sha256:f1254abbfe0faf3f3728ff684127cc6ef26064fe437226c9374fc5df784af8c2", size = 7790959, upload-time = "2026-01-27T09:26:40.818Z" },
+    { url = "https://files.pythonhosted.org/packages/ca/21/d9a24bd9a161f74e4a09be048978f5f021fc5733c22a0174ff603035bdb3/ai_edge_litert-2.1.1-cp312-cp312-manylinux_2_27_x86_64.whl", hash = "sha256:1e57407f317baffbe92b9eee9ad8f2201616cdb251e19d79a39497eace2ca7e5", size = 9575157, upload-time = "2026-01-27T09:20:25.213Z" },
 ]
 
 [[package]]
@@ -348,7 +351,7 @@ dependencies = [
     { name = "openwakeword" },
 ]
 
-[package.dev-dependencies]
+[package.optional-dependencies]
 head-tracking = [
     { name = "opencv-python" },
     { name = "sixdrepnet" },
@@ -361,19 +364,14 @@ mypy = [
 [package.metadata]
 requires-dist = [
     { name = "faster-whisper", specifier = ">=1.2.1" },
+    { name = "mypy", marker = "extra == 'mypy'", specifier = ">=1.19.1" },
     { name = "numpy", specifier = ">=2.2.6" },
+    { name = "opencv-python", marker = "extra == 'head-tracking'", specifier = ">=4.13.0.90" },
     { name = "openwakeword", git = "https://github.com/dscripka/openWakeWord" },
+    { name = "sixdrepnet", marker = "extra == 'head-tracking'", specifier = ">=0.1.6" },
+    { name = "types-pyaudio", marker = "extra == 'mypy'", specifier = ">=0.2.16.20250801" },
 ]
-
-[package.metadata.requires-dev]
-head-tracking = [
-    { name = "opencv-python", specifier = ">=4.13.0.90" },
-    { name = "sixdrepnet", specifier = ">=0.1.6" },
-]
-mypy = [
-    { name = "mypy", specifier = ">=1.19.1" },
-    { name = "types-pyaudio", specifier = ">=0.2.16.20250801" },
-]
+provides-extras = ["head-tracking", "mypy"]
 
 [[package]]
 name = "exceptiongroup"
@@ -1219,11 +1217,11 @@ wheels = [
 
 [[package]]
 name = "pathspec"
-version = "1.0.3"
+version = "1.0.4"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/4c/b2/bb8e495d5262bfec41ab5cb18f522f1012933347fb5d9e62452d446baca2/pathspec-1.0.3.tar.gz", hash = "sha256:bac5cf97ae2c2876e2d25ebb15078eb04d76e4b98921ee31c6f85ade8b59444d", size = 130841, upload-time = "2026-01-09T15:46:46.009Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fa/36/e27608899f9b8d4dff0617b2d9ab17ca5608956ca44461ac14ac48b44015/pathspec-1.0.4.tar.gz", hash = "sha256:0210e2ae8a21a9137c0d470578cb0e595af87edaa6ebf12ff176f14a02e0e645", size = 131200, upload-time = "2026-01-27T03:59:46.938Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/32/2b/121e912bd60eebd623f873fd090de0e84f322972ab25a7f9044c056804ed/pathspec-1.0.3-py3-none-any.whl", hash = "sha256:e80767021c1cc524aa3fb14bedda9c34406591343cc42797b386ce7b9354fb6c", size = 55021, upload-time = "2026-01-09T15:46:44.652Z" },
+    { url = "https://files.pythonhosted.org/packages/ef/3c/2c197d226f9ea224a9ab8d197933f9da0ae0aac5b6e0f884e2b8d9c8e9f7/pathspec-1.0.4-py3-none-any.whl", hash = "sha256:fb6ae2fd4e7c921a165808a552060e722767cfa526f99ca5156ed2ce45a5c723", size = 55206, upload-time = "2026-01-27T03:59:45.137Z" },
 ]
 
 [[package]]
