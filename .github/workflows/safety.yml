@@ -1,0 +1,22 @@
+name: Safety
+
+on:
+  schedule:
+  - cron: "0 0 * * *"
+
+jobs:
+  safety:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        task:
+        - audit
+        - requirements
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v6
+    - uses: astral-sh/setup-uv@v7
+      with:
+        python-version: '3.12'
+    - uses: extractions/setup-just@v3
+    - run: just ${{ matrix.task }}
