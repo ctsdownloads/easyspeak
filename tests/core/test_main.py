@@ -119,12 +119,12 @@ class TestEasySpeakPlugins:
     @patch("importlib.import_module")
     @patch("sys.path")
     def test_load_plugins_valid_plugin(
-        self, mock_syspath, mock_import, mock_test_plugin_with_setup, capsys
+        self, mock_syspath, mock_import, mock_plugin_with_setup, capsys
     ):
         """Test load_plugins with a valid plugin."""
         easy = EasySpeak()
 
-        mock_import.return_value = mock_test_plugin_with_setup
+        mock_import.return_value = mock_plugin_with_setup
 
         # Mock plugins directory
         mock_file = Mock()
@@ -139,8 +139,8 @@ class TestEasySpeakPlugins:
 
         # Check that plugin was loaded
         assert len(easy.plugins) == 1
-        assert easy.plugins[0] == mock_test_plugin_with_setup
-        mock_test_plugin_with_setup.setup.assert_called_once_with(easy)
+        assert easy.plugins[0] == mock_plugin_with_setup
+        mock_plugin_with_setup.setup.assert_called_once_with(easy)
 
         captured = capsys.readouterr()
         assert "✓ Loaded: TestPlugin" in captured.out
@@ -229,17 +229,20 @@ class TestEasySpeakPlugins:
 
         assert commands == []
 
-    def test_get_all_commands_with_plugins(self, mock_test_plugin_with_commands):
+    def test_get_all_commands_with_plugins(
+        self,
+        mock_plugin_with_commands_12,
+        mock_plugin_with_commands_34,
+        mock_plugin_without_commands,
+    ):
         """Test get_all_commands with plugins that have commands."""
         easy = EasySpeak()
 
-        # Create additional plugin with commands
-        plugin2 = Mock()
-        plugin2.COMMANDS = ["cmd3", "cmd4"]
-
-        plugin3 = Mock(spec=[])  # Plugin without COMMANDS
-
-        easy.plugins = [mock_test_plugin_with_commands, plugin2, plugin3]
+        easy.plugins = [
+            mock_plugin_with_commands_12,
+            mock_plugin_with_commands_34,
+            mock_plugin_without_commands,
+        ]
 
         commands = easy.get_all_commands()
 
@@ -257,56 +260,54 @@ class TestEasySpeakRouteCommand:
 
         assert result is True
 
-    def test_route_command_strip_wake_words(self, mock_test_plugin):
+    def test_route_command_strip_wake_words(self, mock_plugin):
         """Test that route_command strips wake words."""
         easy = EasySpeak()
-        easy.plugins = [mock_test_plugin]
+        easy.plugins = [mock_plugin]
 
         # Test various wake word formats
         easy.route_command("hey jarvis test command")
-        mock_test_plugin.handle.assert_called_with("test command", easy)
+        mock_plugin.handle.assert_called_with("test command", easy)
 
         easy.route_command("hey, jarvis, test command")
-        mock_test_plugin.handle.assert_called_with("test command", easy)
+        mock_plugin.handle.assert_called_with("test command", easy)
 
         easy.route_command("jarvis test command")
-        mock_test_plugin.handle.assert_called_with("test command", easy)
+        mock_plugin.handle.assert_called_with("test command", easy)
 
-    def test_route_command_strip_punctuation(self, mock_test_plugin):
+    def test_route_command_strip_punctuation(self, mock_plugin):
         """Test that route_command strips punctuation."""
         easy = EasySpeak()
-        easy.plugins = [mock_test_plugin]
+        easy.plugins = [mock_plugin]
 
         easy.route_command("test command...")
-        mock_test_plugin.handle.assert_called_with("test command", easy)
+        mock_plugin.handle.assert_called_with("test command", easy)
 
-    def test_route_command_plugin_handles_true(self, mock_test_plugin):
+    def test_route_command_plugin_handles_true(self, mock_plugin):
         """Test route_command when plugin handles command and returns True."""
         easy = EasySpeak()
-        easy.plugins = [mock_test_plugin]
+        easy.plugins = [mock_plugin]
 
         result = easy.route_command("test command")
 
         assert result is True
-        mock_test_plugin.handle.assert_called_once()
+        mock_plugin.handle.assert_called_once()
 
-    def test_route_command_plugin_handles_false(self, mock_test_plugin_exit):
+    def test_route_command_plugin_handles_false(self, mock_plugin_exit):
         """Test route_command when plugin handles command and returns False (exit)."""
         easy = EasySpeak()
-        easy.plugins = [mock_test_plugin_exit]
+        easy.plugins = [mock_plugin_exit]
 
         result = easy.route_command("exit")
 
         assert result is False
-        mock_test_plugin_exit.handle.assert_called_once()
+        mock_plugin_exit.handle.assert_called_once()
 
     @patch.object(EasySpeak, "speak")
-    def test_route_command_no_matching_plugin(
-        self, mock_speak, mock_test_plugin_no_handle
-    ):
+    def test_route_command_no_matching_plugin(self, mock_speak, mock_plugin_no_handle):
         """Test route_command when no plugin handles the command."""
         easy = EasySpeak()
-        easy.plugins = [mock_test_plugin_no_handle]
+        easy.plugins = [mock_plugin_no_handle]
 
         result = easy.route_command("unknown command")
 
@@ -583,12 +584,12 @@ class TestEasySpeakRun:
         mock_wakeword_model,
         mock_pyaudio,
         mock_subprocess_run,
-        mock_test_plugin,
+        mock_plugin,
         capsys,
     ):
         """Test run method handles KeyboardInterrupt gracefully."""
         easy = EasySpeak()
-        easy.plugins = [mock_test_plugin]
+        easy.plugins = [mock_plugin]
 
         # Mock PyAudio and stream
         mock_audio = Mock()
@@ -632,12 +633,12 @@ class TestEasySpeakRun:
         mock_pyaudio,
         mock_time,
         mock_subprocess_run,
-        mock_test_plugin,
+        mock_plugin,
         capsys,
     ):
         """Test run method when wake word is detected and command is processed."""
         easy = EasySpeak()
-        easy.plugins = [mock_test_plugin]
+        easy.plugins = [mock_plugin]
 
         # Mock time for cooldown
         mock_time.return_value = 100.0
@@ -707,12 +708,12 @@ class TestEasySpeakRun:
         mock_pyaudio,
         mock_time,
         mock_subprocess_run,
-        mock_test_plugin,
+        mock_plugin,
         capsys,
     ):
         """Test run method when wake word is detected but no speech follows."""
         easy = EasySpeak()
-        easy.plugins = [mock_test_plugin]
+        easy.plugins = [mock_plugin]
 
         # Mock time for cooldown
         mock_time.return_value = 100.0
@@ -775,12 +776,12 @@ class TestEasySpeakRun:
         mock_pyaudio,
         mock_time,
         mock_subprocess_run,
-        mock_test_plugin,
+        mock_plugin,
         capsys,
     ):
         """Test run method respects wake word cooldown period."""
         easy = EasySpeak()
-        easy.plugins = [mock_test_plugin]
+        easy.plugins = [mock_plugin]
 
         # Mock time to simulate cooldown - first call within cooldown, second after
         mock_time.side_effect = [
@@ -848,12 +849,12 @@ class TestEasySpeakRun:
         mock_pyaudio,
         mock_time,
         mock_subprocess_run,
-        mock_test_plugin,
+        mock_plugin,
         capsys,
     ):
         """Test run method exits when route_command returns False."""
         easy = EasySpeak()
-        easy.plugins = [mock_test_plugin]
+        easy.plugins = [mock_plugin]
 
         # Mock time
         mock_time.return_value = 100.0
@@ -903,12 +904,12 @@ class TestEasySpeakRun:
         mock_pyaudio,
         mock_time,
         mock_subprocess_run,
-        mock_test_plugin,
+        mock_plugin,
         capsys,
     ):
         """Test run method manages audio buffer correctly when it exceeds 50 items."""
         easy = EasySpeak()
-        easy.plugins = [mock_test_plugin]
+        easy.plugins = [mock_plugin]
 
         # Mock time
         mock_time.return_value = 100.0

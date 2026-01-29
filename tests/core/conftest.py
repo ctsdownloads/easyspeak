@@ -38,33 +38,45 @@ def create_mock_plugin(name="TestPlugin", **kwargs) -> Mock:
 
 
 @pytest.fixture
-def mock_test_plugin():
+def mock_plugin():
     """Create a mock plugin with name 'TestPlugin' that handles commands."""
     return create_mock_plugin(handle_return=True)
 
 
 @pytest.fixture
-def mock_test_plugin_with_setup():
+def mock_plugin_with_setup():
     """Create a mock plugin with name 'TestPlugin' that has a setup method."""
     return create_mock_plugin(setup=Mock())
 
 
 @pytest.fixture
-def mock_test_plugin_no_handle():
+def mock_plugin_no_handle():
     """Create a mock plugin that doesn't handle commands (returns None)."""
     return create_mock_plugin(handle_return=None)
 
 
 @pytest.fixture
-def mock_test_plugin_exit():
+def mock_plugin_exit():
     """Create a mock plugin that signals exit (returns False)."""
     return create_mock_plugin(handle_return=False)
 
 
 @pytest.fixture
-def mock_test_plugin_with_commands():
-    """Create a mock plugin with COMMANDS attribute."""
+def mock_plugin_with_commands_12():
+    """Create a mock plugin with COMMANDS attribute containing cmd1 and cmd2."""
     return create_mock_plugin(commands=["cmd1", "cmd2"], handle_return=True)
+
+
+@pytest.fixture
+def mock_plugin_with_commands_34():
+    """Create a mock plugin with COMMANDS attribute containing cmd3 and cmd4."""
+    return create_mock_plugin(commands=["cmd3", "cmd4"], handle_return=True)
+
+
+@pytest.fixture
+def mock_plugin_without_commands():
+    """Create a mock plugin without COMMANDS attribute."""
+    return Mock(spec=[])
 
 
 @pytest.fixture
