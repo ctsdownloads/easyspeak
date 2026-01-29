@@ -6,16 +6,17 @@ Loads plugins from plugins/ folder automatically.
 Uses OpenWakeWord for fast wake detection.
 """
 
-import subprocess
-import tempfile
-import os
-import sys
 import importlib
+import os
+import subprocess
+import sys
+import tempfile
 import time
-import numpy as np
-import pyaudio
 import wave
 from pathlib import Path
+
+import numpy as np
+import pyaudio
 from faster_whisper import WhisperModel
 from openwakeword.model import Model as WakeWordModel
 
@@ -150,6 +151,16 @@ class EasySpeak:
 
     # --- Audio ---
 
+    def flush_stream(self):
+        """Flush any remaining audio data from the stream buffer."""
+        try:
+            self.stream.read(
+                self.stream.get_read_available(),
+                exception_on_overflow=False,
+            )
+        except:
+            pass  # intentionally catch all to prevent cleanup failures
+
     def is_silence(self, audio_chunk):
         return np.abs(audio_chunk).mean() < SILENCE_THRESHOLD
 
@@ -257,13 +268,7 @@ class EasySpeak:
                     # Reset everything
                     self.wakeword.reset()
                     audio_buffer = []
-                    try:
-                        self.stream.read(
-                            self.stream.get_read_available(),
-                            exception_on_overflow=False,
-                        )
-                    except:
-                        pass
+                    self.flush_stream()
 
                     # Audio feedback first
                     subprocess.run(
@@ -272,13 +277,7 @@ class EasySpeak:
                     )
 
                     # Flush any audio captured during beep
-                    try:
-                        self.stream.read(
-                            self.stream.get_read_available(),
-                            exception_on_overflow=False,
-                        )
-                    except:
-                        pass
+                    self.flush_stream()
 
                     # Wait for user to start speaking (up to 5 seconds)
                     first = self.wait_for_speech(timeout=5)
@@ -292,13 +291,7 @@ class EasySpeak:
                             if not self.route_command(cmd.lower().strip(".,!? ")):
                                 break
                             self.wakeword.reset()
-                            try:
-                                self.stream.read(
-                                    self.stream.get_read_available(),
-                                    exception_on_overflow=False,
-                                )
-                            except:
-                                pass
+                            self.flush_stream()
                     else:
                         self.speak("I didn't hear anything.")
 
