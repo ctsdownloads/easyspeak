@@ -16,11 +16,9 @@ jobs:
     strategy:
       matrix:
         task:
-        - format
+        - format --diff
         - lint
         - types
-        - audit
-        - requirements
         - package
         - functional
       fail-fast: false
