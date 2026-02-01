@@ -7,13 +7,57 @@ import pytest
 
 @pytest.fixture
 def mock_core():
-    """Create a mock core object for testing."""
+    """Create a basic mock core object for dictation tests."""
     core = Mock()
-    core.host_run = Mock()
-    core.speak = Mock()
-    core.stream = Mock()
-    core.wait_for_speech = Mock()
-    core.record_until_silence = Mock()
-    core.transcribe = Mock()
-    core.route_command = Mock()
+    core.stream.read = Mock()
+    core.stream.get_read_available = Mock(return_value=1024)
     return core
+
+
+@pytest.fixture
+def mock_core_with_audio():
+    """Create a mock core with standard audio recording setup."""
+    core = Mock()
+    core.stream.read = Mock()
+    core.stream.get_read_available = Mock(return_value=1024)
+    core.wait_for_speech = Mock(return_value=b"audio1")
+    core.record_until_silence = Mock(return_value=b"audio2")
+    return core
+
+
+@pytest.fixture
+def mock_core_factory():
+    """Factory fixture to create mock core with custom transcription setup."""
+
+    def _create_mock_core(
+        wait_for_speech_values=None,
+        record_until_silence_value=b"audio_data",
+        transcribe_values=None,
+    ):
+        """
+        Create a mock core with custom audio/transcription configuration.
+
+        Args:
+            wait_for_speech_values: List of values for wait_for_speech side_effect
+            record_until_silence_value: Return value for record_until_silence
+            transcribe_values: List of values for transcribe side_effect
+        """
+        core = Mock()
+        core.stream.read = Mock()
+        core.stream.get_read_available = Mock(return_value=1024)
+
+        if wait_for_speech_values is not None:
+            core.wait_for_speech = Mock(side_effect=wait_for_speech_values)
+        else:
+            core.wait_for_speech = Mock()
+
+        core.record_until_silence = Mock(return_value=record_until_silence_value)
+
+        if transcribe_values is not None:
+            core.transcribe = Mock(side_effect=transcribe_values)
+        else:
+            core.transcribe = Mock()
+
+        return core
+
+    return _create_mock_core
