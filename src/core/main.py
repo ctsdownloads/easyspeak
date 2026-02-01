@@ -306,6 +306,7 @@ class EasySpeak:
             self.audio.terminate()
 
 
-if __name__ == "__main__":
+def run():
+    """Start the application."""
     app = EasySpeak()
     app.run()

@@ -1,1 +1,1 @@
-"""EasySpeak plugins"""
+"""EasySpeak plugins."""
