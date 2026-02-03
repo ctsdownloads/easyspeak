@@ -17,7 +17,7 @@ jobs:
       matrix:
         task:
         - format --diff
-        - lint
+        - lint --
         - types
         - package
         - functional
