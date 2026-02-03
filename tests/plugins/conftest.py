@@ -7,11 +7,25 @@ import pytest
 
 @pytest.fixture
 def mock_core():
-    """Create a basic mock core object for dictation tests."""
+    """Create a mock core object for testing plugins."""
     core = Mock()
     core.stream.read = Mock()
     core.stream.get_read_available = Mock(return_value=1024)
     return core
+
+
+@pytest.fixture
+def mock_core_success(mock_core):
+    """Create a mock core with host_run returning success (returncode=0)."""
+    mock_core.host_run.return_value = Mock(returncode=0)
+    return mock_core
+
+
+@pytest.fixture
+def mock_core_failure(mock_core):
+    """Create a mock core with host_run returning failure (returncode=1)."""
+    mock_core.host_run.return_value = Mock(returncode=1)
+    return mock_core
 
 
 @pytest.fixture
