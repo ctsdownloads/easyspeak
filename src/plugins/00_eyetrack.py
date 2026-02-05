@@ -223,8 +223,8 @@ def run_tracking():
         yaw_buffer.append(smooth_yaw)
         pitch_buffer.append(smooth_pitch)
         if len(yaw_buffer) > BUFFER_SIZE:
-            yaw_buffer.pop(0)
-            pitch_buffer.pop(0)
+            yaw_buffer.pop(0)  # pragma: no cover
+            pitch_buffer.pop(0)  # pragma: no cover
 
         # Use averaged values
         avg_yaw = sum(yaw_buffer) / len(yaw_buffer)

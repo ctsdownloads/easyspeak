@@ -40,6 +40,33 @@ def mock_core_with_audio():
 
 
 @pytest.fixture
+def mock_core_no_file_manager():
+    """Create a mock core that simulates no file manager being available."""
+    core = Mock()
+    core.host_run = Mock(return_value=Mock(returncode=1))
+    core.speak = Mock()
+    return core
+
+
+@pytest.fixture
+def mock_core_which_finds_file_manager():
+    """Factory fixture that creates a mock core simulating finding a specific file manager."""
+
+    def _create_mock(file_manager):
+        def side_effect(cmd, **kwargs):
+            result = Mock()
+            result.returncode = 0 if cmd[1] == file_manager else 1
+            return result
+
+        core = Mock()
+        core.host_run = Mock(side_effect=side_effect)
+        core.speak = Mock()
+        return core
+
+    return _create_mock
+
+
+@pytest.fixture
 def mock_core_factory():
     """Factory fixture to create mock core with custom transcription setup."""
 
