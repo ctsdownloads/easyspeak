@@ -76,11 +76,11 @@ coverage:
 [group('tests')]
 functional: (clean '--quiet') (package '--quiet')
     # Python package should not contain tests (MANIFEST.in)
-    ! unzip -l dist/easyspeak-*-py3-none-any.whl | grep tests
-    ! tar tfz dist/easyspeak-*.tar.gz | grep tests
+    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep tests
+    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep tests
     # Python package should contain Core module
-    tar tfz dist/easyspeak-*.tar.gz | grep -q core
-    unzip -l dist/easyspeak-*-py3-none-any.whl | grep -q core
+    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q core
+    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q core
 
 # Build package and check metadata
 [group('release')]
@@ -92,7 +92,7 @@ package *args:
 ensure_version_matches tag:
     python -c '\
     from importlib.metadata import version ;\
-    ver = version("easyspeak") ;\
+    ver = version("easyspeak-linux") ;\
     tag = "{{ tag }}" ;\
     error = f"`{ver}` != `{tag}`" ;\
     abort = f"Package version does not match the Git tag ({error}). ABORTING." ;\

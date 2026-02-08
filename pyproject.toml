@@ -3,7 +3,7 @@ build-backend = "setuptools.build_meta"
 requires = ["setuptools>=77", "setuptools_scm>=9"]
 
 [project]
-name = "easyspeak"
+name = "easyspeak-linux"
 dynamic = ["version"]
 description = "Voice control for Linux desktops. Fully local, no cloud, Wayland-native."
 license = "GPL-3.0-only"
