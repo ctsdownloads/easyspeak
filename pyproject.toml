@@ -23,6 +23,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Desktop Environment :: Gnome",
   "Topic :: Home Automation",
   "Topic :: Scientific/Engineering :: Human Machine Interfaces",
@@ -39,11 +40,13 @@ keywords = [
   "wayland",
 ]
 readme = "README.md"
-requires-python = ">=3.10, <3.13"
+requires-python = ">=3.10, <3.14"
 dependencies = [
   "faster-whisper>=1.2.1",
   "numpy>=2.2.6",
-  "openwakeword",
+  # "openwakeword",  # requires Python <3.13 for speexdsp-ns (missing wheels)
+  "onnxruntime>=1.23.2",
+  "onnxruntime<1.24 ; python_full_version < '3.11'",
 ]
 
 [project.optional-dependencies]
@@ -85,5 +88,7 @@ easyspeak = "src"
 [tool.setuptools_scm]
 local_scheme = "no-local-version"
 
-[tool.uv.sources]
-openwakeword = { git = "https://github.com/dscripka/openWakeWord" }
+# # TensorFlow Runtime from PyPI (tflite-runtime==2.14.0) only supports
+# # Python <3.12 (see dependencies above)
+# [tool.uv.sources]
+# openwakeword = { git = "https://github.com/dscripka/openWakeWord" }
