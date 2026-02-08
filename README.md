@@ -1,4 +1,4 @@
-# EasySpeak
+# EasySpeak [![PyPI](https://img.shields.io/pypi/v/easyspeak-linux)](https://pypi.org/project/easyspeak-linux/)
 
 Voice control for Linux desktops. Fully local, no cloud, Wayland-native.
 
