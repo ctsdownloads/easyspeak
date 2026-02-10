@@ -47,6 +47,7 @@ dependencies = [
   # "openwakeword",  # requires Python <3.13 for speexdsp-ns (missing wheels)
   "onnxruntime>=1.23.2",
   "onnxruntime<1.24 ; python_full_version < '3.11'",
+  "pyaudio>=0.2.14",
 ]
 
 [project.optional-dependencies]
