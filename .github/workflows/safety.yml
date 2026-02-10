@@ -19,4 +19,5 @@ jobs:
       with:
         python-version: '3.12'
     - uses: extractions/setup-just@v3
+    - run: sudo apt install -y portaudio19-dev
     - run: just ${{ matrix.task }}
