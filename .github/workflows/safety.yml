@@ -1,6 +1,14 @@
 name: Safety
 
 on:
+  pull_request:
+    branches:
+    - main
+    - dev
+  push:
+    branches:
+    - main
+    - dev
   schedule:
   - cron: "0 0 * * *"
 
