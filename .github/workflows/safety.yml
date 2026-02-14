@@ -10,7 +10,7 @@ on:
     - main
     - dev
   schedule:
-  - cron: "0 0 * * *"
+  - cron: "0 0 * * 3,6"  # Wed+Sat at midnight UTC
 
 jobs:
   safety:
