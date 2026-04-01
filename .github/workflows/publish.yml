@@ -16,7 +16,7 @@ jobs:
     - uses: astral-sh/setup-uv@v7
       with:
         python-version: '3.12'
-    - uses: extractions/setup-just@v3
+    - uses: taiki-e/install-action@just
     - run: |
         sudo apt update
         sudo apt install -y portaudio19-dev
