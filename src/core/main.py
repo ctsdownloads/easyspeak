@@ -80,7 +80,7 @@ class EasySpeak:
     # --- Plugin management ---
 
     def load_plugins(self):
-        plugins_dir = Path(__file__).parent / "plugins"
+        plugins_dir = Path(__file__).parent.parent / "plugins"
         if not plugins_dir.exists():
             print("No plugins directory found")
             return
