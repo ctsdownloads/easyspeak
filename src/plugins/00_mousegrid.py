@@ -277,7 +277,6 @@ def get_screen_size():
 
     if result.returncode == 0:
         # Parse output like "((1920, 1200),)"
-        import re
 
         match = re.search(r"\((\d+),\s*(\d+)\)", result.stdout)
         if match:
