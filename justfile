@@ -73,6 +73,12 @@ coverage:
     uvx coverage[toml] xml
     uvx coverage[toml] report
 
+# Run Whisper benchmarks (writes results.json for bencher.dev)
+[group('tests')]
+benchmark *args:
+    uv run --extra=benchmark pytest tests/benchmarks/ \
+        --benchmark-json=results.json {{ args }}
+
 # Run functional tests on a built package
 [group('tests')]
 functional: (clean '--quiet') (package '--quiet')
