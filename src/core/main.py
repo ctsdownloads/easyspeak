@@ -29,11 +29,29 @@ PIPER_MODEL = os.environ.get(
     "EASYSPEAK_PIPER_MODEL",
     os.path.expanduser("~/.local/share/piper/en_US-amy-medium.onnx"),
 )
-WHISPER_MODEL = "base.en"
+WHISPER_MODEL = os.environ.get("EASYSPEAK_WHISPER_MODEL", "base.en")
+WHISPER_COMPUTE_TYPE = os.environ.get("EASYSPEAK_WHISPER_COMPUTE_TYPE", "int8")
+try:
+    # 0 == let CTranslate2 pick (uses all logical cores, which oversubscribes
+    # hyper-threaded CPUs). Set to physical core count for best CPU-only latency.
+    WHISPER_CPU_THREADS = max(
+        0, int(os.environ.get("EASYSPEAK_WHISPER_CPU_THREADS", "0"))
+    )
+except ValueError:
+    WHISPER_CPU_THREADS = 0
 SILENCE_THRESHOLD = 300
 SILENCE_DURATION = 0.3
 WAKE_THRESHOLD = 0.5
 WAKE_COOLDOWN = 3.0  # Seconds to ignore wake word after trigger
+
+
+def load_whisper_model(
+    model_name: str = WHISPER_MODEL,
+    compute_type: str = WHISPER_COMPUTE_TYPE,
+    cpu_threads: int = WHISPER_CPU_THREADS,
+) -> WhisperModel:
+    return WhisperModel(model_name, compute_type=compute_type, cpu_threads=cpu_threads)
+
 
 # Prompt to help Whisper recognize common commands
 COMMAND_PROMPT = (
@@ -216,8 +234,11 @@ class EasySpeak:
         print("Loading OpenWakeWord...")
         self.wakeword = WakeWordModel()
 
-        print("Loading Whisper...")
-        self.whisper = WhisperModel(WHISPER_MODEL, compute_type="int8")
+        print(
+            f"Loading Whisper ({WHISPER_MODEL}, {WHISPER_COMPUTE_TYPE}, "
+            f"cpu_threads={WHISPER_CPU_THREADS or 'auto'})..."
+        )
+        self.whisper = load_whisper_model()
 
         print("\nLoading plugins...")
         self.load_plugins()

@@ -1,0 +1,99 @@
+name: Benchmark
+
+# Tracks Whisper transcribe latency on bencher.dev.
+# Pattern follows https://bencher.dev/docs/how-to/github-actions/
+#
+# Required GitHub configuration:
+#   - secret  BENCHER_API_KEY   (from bencher.dev account)
+#   - variable BENCHER_PROJECT  (the project slug on bencher.dev)
+#
+# Fork PRs are skipped — secrets aren't available there. For fork-PR support
+# see the two-workflow pattern in the Bencher docs.
+
+on:
+  pull_request:
+    types:
+    - opened
+    - reopened
+    - edited
+    - synchronize
+  push:
+    branches:
+    - main
+    - dev
+
+jobs:
+  benchmark_branch:
+    name: Track base branch benchmarks
+    if: github.event_name == 'push'
+    permissions:
+      checks: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - uses: astral-sh/setup-uv@v7
+      with:
+        python-version: '3.13'
+    - uses: taiki-e/install-action@just
+    - uses: bencherdev/bencher@main
+    - run: |
+        sudo apt update
+        sudo apt install -y portaudio19-dev ffmpeg
+    - uses: actions/cache@v4
+      with:
+        path: ~/.cache/huggingface
+        key: hf-${{ runner.os }}-whisper-base.en-tiny.en
+    - name: Track base branch benchmarks with Bencher
+      run: |
+        bencher run \
+        --project '${{ vars.BENCHER_PROJECT }}' \
+        --key '${{ secrets.BENCHER_API_KEY }}' \
+        --branch '${{ github.ref_name }}' \
+        --testbed ubuntu-latest \
+        --threshold-measure latency \
+        --threshold-test t_test \
+        --threshold-max-sample-size 64 \
+        --threshold-upper-boundary 0.99 \
+        --thresholds-reset \
+        --error-on-alert \
+        --adapter python_pytest \
+        --file results.json \
+        --github-actions '${{ secrets.GITHUB_TOKEN }}' \
+        "just benchmark"
+
+  benchmark_pr:
+    name: Track PR benchmarks
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - uses: astral-sh/setup-uv@v7
+      with:
+        python-version: '3.13'
+    - uses: taiki-e/install-action@just
+    - uses: bencherdev/bencher@main
+    - run: |
+        sudo apt update
+        sudo apt install -y portaudio19-dev ffmpeg
+    - uses: actions/cache@v4
+      with:
+        path: ~/.cache/huggingface
+        key: hf-${{ runner.os }}-whisper-base.en-tiny.en
+    - name: Track PR benchmarks with Bencher
+      run: |
+        bencher run \
+        --project '${{ vars.BENCHER_PROJECT }}' \
+        --key '${{ secrets.BENCHER_API_KEY }}' \
+        --branch "$GITHUB_HEAD_REF" \
+        --start-point "$GITHUB_BASE_REF" \
+        --start-point-hash '${{ github.event.pull_request.base.sha }}' \
+        --start-point-clone-thresholds \
+        --start-point-reset \
+        --testbed ubuntu-latest \
+        --error-on-alert \
+        --adapter python_pytest \
+        --file results.json \
+        --github-actions '${{ secrets.GITHUB_TOKEN }}' \
+        "just benchmark"

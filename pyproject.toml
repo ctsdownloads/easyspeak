@@ -51,6 +51,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+benchmark = [
+  "pytest>=8",
+  "pytest-benchmark>=5",
+]
 head-tracking = [
   "opencv-python>=4.13.0.90",
   "sixdrepnet>=0.1.6",
@@ -78,6 +82,11 @@ ignore_missing_imports = true
 warn_redundant_casts = true
 warn_unreachable = true
 warn_unused_ignores = true
+
+[tool.pytest.ini_options]
+# Whisper benchmarks download large models and take minutes; opt-in only.
+# Run them with `just benchmark` or `pytest tests/benchmarks/`.
+addopts = "--ignore=tests/benchmarks"
 
 [tool.ruff.lint]
 extend-select = ["I"]  # "ALL" one day
