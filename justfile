@@ -12,7 +12,7 @@ all: codestyle safety test package clean
 # Remove build artifacts and reports (use -v for verbose, -n for dry-run)
 [group('lifecycle')]
 clean *args:
-    uvx pyclean . {{ args }} --debris all --erase tests/junit-report.xml --yes
+    uvx pyclean . {{ args }} --debris all --erase result results.json --yes
 
 # Run all code style checks (format, lint)
 [group('codestyle')]
