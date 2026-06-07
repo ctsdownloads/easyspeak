@@ -1,0 +1,50 @@
+name: Benchmark
+description: >-
+  Tracks Whisper transcribe latency on the bencher.dev service. Sets up
+  uv + just + bencher CLI, install audio deps, prime the HuggingFace
+  cache, and run `bencher run "just benchmark"` with the per-event flags.
+  Reads from the calling job's env:
+    BENCHER_PROJECT, BENCHER_API_KEY, BENCHER_GITHUB_TOKEN, BENCHER_ARGS.
+  Checkout must happen in the calling workflow first so this action.yml is
+  on disk.
+
+# The pattern follows https://bencher.dev/docs/how-to/github-actions/
+# Required GitHub configuration:
+# - secret  BENCHER_API_KEY   (from bencher.dev account)
+# - variable BENCHER_PROJECT  (the project slug on bencher.dev)
+#
+# NOTE: Fork PRs are skipped — secrets aren't available there. For fork-PR
+# support see the two-workflow pattern in the Bencher docs.
+
+runs:
+  using: composite
+  steps:
+  - uses: astral-sh/setup-uv@v7
+    with:
+      python-version: '3.13'
+  - uses: taiki-e/install-action@just
+  - uses: bencherdev/bencher@main
+  - shell: bash
+    run: |
+      sudo apt update
+      sudo apt install -y portaudio19-dev ffmpeg
+  - uses: actions/cache@v5
+    with:
+      path: ~/.cache/huggingface
+      key: hf-${{ runner.os }}-whisper-base.en-tiny.en
+  - name: Track benchmarks with Bencher
+    shell: bash
+    env:
+      FORCE_COLOR: '1'
+      PY_COLORS: '1'
+    run: |
+      bencher run \
+      --project "$BENCHER_PROJECT" \
+      --key "$BENCHER_API_KEY" \
+      --testbed ubuntu-latest \
+      --adapter python_pytest \
+      --file results.json \
+      --error-on-alert \
+      --github-actions "$BENCHER_GITHUB_TOKEN" \
+      $BENCHER_ARGS \
+      "just benchmark"
