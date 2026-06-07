@@ -53,6 +53,32 @@ python3 -m pip install uv
 uv tool install rust-just
 ```
 
+### NixOS
+
+Enter a development shell with all dependencies installed, or run the
+application directly:
+
+```console
+nix develop
+```
+
+```console
+nix run
+```
+
+To run directly off GitHub, with no clone required:
+
+```console
+nix run github:ctsdownloads/easyspeak
+```
+
+Install (and later remove) the GNOME Shell extension:
+
+```console
+nix run .#install-extension
+nix run .#uninstall-extension
+```
+
 ## Packaging & Version Numbers
 
 The packaging configuration is in `pyproject.toml`, supported by
