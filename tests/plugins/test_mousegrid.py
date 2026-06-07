@@ -362,6 +362,19 @@ def test_get_screen_size_with_fallback_to_drm(mock_host_run):
     assert result == (2560, 1440)
 
 
+@patch.object(mousegrid_plugin, "host_run")
+def test_get_screen_size_drm_fallback_when_gdbus_returncode_nonzero(mock_host_run):
+    """When gdbus fails outright get_screen_size still parses drm output (PR #48)."""
+    mock_host_run.side_effect = [
+        Mock(returncode=1, stdout=""),
+        Mock(returncode=0, stdout="2560x1440@60\n"),
+    ]
+
+    result = mousegrid_plugin.get_screen_size()
+
+    assert result == (2560, 1440)
+
+
 @pytest.mark.parametrize(
     ["text", "expected"],
     [
