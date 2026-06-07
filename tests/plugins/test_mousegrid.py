@@ -28,11 +28,244 @@ def reset_mousegrid_state():
     mousegrid_plugin.drag_start = None
 
 
-def test_setup(mock_core):
-    """When setup is called with a core object then it stores the reference."""
+@patch.object(mousegrid_plugin, "ensure_grid_extension")
+def test_setup(mock_ensure, mock_core):
+    """setup() stores the core reference and triggers extension auto-install."""
     mousegrid_plugin.setup(mock_core)
 
     assert mousegrid_plugin.core is mock_core
+    mock_ensure.assert_called_once_with()
+
+
+# Tests for ensure_grid_extension.
+
+
+@patch.object(mousegrid_plugin.shutil, "which", return_value=None)
+def test_ensure_grid_extension_no_gnome_cli(mock_which, capsys):
+    """No gnome-extensions on PATH (non-GNOME): silent no-op."""
+    mousegrid_plugin.ensure_grid_extension()
+
+    assert capsys.readouterr().err == ""
+
+
+@patch.object(mousegrid_plugin.subprocess, "run", side_effect=OSError("nope"))
+@patch.object(
+    mousegrid_plugin.shutil, "which", return_value="/usr/bin/gnome-extensions"
+)
+def test_ensure_grid_extension_list_oserror(mock_which, mock_run, capsys):
+    """`gnome-extensions list` raising OSError is swallowed silently."""
+    mousegrid_plugin.ensure_grid_extension()
+
+    assert capsys.readouterr().err == ""
+
+
+@patch.object(
+    mousegrid_plugin.subprocess, "run", return_value=Mock(returncode=1, stdout="")
+)
+@patch.object(
+    mousegrid_plugin.shutil, "which", return_value="/usr/bin/gnome-extensions"
+)
+def test_ensure_grid_extension_list_returncode_nonzero(mock_which, mock_run, capsys):
+    """`gnome-extensions list` returning non-zero: silent no-op."""
+    mousegrid_plugin.ensure_grid_extension()
+
+    assert capsys.readouterr().err == ""
+
+
+@patch.object(
+    mousegrid_plugin.shutil, "which", return_value="/usr/bin/gnome-extensions"
+)
+def test_ensure_grid_extension_already_installed_and_enabled(mock_which, capsys):
+    """UUID in both `list` and `list --enabled`: short-circuit, announce state."""
+    listed = Mock(
+        returncode=0, stdout="other@one.com\neasyspeak-grid@local\nthird@two.org\n"
+    )
+    listed_enabled = Mock(
+        returncode=0, stdout="easyspeak-grid@local\nother-on@two.org\n"
+    )
+    with patch.object(
+        mousegrid_plugin.subprocess, "run", side_effect=[listed, listed_enabled]
+    ) as mock_run:
+        mousegrid_plugin.ensure_grid_extension()
+
+    captured = capsys.readouterr()
+    assert "already installed and enabled" in captured.err
+    assert "easyspeak-grid@local" in captured.err
+    # No `enable` call needed — only the two probe calls.
+    assert mock_run.call_count == 2
+
+
+@patch.object(
+    mousegrid_plugin.shutil, "which", return_value="/usr/bin/gnome-extensions"
+)
+def test_ensure_grid_extension_installed_but_disabled_enable_succeeds(
+    mock_which, capsys
+):
+    """UUID in `list` but not in `list --enabled`: flip it on and announce."""
+    listed = Mock(returncode=0, stdout="other@one.com\neasyspeak-grid@local\n")
+    listed_enabled = Mock(returncode=0, stdout="other-on@two.org\n")
+    enabled = Mock(returncode=0, stdout="")
+    with patch.object(
+        mousegrid_plugin.subprocess,
+        "run",
+        side_effect=[listed, listed_enabled, enabled],
+    ) as mock_run:
+        mousegrid_plugin.ensure_grid_extension()
+
+    captured = capsys.readouterr()
+    assert "enabled GNOME extension easyspeak-grid@local" in captured.err
+    assert "was installed but disabled" in captured.err
+    assert mock_run.call_count == 3
+    assert mock_run.call_args_list[2].args[0] == [
+        "gnome-extensions",
+        "enable",
+        "easyspeak-grid@local",
+    ]
+
+
+@patch.object(
+    mousegrid_plugin.shutil, "which", return_value="/usr/bin/gnome-extensions"
+)
+def test_ensure_grid_extension_installed_but_disabled_enable_fails(mock_which, capsys):
+    """Installed-but-disabled and `enable` fails: print a hint, no log-out wording."""
+    listed = Mock(returncode=0, stdout="easyspeak-grid@local\n")
+    listed_enabled = Mock(returncode=0, stdout="")
+    enabled = Mock(returncode=1, stdout="")
+    with patch.object(
+        mousegrid_plugin.subprocess,
+        "run",
+        side_effect=[listed, listed_enabled, enabled],
+    ):
+        mousegrid_plugin.ensure_grid_extension()
+
+    captured = capsys.readouterr()
+    assert "installed but disabled, and could not be enabled" in captured.err
+    assert "gnome-extensions enable easyspeak-grid@local" in captured.err
+    # The "log out and back in" hint is only for fresh installs.
+    assert "log out" not in captured.err
+
+
+@patch.object(mousegrid_plugin.Path, "is_file", return_value=False)
+@patch.object(
+    mousegrid_plugin.subprocess, "run", return_value=Mock(returncode=0, stdout="")
+)
+@patch.object(
+    mousegrid_plugin.shutil, "which", return_value="/usr/bin/gnome-extensions"
+)
+def test_ensure_grid_extension_source_files_missing(
+    mock_which, mock_run, mock_is_file, capsys
+):
+    """When extension source files aren't at the project root: polite note."""
+    mousegrid_plugin.ensure_grid_extension()
+
+    captured = capsys.readouterr()
+    assert "mousegrid: note:" in captured.err
+    assert "source files not found" in captured.err
+
+
+@patch.object(
+    mousegrid_plugin.subprocess, "run", return_value=Mock(returncode=0, stdout="")
+)
+@patch.object(
+    mousegrid_plugin.shutil, "which", return_value="/usr/bin/gnome-extensions"
+)
+@patch.object(mousegrid_plugin.shutil, "copy2", side_effect=PermissionError("ro"))
+def test_ensure_grid_extension_copy_fails(
+    mock_copy, mock_which, mock_run, tmp_path, monkeypatch, capsys
+):
+    """copy2 raising OSError: polite note, no enable attempt."""
+    monkeypatch.setenv("HOME", str(tmp_path))
+
+    mousegrid_plugin.ensure_grid_extension()
+
+    captured = capsys.readouterr()
+    assert "mousegrid: note:" in captured.err
+    assert "could not install GNOME extension" in captured.err
+    # Only the two probe calls (`list` and `list --enabled`); no `enable`
+    # attempt after copy failure.
+    assert mock_run.call_count == 2
+
+
+@patch.object(
+    mousegrid_plugin.shutil, "which", return_value="/usr/bin/gnome-extensions"
+)
+def test_ensure_grid_extension_install_and_enable_success(
+    mock_which, tmp_path, monkeypatch, capsys
+):
+    """Happy path: copies files and enables, prints success message."""
+    monkeypatch.setenv("HOME", str(tmp_path))
+
+    listed = Mock(returncode=0, stdout="other@one.com\n")
+    listed_enabled = Mock(returncode=0, stdout="other-on@two.org\n")
+    enabled = Mock(returncode=0, stdout="")
+    with patch.object(
+        mousegrid_plugin.subprocess,
+        "run",
+        side_effect=[listed, listed_enabled, enabled],
+    ):
+        mousegrid_plugin.ensure_grid_extension()
+
+    dest = (
+        tmp_path
+        / ".local"
+        / "share"
+        / "gnome-shell"
+        / "extensions"
+        / "easyspeak-grid@local"
+    )
+    assert (dest / "extension.js").is_file()
+    assert (dest / "metadata.json").is_file()
+
+    captured = capsys.readouterr()
+    assert "installed and enabled" in captured.err
+
+
+@patch.object(
+    mousegrid_plugin.shutil, "which", return_value="/usr/bin/gnome-extensions"
+)
+def test_ensure_grid_extension_install_succeeds_enable_returncode_nonzero(
+    mock_which, tmp_path, monkeypatch, capsys
+):
+    """Install succeeds, but `enable` returns non-zero: log-out hint."""
+    monkeypatch.setenv("HOME", str(tmp_path))
+
+    listed = Mock(returncode=0, stdout="other@one.com\n")
+    listed_enabled = Mock(returncode=0, stdout="")
+    enabled = Mock(returncode=1, stdout="")
+    with patch.object(
+        mousegrid_plugin.subprocess,
+        "run",
+        side_effect=[listed, listed_enabled, enabled],
+    ):
+        mousegrid_plugin.ensure_grid_extension()
+
+    captured = capsys.readouterr()
+    assert "log out and back in" in captured.err
+    # No manual `gnome-extensions enable` instruction — next startup
+    # picks it up via the installed-but-disabled branch.
+    assert "gnome-extensions enable" not in captured.err
+
+
+@patch.object(
+    mousegrid_plugin.shutil, "which", return_value="/usr/bin/gnome-extensions"
+)
+def test_ensure_grid_extension_install_succeeds_enable_oserror(
+    mock_which, tmp_path, monkeypatch, capsys
+):
+    """Install succeeds, but `enable` raises OSError: log-out hint."""
+    monkeypatch.setenv("HOME", str(tmp_path))
+
+    listed = Mock(returncode=0, stdout="other@one.com\n")
+    listed_enabled = Mock(returncode=0, stdout="")
+    with patch.object(
+        mousegrid_plugin.subprocess,
+        "run",
+        side_effect=[listed, listed_enabled, OSError("boom")],
+    ):
+        mousegrid_plugin.ensure_grid_extension()
+
+    captured = capsys.readouterr()
+    assert "log out and back in" in captured.err
 
 
 @patch("subprocess.run", return_value=Mock(returncode=0, stdout="", stderr=""))

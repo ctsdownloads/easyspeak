@@ -146,20 +146,6 @@ git clone https://github.com/ctsdownloads/easyspeak.git ~/easyspeak
 cd ~/easyspeak
 ```
 
-### 5. GNOME Shell Extension
-
-```bash
-mkdir -p ~/.local/share/gnome-shell/extensions/easyspeak-grid@local
-cp extension.js metadata.json ~/.local/share/gnome-shell/extensions/easyspeak-grid@local/
-```
-
-**Log out and back in** (GNOME Shell must restart to detect new extensions).
-
-Then enable:
-```bash
-gnome-extensions enable easyspeak-grid@local
-```
-
 ## Usage
 
 ```bash
@@ -336,29 +322,33 @@ easyspeak/
 ├── extension.js               # GNOME Shell extension
 ├── metadata.json              # Extension metadata
 ├── pyproject.toml
-├── [1;38;2;36;114;200msrc[0m
-│   ├── [1;38;2;36;114;200mcore[0m
-│   │   ├── __init__.py
-│   │   └── main.py             # Main application
-│   └── [1;38;2;36;114;200mplugins[0m
-│       ├── __init__.py
-│       ├── 00_eyetrack.py      # Head tracking (experimental)
-│       ├── 00_mousegrid.py     # Grid overlay mouse control
-│       ├── apps.py             # Application launcher
-│       ├── browser.py          # Qutebrowser control
-│       ├── dictation.py        # Voice-to-text
-│       ├── files.py            # Folder navigation
-│       ├── media.py            # Playback controls
-│       ├── system.py           # Volume, brightness, DND
-│       └── zz_base.py          # Help and exit
-└── [1;38;2;36;114;200mtests[0m
-    ├── [1;38;2;36;114;200mcore[0m
-    │   └── test_main.py
-    └── [1;38;2;36;114;200mplugins[0m
-        └── test_apps.py
+├── src
+│   ├── core
+│   │   ├── __init__.py
+│   │   ├── __main__.py
+│   │   ├── config.py          # Tuning constants + Whisper model factory
+│   │   └── main.py            # EasySpeak class + main loop
+│   └── plugins
+│       ├── __init__.py
+│       ├── 00_eyetrack.py     # Head tracking (experimental)
+│       ├── 00_mousegrid.py    # Grid overlay mouse control
+│       ├── apps.py            # Application launcher
+│       ├── browser.py         # Qutebrowser control + auto-config
+│       ├── dictation.py       # Voice-to-text + AT-SPI enablement
+│       ├── files.py           # Folder navigation
+│       ├── media.py           # Playback controls
+│       ├── system.py          # Volume, brightness, DND
+│       └── zz_base.py         # Help and exit
+└── tests
+    ├── benchmarks             # pytest-benchmark suites for bencher.dev
+    ├── core                   # tests for src/core/
+    └── plugins                # tests for src/plugins/
 ```
 
-After installation, the extension is copied to:
+On first start, the `mousegrid` plugin auto-installs the GNOME Shell
+extension to the user-local extensions directory (unless GNOME already
+sees it via a system-wide install). Files copied:
+
 ```
 ~/.local/share/gnome-shell/extensions/easyspeak-grid@local/
 ├── extension.js
@@ -411,11 +401,30 @@ def handle(cmd, core):
 
 ## Troubleshooting
 
-**"Failed to show grid - is extension enabled?"**
+**Mouse grid: "Failed to show grid — is extension enabled?"**
+
+EasySpeak auto-installs the GNOME Shell extension to
+`~/.local/share/gnome-shell/extensions/easyspeak-grid@local/` on first
+run (look for a `mousegrid: installed ...` message at startup). On
+Wayland, GNOME Shell only scans for new extensions at login, so you
+typically have to **log out and back in** before it becomes loadable.
+
+After re-login, enable it from the command line:
+
 ```bash
 gnome-extensions enable easyspeak-grid@local
-# Then log out and back in
 ```
+
+…or open the **Extensions** GNOME app and toggle *EasySpeak Grid* on.
+
+To remove it later:
+
+```bash
+gnome-extensions disable easyspeak-grid@local
+rm -rf ~/.local/share/gnome-shell/extensions/easyspeak-grid@local
+```
+
+…or click the trash icon next to *EasySpeak Grid* in the Extensions app.
 
 **Dictation not working**
 
