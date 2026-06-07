@@ -6,8 +6,14 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
@@ -19,24 +25,27 @@
         # infer a version. Derive a PEP 440 "local version" from whatever
         # the flake knows (clean rev > dirty rev > nothing).
         pretendVersion =
-          if self ? rev then "0.0.0+g${builtins.substring 0 8 self.rev}"
-          else if self ? dirtyRev then "0.0.0+g${builtins.substring 0 8 self.dirtyRev}.dirty"
-          else "0.0.0+nix";
+          if self ? rev then
+            "0.0.0+g${builtins.substring 0 8 self.rev}"
+          else if self ? dirtyRev then
+            "0.0.0+g${builtins.substring 0 8 self.dirtyRev}.dirty"
+          else
+            "0.0.0+nix";
 
         # Shared libraries that Python wheels dlopen at runtime.
         runtimeLibs = with pkgs; [
-          portaudio          # libportaudio.so for pyaudio
-          stdenv.cc.cc.lib   # libstdc++ for onnxruntime / faster-whisper
+          portaudio # libportaudio.so for pyaudio
+          stdenv.cc.cc.lib # libstdc++ for onnxruntime / faster-whisper
           zlib
         ];
 
         # Tools the app shells out to (paplay, ffplay, piper, etc).
         runtimeTools = with pkgs; [
-          ffmpeg                    # ffplay for TTS playback (NOT -headless; that strips SDL)
-          pulseaudio                # paplay for the wake-word chime
-          piper-tts                 # TTS engine
-          qutebrowser               # browser plugin + "open browser" / help page
-          sound-theme-freedesktop   # /usr/share/sounds/freedesktop/...
+          ffmpeg # ffplay for TTS playback (NOT -headless; that strips SDL)
+          pulseaudio # paplay for the wake-word chime
+          piper-tts # TTS engine
+          qutebrowser # browser plugin + "open browser" / help page
+          sound-theme-freedesktop # /usr/share/sounds/freedesktop/...
         ];
 
         # Native toolchain needed when uv compiles wheels from source
@@ -76,7 +85,14 @@
 
         easyspeak = pkgs.writeShellApplication {
           name = "easyspeak";
-          runtimeInputs = [ python pkgs.uv pkgs.coreutils pkgs.gnused ] ++ runtimeTools ++ buildTools;
+          runtimeInputs = [
+            python
+            pkgs.uv
+            pkgs.coreutils
+            pkgs.gnused
+          ]
+          ++ runtimeTools
+          ++ buildTools;
           text = ''
             set -euo pipefail
 
@@ -159,6 +175,7 @@
             echo "Log out and back in to fully unload GNOME Shell extension."
           '';
         };
+
       in
       {
         packages = {
@@ -184,7 +201,13 @@
         };
 
         devShells.default = pkgs.mkShell {
-          packages = [ python pkgs.uv pkgs.just ] ++ runtimeTools ++ buildTools;
+          packages = [
+            python
+            pkgs.uv
+            pkgs.just
+          ]
+          ++ runtimeTools
+          ++ buildTools;
           shellHook = ''
             # mkShell's setup-hooks pile every Python app's (qutebrowser,
             # piper-tts, onnxruntime, ...) Python 3.13 site-packages onto
@@ -208,5 +231,6 @@
             echo "      just --list"
           '';
         };
-      });
+      }
+    );
 }
