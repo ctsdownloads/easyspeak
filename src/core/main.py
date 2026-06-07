@@ -25,7 +25,10 @@ from openwakeword.model import Model as WakeWordModel
 # =============================================================================
 
 WAKE_WORD = "hey_jarvis"  # OpenWakeWord model name
-PIPER_MODEL = os.path.expanduser("~/.local/share/piper/en_US-amy-medium.onnx")
+PIPER_MODEL = os.environ.get(
+    "EASYSPEAK_PIPER_MODEL",
+    os.path.expanduser("~/.local/share/piper/en_US-amy-medium.onnx"),
+)
 WHISPER_MODEL = "base.en"
 SILENCE_THRESHOLD = 300
 SILENCE_DURATION = 0.3
