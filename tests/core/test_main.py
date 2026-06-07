@@ -221,6 +221,25 @@ class TestEasySpeakPlugins:
         captured = capsys.readouterr()
         assert "Failed to load broken_plugin.py" in captured.out
 
+    def test_load_plugins_loads_all_shipped_plugins(self):
+        """All shipped plugins are discovered against the real filesystem layout."""
+        easy = EasySpeak()
+
+        easy.load_plugins()
+        loaded = {module.__name__.rsplit(".", 1)[-1] for module in easy.plugins}
+
+        assert loaded == {
+            "00_eyetrack",
+            "00_mousegrid",
+            "apps",
+            "browser",
+            "dictation",
+            "files",
+            "media",
+            "system",
+            "zz_base",
+        }
+
     def test_get_all_commands_empty(self):
         """Test get_all_commands with no plugins."""
         easy = EasySpeak()
