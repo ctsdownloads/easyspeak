@@ -160,24 +160,6 @@ Then enable:
 gnome-extensions enable easyspeak-grid@local
 ```
 
-### 6. Enable Accessibility
-
-```bash
-gsettings set org.gnome.desktop.interface toolkit-accessibility true
-```
-
-### 7. Configure Qutebrowser
-
-EasySpeak uses number hints (not letters). Configure qutebrowser:
-
-```bash
-mkdir -p ~/.config/qutebrowser
-cat > ~/.config/qutebrowser/config.py << 'EOF'
-config.load_autoconfig(False)
-c.hints.chars = '0123456789'
-EOF
-```
-
 ## Usage
 
 ```bash
@@ -436,9 +418,27 @@ gnome-extensions enable easyspeak-grid@local
 ```
 
 **Dictation not working**
+
+EasySpeak enables the GNOME accessibility bridge on first run; log out and
+back in after seeing the `dictation: enabled GNOME toolkit-accessibility`
+message. If the auto-config printed a `WARNING` instead (e.g. on a
+non-GNOME or locked-down desktop), run it manually:
+
 ```bash
 gsettings set org.gnome.desktop.interface toolkit-accessibility true
 # Log out and back in
+```
+
+**Browser plugin: link numbers don't work**
+
+EasySpeak appends two required lines to `~/.config/qutebrowser/config.py`
+on first run (you'll see a `browser: wrote ...` or `browser: updated ...`
+message). If you see a `browser: note: ... is read-only` or a similar
+error instead, add these lines to the config module yourself:
+
+```python
+config.load_autoconfig(False)
+c.hints.chars = '0123456789'
 ```
 
 **Wake word not detecting**

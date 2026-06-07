@@ -3,7 +3,9 @@ Dictation Plugin - Voice to text via AT-SPI
 """
 
 import re
+import shutil
 import subprocess
+import sys
 
 NAME = "dictation"
 DESCRIPTION = "Voice dictation into any text field"
@@ -22,9 +24,53 @@ core = None
 DICTATION_PROMPT = "comma, period, new sentence, new paragraph, new line, question mark, exclamation mark, colon, semicolon, stop notes, backspace, space, tab, enter, apostrophe, quote, dash, hyphen, at sign, hashtag, percent"
 
 
+def ensure_gnome_accessibility():
+    """Enable GNOME's toolkit-accessibility for the AT-SPI bridge.
+
+    Silently skipped if gsettings isn't on PATH or the schema isn't
+    installed (i.e. user isn't on GNOME). Warns if it's present but the
+    flip fails. Tells the user to re-login when newly enabled.
+    """
+    if shutil.which("gsettings") is None:
+        return
+    schema, key = "org.gnome.desktop.interface", "toolkit-accessibility"
+    try:
+        current = subprocess.run(
+            ["gsettings", "get", schema, key],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if current.returncode != 0:
+            return  # schema missing — not really on GNOME
+        if current.stdout.strip() == "true":
+            return
+        result = subprocess.run(
+            ["gsettings", "set", schema, key, "true"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode == 0:
+            print(
+                "dictation: enabled GNOME toolkit-accessibility — "
+                "log out and back in for dictation to work",
+                file=sys.stderr,
+            )
+        else:
+            print(
+                "dictation: WARNING could not enable GNOME "
+                "toolkit-accessibility; dictation will not work",
+                file=sys.stderr,
+            )
+    except OSError:
+        pass
+
+
 def setup(c):
     global core
     core = c
+    ensure_gnome_accessibility()
 
 
 ATSPI_INSERT_SCRIPT = """

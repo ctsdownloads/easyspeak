@@ -549,7 +549,7 @@ class TestEasySpeakRun:
     """Tests for EasySpeak run method."""
 
     @patch("easyspeak.core.main.WakeWordModel")
-    @patch("easyspeak.core.main.WhisperModel")
+    @patch("easyspeak.core.main.load_whisper_model")
     @patch.object(EasySpeak, "load_plugins")
     def test_run_no_plugins(
         self, mock_load_plugins, mock_whisper_model, mock_wakeword_model, capsys
@@ -575,7 +575,7 @@ class TestEasySpeakRun:
     @patch("subprocess.run")
     @patch("easyspeak.core.main.pyaudio")
     @patch("easyspeak.core.main.WakeWordModel")
-    @patch("easyspeak.core.main.WhisperModel")
+    @patch("easyspeak.core.main.load_whisper_model")
     @patch.object(EasySpeak, "load_plugins")
     def test_run_with_keyboard_interrupt(
         self,
@@ -613,7 +613,7 @@ class TestEasySpeakRun:
     @patch("time.time")
     @patch("easyspeak.core.main.pyaudio")
     @patch("easyspeak.core.main.WakeWordModel")
-    @patch("easyspeak.core.main.WhisperModel")
+    @patch("easyspeak.core.main.load_whisper_model")
     @patch.object(EasySpeak, "load_plugins")
     @patch.object(EasySpeak, "wait_for_speech")
     @patch.object(EasySpeak, "record_until_silence")
@@ -692,7 +692,7 @@ class TestEasySpeakRun:
     @patch("time.time")
     @patch("easyspeak.core.main.pyaudio")
     @patch("easyspeak.core.main.WakeWordModel")
-    @patch("easyspeak.core.main.WhisperModel")
+    @patch("easyspeak.core.main.load_whisper_model")
     @patch.object(EasySpeak, "load_plugins")
     @patch.object(EasySpeak, "wait_for_speech")
     @patch.object(EasySpeak, "speak")
@@ -756,7 +756,7 @@ class TestEasySpeakRun:
     @patch("time.time")
     @patch("easyspeak.core.main.pyaudio")
     @patch("easyspeak.core.main.WakeWordModel")
-    @patch("easyspeak.core.main.WhisperModel")
+    @patch("easyspeak.core.main.load_whisper_model")
     @patch.object(EasySpeak, "load_plugins")
     @patch.object(EasySpeak, "wait_for_speech")
     @patch.object(EasySpeak, "record_until_silence")
@@ -831,7 +831,7 @@ class TestEasySpeakRun:
     @patch("time.time")
     @patch("easyspeak.core.main.pyaudio")
     @patch("easyspeak.core.main.WakeWordModel")
-    @patch("easyspeak.core.main.WhisperModel")
+    @patch("easyspeak.core.main.load_whisper_model")
     @patch.object(EasySpeak, "load_plugins")
     @patch.object(EasySpeak, "wait_for_speech")
     @patch.object(EasySpeak, "record_until_silence")
@@ -894,7 +894,7 @@ class TestEasySpeakRun:
     @patch("time.time")
     @patch("easyspeak.core.main.pyaudio")
     @patch("easyspeak.core.main.WakeWordModel")
-    @patch("easyspeak.core.main.WhisperModel")
+    @patch("easyspeak.core.main.load_whisper_model")
     @patch.object(EasySpeak, "load_plugins")
     def test_run_audio_buffer_management(
         self,
