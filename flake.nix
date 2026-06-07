@@ -132,71 +132,17 @@
             exec uv run --with openwakeword easyspeak "$@"
           '';
         };
-        # GNOME Shell extension installer. Symlinks rather than copies so
-        # uninstall is a clean rm and updates track the flake source.
-        extUuid = "easyspeak-grid@local";
-        installExtension = pkgs.writeShellApplication {
-          name = "easyspeak-install-extension";
-          runtimeInputs = [ pkgs.coreutils ];
-          text = ''
-            set -euo pipefail
-            ext_dir="$HOME/.local/share/gnome-shell/extensions/${extUuid}"
-            mkdir -p "$ext_dir"
-            ln -sfn '${./extension.js}'  "$ext_dir/extension.js"
-            ln -sfn '${./metadata.json}' "$ext_dir/metadata.json"
-            echo "Installed (symlinked) extension at $ext_dir"
-
-            if command -v gnome-extensions >/dev/null 2>&1; then
-              if gnome-extensions enable '${extUuid}' 2>/dev/null; then
-                echo "Enabled: ${extUuid}"
-              else
-                echo
-                echo "GNOME Shell hasn't loaded the extension yet."
-                echo "On Wayland you must LOG OUT and back in, then run:"
-                echo "  gnome-extensions enable ${extUuid}"
-              fi
-            else
-              echo "gnome-extensions CLI not on PATH; enable manually after re-login."
-            fi
-          '';
-        };
-
-        uninstallExtension = pkgs.writeShellApplication {
-          name = "easyspeak-uninstall-extension";
-          runtimeInputs = [ pkgs.coreutils ];
-          text = ''
-            set -euo pipefail
-            ext_dir="$HOME/.local/share/gnome-shell/extensions/${extUuid}"
-            if command -v gnome-extensions >/dev/null 2>&1; then
-              gnome-extensions disable '${extUuid}' 2>/dev/null || true
-            fi
-            rm -rf "$ext_dir"
-            echo "Removed $ext_dir"
-            echo "Log out and back in to fully unload GNOME Shell extension."
-          '';
-        };
-
       in
       {
         packages = {
           default = easyspeak;
           easyspeak = easyspeak;
-          install-extension = installExtension;
-          uninstall-extension = uninstallExtension;
         };
 
         apps = {
           default = {
             type = "app";
             program = "${easyspeak}/bin/easyspeak";
-          };
-          install-extension = {
-            type = "app";
-            program = "${installExtension}/bin/easyspeak-install-extension";
-          };
-          uninstall-extension = {
-            type = "app";
-            program = "${uninstallExtension}/bin/easyspeak-uninstall-extension";
           };
         };
 

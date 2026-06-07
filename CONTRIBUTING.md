@@ -72,13 +72,6 @@ To run directly off GitHub, with no clone required:
 nix run github:ctsdownloads/easyspeak
 ```
 
-Install (and later remove) the GNOME Shell extension:
-
-```console
-nix run .#install-extension
-nix run .#uninstall-extension
-```
-
 ## Packaging & Version Numbers
 
 The packaging configuration is in `pyproject.toml`, supported by
