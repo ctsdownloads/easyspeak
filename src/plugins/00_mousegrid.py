@@ -9,7 +9,10 @@ Features:
 
 import atexit
 import re
+import shutil
 import subprocess
+import sys
+from pathlib import Path
 
 NAME = "mousegrid"
 DESCRIPTION = "Voice-controlled mouse grid"
@@ -95,9 +98,144 @@ DIRECTIONS = {
 }
 
 
+# GNOME Shell extension that this plugin drives via DBus. The extension
+# itself ships at the project root (extension.js + metadata.json) and is
+# auto-installed into the user's extension directory on first run if it
+# isn't already visible to GNOME (whether system-wide or user-local).
+GRID_EXTENSION_UUID = "easyspeak-grid@local"
+
+
+def ensure_grid_extension():
+    """Install the GNOME Shell extension if needed, and enable it.
+
+    Probes state with ``gnome-extensions list`` (covers both system and
+    user paths) and ``gnome-extensions list --enabled``, then reports
+    exactly what it did: found it already enabled, enabled a previously
+    disabled install (e.g. user toggled it off or a GNOME Shell version
+    bump auto-disabled it), or freshly installed and enabled. Silently
+    skipped on non-GNOME systems. Non-fatal on missing source files or
+    write failures — emits a polite note and lets startup proceed.
+    """
+    if shutil.which("gnome-extensions") is None:
+        return  # not a GNOME-based desktop
+
+    try:
+        listed = subprocess.run(
+            ["gnome-extensions", "list"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        listed_enabled = subprocess.run(
+            ["gnome-extensions", "list", "--enabled"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return
+    if listed.returncode != 0:
+        return
+
+    installed = GRID_EXTENSION_UUID in listed.stdout.split()
+    # If the --enabled probe failed we don't know; fall through and try
+    # enabling (a no-op when it's already on).
+    already_enabled = (
+        listed_enabled.returncode == 0
+        and GRID_EXTENSION_UUID in listed_enabled.stdout.split()
+    )
+    dest_dir = (
+        Path.home()
+        / ".local"
+        / "share"
+        / "gnome-shell"
+        / "extensions"
+        / GRID_EXTENSION_UUID
+    )
+
+    if installed and already_enabled:
+        print(
+            f"mousegrid: GNOME extension {GRID_EXTENSION_UUID} "
+            f"already installed and enabled",
+            file=sys.stderr,
+        )
+        return
+
+    if not installed:
+        project_root = Path(__file__).resolve().parents[2]
+        src_ext = project_root / "extension.js"
+        src_meta = project_root / "metadata.json"
+        if not (src_ext.is_file() and src_meta.is_file()):
+            print(
+                f"mousegrid: note: could not auto-install GNOME extension — "
+                f"source files not found at {project_root}. Grid commands "
+                f"will not work until the extension is installed manually.",
+                file=sys.stderr,
+            )
+            return
+
+        try:
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src_ext, dest_dir / "extension.js")
+            shutil.copy2(src_meta, dest_dir / "metadata.json")
+        except OSError as e:
+            print(
+                f"mousegrid: note: could not install GNOME extension to "
+                f"{dest_dir} ({e}). Grid commands will not work until it "
+                f"is installed manually.",
+                file=sys.stderr,
+            )
+            return
+
+    # First-time installs require GNOME Shell to rescan, which on Wayland
+    # only happens at login. `enable` will fail with "Unknown extension"
+    # until then — we treat that as "installed, log back in to use".
+    try:
+        enabled = subprocess.run(
+            ["gnome-extensions", "enable", GRID_EXTENSION_UUID],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        ok = enabled.returncode == 0
+    except OSError:
+        ok = False
+
+    if installed:
+        # Was installed but disabled — we just flipped it on (or tried to).
+        if ok:
+            print(
+                f"mousegrid: enabled GNOME extension {GRID_EXTENSION_UUID} "
+                f"(was installed but disabled)",
+                file=sys.stderr,
+            )
+        else:
+            print(
+                f"mousegrid: note: GNOME extension {GRID_EXTENSION_UUID} is "
+                f"installed but disabled, and could not be enabled. Try: "
+                f"gnome-extensions enable {GRID_EXTENSION_UUID}",
+                file=sys.stderr,
+            )
+        return
+
+    if ok:
+        print(
+            f"mousegrid: installed and enabled GNOME extension "
+            f"{GRID_EXTENSION_UUID} at {dest_dir}",
+            file=sys.stderr,
+        )
+    else:
+        print(
+            f"mousegrid: installed GNOME extension to {dest_dir} — "
+            f"log out and back in to finish enabling it.",
+            file=sys.stderr,
+        )
+
+
 def setup(c):
     global core
     core = c
+    ensure_grid_extension()
 
 
 def host_run(cmd):
