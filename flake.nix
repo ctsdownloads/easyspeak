@@ -52,6 +52,28 @@
         chimeFhsPath = "/usr/share/sounds/freedesktop/stereo/message.oga";
         chimeNixPath = "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/message.oga";
 
+        # Piper voice model (Amy, US English) — fetched at build time so the
+        # README's manual wget step isn't needed on NixOS. Piper expects the
+        # .onnx and .onnx.json to live in the same directory, so we linkFarm
+        # them together and point EASYSPEAK_PIPER_MODEL at the .onnx.
+        piperVoice = pkgs.linkFarm "piper-voice-en-US-amy-medium" [
+          {
+            name = "en_US-amy-medium.onnx";
+            path = pkgs.fetchurl {
+              url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx";
+              sha256 = "063c43bbs0nb09f86l4avnf9mxah38b1h9ffl3kgpixqaxxy99mk";
+            };
+          }
+          {
+            name = "en_US-amy-medium.onnx.json";
+            path = pkgs.fetchurl {
+              url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx.json";
+              sha256 = "0xvxjxk59byydx9gj6rdvvydp5zm8mzsrf9vyy6x6299sjs3x8lm";
+            };
+          }
+        ];
+        piperModelPath = "${piperVoice}/en_US-amy-medium.onnx";
+
         easyspeak = pkgs.writeShellApplication {
           name = "easyspeak";
           runtimeInputs = [ python pkgs.uv pkgs.coreutils pkgs.gnused ] ++ runtimeTools ++ buildTools;
@@ -76,6 +98,7 @@
             export UV_CACHE_DIR="''${XDG_CACHE_HOME:-$HOME/.cache}/easyspeak/uv"
             export UV_PROJECT_ENVIRONMENT="$state_dir/venv"
             export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX='${pretendVersion}'
+            export EASYSPEAK_PIPER_MODEL='${piperModelPath}'
             # pyaudio's setup.py hard-codes /usr/include and won't find
             # headers from the Nix store. CPPFLAGS/LDFLAGS are picked up by
             # distutils; C_INCLUDE_PATH/LIBRARY_PATH are read by gcc itself,
@@ -176,6 +199,7 @@
             export C_INCLUDE_PATH="${pkgs.portaudio}/include''${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}"
             export LIBRARY_PATH="${pkgs.portaudio}/lib''${LIBRARY_PATH:+:$LIBRARY_PATH}"
             export UV_PYTHON='${python}/bin/python'
+            export EASYSPEAK_PIPER_MODEL="''${EASYSPEAK_PIPER_MODEL:-${piperModelPath}}"
             # Only used when .git is missing (e.g. tarball checkout); a real
             # git tree lets setuptools_scm derive the proper version.
             export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX="''${SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX:-${pretendVersion}}"
