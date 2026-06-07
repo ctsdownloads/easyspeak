@@ -3,7 +3,9 @@ Browser Plugin - Qutebrowser voice control via IPC
 """
 
 import re
+import sys
 import time
+from pathlib import Path
 
 NAME = "browser"
 DESCRIPTION = "Qutebrowser voice control"
@@ -91,9 +93,75 @@ SCROLL_TOP_JS = "(function(){var el=document.elementFromPoint(window.innerWidth/
 SCROLL_BOTTOM_JS = "(function(){var el=document.elementFromPoint(window.innerWidth/2,window.innerHeight/2);while(el){if(el.scrollHeight>el.clientHeight&&getComputedStyle(el).overflowY!=='visible'){el.scrollTo(0,el.scrollHeight);return}el=el.parentElement}window.scrollTo(0,document.body.scrollHeight)})()"
 
 
+# Lines this plugin requires in ~/.config/qutebrowser/config.py. Each is
+# checked grep-style (substring on the file as a whole) and appended
+# individually if absent — the user's other settings are left intact.
+REQUIRED_QUTEBROWSER_LINES = [
+    "config.load_autoconfig(False)",
+    "c.hints.chars = '0123456789'",
+]
+
+
+def ensure_qutebrowser_config():
+    """Append any missing required lines to qutebrowser's config.py.
+
+    Preserves everything else the user has written. Tolerates read-only
+    configs (e.g. Nix Home-Manager symlinks into /nix/store): on a write
+    failure we emit a polite note telling the user which lines to add
+    themselves, rather than crashing startup.
+    """
+    cfg = Path.home() / ".config" / "qutebrowser" / "config.py"
+
+    try:
+        cfg.parent.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        _note_missing_qb_lines(
+            cfg,
+            REQUIRED_QUTEBROWSER_LINES,
+            reason=f"could not create {cfg.parent} ({e})",
+        )
+        return
+
+    try:
+        existing = cfg.read_text() if cfg.exists() else ""
+    except OSError as e:
+        _note_missing_qb_lines(
+            cfg, REQUIRED_QUTEBROWSER_LINES, reason=f"could not read it ({e})"
+        )
+        return
+
+    missing = [line for line in REQUIRED_QUTEBROWSER_LINES if line not in existing]
+    if not missing:
+        return
+
+    separator = "" if not existing or existing.endswith("\n") else "\n"
+    updated = existing + separator + "\n".join(missing) + "\n"
+
+    try:
+        cfg.write_text(updated)
+    except OSError as e:
+        _note_missing_qb_lines(cfg, missing, reason=f"is read-only ({e})")
+        return
+
+    verb = "wrote" if not existing else "updated"
+    added = "; ".join(missing)
+    print(f"browser: {verb} {cfg} (added: {added})", file=sys.stderr)
+
+
+def _note_missing_qb_lines(cfg, lines, reason):
+    """Politely tell the user to add missing qutebrowser config lines."""
+    body = "\n".join(f"  {line}" for line in lines)
+    print(
+        f"browser: note: {cfg} {reason}. "
+        f"Please make sure your qutebrowser config includes:\n{body}",
+        file=sys.stderr,
+    )
+
+
 def setup(c):
     global core
     core = c
+    ensure_qutebrowser_config()
 
 
 def qb(command):

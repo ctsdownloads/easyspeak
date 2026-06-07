@@ -558,11 +558,13 @@ def test_handle_browser_command_unknown(mock_core):
 # Tests for setup function.
 
 
-def test_setup(mock_core):
-    """Test setup function sets core reference."""
+@patch.object(browser, "ensure_qutebrowser_config")
+def test_setup(mock_ensure, mock_core):
+    """Test setup function sets core reference and triggers host-env setup."""
     browser.setup(mock_core)
 
     assert browser.core == mock_core
+    mock_ensure.assert_called_once_with()
 
 
 # Tests for handle function.
@@ -962,3 +964,126 @@ def test_handle_browser_command_phonetic_hint_parsing(mock_qb, mock_core, capsys
     assert mock_qb.call_args.args[0] == "hint-follow 1"
     captured = capsys.readouterr()
     assert "Phonetic parsed:" in captured.out
+
+
+# Tests for ensure_qutebrowser_config and _note_missing_qb_lines.
+
+
+@pytest.fixture
+def fake_home(tmp_path, monkeypatch):
+    """Redirect Path.home() to a tmp dir so config writes are isolated."""
+    monkeypatch.setenv("HOME", str(tmp_path))
+    return tmp_path
+
+
+def _read_cfg(home):
+    return (home / ".config" / "qutebrowser" / "config.py").read_text()
+
+
+def test_ensure_qutebrowser_config_fresh(fake_home, capsys):
+    """When the file is missing, both required lines are written."""
+    browser.ensure_qutebrowser_config()
+
+    content = _read_cfg(fake_home)
+    assert "config.load_autoconfig(False)" in content
+    assert "c.hints.chars = '0123456789'" in content
+
+    captured = capsys.readouterr()
+    assert "browser: wrote" in captured.err
+    assert "config.load_autoconfig(False)" in captured.err
+
+
+def test_ensure_qutebrowser_config_idempotent(fake_home, capsys):
+    """A second call on an already-correct file is silent and doesn't rewrite."""
+    browser.ensure_qutebrowser_config()
+    capsys.readouterr()  # discard the "wrote" message from the first call
+
+    cfg = fake_home / ".config" / "qutebrowser" / "config.py"
+    mtime_before = cfg.stat().st_mtime
+
+    browser.ensure_qutebrowser_config()
+
+    assert cfg.stat().st_mtime == mtime_before
+    captured = capsys.readouterr()
+    assert captured.err == ""
+
+
+def test_ensure_qutebrowser_config_appends_missing(fake_home, capsys):
+    """User content + one of our lines: we append only what's missing."""
+    cfg = fake_home / ".config" / "qutebrowser" / "config.py"
+    cfg.parent.mkdir(parents=True)
+    cfg.write_text(
+        "# user notes\nconfig.load_autoconfig(False)\nc.tabs.background = True\n"
+    )
+
+    browser.ensure_qutebrowser_config()
+
+    content = cfg.read_text()
+    assert "# user notes" in content
+    assert "c.tabs.background = True" in content
+    assert "c.hints.chars = '0123456789'" in content
+
+    captured = capsys.readouterr()
+    assert "browser: updated" in captured.err
+    assert "c.hints.chars = '0123456789'" in captured.err
+    # The other required line was already present — shouldn't be listed as added.
+    assert "added: config.load_autoconfig" not in captured.err
+
+
+def test_ensure_qutebrowser_config_no_trailing_newline(fake_home):
+    """Existing file without trailing newline gets a separator added."""
+    cfg = fake_home / ".config" / "qutebrowser" / "config.py"
+    cfg.parent.mkdir(parents=True)
+    cfg.write_text("c.tabs.background = True")  # no trailing newline
+
+    browser.ensure_qutebrowser_config()
+
+    content = cfg.read_text()
+    # Original line must remain intact (not merged with the appended line).
+    assert "c.tabs.background = True\n" in content
+    assert "c.hints.chars = '0123456789'" in content
+
+
+def test_ensure_qutebrowser_config_mkdir_fails(fake_home, capsys):
+    """mkdir OSError routes to the polite note with all required lines."""
+    with patch.object(browser.Path, "mkdir", side_effect=PermissionError("denied")):
+        browser.ensure_qutebrowser_config()
+
+    captured = capsys.readouterr()
+    assert "browser: note:" in captured.err
+    assert "could not create" in captured.err
+    # Lists both required lines since we don't know what's there.
+    assert "config.load_autoconfig(False)" in captured.err
+    assert "c.hints.chars = '0123456789'" in captured.err
+
+
+def test_ensure_qutebrowser_config_read_fails(fake_home, capsys):
+    """read_text OSError routes to the polite note with all required lines."""
+    cfg = fake_home / ".config" / "qutebrowser" / "config.py"
+    cfg.parent.mkdir(parents=True)
+    cfg.write_text("anything")
+
+    with patch.object(browser.Path, "read_text", side_effect=PermissionError("nope")):
+        browser.ensure_qutebrowser_config()
+
+    captured = capsys.readouterr()
+    assert "browser: note:" in captured.err
+    assert "could not read" in captured.err
+    assert "config.load_autoconfig(False)" in captured.err
+
+
+def test_ensure_qutebrowser_config_write_fails(fake_home, capsys):
+    """Read-only file: warning lists only the lines that still need adding."""
+    cfg = fake_home / ".config" / "qutebrowser" / "config.py"
+    cfg.parent.mkdir(parents=True)
+    cfg.write_text("config.load_autoconfig(False)\n")  # one line already present
+
+    with patch.object(browser.Path, "write_text", side_effect=PermissionError("ro")):
+        browser.ensure_qutebrowser_config()
+
+    captured = capsys.readouterr()
+    assert "browser: note:" in captured.err
+    assert "is read-only" in captured.err
+    # Only the still-missing line should be listed.
+    assert "c.hints.chars = '0123456789'" in captured.err
+    assert "config.load_autoconfig(False)" not in captured.err.split("includes:")[1]
