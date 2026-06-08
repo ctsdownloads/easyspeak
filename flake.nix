@@ -33,10 +33,18 @@
             "0.0.0+nix";
 
         # Shared libraries that Python wheels dlopen at runtime.
+        # NOTE: nix-ld (programs.nix-ld) does NOT cover these — it only injects
+        # NIX_LD_LIBRARY_PATH for foreign executables that run through its loader
+        # stub. These wheels are dlopen'd by a Nix-store Python, which uses the
+        # normal glibc loader and only searches LD_LIBRARY_PATH/rpath.
         runtimeLibs = with pkgs; [
           portaudio # libportaudio.so for pyaudio
           stdenv.cc.cc.lib # libstdc++ for onnxruntime / faster-whisper
-          zlib
+          zlib # libz.so.1
+          # head-tracking extra: opencv-python's cv2.abi3.so links these.
+          glib # libglib-2.0.so.0 + libgthread-2.0.so.0
+          libGL # libGL.so.1
+          libxcb # libxcb.so.1
         ];
 
         # Tools the app shells out to (paplay, ffplay, piper, etc).
@@ -173,7 +181,7 @@
             # git tree lets setuptools_scm derive the proper version.
             export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX="''${SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX:-${pretendVersion}}"
             echo "EasySpeak dev shell — Python $(python --version 2>&1 | awk '{print $2}'), uv $(uv --version | awk '{print $2}')"
-            echo "Run:  uv run --with openwakeword easyspeak"
+            echo "Run:  uv run [--extra head-tracking] --with openwakeword easyspeak"
             echo "      just --list"
           '';
         };
