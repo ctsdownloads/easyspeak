@@ -82,9 +82,9 @@ def test_load_whisper_model_uses_module_defaults():
 
 def test_piper_model_env_override(monkeypatch):
     """EASYSPEAK_PIPER_MODEL overrides the default path."""
-    monkeypatch.setenv("EASYSPEAK_PIPER_MODEL", "/nix/store/abc/voice.onnx")
+    monkeypatch.setenv("EASYSPEAK_PIPER_MODEL", "/opt/voices/voice.onnx")
     importlib.reload(config)
-    assert config.PIPER_MODEL == "/nix/store/abc/voice.onnx"
+    assert config.PIPER_MODEL == "/opt/voices/voice.onnx"
 
 
 def test_whisper_model_env_override(monkeypatch):
