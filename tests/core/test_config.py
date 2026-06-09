@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 # Mock the heavy external dep before importing
-sys.modules.setdefault("faster_whisper", MagicMock())
+sys.modules["faster_whisper"] = MagicMock()
 
 from easyspeak.core import config  # noqa: E402
 

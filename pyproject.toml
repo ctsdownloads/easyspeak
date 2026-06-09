@@ -51,6 +51,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+acceptance = [
+  "pytest>=8",
+  "pytest-bdd>=7",
+]
 benchmark = [
   "pytest>=8",
   "pytest-benchmark>=5",
@@ -59,9 +63,16 @@ head-tracking = [
   "opencv-python>=4.13.0.90",
   "sixdrepnet>=0.1.6",
 ]
+integration = [
+  "pytest>=8",
+]
 mypy = [
   "mypy>=1.19.1",
   "types-pyaudio>=0.2.16.20250801",
+]
+unittest = [
+  "coverage[toml]>=7.14",
+  "pytest>=8",
 ]
 
 [project.scripts]
@@ -84,9 +95,13 @@ warn_unreachable = true
 warn_unused_ignores = true
 
 [tool.pytest.ini_options]
-# Whisper benchmarks download large models and take minutes; opt-in only.
-# Run them with `just benchmark` or `pytest tests/benchmarks/`.
-addopts = "--ignore=tests/benchmarks"
+# Folders excluded from default discovery are opt-in: they need preparation
+# the plain unit run doesn't (large model downloads, real external binaries,
+# an audio server). Each has its own `just` target.
+#   tests/acceptance  -> `just acceptance`  (Gherkin scenarios; needs pytest-bdd)
+#   tests/benchmarks  -> `just benchmark`   (downloads large Whisper models)
+#   tests/integration -> `just integration` (runs real piper/audio-player binaries)
+addopts = "--ignore=tests/acceptance --ignore=tests/benchmarks --ignore=tests/integration"
 
 [tool.ruff.lint]
 extend-select = ["I"]  # "ALL" one day

@@ -3,7 +3,7 @@
 
 # Show this usage screen (default)
 @help:
-    just --list
+    just --list --unsorted
 
 # Run codestyle and safety checks, tests, packaging and cleanup
 [group('lifecycle')]
@@ -65,7 +65,7 @@ test *args:
 # Run pytest (use -q for silent, -v for verbose, -s for debug, -x to stop on error)
 [group('tests')]
 pytest *args:
-    uv run --with=coverage[toml] --with=pytest coverage run -m pytest {{ args }}
+    uv run --extra=unittest coverage run -m pytest {{ args }}
 
 # Display test coverage report
 [group('tests')]
@@ -73,26 +73,36 @@ coverage:
     uvx coverage[toml] xml
     uvx coverage[toml] report
 
+# Run integration tests (exercise external commands for real)
+[group('tests')]
+integration *args=('-v'):
+    uv run --extra=integration pytest tests/integration {{ args }}
+
+# Run acceptance tests (Gherkin scenarios via pytest-bdd)
+[group('tests')]
+acceptance *args:
+    uv run --extra=acceptance pytest tests/acceptance {{ args }}
+
 # Run Whisper benchmarks (writes results.json for bencher.dev)
 [group('tests')]
 benchmark *args:
     uv run --extra=benchmark pytest tests/benchmarks/ \
         --benchmark-json=results.json {{ args }}
 
-# Run functional tests on a built package
-[group('tests')]
-functional: (clean '--quiet') (package '--quiet')
+# Build package and check metadata
+[group('release')]
+package *args:
+    uv build {{ args }}
+
+# Runs plausibility checks against freshly built packages
+[group('release')]
+gate: (clean '--quiet') (package '--quiet')
     # Python package should not contain tests (MANIFEST.in)
     ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep tests
     ! tar tfz dist/easyspeak_linux-*.tar.gz | grep tests
     # Python package should contain Core module
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q core
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q core
-
-# Build package and check metadata
-[group('release')]
-package *args:
-    uv build {{ args }}
 
 # Verify package version is same as Git tag
 [group('release')]

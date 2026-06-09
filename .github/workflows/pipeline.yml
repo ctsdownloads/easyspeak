@@ -20,7 +20,7 @@ jobs:
         - lint --
         - types
         - package
-        - functional
+        - gate
       fail-fast: false
     steps:
     - uses: actions/checkout@v6
