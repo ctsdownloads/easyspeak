@@ -22,9 +22,34 @@ FLATPAK_APPS = {
 
 # Local binary apps
 LOCAL_APPS = {
-    "files": "nautilus",
-    "terminal": "gnome-terminal",
+    "alarm": "gnome-clocks",
     "browser": "qutebrowser",
+    "calculator": "gnome-calculator",
+    "calendar": "gnome-calendar",
+    "camera": "snapshot",
+    "characters": "gnome-characters",
+    "clocks": "gnome-clocks",
+    "connections": "gnome-connections",
+    "contacts": "gnome-contacts",
+    "editor": "gnome-text-editor",
+    "epiphany": "epiphany",
+    "extensions": "gnome-extensions-app",
+    "files": "nautilus",
+    "gimp": "gimp",
+    "inkscape": "inkscape",
+    "logs": "gnome-logs",
+    "maps": "gnome-maps",
+    "music player": "gnome-music",
+    "nautilus": "nautilus",
+    "radio": "shortwave",
+    "scanner": "simple-scan",
+    "settings": "gnome-control-center",
+    "software": "gnome-software",
+    "terminal": "gnome-terminal",
+    "timer": "gnome-clocks",
+    "video player": "showtime",
+    "weather": "gnome-weather",
+    "web": "epiphany",
 }
 
 core = None
