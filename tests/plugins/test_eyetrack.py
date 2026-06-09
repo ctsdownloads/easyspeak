@@ -673,17 +673,12 @@ def test_run_tracking_scenarios(
         eyetrack_plugin.tracking_active = True
         eyetrack_plugin.stop_event.clear()
 
-        # Set stop_event after a short delay to prevent infinite loop in test
-        import threading
-
-        def stop_after_delay():
-            time.sleep(0.5)
-            eyetrack_plugin.stop_event.set()
-
-        stopper = threading.Thread(target=stop_after_delay, daemon=True)
-        stopper.start()
-
-        eyetrack_plugin.run_tracking()
+        # read_side_effect already stops the loop deterministically once the
+        # frames run out. Stub the real-time pacing sleep so the loop processes
+        # every frame at full speed, making coverage of the motion branches
+        # stable instead of racing a wall-clock timer.
+        with patch("time.sleep"):
+            eyetrack_plugin.run_tracking()
 
         # After run_tracking completes, tracking_active should be False
         assert eyetrack_plugin.tracking_active is False
