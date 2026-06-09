@@ -1,6 +1,6 @@
 """Tests for the apps plugin module."""
 
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 from easyspeak.plugins import apps
@@ -61,7 +61,6 @@ def test_find_app_flatpak_not_installed(mock_core_failure, app_name):
     ["app_name", "binary_name"],
     [
         ["files", "nautilus"],
-        ["terminal", "gnome-terminal"],
         ["browser", "qutebrowser"],
     ],
 )
@@ -175,6 +174,260 @@ def test_close_app_not_found(mock_find_app, mock_core):
     assert result is False
     assert mock_find_app.call_args.args == (app_name, mock_core)
     assert not mock_core.host_run.called
+
+
+@pytest.fixture(autouse=True)
+def _reset_apps():
+    """Keep setup()'s discovered terminal entry from leaking between tests."""
+    local, flatpak = apps.LOCAL_APPS.copy(), apps.FLATPAK_APPS.copy()
+    yield
+    apps.LOCAL_APPS.clear()
+    apps.LOCAL_APPS.update(local)
+    apps.FLATPAK_APPS.clear()
+    apps.FLATPAK_APPS.update(flatpak)
+
+
+def test_setup_registers_terminal_via_xdg_spec(mock_core):
+    """When the spec launcher exists, then setup registers the real terminal binary."""
+
+    def side_effect(cmd, **kwargs):
+        if cmd == ["which", "xdg-terminal-exec"]:
+            return Mock(returncode=0)
+        if cmd == ["xdg-terminal-exec", "--print-cmd"]:
+            return Mock(
+                returncode=0,
+                stdout="/opt/ghostty/bin/ghostty\n--gtk-single-instance=true\n",
+            )
+        if cmd == ["which", "/opt/ghostty/bin/ghostty"]:
+            return Mock(returncode=0)
+        return Mock(returncode=1)
+
+    mock_core.host_run.side_effect = side_effect
+
+    apps.setup(mock_core)
+
+    assert apps.LOCAL_APPS["terminal"] == "/opt/ghostty/bin/ghostty"
+
+
+def test_setup_skips_env_wrapper_in_xdg_spec(mock_core):
+    """When the spec wraps the terminal in env, then setup registers the binary, not env."""
+
+    def side_effect(cmd, **kwargs):
+        if cmd == ["which", "xdg-terminal-exec"]:
+            return Mock(returncode=0)
+        if cmd == ["xdg-terminal-exec", "--print-cmd"]:
+            return Mock(returncode=0, stdout="/usr/bin/env\nFOO=bar\nghostty\n")
+        if cmd == ["which", "ghostty"]:
+            return Mock(returncode=0)
+        return Mock(returncode=1)
+
+    mock_core.host_run.side_effect = side_effect
+
+    apps.setup(mock_core)
+
+    assert apps.LOCAL_APPS["terminal"] == "ghostty"
+
+
+def test_setup_registers_flatpak_terminal_by_app_id(mock_core):
+    """When the default terminal is a flatpak, then setup registers it by app-id."""
+
+    def side_effect(cmd, **kwargs):
+        if cmd == ["which", "xdg-terminal-exec"]:
+            return Mock(returncode=0)
+        if cmd == ["xdg-terminal-exec", "--print-cmd"]:
+            return Mock(
+                returncode=0,
+                stdout="flatpak\nrun\n--branch=stable\ncom.raggesilver.BlackBox\n",
+            )
+        if cmd == ["flatpak", "info", "com.raggesilver.BlackBox"]:
+            return Mock(returncode=0)
+        return Mock(returncode=1)
+
+    mock_core.host_run.side_effect = side_effect
+
+    apps.setup(mock_core)
+
+    assert apps.FLATPAK_APPS["terminal"] == "com.raggesilver.BlackBox"
+    assert "terminal" not in apps.LOCAL_APPS
+
+
+def test_setup_registers_snap_terminal_by_name(mock_core):
+    """When the default terminal is a snap, then setup registers its executable name."""
+
+    def side_effect(cmd, **kwargs):
+        if cmd == ["which", "xdg-terminal-exec"]:
+            return Mock(returncode=0)
+        if cmd == ["xdg-terminal-exec", "--print-cmd"]:
+            return Mock(returncode=0, stdout="snap\nrun\nalacritty\n")
+        if cmd == ["which", "alacritty"]:
+            return Mock(returncode=0)
+        return Mock(returncode=1)
+
+    mock_core.host_run.side_effect = side_effect
+
+    apps.setup(mock_core)
+
+    assert apps.LOCAL_APPS["terminal"] == "alacritty"
+
+
+def test_setup_falls_back_when_spec_terminal_uninstalled(mock_core):
+    """When the spec names a terminal not in PATH, then setup falls back to PATH."""
+
+    def side_effect(cmd, **kwargs):
+        if cmd == ["which", "xdg-terminal-exec"]:
+            return Mock(returncode=0)
+        if cmd == ["xdg-terminal-exec", "--print-cmd"]:
+            return Mock(returncode=0, stdout="ghostty\n")
+        if cmd == ["which", "kgx"]:
+            return Mock(returncode=0)
+        return Mock(returncode=1)
+
+    mock_core.host_run.side_effect = side_effect
+
+    apps.setup(mock_core)
+
+    assert apps.LOCAL_APPS["terminal"] == "kgx"
+
+
+def test_setup_falls_back_when_spec_flatpak_uninstalled(mock_core):
+    """When the spec names an uninstalled flatpak terminal, then setup falls back."""
+
+    def side_effect(cmd, **kwargs):
+        if cmd == ["which", "xdg-terminal-exec"]:
+            return Mock(returncode=0)
+        if cmd == ["xdg-terminal-exec", "--print-cmd"]:
+            return Mock(returncode=0, stdout="flatpak\nrun\ncom.raggesilver.BlackBox\n")
+        if cmd == ["which", "kgx"]:
+            return Mock(returncode=0)
+        return Mock(returncode=1)
+
+    mock_core.host_run.side_effect = side_effect
+
+    apps.setup(mock_core)
+
+    assert apps.LOCAL_APPS["terminal"] == "kgx"
+    assert "terminal" not in apps.FLATPAK_APPS
+
+
+def test_setup_falls_back_when_spec_snap_uninstalled(mock_core):
+    """When the spec names an uninstalled snap terminal, then setup falls back."""
+
+    def side_effect(cmd, **kwargs):
+        if cmd == ["which", "xdg-terminal-exec"]:
+            return Mock(returncode=0)
+        if cmd == ["xdg-terminal-exec", "--print-cmd"]:
+            return Mock(returncode=0, stdout="snap\nrun\nalacritty\n")
+        if cmd == ["which", "kgx"]:
+            return Mock(returncode=0)
+        return Mock(returncode=1)
+
+    mock_core.host_run.side_effect = side_effect
+
+    apps.setup(mock_core)
+
+    assert apps.LOCAL_APPS["terminal"] == "kgx"
+
+
+def test_setup_falls_back_when_spec_yields_only_env(mock_core):
+    """When the spec output is only an env prefix, then setup falls back to PATH."""
+
+    def side_effect(cmd, **kwargs):
+        if cmd == ["which", "xdg-terminal-exec"]:
+            return Mock(returncode=0)
+        if cmd == ["xdg-terminal-exec", "--print-cmd"]:
+            return Mock(returncode=0, stdout="env\nFOO=bar\n")
+        if cmd == ["which", "kgx"]:
+            return Mock(returncode=0)
+        return Mock(returncode=1)
+
+    mock_core.host_run.side_effect = side_effect
+
+    apps.setup(mock_core)
+
+    assert apps.LOCAL_APPS["terminal"] == "kgx"
+
+
+def test_setup_falls_back_when_wrapper_has_no_target(mock_core):
+    """When a wrapper command names no app, then setup falls back to PATH."""
+
+    def side_effect(cmd, **kwargs):
+        if cmd == ["which", "xdg-terminal-exec"]:
+            return Mock(returncode=0)
+        if cmd == ["xdg-terminal-exec", "--print-cmd"]:
+            return Mock(returncode=0, stdout="flatpak\nrun\n--branch=stable\n")
+        if cmd == ["which", "kgx"]:
+            return Mock(returncode=0)
+        return Mock(returncode=1)
+
+    mock_core.host_run.side_effect = side_effect
+
+    apps.setup(mock_core)
+
+    assert apps.LOCAL_APPS["terminal"] == "kgx"
+
+
+def test_setup_registers_terminal_via_fallback(mock_core):
+    """When the spec launcher is missing, then setup registers the first terminal in PATH."""
+
+    def side_effect(cmd, **kwargs):
+        if cmd == ["which", "xdg-terminal-exec"]:
+            return Mock(returncode=1)
+        if cmd == ["which", "kgx"]:
+            return Mock(returncode=0)
+        return Mock(returncode=1)
+
+    mock_core.host_run.side_effect = side_effect
+
+    apps.setup(mock_core)
+
+    assert apps.LOCAL_APPS["terminal"] == "kgx"
+
+
+def test_setup_falls_back_when_spec_print_fails(mock_core):
+    """When the spec launcher cannot report a command, then setup falls back to PATH."""
+
+    def side_effect(cmd, **kwargs):
+        if cmd == ["which", "xdg-terminal-exec"]:
+            return Mock(returncode=0)
+        if cmd == ["xdg-terminal-exec", "--print-cmd"]:
+            return Mock(returncode=1, stdout="")
+        if cmd == ["which", "kgx"]:
+            return Mock(returncode=0)
+        return Mock(returncode=1)
+
+    mock_core.host_run.side_effect = side_effect
+
+    apps.setup(mock_core)
+
+    assert apps.LOCAL_APPS["terminal"] == "kgx"
+
+
+def test_setup_no_terminal_not_registered(mock_core_failure):
+    """When no terminal can be found, then no terminal entry is registered."""
+    apps.setup(mock_core_failure)
+
+    assert "terminal" not in apps.LOCAL_APPS
+
+
+def test_launch_registered_terminal(mock_core):
+    """When a registered terminal is launched, then its binary runs in the background."""
+    apps.LOCAL_APPS["terminal"] = "ghostty"
+
+    result = apps.launch_app("terminal", mock_core)
+
+    assert result is True
+    assert mock_core.host_run.call_args.args == (["ghostty"],)
+    assert mock_core.host_run.call_args.kwargs == {"background": True}
+
+
+def test_close_registered_terminal(mock_core):
+    """When a registered terminal is closed, then its binary is killed."""
+    apps.LOCAL_APPS["terminal"] = "ghostty"
+
+    result = apps.close_app("terminal", mock_core)
+
+    assert result is True
+    assert mock_core.host_run.call_args.args == (["pkill", "-f", "ghostty"],)
 
 
 @patch("easyspeak.plugins.apps.launch_app", return_value=True)
