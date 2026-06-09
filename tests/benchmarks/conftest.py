@@ -10,8 +10,8 @@ from unittest.mock import MagicMock
 # openwakeword isn't a hard dependency on Python 3.13+ (speexdsp-ns wheels
 # missing) and the benchmark doesn't exercise the wake-word path. Stub it
 # before tests import easyspeak.core.main. Same pattern as tests/core/test_main.py.
-sys.modules.setdefault("openwakeword", MagicMock())
-sys.modules.setdefault("openwakeword.model", MagicMock())
+sys.modules["openwakeword"] = MagicMock()
+sys.modules["openwakeword.model"] = MagicMock()
 
 import numpy as np  # noqa: E402
 import pytest  # noqa: E402
