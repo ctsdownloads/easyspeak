@@ -89,6 +89,11 @@ integration *args=('-v'):
 acceptance *args:
     uv run --extra=acceptance pytest tests/acceptance {{ args }}
 
+# Unit-test the GNOME Shell extension's pure JS helpers (needs node >= 21)
+[group('tests')]
+test-js *args:
+    node --test tests/js/*.test.js {{ args }}
+
 # Run Whisper benchmarks (writes results.json for bencher.dev)
 [group('tests')]
 benchmark *args:

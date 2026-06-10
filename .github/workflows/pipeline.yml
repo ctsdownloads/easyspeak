@@ -43,6 +43,7 @@ jobs:
     - uses: taiki-e/install-action@just
     - run: npm install --global eslint@10
     - run: just lint-js
+    - run: just test-js
 
   test:
     runs-on: ubuntu-latest
