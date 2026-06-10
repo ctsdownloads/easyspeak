@@ -372,8 +372,29 @@ def listen_for_hint(core):
     print("  [listen_for_hint returning - complete]")
 
 
+# Global control phrases owned by the sleep and base plugins. This plugin is
+# routed before them (filename order), and qb() would spawn a fresh qutebrowser
+# window for each — e.g. "stop" -> :stop, "go to sleep" -> :quickmark-load
+# sleep. Decline them so they fall through to the plugin that actually owns
+# them (deactivate / quit). Exact-matched quit words mirror zz_base; the sleep
+# phrases are substring-matched to match sleep.py.
+RESERVED_GLOBAL_EXACT = ("stop", "exit", "quit", "goodbye", "bye")
+RESERVED_GLOBAL_SUBSTR = ("go to sleep", "goto sleep", "stop listening")
+
+
+def _is_reserved_global(cmd_lower):
+    return cmd_lower in RESERVED_GLOBAL_EXACT or any(
+        phrase in cmd_lower for phrase in RESERVED_GLOBAL_SUBSTR
+    )
+
+
 def handle(cmd, core):
     cmd_lower = cmd.lower().strip(".,!? ")
+
+    # Global sleep/quit commands belong to other plugins; if we matched them as
+    # browser commands we would open qutebrowser instead. Let them through.
+    if _is_reserved_global(cmd_lower):
+        return None
 
     # --- Enter browser mode (explicit) ---
     if cmd_lower in ["browser", "browser mode", "open browser", "launch browser"]:

@@ -1,10 +1,13 @@
 import St from 'gi://St';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
 import Clutter from 'gi://Clutter';
 import Shell from 'gi://Shell';
 import Meta from 'gi://Meta';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 const DBUS_INTERFACE = `
 <node>
@@ -99,6 +102,11 @@ const DBUS_INTERFACE = `
     <method name="GetScreenSize">
       <arg type="i" direction="out" name="width"/>
       <arg type="i" direction="out" name="height"/>
+    </method>
+
+    <!-- Panel indicator state (listening / active / thinking / muted) -->
+    <method name="SetState">
+      <arg type="s" direction="in" name="state"/>
     </method>
   </interface>
 </node>`;
@@ -526,18 +534,94 @@ class ScreenshotManager {
     }
 }
 
+const CACHE_DIR = GLib.get_home_dir() + '/.cache/easyspeak';
+const CONTROL_FILE = CACHE_DIR + '/control';
+
+// The indicator is shown ONLY while EasySpeak is deactivated. While it's running
+// it listens continuously, so GNOME's own red microphone privacy icon already
+// signals the open mic and the assistant is driven by voice — a second icon would
+// just be noise. When deactivated the mic is released (GNOME's dot disappears) and
+// voice is off, so this dimmed, struck-through mic becomes the one affordance to
+// wake the assistant back up.
+const TrayIndicator = GObject.registerClass(
+class TrayIndicator extends PanelMenu.Button {
+    _init() {
+        super._init(0.0, 'EasySpeak');
+        this.visible = false;  // hidden until the daemon reports "muted"
+
+        this._icon = new St.Icon({
+            icon_name: 'microphone-disabled-symbolic',  // mic with a slash
+            style_class: 'system-status-icon',
+            style: 'color: rgba(255, 255, 255, 0.5);',  // dimmed: "asleep"
+        });
+        this.add_child(this._icon);
+
+        const statusItem = new PopupMenu.PopupMenuItem('EasySpeak: Deactivated', {
+            reactive: false,
+        });
+        this.menu.addMenuItem(statusItem);
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+        const reactivateItem = new PopupMenu.PopupMenuItem('Reactivate');
+        reactivateItem.connect('activate', () => this._writeCommand('unmute'));
+        this.menu.addMenuItem(reactivateItem);
+
+        const quitItem = new PopupMenu.PopupMenuItem('Quit EasySpeak');
+        quitItem.connect('activate', () => {
+            this._writeCommand('quit');
+            this.visible = false;  // the daemon is exiting; don't leave a stale icon
+        });
+        this.menu.addMenuItem(quitItem);
+    }
+
+    // Pushed over D-Bus by the daemon. Only the deactivated state is visible;
+    // every running state (listening/active/thinking) hides the indicator.
+    setState(state) {
+        this.visible = state === 'muted';
+    }
+
+    // Menu actions reach the daemon via a one-shot control file it polls each
+    // audio-loop iteration (the daemon can't serve D-Bus while blocked reading).
+    _writeCommand(command) {
+        try {
+            const dir = Gio.File.new_for_path(CACHE_DIR);
+            if (!dir.query_exists(null)) dir.make_directory_with_parents(null);
+            GLib.file_set_contents(CONTROL_FILE, command);
+        } catch (e) {
+            log('EasySpeak: failed to write tray command: ' + e.message);
+        }
+    }
+});
+
 export default class EasySpeakGridExtension {
     constructor() {
         this._dbus = null;
         this._grid = null;
         this._winMgr = null;
         this._screenMgr = null;
+        this._tray = null;
     }
 
     enable() {
         this._grid = new GridOverlay();
         this._winMgr = new WindowManager();
         this._screenMgr = new ScreenshotManager();
+        this._tray = new TrayIndicator();
+        Main.panel.addToStatusArea('easyspeak', this._tray);
+        // addToStatusArea drops new indicators at the LEFT end of the status
+        // area (the "application content" zone). Move ours to the RIGHT end of
+        // that zone, immediately before GNOME's system menu, so it sits where
+        // the red microphone privacy icon shows: when the daemon sleeps and
+        // releases the mic, GNOME's red mic disappears and our struck-through
+        // mic takes its place. (Same idea as brendaw/add-username-toppanel#28,
+        // which used set_child_above_sibling to escape the default zone.)
+        const rightBox = Main.panel._rightBox;
+        const systemMenu = Main.panel.statusArea.quickSettings;
+        if (systemMenu && rightBox.contains(systemMenu.container)) {
+            rightBox.set_child_below_sibling(this._tray.container, systemMenu.container);
+        } else {
+            rightBox.set_child_above_sibling(this._tray.container, null);
+        }
 
         this._dbus = Gio.DBusExportedObject.wrapJSObject(DBUS_INTERFACE, {
             // Grid
@@ -581,6 +665,9 @@ export default class EasySpeakGridExtension {
             
             // Screen info
             GetScreenSize: () => this._grid.getScreenSize(),
+
+            // Panel indicator
+            SetState: (state) => this._tray.setState(state),
         });
 
         this._dbus.export(Gio.DBus.session, '/org/easyspeak/Grid');
@@ -594,6 +681,10 @@ export default class EasySpeakGridExtension {
         if (this._dbus) {
             this._dbus.unexport();
             this._dbus = null;
+        }
+        if (this._tray) {
+            this._tray.destroy();
+            this._tray = null;
         }
         this._winMgr = null;
         this._screenMgr = null;

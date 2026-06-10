@@ -159,6 +159,7 @@
             python
             pkgs.uv
             pkgs.just
+            pkgs.eslint # JS linter for the GNOME Shell extension (see `just lint-js`)
           ]
           ++ runtimeTools
           ++ buildTools;

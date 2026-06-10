@@ -33,6 +33,17 @@ jobs:
         sudo apt install -y portaudio19-dev
     - run: just ${{ matrix.task }}
 
+  lint-js:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - uses: taiki-e/install-action@just
+    - run: npm install --global eslint@10
+    - run: just lint-js
+
   test:
     runs-on: ubuntu-latest
     strategy:

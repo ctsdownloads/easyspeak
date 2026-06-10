@@ -8,6 +8,7 @@ Features:
 """
 
 import atexit
+import filecmp
 import re
 import shutil
 import subprocess
@@ -105,6 +106,38 @@ DIRECTIONS = {
 GRID_EXTENSION_UUID = "easyspeak-grid@local"
 
 
+def _refresh_extension_files(src_ext, src_meta, dest_dir):
+    """Copy the bundled extension into ``dest_dir`` if it differs from the
+    installed copy. Returns True if anything was written.
+
+    GNOME only auto-installs on first run, so without this an installed copy
+    from an older version lingers forever and improvements to extension.js
+    (e.g. the tray indicator) never reach the user. Best-effort: a missing
+    source or a write failure returns False rather than disturbing a working
+    install. The running GNOME Shell still won't load refreshed code until the
+    next login on Wayland.
+    """
+    if not (src_ext.is_file() and src_meta.is_file()):
+        return False
+    dest_ext = dest_dir / "extension.js"
+    dest_meta = dest_dir / "metadata.json"
+    try:
+        unchanged = (
+            dest_ext.is_file()
+            and dest_meta.is_file()
+            and filecmp.cmp(src_ext, dest_ext, shallow=False)
+            and filecmp.cmp(src_meta, dest_meta, shallow=False)
+        )
+        if unchanged:
+            return False
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src_ext, dest_ext)
+        shutil.copy2(src_meta, dest_meta)
+        return True
+    except OSError:
+        return False
+
+
 def ensure_grid_extension():
     """Install the GNOME Shell extension if needed, and enable it.
 
@@ -153,18 +186,29 @@ def ensure_grid_extension():
         / GRID_EXTENSION_UUID
     )
 
+    project_root = Path(__file__).resolve().parents[2]
+    src_ext = project_root / "extension.js"
+    src_meta = project_root / "metadata.json"
+
     if installed and already_enabled:
-        print(
-            f"mousegrid: GNOME extension {GRID_EXTENSION_UUID} "
-            f"already installed and enabled",
-            file=sys.stderr,
-        )
+        # Steady state — but still refresh the on-disk copy if the bundled
+        # extension changed since it was installed (GNOME only copies on first
+        # run). The refreshed code loads at the next login on Wayland.
+        if _refresh_extension_files(src_ext, src_meta, dest_dir):
+            print(
+                f"mousegrid: updated GNOME extension {GRID_EXTENSION_UUID} to "
+                f"the bundled version — log out and back in to load it",
+                file=sys.stderr,
+            )
+        else:
+            print(
+                f"mousegrid: GNOME extension {GRID_EXTENSION_UUID} "
+                f"already installed and enabled",
+                file=sys.stderr,
+            )
         return
 
     if not installed:
-        project_root = Path(__file__).resolve().parents[2]
-        src_ext = project_root / "extension.js"
-        src_meta = project_root / "metadata.json"
         if not (src_ext.is_file() and src_meta.is_file()):
             print(
                 f"mousegrid: note: could not auto-install GNOME extension — "

@@ -19,6 +19,7 @@ clean *args:
 codestyle:
     -just format
     -just lint
+    -just lint-js
 
 # Consistent code style (use -- to apply, --diff to preview)
 [group('codestyle')]
@@ -29,6 +30,11 @@ format *args=('--check'):
 [group('codestyle')]
 lint *args=('--statistics'):
     uvx ruff check {{ args }}
+
+# Lint the GNOME Shell extension JS (use --fix to autocorrect)
+[group('codestyle')]
+lint-js *args:
+    eslint extension.js {{ args }}
 
 # Static type checking (use --pretty for error details)
 [group('safety')]
