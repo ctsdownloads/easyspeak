@@ -13,68 +13,63 @@ def test_setup(mock_core):
     assert system.core is mock_core
 
 
-@pytest.mark.parametrize(
-    ["func", "expected_command"],
-    [
-        (
-            system.volume_up,
-            ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "10%+"],
-        ),
-        (
-            system.volume_down,
-            ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "10%-"],
-        ),
-        (
-            system.volume_mute,
-            ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"],
-        ),
-    ],
-)
-def test_volume_functions(func, expected_command, mock_core):
-    """When volume control functions are called, host_run is called with correct commands."""
+_STEP_UP = "org.gnome.SettingsDaemon.Power.Screen.StepUp"
+_STEP_DOWN = "org.gnome.SettingsDaemon.Power.Screen.StepDown"
+
+# (function, replayed keycode, command it falls back to when injection is unavailable).
+MEDIA_KEYS = [
+    (
+        system.volume_up,
+        system.KEY_VOLUME_UP,
+        ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "10%+"],
+    ),
+    (
+        system.volume_down,
+        system.KEY_VOLUME_DOWN,
+        ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "10%-"],
+    ),
+    (
+        system.volume_mute,
+        system.KEY_MUTE,
+        ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"],
+    ),
+    (system.brightness_up, system.KEY_BRIGHTNESS_UP, [*system._POWER_SCREEN, _STEP_UP]),
+    (
+        system.brightness_down,
+        system.KEY_BRIGHTNESS_DOWN,
+        [*system._POWER_SCREEN, _STEP_DOWN],
+    ),
+]
+
+
+@pytest.mark.parametrize(["func", "expected_keycode", "fallback"], MEDIA_KEYS)
+def test_replays_media_key(func, expected_keycode, fallback, mock_core):
+    """Volume and brightness controls replay the real key for GNOME's native feedback."""
+    mock_core.tap_key.return_value = True
+
     func(mock_core)
 
-    assert mock_core.host_run.call_args.args[0] == expected_command
+    assert mock_core.tap_key.call_args.args[0] == expected_keycode
 
 
-@pytest.mark.parametrize(
-    ["func", "expected_command"],
-    [
-        (
-            system.brightness_up,
-            [
-                "gdbus",
-                "call",
-                "--session",
-                "--dest",
-                "org.gnome.SettingsDaemon.Power",
-                "--object-path",
-                "/org/gnome/SettingsDaemon/Power",
-                "--method",
-                "org.gnome.SettingsDaemon.Power.Screen.StepUp",
-            ],
-        ),
-        (
-            system.brightness_down,
-            [
-                "gdbus",
-                "call",
-                "--session",
-                "--dest",
-                "org.gnome.SettingsDaemon.Power",
-                "--object-path",
-                "/org/gnome/SettingsDaemon/Power",
-                "--method",
-                "org.gnome.SettingsDaemon.Power.Screen.StepDown",
-            ],
-        ),
-    ],
-)
-def test_brightness_functions(func, expected_command, mock_core):
-    """When brightness control functions are called, host_run is called with correct commands."""
+@pytest.mark.parametrize(["func", "expected_keycode", "fallback"], MEDIA_KEYS)
+def test_no_fallback_when_key_injected(func, expected_keycode, fallback, mock_core):
+    """When the key injection succeeds, no fallback command is issued."""
+    mock_core.tap_key.return_value = True
+
     func(mock_core)
 
-    assert mock_core.host_run.call_args.args[0] == expected_command
+    assert not mock_core.host_run.called
+
+
+@pytest.mark.parametrize(["func", "expected_keycode", "fallback"], MEDIA_KEYS)
+def test_falls_back_when_key_unavailable(func, expected_keycode, fallback, mock_core):
+    """When key injection is unavailable, fall back to the silent command."""
+    mock_core.tap_key.return_value = False
+
+    func(mock_core)
+
+    assert mock_core.host_run.call_args.args[0] == fallback
 
 
 @pytest.mark.parametrize(
@@ -114,10 +109,14 @@ def test_dnd_functions(func, expected_command, mock_core):
     [
         ("volume up", "Volume up.", "volume_up"),
         ("volume louder", "Volume up.", "volume_up"),
+        ("louder", "Volume up.", "volume_up"),
+        ("make it louder", "Volume up.", "volume_up"),
         ("sound up", "Volume up.", "volume_up"),
         ("volume down", "Volume down.", "volume_down"),
         ("volume quieter", "Volume down.", "volume_down"),
         ("volume softer", "Volume down.", "volume_down"),
+        ("more silent", "Volume down.", "volume_down"),
+        ("make it quieter", "Volume down.", "volume_down"),
         ("sound down", "Volume down.", "volume_down"),
         ("volume mute", "Toggled mute.", "volume_mute"),
         ("volume unmute", "Toggled mute.", "volume_mute"),
@@ -212,6 +211,15 @@ def test_handle_dnd_commands(
     assert result is True
     assert mock_core.speak.call_args.args[0] == expected_speech
     assert func_map[expected_func].call_args.args[0] == mock_core
+
+
+@pytest.mark.parametrize("command", ["wait silently", "the softest blanket"])
+def test_handle_volume_word_match_not_substring(command, mock_core):
+    """Volume synonyms match whole words, so 'silently'/'softest' don't trigger it."""
+    result = system.handle(command, mock_core)
+
+    assert result is None
+    assert not mock_core.speak.called
 
 
 def test_handle_unrecognized_command(mock_core):

@@ -74,6 +74,25 @@ class TestEasySpeakUtilities:
 
         easy.speech.speak.assert_called_once_with("hello")
 
+    def test_tap_key_returns_true_on_injection(self):
+        """tap_key delegates to mediakeys and reports success."""
+        easy = EasySpeak()
+
+        with patch("easyspeak.core.mediakeys.tap_key") as mock_tap:
+            result = easy.tap_key(115)
+
+        assert result is True
+        mock_tap.assert_called_once_with(115)
+
+    def test_tap_key_returns_false_when_unavailable(self):
+        """tap_key reports failure when injection raises (e.g. non-GNOME session)."""
+        easy = EasySpeak()
+
+        with patch("easyspeak.core.mediakeys.tap_key", side_effect=Exception):
+            result = easy.tap_key(115)
+
+        assert result is False
+
 
 class TestEasySpeakPlugins:
     """Tests for EasySpeak plugin management."""
