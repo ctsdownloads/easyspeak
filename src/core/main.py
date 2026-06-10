@@ -7,16 +7,13 @@ Uses OpenWakeWord for fast wake detection.
 """
 
 import importlib
-import json
 import os
-import shutil
 import subprocess
 import sys
 import tempfile
 import time
 import wave
 from pathlib import Path
-from subprocess import TimeoutExpired
 
 import numpy as np
 import pyaudio
@@ -24,7 +21,6 @@ from openwakeword.model import Model as WakeWordModel
 
 from .config import (
     COMMAND_PROMPT,
-    PIPER_MODEL,
     SILENCE_DURATION,
     SILENCE_THRESHOLD,
     WAKE_COOLDOWN,
@@ -35,15 +31,11 @@ from .config import (
     WHISPER_MODEL,
     load_whisper_model,
 )
+from .speech import SpeechPipeline, suppressed_c_stderr
 
 # =============================================================================
 # CORE CLASS
 # =============================================================================
-
-# Seconds to wait after spawning the piper -> player pipeline before trusting
-# it: long enough for an immediate failure (bad model, bad flag) to surface,
-# short enough to barely register during the one-time warmup.
-SPEECH_SPAWN_GRACE = 0.2
 
 
 class EasySpeak:
@@ -56,8 +48,7 @@ class EasySpeak:
         self.last_wake_time = 0
         # Persistent text-to-speech pipeline (piper -> audio player) so the
         # voice model is loaded only once.
-        self._piper = None
-        self._player = None
+        self.speech = SpeechPipeline()
 
     # --- Utilities for plugins ---
 
@@ -69,161 +60,9 @@ class EasySpeak:
             )
         return subprocess.run(cmd, capture_output=True, text=True)
 
-    def _piper_sample_rate(self):
-        """Read the model's output sample rate (defaults to 22050)."""
-        try:
-            with open(f"{PIPER_MODEL}.json") as f:
-                return int(json.load(f)["audio"]["sample_rate"])
-        except (OSError, ValueError, KeyError, TypeError):
-            return 22050
-
-    def _player_cmd(self, rate):
-        """Pick a player that streams raw 16-bit mono PCM from stdin."""
-        if shutil.which("pw-play"):
-            return [
-                "pw-play",
-                "--raw",
-                "--format",
-                "s16",
-                "--rate",
-                str(rate),
-                "--channels",
-                "1",
-                "-",
-            ]
-        if shutil.which("paplay"):
-            return [
-                "paplay",
-                "--raw",
-                "--format=s16le",
-                f"--rate={rate}",
-                "--channels=1",
-            ]
-        # Last resort: ffplay (may quit on long silent gaps between utterances).
-        return [
-            "ffplay",
-            "-f",
-            "s16le",
-            "-ar",
-            str(rate),
-            "-ch_layout",
-            "mono",
-            "-nodisp",
-            "-autoexit",
-            "-i",
-            "-",
-        ]
-
-    @staticmethod
-    def _alive(proc):
-        return proc is not None and proc.poll() is None
-
-    def _ensure_speech(self):
-        """Spawn the persistent piper -> player pipeline if not already running.
-
-        Keeping piper alive avoids reloading its model (~2s) on every phrase,
-        and streaming raw audio straight to the player means playback starts as
-        soon as synthesis does instead of after a temp WAV is fully written.
-        """
-        if self._alive(self._piper) and self._alive(self._player):
-            return
-        self._kill_speech()  # clear out any half-dead pipeline first
-        rate = self._piper_sample_rate()
-        try:
-            self._player = subprocess.Popen(
-                self._player_cmd(rate),
-                stdin=subprocess.PIPE,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            self._piper = subprocess.Popen(
-                ["piper", "--model", PIPER_MODEL, "--output-raw"],
-                stdin=subprocess.PIPE,
-                stdout=self._player.stdin,
-                stderr=subprocess.DEVNULL,
-            )
-            # A bad model path or unsupported player flag lets Popen succeed but
-            # the process dies milliseconds later. Give it a brief grace period
-            # and confirm both are still alive, so warmup reports the failure
-            # once instead of speak() rebuilding a dead pipeline on every phrase.
-            time.sleep(SPEECH_SPAWN_GRACE)
-            if not (self._alive(self._piper) and self._alive(self._player)):
-                raise OSError("speech pipeline exited immediately after start")
-        except Exception:
-            self._kill_speech()  # don't leak a half-spawned pipeline
-            raise
-
     def speak(self, text):
-        """Text-to-speech output.
-
-        Non-blocking: the phrase is handed to a warm piper process that streams
-        audio to the player, so this returns immediately and the speech plays
-        concurrently with whatever the caller does next.
-        """
-        text = text.strip()
-        if not text:
-            return
-        print(f"💬 {text}")
-        for _ in range(2):
-            try:
-                self._ensure_speech()
-                self._piper.stdin.write((text + "\n").encode())
-                self._piper.stdin.flush()
-                return
-            except (BrokenPipeError, OSError, ValueError):
-                self._kill_speech()  # tear down the broken pipeline, then retry
-
-    @staticmethod
-    def _reap(proc):
-        """Kill a process, close its parent-side pipes, and wait for it, best-effort.
-
-        Both pipeline processes are spawned with stdin=PIPE, so the parent holds
-        a pipe fd for each; without closing them here, a repeatedly rebuilt
-        pipeline would leak two fds per cycle until it hits the fd limit. kill()
-        polls first and suppresses the PID-reuse race internally on Python 3.10+,
-        but ProcessLookupError is named anyway to stay safe on other versions;
-        AttributeError covers a malformed process handle and TimeoutExpired a
-        process that refuses to die.
-        """
-        for name in ("stdin", "stdout", "stderr"):
-            handle = getattr(proc, name, None)  # tolerate a handle missing these
-            if handle is not None:
-                try:
-                    handle.close()
-                except (AttributeError, OSError):
-                    pass
-        try:
-            proc.kill()
-            proc.wait(timeout=1)
-        except (AttributeError, ProcessLookupError, TimeoutExpired):
-            pass
-
-    def _kill_speech(self):
-        """Stop the pipeline at once (no wait for playback) so it can rebuild."""
-        for proc in (self._piper, self._player):
-            if proc is not None:
-                self._reap(proc)
-        self._piper = self._player = None
-
-    @staticmethod
-    def _close(proc):
-        """Close stdin and wait for the process, killing it if it overruns."""
-        try:
-            proc.stdin.close()  # flush may raise if the downstream player died
-            proc.wait(timeout=15)
-        except (AttributeError, OSError, TimeoutExpired):
-            EasySpeak._reap(proc)
-
-    def _drain_speech(self):
-        """Flush pending speech and wait for playback to finish, then stop the
-        pipeline. Used on shutdown so a final phrase (e.g. "Goodbye.") is heard
-        in full before the process exits."""
-        piper, player = self._piper, self._player
-        self._piper = self._player = None
-        if piper is not None:
-            self._close(piper)
-        if player is not None:
-            self._close(player)
+        """Speak a phrase. Stable plugin-facing API; delegates to the pipeline."""
+        self.speech.speak(text)
 
     # --- Plugin management ---
 
@@ -374,7 +213,7 @@ class EasySpeak:
         # during startup, not on the first spoken response.
         print("Warming up speech...")
         try:
-            self._ensure_speech()
+            self.speech.ensure()
         except OSError:
             print("Speech unavailable; continuing without it.")
 
@@ -388,14 +227,19 @@ class EasySpeak:
 """)
 
         try:
-            self.audio = pyaudio.PyAudio()
-            self.stream = self.audio.open(
-                format=pyaudio.paInt16,
-                channels=1,
-                rate=16000,
-                input=True,
-                frames_per_buffer=1280,
-            )
+            # PortAudio probes every ALSA/JACK device on init and on open,
+            # spamming stderr about hardware this machine lacks; redirect fd 2
+            # to silence that C-level noise just for these two calls, which
+            # emit no Python stderr output of their own.
+            with suppressed_c_stderr():
+                self.audio = pyaudio.PyAudio()
+                self.stream = self.audio.open(
+                    format=pyaudio.paInt16,
+                    channels=1,
+                    rate=16000,
+                    input=True,
+                    frames_per_buffer=1280,
+                )
 
             print("Listening for wake word...")
             audio_buffer = []
@@ -456,7 +300,7 @@ class EasySpeak:
         except KeyboardInterrupt:
             print("\nBye!")
         finally:
-            self._drain_speech()
+            self.speech.drain()
             if self.stream is not None:
                 self.stream.stop_stream()
                 self.stream.close()
