@@ -76,16 +76,19 @@ def test_ensure_grid_extension_list_returncode_nonzero(mock_which, mock_run, cap
     mousegrid_plugin.shutil, "which", return_value="/usr/bin/gnome-extensions"
 )
 def test_ensure_grid_extension_already_installed_and_enabled(mock_which, capsys):
-    """UUID in both `list` and `list --enabled`: short-circuit, announce state."""
+    """UUID in both `list` and `list --enabled`, bundle unchanged: announce state."""
     listed = Mock(
         returncode=0, stdout="other@one.com\neasyspeak-grid@local\nthird@two.org\n"
     )
     listed_enabled = Mock(
         returncode=0, stdout="easyspeak-grid@local\nother-on@two.org\n"
     )
-    with patch.object(
-        mousegrid_plugin.subprocess, "run", side_effect=[listed, listed_enabled]
-    ) as mock_run:
+    with (
+        patch.object(
+            mousegrid_plugin.subprocess, "run", side_effect=[listed, listed_enabled]
+        ) as mock_run,
+        patch.object(mousegrid_plugin, "_refresh_extension_files", return_value=False),
+    ):
         mousegrid_plugin.ensure_grid_extension()
 
     captured = capsys.readouterr()
@@ -93,6 +96,116 @@ def test_ensure_grid_extension_already_installed_and_enabled(mock_which, capsys)
     assert "easyspeak-grid@local" in captured.err
     # No `enable` call needed — only the two probe calls.
     assert mock_run.call_count == 2
+
+
+@patch.object(
+    mousegrid_plugin.shutil, "which", return_value="/usr/bin/gnome-extensions"
+)
+def test_ensure_grid_extension_already_installed_refreshes_changed_bundle(
+    mock_which, capsys
+):
+    """Installed+enabled but the bundled extension changed: refresh and tell the
+    user to re-login so GNOME loads the new code."""
+    listed = Mock(returncode=0, stdout="easyspeak-grid@local\n")
+    listed_enabled = Mock(returncode=0, stdout="easyspeak-grid@local\n")
+    with (
+        patch.object(
+            mousegrid_plugin.subprocess, "run", side_effect=[listed, listed_enabled]
+        ) as mock_run,
+        patch.object(mousegrid_plugin, "_refresh_extension_files", return_value=True),
+    ):
+        mousegrid_plugin.ensure_grid_extension()
+
+    captured = capsys.readouterr()
+    assert "updated GNOME extension easyspeak-grid@local" in captured.err
+    assert "log out and back in" in captured.err
+    # Still only the two probe calls — refresh is file I/O, not a subprocess.
+    assert mock_run.call_count == 2
+
+
+def test_refresh_extension_files_installs_when_dest_missing(tmp_path):
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "extension.js").write_text("new")
+    (src / "metadata.json").write_text("{}")
+    dest = tmp_path / "dest"  # does not exist yet
+
+    refreshed = mousegrid_plugin._refresh_extension_files(
+        src / "extension.js", src / "metadata.json", dest
+    )
+
+    assert refreshed is True
+    assert (dest / "extension.js").read_text() == "new"
+    assert (dest / "metadata.json").read_text() == "{}"
+
+
+def test_refresh_extension_files_overwrites_when_changed(tmp_path):
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "extension.js").write_text("new")
+    (src / "metadata.json").write_text("{}")
+    dest = tmp_path / "dest"
+    dest.mkdir()
+    (dest / "extension.js").write_text("old")
+    (dest / "metadata.json").write_text("{}")
+
+    refreshed = mousegrid_plugin._refresh_extension_files(
+        src / "extension.js", src / "metadata.json", dest
+    )
+
+    assert refreshed is True
+    assert (dest / "extension.js").read_text() == "new"
+
+
+def test_refresh_extension_files_noop_when_identical(tmp_path):
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "extension.js").write_text("same")
+    (src / "metadata.json").write_text("{}")
+    dest = tmp_path / "dest"
+    dest.mkdir()
+    (dest / "extension.js").write_text("same")
+    (dest / "metadata.json").write_text("{}")
+
+    refreshed = mousegrid_plugin._refresh_extension_files(
+        src / "extension.js", src / "metadata.json", dest
+    )
+
+    assert refreshed is False
+
+
+@patch.object(mousegrid_plugin.shutil, "copy2", side_effect=PermissionError("ro"))
+def test_refresh_extension_files_write_failure_returns_false(mock_copy, tmp_path):
+    """A write error (e.g. read-only dest) is swallowed, leaving the existing
+    install untouched rather than crashing startup."""
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "extension.js").write_text("new")
+    (src / "metadata.json").write_text("{}")
+    dest = tmp_path / "dest"
+    dest.mkdir()
+    (dest / "extension.js").write_text("old")
+    (dest / "metadata.json").write_text("{}")
+
+    refreshed = mousegrid_plugin._refresh_extension_files(
+        src / "extension.js", src / "metadata.json", dest
+    )
+
+    assert refreshed is False
+    # Original copy preserved.
+    assert (dest / "extension.js").read_text() == "old"
+
+
+def test_refresh_extension_files_missing_source(tmp_path):
+    src = tmp_path / "src"  # no files created
+    dest = tmp_path / "dest"
+
+    refreshed = mousegrid_plugin._refresh_extension_files(
+        src / "extension.js", src / "metadata.json", dest
+    )
+
+    assert refreshed is False
+    assert not dest.exists()
 
 
 @patch.object(

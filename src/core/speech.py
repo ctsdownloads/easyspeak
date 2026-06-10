@@ -151,6 +151,11 @@ class SpeechPipeline:
                 stdout=self._player.stdin,
                 stderr=subprocess.DEVNULL,
             )
+            # Hand the write end of the player's input pipe entirely to piper.
+            # If the parent kept its own copy open, the player would never see
+            # EOF when piper exits and would hang forever in read() (a dead
+            # piper leaving an immortal pw-play behind), wedging the pipeline.
+            self._player.stdin.close()
             # A bad model path or unsupported player flag lets Popen succeed but
             # the process dies milliseconds later. Give it a brief grace period
             # and confirm both are still alive, so warmup reports the failure

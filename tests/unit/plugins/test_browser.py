@@ -610,6 +610,28 @@ def test_handle_browser_command_enters_mode(
     assert mock_browser_mode.call_args.args[0] == mock_core
 
 
+@pytest.mark.parametrize(
+    "command",
+    [
+        "stop",  # quit word — owned by the base plugin
+        "quit",
+        "go to sleep",  # sleep phrases — owned by the sleep plugin
+        "goto sleep",
+        "stop listening",
+        "stop listening now",
+    ],
+)
+@patch.object(browser, "handle_browser_command")
+def test_handle_declines_reserved_global_commands(mock_handle_cmd, command, mock_core):
+    """Sleep/quit phrases fall through (return None) without being treated as
+    browser commands — otherwise qb() would open a qutebrowser window."""
+    result = browser.handle(command, mock_core)
+
+    assert result is None
+    mock_handle_cmd.assert_not_called()
+    mock_core.host_run.assert_not_called()
+
+
 @patch.object(browser, "handle_browser_command")
 def test_handle_unmatched_command(mock_handle_cmd, mock_core):
     """Test handle function with unmatched command."""

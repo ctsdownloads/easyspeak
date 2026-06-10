@@ -32,6 +32,7 @@ from .config import (
     load_whisper_model,
 )
 from .speech import SpeechPipeline, suppressed_c_stderr
+from .tray import Tray, TrayAction
 
 # =============================================================================
 # CORE CLASS
@@ -49,6 +50,8 @@ class EasySpeak:
         # Persistent text-to-speech pipeline (piper -> audio player) so the
         # voice model is loaded only once.
         self.speech = SpeechPipeline()
+        # GNOME panel indicator: owns the icon and the asleep lifecycle.
+        self.tray = Tray()
 
     # --- Utilities for plugins ---
 
@@ -78,6 +81,13 @@ class EasySpeak:
             return True
         except Exception:
             return False
+
+    def deactivate(self):
+        """Request the assistant go to sleep: release the mic and stop wake
+        detection until reactivated from the tray. Plugin-facing; the actual
+        release happens at the next main-loop iteration (handled by the tray
+        controller) so the triggering command can finish, and speak, first."""
+        self.tray.request_sleep()
 
     # --- Plugin management ---
 
@@ -148,6 +158,33 @@ class EasySpeak:
         return True
 
     # --- Audio ---
+
+    def _open_stream(self):
+        """Open the microphone input stream.
+
+        PortAudio probes every ALSA/JACK device on open, spamming stderr about
+        hardware this machine lacks; hide that C-level noise while keeping our
+        own Python output intact.
+        """
+        with suppressed_c_stderr():
+            self.stream = self.audio.open(
+                format=pyaudio.paInt16,
+                channels=1,
+                rate=16000,
+                input=True,
+                frames_per_buffer=1280,
+            )
+
+    def _close_stream(self):
+        """Release the microphone so other apps — and GNOME's privacy mic
+        indicator — see it as free. The PyAudio instance is kept for reopening."""
+        if self.stream is not None:
+            try:
+                self.stream.stop_stream()
+                self.stream.close()
+            except OSError:
+                pass  # already torn down; nothing to release
+            self.stream = None
 
     def flush_stream(self):
         """Flush any remaining audio data from the stream buffer."""
@@ -242,24 +279,29 @@ class EasySpeak:
 """)
 
         try:
-            # PortAudio probes every ALSA/JACK device on init and on open,
-            # spamming stderr about hardware this machine lacks; redirect fd 2
-            # to silence that C-level noise just for these two calls, which
-            # emit no Python stderr output of their own.
+            # PortAudio probes every ALSA/JACK device on init, spamming stderr
+            # about hardware this machine lacks; redirect fd 2 to silence that
+            # C-level noise. PyAudio init emits no Python stderr of its own; the
+            # stream is opened separately by _open_stream().
             with suppressed_c_stderr():
                 self.audio = pyaudio.PyAudio()
-                self.stream = self.audio.open(
-                    format=pyaudio.paInt16,
-                    channels=1,
-                    rate=16000,
-                    input=True,
-                    frames_per_buffer=1280,
-                )
+            self._open_stream()
 
+            self.tray.started()
             print("Listening for wake word...")
             audio_buffer = []
 
             while True:
+                # The tray controller owns sleep/quit; it releases and reopens
+                # the mic via these callbacks so this loop stays about audio.
+                action = self.tray.poll(self._close_stream, self._open_stream)
+                if action is TrayAction.QUIT:
+                    break
+                if action is TrayAction.RESUME:
+                    audio_buffer = []
+                    print("Listening for wake word...")
+                    continue
+
                 pcm = self.stream.read(1280, exception_on_overflow=False)
                 audio_data = np.frombuffer(pcm, dtype=np.int16)
 
@@ -315,6 +357,8 @@ class EasySpeak:
         except KeyboardInterrupt:
             print("\nBye!")
         finally:
+            # Hide the indicator so the daemon's exit doesn't leave a stale icon.
+            self.tray.stopped()
             self.speech.drain()
             if self.stream is not None:
                 self.stream.stop_stream()

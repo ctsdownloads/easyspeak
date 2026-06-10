@@ -189,7 +189,10 @@ class TestSpeechPipeline:
 
         mock_piper.stdin.close.assert_called_once()
         mock_piper.wait.assert_called_once()
-        mock_player.stdin.close.assert_called_once()
+        # The player's stdin is closed twice: once by ensure() at spawn (so a
+        # dying piper can't leave the player hung on a pipe the parent still
+        # holds open) and again by drain()'s _close. close() is idempotent.
+        assert mock_player.stdin.close.call_count == 2
         mock_player.wait.assert_called_once()
         assert pipe._piper is None and pipe._player is None
 

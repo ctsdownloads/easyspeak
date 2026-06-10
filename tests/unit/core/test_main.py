@@ -15,6 +15,7 @@ sys.modules["openwakeword.model"] = MagicMock()
 sys.modules["faster_whisper"] = MagicMock()
 
 from easyspeak.core.main import EasySpeak  # noqa: E402
+from easyspeak.core.tray import TrayAction  # noqa: E402
 
 
 class TestEasySpeakInit:
@@ -92,6 +93,15 @@ class TestEasySpeakUtilities:
             result = easy.tap_key(115)
 
         assert result is False
+
+    def test_deactivate_delegates_to_tray(self):
+        """EasySpeak.deactivate just queues a sleep on the tray controller."""
+        easy = EasySpeak()
+        easy.tray = Mock()
+
+        easy.deactivate()
+
+        easy.tray.request_sleep.assert_called_once()
 
 
 class TestEasySpeakPlugins:
@@ -231,6 +241,7 @@ class TestEasySpeakPlugins:
             "dictation",
             "files",
             "media",
+            "sleep",
             "system",
             "zz_base",
         }
@@ -388,6 +399,40 @@ class TestEasySpeakAudio:
 
         # Verify read was attempted
         easy.stream.read.assert_called_once()
+
+    def test_close_stream_releases_microphone(self):
+        """_close_stream stops and closes the open stream, then clears it so the
+        mic (and GNOME's privacy indicator) is freed."""
+        easy = EasySpeak()
+        stream = Mock()
+        easy.stream = stream
+
+        easy._close_stream()
+
+        stream.stop_stream.assert_called_once()
+        stream.close.assert_called_once()
+        assert easy.stream is None
+
+    def test_close_stream_swallows_oserror(self):
+        """A stream already torn down (close raises OSError) is ignored and the
+        handle is still cleared."""
+        easy = EasySpeak()
+        stream = Mock()
+        stream.stop_stream.side_effect = OSError("already closed")
+        easy.stream = stream
+
+        easy._close_stream()  # must not raise
+
+        assert easy.stream is None
+
+    def test_close_stream_noop_when_already_closed(self):
+        """With no stream open, _close_stream is a safe no-op."""
+        easy = EasySpeak()
+        easy.stream = None
+
+        easy._close_stream()
+
+        assert easy.stream is None
 
     def test_is_silence_true(self):
         """Test is_silence returns True for quiet audio."""
@@ -1024,3 +1069,92 @@ class TestEasySpeakRun:
         mock_stream.stop_stream.assert_called_once()
         mock_stream.close.assert_called_once()
         mock_audio.terminate.assert_called_once()
+
+    @patch("easyspeak.core.main.pyaudio")
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch.object(EasySpeak, "load_plugins")
+    def test_run_quit_from_tray(
+        self,
+        mock_load_plugins,
+        mock_whisper_model,
+        mock_wakeword_model,
+        mock_pyaudio,
+        mock_plugin,
+    ):
+        """When the tray controller returns QUIT then the loop exits and cleans
+        up without ever reading audio."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin]
+        easy.tray = Mock()
+        easy.tray.poll.return_value = TrayAction.QUIT
+
+        mock_stream = Mock()
+        mock_audio = Mock()
+        mock_audio.open.return_value = mock_stream
+        mock_pyaudio.PyAudio.return_value = mock_audio
+
+        easy.run()
+
+        mock_stream.read.assert_not_called()
+        mock_stream.stop_stream.assert_called_once()
+        mock_stream.close.assert_called_once()
+        mock_audio.terminate.assert_called_once()
+
+    @patch("easyspeak.core.main.pyaudio")
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch.object(EasySpeak, "load_plugins")
+    def test_run_resume_from_tray_restarts_iteration(
+        self,
+        mock_load_plugins,
+        mock_whisper_model,
+        mock_wakeword_model,
+        mock_pyaudio,
+        mock_plugin,
+    ):
+        """A RESUME (woke from sleep) skips the audio read and loops again; the
+        next CONTINUE proceeds to read."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin]
+        easy.tray = Mock()
+        easy.tray.poll.side_effect = [TrayAction.RESUME, TrayAction.CONTINUE]
+
+        mock_stream = Mock()
+        mock_stream.read.side_effect = KeyboardInterrupt()
+        mock_audio = Mock()
+        mock_audio.open.return_value = mock_stream
+        mock_pyaudio.PyAudio.return_value = mock_audio
+        mock_wakeword_model.return_value = Mock()
+
+        easy.run()
+
+        # RESUME read nothing; only the CONTINUE iteration reached the mic.
+        mock_stream.read.assert_called_once()
+
+    @patch("easyspeak.core.main.pyaudio")
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch.object(EasySpeak, "load_plugins")
+    def test_run_polls_tray_with_stream_callbacks(
+        self,
+        mock_load_plugins,
+        mock_whisper_model,
+        mock_wakeword_model,
+        mock_pyaudio,
+        mock_plugin,
+    ):
+        """The loop hands the tray its stream open/close callbacks so the
+        controller can release/reacquire the mic without touching audio."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin]
+        easy.tray = Mock()
+        easy.tray.poll.return_value = TrayAction.QUIT
+
+        mock_audio = Mock()
+        mock_audio.open.return_value = Mock()
+        mock_pyaudio.PyAudio.return_value = mock_audio
+
+        easy.run()
+
+        easy.tray.poll.assert_called_with(easy._close_stream, easy._open_stream)
