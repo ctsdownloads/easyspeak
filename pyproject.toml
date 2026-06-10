@@ -43,6 +43,7 @@ readme = "README.md"
 requires-python = ">=3.10, <3.14"
 dependencies = [
   "faster-whisper>=1.2.1",
+  "jeepney>=0.9",
   "numpy>=2.2.6",
   # "openwakeword",  # requires Python <3.13 for speexdsp-ns (missing wheels)
   "onnxruntime>=1.23.2",
