@@ -50,7 +50,7 @@ def speak_phrase(speech, phrase):
 
 @when("the app drains speech on shutdown")
 def drain_on_shutdown(speech):
-    speech["easy"]._drain_speech()
+    speech["easy"].speech.drain()
 
 
 @then("the voice model is loaded only once")

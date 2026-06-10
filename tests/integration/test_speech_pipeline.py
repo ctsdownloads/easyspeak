@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 from easyspeak.core.config import PIPER_MODEL
-from easyspeak.core.main import EasySpeak
+from easyspeak.core.speech import SpeechPipeline
 
 # Only the players _player_cmd can actually emit, in its own priority order.
 # (pacat is intentionally absent: _player_cmd never selects it — paplay --raw
@@ -54,11 +54,11 @@ def test_player_accepts_our_raw_invocation(player, audio_server, monkeypatch):
     # Force _player_cmd to select exactly this player, regardless of priority.
     real_which = shutil.which
     monkeypatch.setattr(
-        "easyspeak.core.main.shutil.which",
+        "easyspeak.core.speech.shutil.which",
         lambda name: real_which(name) if name == player else None,
     )
     rate = 22050
-    cmd = EasySpeak()._player_cmd(rate)
+    cmd = SpeechPipeline()._player_cmd(rate)
     assert cmd[0] == player
 
     # ~0.3s of finite silence so the player consumes the stream and exits.

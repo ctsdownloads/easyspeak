@@ -3,7 +3,7 @@
 import subprocess
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, mock_open, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import numpy as np
 import pytest
@@ -35,12 +35,6 @@ class TestEasySpeakInit:
 class TestEasySpeakUtilities:
     """Tests for EasySpeak utility methods."""
 
-    @pytest.fixture(autouse=True)
-    def _no_spawn_grace(self):
-        """Skip the post-spawn liveness wait so pipeline tests stay instant."""
-        with patch("easyspeak.core.main.SPEECH_SPAWN_GRACE", 0):
-            yield
-
     @patch("subprocess.run")
     def test_host_run_foreground(self, mock_run):
         """Test host_run method in foreground mode."""
@@ -71,298 +65,14 @@ class TestEasySpeakUtilities:
         assert call_args[1]["stderr"] == subprocess.DEVNULL
         assert result == mock_process
 
-    @patch("shutil.which", return_value="/usr/bin/pw-play")
-    @patch("subprocess.Popen")
-    def test_speak(self, mock_popen, mock_which, capsys):
-        """When speak is called then it streams the phrase to a warm piper process."""
+    def test_speak_delegates_to_pipeline(self):
+        """EasySpeak.speak is a thin delegate to the speech pipeline."""
         easy = EasySpeak()
+        easy.speech = Mock()
 
-        # Two Popen calls: the player, then piper (whose stdin we write to).
-        mock_player = Mock()
-        mock_player.poll.return_value = None
-        mock_piper = Mock()
-        mock_piper.poll.return_value = None
-        mock_popen.side_effect = [mock_player, mock_piper]
+        easy.speak("hello")
 
-        easy.speak("Hello world")
-
-        # Check that text was printed
-        captured = capsys.readouterr()
-        assert "💬 Hello world" in captured.out
-
-        # Pipeline spawned: player + piper
-        assert mock_popen.call_count == 2
-        piper_cmd = mock_popen.call_args_list[1].args[0]
-        assert piper_cmd[0] == "piper"
-        assert "--output-raw" in piper_cmd
-
-        # Phrase was written to piper's stdin (newline-terminated)
-        mock_piper.stdin.write.assert_called_once_with(b"Hello world\n")
-        assert mock_piper.stdin.flush.called
-
-    @patch("subprocess.Popen")
-    def test_speak_reuses_warm_piper(self, mock_popen, capsys):
-        """When speak is called twice then the piper process is reused (model loaded once)."""
-        easy = EasySpeak()
-        mock_player = Mock()
-        mock_player.poll.return_value = None
-        mock_piper = Mock()
-        mock_piper.poll.return_value = None
-        mock_popen.side_effect = [mock_player, mock_piper]
-
-        easy.speak("first")
-        easy.speak("second")
-
-        # Pipeline spawned only once across both phrases
-        assert mock_popen.call_count == 2
-        assert mock_piper.stdin.write.call_count == 2
-
-    @patch("shutil.which", return_value="/usr/bin/pw-play")
-    @patch("subprocess.Popen")
-    def test_ensure_speech_rebuilds_when_player_dies(self, mock_popen, mock_which):
-        """When the player exits but piper survives then the stale pipeline is
-        killed and rebuilt (no leaked player)."""
-        easy = EasySpeak()
-        old_player = Mock()
-        # Alive at the post-spawn liveness check, dead by the next _ensure_speech.
-        old_player.poll.side_effect = [None, 0]
-        old_piper = Mock()
-        old_piper.poll.return_value = None  # piper still alive
-        new_player, new_piper = Mock(), Mock()
-        new_player.poll.return_value = new_piper.poll.return_value = None
-        mock_popen.side_effect = [old_player, old_piper, new_player, new_piper]
-
-        easy._ensure_speech()  # spawns old pair
-        easy._ensure_speech()  # player dead -> rebuild
-
-        old_piper.kill.assert_called_once()
-        old_player.kill.assert_called_once()
-        assert easy._piper is new_piper and easy._player is new_player
-
-    @patch("shutil.which", return_value="/usr/bin/pw-play")
-    @patch("subprocess.Popen")
-    def test_ensure_speech_cleans_up_when_piper_spawn_fails(
-        self, mock_popen, mock_which
-    ):
-        """When the player spawns but piper fails (e.g. missing binary) then the
-        partial pipeline is torn down and the error propagates (no leaked player)."""
-        easy = EasySpeak()
-        player = Mock()
-        mock_popen.side_effect = [player, FileNotFoundError("piper")]
-
-        with pytest.raises(FileNotFoundError):
-            easy._ensure_speech()
-
-        player.kill.assert_called_once()
-        assert easy._piper is None and easy._player is None
-
-    @patch("shutil.which", return_value="/usr/bin/pw-play")
-    @patch("subprocess.Popen")
-    def test_ensure_speech_raises_when_pipeline_dies_immediately(
-        self, mock_popen, mock_which
-    ):
-        """When piper exits right after spawn (e.g. bad model) then the dead
-        pipeline is torn down and OSError is raised so warmup can report it."""
-        easy = EasySpeak()
-        player = Mock()
-        player.poll.return_value = None  # player alive
-        piper = Mock()
-        piper.poll.return_value = 1  # piper died on startup
-        mock_popen.side_effect = [player, piper]
-
-        with pytest.raises(OSError):
-            easy._ensure_speech()
-
-        player.kill.assert_called_once()
-        piper.kill.assert_called_once()
-        assert easy._piper is None and easy._player is None
-
-    def test_kill_speech_swallows_reap_failure(self):
-        """When wait() after kill() fails then _kill_speech still resets state."""
-        easy = EasySpeak()
-        piper = Mock()
-        piper.wait.side_effect = subprocess.TimeoutExpired("piper", 1)
-        easy._piper = piper
-
-        easy._kill_speech()  # must not raise
-
-        piper.kill.assert_called_once()
-        assert easy._piper is None and easy._player is None
-
-    def test_kill_speech_closes_parent_pipes(self):
-        """_kill_speech closes the parent-side stdin handles so a rebuilt
-        pipeline doesn't leak a pipe fd per cycle."""
-        easy = EasySpeak()
-        piper, player = Mock(), Mock()
-        easy._piper, easy._player = piper, player
-
-        easy._kill_speech()
-
-        piper.stdin.close.assert_called_once()
-        player.stdin.close.assert_called_once()
-
-    def test_kill_speech_swallows_pipe_close_failure(self):
-        """A handle whose close() raises (e.g. already-broken pipe) is ignored,
-        and _kill_speech still kills and resets state."""
-        easy = EasySpeak()
-        piper = Mock()
-        piper.stdin.close.side_effect = OSError("broken pipe")
-        easy._piper = piper
-
-        easy._kill_speech()  # must not raise
-
-        piper.kill.assert_called_once()
-        assert easy._piper is None and easy._player is None
-
-    def test_kill_speech_tolerates_malformed_handle(self):
-        """A handle missing stdin/stdout/stderr (and kill) is reaped without
-        raising, as _reap's docstring promises."""
-        easy = EasySpeak()
-        easy._piper = object()  # no stdin/stdout/stderr/kill attributes
-
-        easy._kill_speech()  # must not raise
-
-        assert easy._piper is None and easy._player is None
-
-    @patch("subprocess.Popen")
-    def test_drain_speech_waits_for_playback(self, mock_popen):
-        """When draining then piper stdin is closed and the pipeline is awaited."""
-        easy = EasySpeak()
-        mock_player = Mock()
-        mock_player.poll.return_value = None
-        mock_piper = Mock()
-        mock_piper.poll.return_value = None
-        mock_popen.side_effect = [mock_player, mock_piper]
-
-        easy.speak("Goodbye.")
-        easy._drain_speech()
-
-        mock_piper.stdin.close.assert_called_once()
-        mock_piper.wait.assert_called_once()
-        mock_player.stdin.close.assert_called_once()
-        mock_player.wait.assert_called_once()
-        assert easy._piper is None and easy._player is None
-
-    @patch("subprocess.Popen")
-    def test_speak_ignores_blank_text(self, mock_popen):
-        """When speak is given blank text then no pipeline is spawned."""
-        easy = EasySpeak()
-
-        easy.speak("   ")
-
-        mock_popen.assert_not_called()
-
-    def test_speak_rebuilds_pipeline_on_broken_pipe(self):
-        """When the pipeline write fails then speak rebuilds it and retries once."""
-        easy = EasySpeak()
-        broken = Mock()
-        broken.poll.return_value = None
-        broken.stdin.write.side_effect = BrokenPipeError()
-        healthy = Mock()
-        healthy.poll.return_value = None
-        pipers = [broken, healthy]
-
-        def fake_ensure():
-            easy._piper = pipers.pop(0)
-
-        with patch.object(easy, "_ensure_speech", side_effect=fake_ensure):
-            easy.speak("hello")
-
-        # The rebuilt (healthy) piper received the phrase.
-        healthy.stdin.write.assert_called_once_with(b"hello\n")
-
-    def test_speak_gives_up_after_two_failures(self):
-        """When the pipeline keeps failing then speak gives up without raising."""
-        easy = EasySpeak()
-
-        def fake_ensure():
-            piper = Mock()
-            piper.poll.return_value = None
-            piper.stdin.write.side_effect = OSError()
-            easy._piper = piper
-
-        with patch.object(
-            easy, "_ensure_speech", side_effect=fake_ensure
-        ) as mock_ensure:
-            easy.speak("hello")  # must not raise
-
-        # Tried to (re)build the pipeline twice before giving up.
-        assert mock_ensure.call_count == 2
-
-    def test_piper_sample_rate_reads_model_json(self):
-        """When the model json is readable then its sample rate is used."""
-        easy = EasySpeak()
-
-        with patch(
-            "builtins.open", mock_open(read_data='{"audio": {"sample_rate": 16000}}')
-        ):
-            assert easy._piper_sample_rate() == 16000
-
-    def test_piper_sample_rate_defaults_on_error(self):
-        """When the model json is unreadable then the rate defaults to 22050."""
-        easy = EasySpeak()
-
-        with patch("builtins.open", side_effect=OSError()):
-            assert easy._piper_sample_rate() == 22050
-
-    def test_player_cmd_prefers_pw_play(self):
-        """When pw-play is available then it is used to stream raw audio."""
-        easy = EasySpeak()
-
-        with patch(
-            "shutil.which",
-            side_effect=lambda p: "/bin/pw-play" if p == "pw-play" else None,
-        ):
-            cmd = easy._player_cmd(22050)
-
-        assert cmd[0] == "pw-play"
-        assert "--raw" in cmd and "22050" in cmd
-
-    def test_player_cmd_falls_back_to_paplay(self):
-        """When only paplay is available then it is used."""
-        easy = EasySpeak()
-
-        with patch(
-            "shutil.which",
-            side_effect=lambda p: "/bin/paplay" if p == "paplay" else None,
-        ):
-            cmd = easy._player_cmd(16000)
-
-        assert cmd[0] == "paplay"
-        assert "--rate=16000" in cmd
-
-    def test_player_cmd_falls_back_to_ffplay(self):
-        """When no PipeWire/PulseAudio player exists then ffplay is the last resort."""
-        easy = EasySpeak()
-
-        with patch("shutil.which", return_value=None):
-            cmd = easy._player_cmd(22050)
-
-        assert cmd[0] == "ffplay"
-        assert "-ar" in cmd and "22050" in cmd
-
-    def test_drain_speech_kills_pipeline_on_timeout(self):
-        """When the pipeline does not exit in time then both processes are killed."""
-        easy = EasySpeak()
-        piper = Mock()
-        piper.wait.side_effect = subprocess.TimeoutExpired("piper", 15)
-        player = Mock()
-        player.wait.side_effect = subprocess.TimeoutExpired("player", 15)
-        easy._piper = piper
-        easy._player = player
-
-        easy._drain_speech()
-
-        piper.kill.assert_called_once()
-        player.kill.assert_called_once()
-
-    def test_drain_speech_noop_when_idle(self):
-        """When nothing has been spoken then draining does nothing."""
-        easy = EasySpeak()
-
-        easy._drain_speech()  # must not raise
-
-        assert easy._piper is None and easy._player is None
+        easy.speech.speak.assert_called_once_with("hello")
 
 
 class TestEasySpeakPlugins:
@@ -836,7 +546,7 @@ class TestEasySpeakRun:
     @pytest.fixture(autouse=True)
     def _stub_speech_warmup(self):
         """Keep run() from spawning the real piper/player pipeline at startup."""
-        with patch.object(EasySpeak, "_ensure_speech") as mock_ensure:
+        with patch("easyspeak.core.speech.SpeechPipeline.ensure") as mock_ensure:
             yield mock_ensure
 
     @patch("easyspeak.core.main.WakeWordModel")
