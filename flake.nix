@@ -160,6 +160,7 @@
             pkgs.uv
             pkgs.just
             pkgs.eslint # JS linter for the GNOME Shell extension (see `just lint-js`)
+            pkgs.nodejs # `node --test` for the extension's JS helpers (see `just test-js`)
           ]
           ++ runtimeTools
           ++ buildTools;
