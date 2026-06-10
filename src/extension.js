@@ -8,6 +8,12 @@ import Meta from 'gi://Meta';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import {
+    clampToWorkArea,
+    scrollDirectionDelta,
+    gridGeometry,
+    indicatorVisibleForState,
+} from './extension-helpers.js';
 
 const DBUS_INTERFACE = `
 <node>
@@ -131,11 +137,7 @@ class GridOverlay {
     }
 
     _clampToWorkArea(x, y, w, h) {
-        if (!this.workArea) return [x, y, w, h];
-        const wa = this.workArea;
-        let newX = Math.max(wa.x, Math.min(x, wa.x + wa.width - w));
-        let newY = Math.max(wa.y, Math.min(y, wa.y + wa.height - h));
-        return [newX, newY, w, h];
+        return clampToWorkArea(x, y, w, h, this.workArea);
     }
 
     show(width, height) {
@@ -248,14 +250,7 @@ class GridOverlay {
         const t = GLib.get_monotonic_time();
         pointer.notify_absolute_motion(t, x, y);
 
-        let dx = 0, dy = 0;
-        const scrollAmount = 1;
-        switch (direction) {
-            case 'up': dy = -scrollAmount; break;
-            case 'down': dy = scrollAmount; break;
-            case 'left': dx = -scrollAmount; break;
-            case 'right': dx = scrollAmount; break;
-        }
+        const { dx, dy } = scrollDirectionDelta(direction);
 
         for (let i = 0; i < clicks; i++) {
             pointer.notify_scroll_continuous(t + (i * 50000), dx, dy,
@@ -274,8 +269,8 @@ class GridOverlay {
         }));
 
         // Grid lines and labels
-        const cellW = Math.floor(bw / 3);
-        const cellH = Math.floor(bh / 3);
+        const { cellW, cellH, fontSize, cells, center, crossSize } =
+            gridGeometry(bx, by, bw, bh);
 
         // Vertical lines
         for (let i = 1; i < 3; i++) {
@@ -294,27 +289,20 @@ class GridOverlay {
         }
 
         // Number labels 1-9
-        const fontSize = Math.max(24, Math.min(72, Math.floor(Math.min(cellW, cellH) / 3)));
-        for (let num = 1; num <= 9; num++) {
-            const row = Math.floor((num - 1) / 3);
-            const col = (num - 1) % 3;
-            const zoneX = bx + col * cellW;
-            const zoneY = by + row * cellH;
-
+        for (const cell of cells) {
             const label = new St.Label({
-                text: String(num),
+                text: String(cell.num),
                 style: `font-size: ${fontSize}px; font-weight: bold; color: #ffe600; ` +
                     `background-color: rgba(0,0,0,0.8); border-radius: 8px; padding: 8px 16px;`
             });
 
-            label.set_position(zoneX + cellW / 2 - fontSize / 2, zoneY + cellH / 2 - fontSize / 2);
+            label.set_position(cell.x, cell.y);
             this.container.add_child(label);
         }
 
         // Crosshair at center
-        const centerX = bx + Math.floor(bw / 2);
-        const centerY = by + Math.floor(bh / 2);
-        const crossSize = Math.min(50, Math.floor(Math.min(bw, bh) / 3));
+        const centerX = center.x;
+        const centerY = center.y;
         const crossThick = 4;
 
         // White outline
@@ -577,7 +565,7 @@ class TrayIndicator extends PanelMenu.Button {
     // Pushed over D-Bus by the daemon. Only the deactivated state is visible;
     // every running state (listening/active/thinking) hides the indicator.
     setState(state) {
-        this.visible = state === 'muted';
+        this.visible = indicatorVisibleForState(state);
     }
 
     // Menu actions reach the daemon via a one-shot control file it polls each
