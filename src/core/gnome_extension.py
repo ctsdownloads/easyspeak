@@ -2,11 +2,13 @@
 
 Core owns the extension's lifecycle because both the mousegrid plugin and
 ``core.tray`` drive it over D-Bus; :func:`ensure_extension` runs once at startup.
-The extension ships as package data and is copied into the user's extensions
-dir. On Wayland GNOME only loads extension code at login, so the startup copy is
-always one login behind; a ``oneshot`` systemd *user* unit ordered before the
-shell re-copies it at the start of every login to close that gap. The unit runs
-as the user, writes only to ``$HOME``, and needs no privileges.
+The extension ships as package data — ``extension.js``, the
+``extension-helpers.js`` it imports, and ``metadata.json`` — copied into the
+user's extensions dir as a set. On Wayland GNOME only loads extension code at
+login, so the startup copy is always one login behind; a ``oneshot`` systemd
+*user* unit ordered before the shell re-copies it at the start of every login to
+close that gap. The unit runs as the user, writes only to ``$HOME``, and needs
+no privileges.
 """
 
 import enum
@@ -22,6 +24,10 @@ PRE_SHELL_TARGET = "gnome-session-pre.target"  # reached before org.gnome.Shell@
 
 # Cap each helper subprocess so a wedged session/user bus can't hang startup.
 SUBPROCESS_TIMEOUT = 5.0
+
+# Bundled assets, installed as a set: extension.js imports extension-helpers.js,
+# so they must travel together or the extension fails to load.
+EXTENSION_ASSETS = ("extension.js", "extension-helpers.js", "metadata.json")
 
 
 class RefreshResult(enum.Enum):
@@ -48,44 +54,55 @@ def extension_dest_dir():
     )
 
 
-def refresh_extension_files(src_ext, src_meta, dest_dir):
-    """Copy the bundled extension into ``dest_dir`` when it differs from the
+def _staged_tmp(dest_dir, name):
+    return dest_dir / f".{name}.tmp"
+
+
+def _discard_staged(dest_dir):
+    """Remove any ``.<asset>.tmp`` files a previous refresh may have left."""
+    for name in EXTENSION_ASSETS:
+        try:
+            _staged_tmp(dest_dir, name).unlink()
+        except OSError:
+            pass
+
+
+def refresh_extension_files(src_dir, dest_dir):
+    """Copy the bundled assets into ``dest_dir`` when they differ from the
     installed copy. Best-effort: returns ``REFRESHED`` if written, ``UNCHANGED``
-    if already current, or ``ERROR`` (noted on stderr) when the sources are
-    missing or the copy fails. Both files are staged then moved into place, so a
-    failure leaves any working install untouched."""
-    if not (src_ext.is_file() and src_meta.is_file()):
+    if already current, or ``ERROR`` (noted on stderr) when a source is missing
+    or a copy fails. Assets are staged then moved into place (extension.js last),
+    so a failure leaves any working install untouched and never installs
+    extension.js without the helper it imports."""
+    srcs = {name: src_dir / name for name in EXTENSION_ASSETS}
+    if not all(s.is_file() for s in srcs.values()):
         print(
-            f"easyspeak: note: bundled GNOME extension sources missing at "
-            f"{src_ext.parent}",
+            f"easyspeak: note: bundled GNOME extension sources missing at {src_dir}",
             file=sys.stderr,
         )
         return RefreshResult.ERROR
-    dest_ext = dest_dir / "extension.js"
-    dest_meta = dest_dir / "metadata.json"
-    tmp_ext = dest_dir / ".extension.js.tmp"
-    tmp_meta = dest_dir / ".metadata.json.tmp"
+    # Clear temps an interrupted run may have left, so the dir self-heals even on
+    # the UNCHANGED path below.
+    _discard_staged(dest_dir)
     try:
-        unchanged = (
-            dest_ext.is_file()
-            and dest_meta.is_file()
-            and filecmp.cmp(src_ext, dest_ext, shallow=False)
-            and filecmp.cmp(src_meta, dest_meta, shallow=False)
+        unchanged = all(
+            (dest_dir / name).is_file()
+            and filecmp.cmp(src, dest_dir / name, shallow=False)
+            for name, src in srcs.items()
         )
         if unchanged:
             return RefreshResult.UNCHANGED
         dest_dir.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src_ext, tmp_ext)
-        shutil.copy2(src_meta, tmp_meta)
-        tmp_meta.replace(dest_meta)
-        tmp_ext.replace(dest_ext)
+        staged = []
+        for name, src in srcs.items():
+            tmp = _staged_tmp(dest_dir, name)
+            shutil.copy2(src, tmp)
+            staged.append((tmp, dest_dir / name))
+        for tmp, dest in reversed(staged):  # extension.js leads EXTENSION_ASSETS
+            tmp.replace(dest)
         return RefreshResult.REFRESHED
     except OSError as e:
-        for tmp in (tmp_ext, tmp_meta):
-            try:
-                tmp.unlink()
-            except OSError:
-                pass
+        _discard_staged(dest_dir)
         print(
             f"easyspeak: note: could not refresh GNOME extension in {dest_dir} ({e})",
             file=sys.stderr,
@@ -96,12 +113,7 @@ def refresh_extension_files(src_ext, src_meta, dest_dir):
 def refresh_installed_extension():
     """Refresh the installed extension from the bundled copy; run by the systemd
     unit at each login."""
-    root = extension_source_dir()
-    return refresh_extension_files(
-        root / "extension.js",
-        root / "metadata.json",
-        extension_dest_dir(),
-    )
+    return refresh_extension_files(extension_source_dir(), extension_dest_dir())
 
 
 def _unit_path():
@@ -228,13 +240,11 @@ def ensure_extension():
         and GRID_EXTENSION_UUID in listed_enabled.stdout.split()
     )
     dest_dir = extension_dest_dir()
-
     root = extension_source_dir()
-    src_ext = root / "extension.js"
-    src_meta = root / "metadata.json"
+    srcs = [root / name for name in EXTENSION_ASSETS]
 
     if installed and already_enabled:
-        result = refresh_extension_files(src_ext, src_meta, dest_dir)
+        result = refresh_extension_files(root, dest_dir)
         if result is RefreshResult.REFRESHED:
             print(
                 f"easyspeak: updated GNOME extension {GRID_EXTENSION_UUID} to "
@@ -252,7 +262,7 @@ def ensure_extension():
         return
 
     if not installed:
-        if not (src_ext.is_file() and src_meta.is_file()):
+        if not all(s.is_file() for s in srcs):
             print(
                 f"easyspeak: note: could not auto-install GNOME extension — "
                 f"source files not found at {root}. The panel indicator and "
@@ -262,14 +272,11 @@ def ensure_extension():
             )
             return
 
-        try:
-            dest_dir.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(src_ext, dest_dir / "extension.js")
-            shutil.copy2(src_meta, dest_dir / "metadata.json")
-        except OSError as e:
+        refresh_extension_files(root, dest_dir)
+        if not all((dest_dir / name).is_file() for name in EXTENSION_ASSETS):
             print(
                 f"easyspeak: note: could not install GNOME extension to "
-                f"{dest_dir} ({e}). The panel indicator and grid commands will "
+                f"{dest_dir}. The panel indicator and grid commands will "
                 f"not work until it is installed manually.",
                 file=sys.stderr,
             )

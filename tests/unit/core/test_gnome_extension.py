@@ -13,55 +13,95 @@ UNIT_NAME = "easyspeak-extension-refresh.service"
 # --- refresh_extension_files -------------------------------------------------
 
 
+def _write_assets(directory, **overrides):
+    """Create every bundled asset under ``directory``, with per-file contents
+    overridable by name (dots and hyphens in filenames map to underscores, e.g.
+    ``extension_helpers_js`` for ``extension-helpers.js``)."""
+    directory.mkdir(parents=True, exist_ok=True)
+    for name in gnome_extension.EXTENSION_ASSETS:
+        key = name.replace(".", "_").replace("-", "_")
+        directory.joinpath(name).write_text(overrides.get(key, "x"))
+
+
 def test_refresh_extension_files_installs_when_dest_missing(tmp_path):
     src = tmp_path / "src"
-    src.mkdir()
-    (src / "extension.js").write_text("new")
-    (src / "metadata.json").write_text("{}")
+    _write_assets(src, extension_js="new", metadata_json="{}")
     dest = tmp_path / "dest"  # does not exist yet
 
-    refreshed = gnome_extension.refresh_extension_files(
-        src / "extension.js", src / "metadata.json", dest
-    )
+    refreshed = gnome_extension.refresh_extension_files(src, dest)
 
     assert refreshed is gnome_extension.RefreshResult.REFRESHED
+    for name in gnome_extension.EXTENSION_ASSETS:
+        assert (dest / name).is_file()
     assert (dest / "extension.js").read_text() == "new"
-    assert (dest / "metadata.json").read_text() == "{}"
 
 
 def test_refresh_extension_files_overwrites_when_changed(tmp_path):
     src = tmp_path / "src"
-    src.mkdir()
-    (src / "extension.js").write_text("new")
-    (src / "metadata.json").write_text("{}")
+    _write_assets(src, extension_js="new")
     dest = tmp_path / "dest"
-    dest.mkdir()
-    (dest / "extension.js").write_text("old")
-    (dest / "metadata.json").write_text("{}")
+    _write_assets(dest, extension_js="old")
 
-    refreshed = gnome_extension.refresh_extension_files(
-        src / "extension.js", src / "metadata.json", dest
-    )
+    refreshed = gnome_extension.refresh_extension_files(src, dest)
 
     assert refreshed is gnome_extension.RefreshResult.REFRESHED
     assert (dest / "extension.js").read_text() == "new"
 
 
-def test_refresh_extension_files_noop_when_identical(tmp_path):
+def test_refresh_extension_files_refreshes_when_helper_changed(tmp_path):
+    """A changed helper alone triggers a re-copy: extension.js must never be
+    left in step with a stale extension-helpers.js."""
     src = tmp_path / "src"
-    src.mkdir()
-    (src / "extension.js").write_text("same")
-    (src / "metadata.json").write_text("{}")
+    _write_assets(src, extension_helpers_js="new-helper")
+    dest = tmp_path / "dest"
+    _write_assets(dest, extension_helpers_js="old-helper")
+
+    refreshed = gnome_extension.refresh_extension_files(src, dest)
+
+    assert refreshed is gnome_extension.RefreshResult.REFRESHED
+    assert (dest / "extension-helpers.js").read_text() == "new-helper"
+
+
+def test_refresh_extension_files_installs_helper_missing_from_old_dest(tmp_path):
+    """An install predating the helper is brought up to date."""
+    src = tmp_path / "src"
+    _write_assets(src)
     dest = tmp_path / "dest"
     dest.mkdir()
-    (dest / "extension.js").write_text("same")
-    (dest / "metadata.json").write_text("{}")
+    (dest / "extension.js").write_text("x")
+    (dest / "metadata.json").write_text("x")  # no extension-helpers.js
 
-    refreshed = gnome_extension.refresh_extension_files(
-        src / "extension.js", src / "metadata.json", dest
-    )
+    refreshed = gnome_extension.refresh_extension_files(src, dest)
+
+    assert refreshed is gnome_extension.RefreshResult.REFRESHED
+    assert (dest / "extension-helpers.js").is_file()
+
+
+def test_refresh_extension_files_noop_when_identical(tmp_path):
+    src = tmp_path / "src"
+    _write_assets(src, extension_js="same")
+    dest = tmp_path / "dest"
+    _write_assets(dest, extension_js="same")
+
+    refreshed = gnome_extension.refresh_extension_files(src, dest)
 
     assert refreshed is gnome_extension.RefreshResult.UNCHANGED
+
+
+def test_refresh_extension_files_discards_stale_temp_up_front(tmp_path):
+    """A temp left by an interrupted earlier run is cleared even when nothing
+    needs copying, so the dir self-heals."""
+    src = tmp_path / "src"
+    _write_assets(src, extension_js="same")
+    dest = tmp_path / "dest"
+    _write_assets(dest, extension_js="same")
+    stale = dest / ".extension.js.tmp"
+    stale.write_text("orphan")
+
+    refreshed = gnome_extension.refresh_extension_files(src, dest)
+
+    assert refreshed is gnome_extension.RefreshResult.UNCHANGED
+    assert not stale.exists()
 
 
 @patch.object(gnome_extension.shutil, "copy2", side_effect=PermissionError("ro"))
@@ -71,17 +111,11 @@ def test_refresh_extension_files_write_failure_returns_error(
     """A write error (e.g. read-only dest) is swallowed and noted on stderr,
     leaving the existing install untouched rather than crashing startup."""
     src = tmp_path / "src"
-    src.mkdir()
-    (src / "extension.js").write_text("new")
-    (src / "metadata.json").write_text("{}")
+    _write_assets(src, extension_js="new")
     dest = tmp_path / "dest"
-    dest.mkdir()
-    (dest / "extension.js").write_text("old")
-    (dest / "metadata.json").write_text("{}")
+    _write_assets(dest, extension_js="old")
 
-    refreshed = gnome_extension.refresh_extension_files(
-        src / "extension.js", src / "metadata.json", dest
-    )
+    refreshed = gnome_extension.refresh_extension_files(src, dest)
 
     assert refreshed is gnome_extension.RefreshResult.ERROR
     assert (dest / "extension.js").read_text() == "old"
@@ -92,13 +126,9 @@ def test_refresh_extension_files_no_partial_overwrite_on_midway_failure(tmp_path
     """A copy failing partway through leaves the existing install untouched and
     no temp files behind, since files are staged then moved."""
     src = tmp_path / "src"
-    src.mkdir()
-    (src / "extension.js").write_text("new")
-    (src / "metadata.json").write_text("new")
+    _write_assets(src, extension_js="new", extension_helpers_js="new")
     dest = tmp_path / "dest"
-    dest.mkdir()
-    (dest / "extension.js").write_text("old")
-    (dest / "metadata.json").write_text("old")
+    _write_assets(dest, extension_js="old", extension_helpers_js="old")
 
     real_copy = gnome_extension.shutil.copy2
     calls = {"n": 0}
@@ -110,13 +140,11 @@ def test_refresh_extension_files_no_partial_overwrite_on_midway_failure(tmp_path
         return real_copy(s, d, *a, **k)
 
     with patch.object(gnome_extension.shutil, "copy2", side_effect=flaky_copy):
-        refreshed = gnome_extension.refresh_extension_files(
-            src / "extension.js", src / "metadata.json", dest
-        )
+        refreshed = gnome_extension.refresh_extension_files(src, dest)
 
     assert refreshed is gnome_extension.RefreshResult.ERROR
     assert (dest / "extension.js").read_text() == "old"
-    assert (dest / "metadata.json").read_text() == "old"
+    assert (dest / "extension-helpers.js").read_text() == "old"
     assert not list(dest.glob(".*.tmp"))
 
 
@@ -124,13 +152,25 @@ def test_refresh_extension_files_missing_source(tmp_path, capsys):
     src = tmp_path / "src"  # no files created
     dest = tmp_path / "dest"
 
-    refreshed = gnome_extension.refresh_extension_files(
-        src / "extension.js", src / "metadata.json", dest
-    )
+    refreshed = gnome_extension.refresh_extension_files(src, dest)
 
     assert refreshed is gnome_extension.RefreshResult.ERROR
     assert not dest.exists()
     assert "sources missing" in capsys.readouterr().err
+
+
+def test_refresh_extension_files_partial_source_missing_helper(tmp_path):
+    """A bundle missing the helper installs nothing rather than a half-extension."""
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "extension.js").write_text("x")
+    (src / "metadata.json").write_text("x")  # no extension-helpers.js
+    dest = tmp_path / "dest"
+
+    refreshed = gnome_extension.refresh_extension_files(src, dest)
+
+    assert refreshed is gnome_extension.RefreshResult.ERROR
+    assert not dest.exists()
 
 
 # --- path helpers ------------------------------------------------------------
@@ -139,8 +179,8 @@ def test_refresh_extension_files_missing_source(tmp_path, capsys):
 def test_extension_source_dir_holds_bundled_assets():
     src = gnome_extension.extension_source_dir()
     # Assets are package data in src/ (the easyspeak package), next to core/.
-    assert (src / "extension.js").is_file()
-    assert (src / "metadata.json").is_file()
+    for name in gnome_extension.EXTENSION_ASSETS:
+        assert (src / name).is_file()
     assert (src / "core" / "gnome_extension.py").is_file()
 
 
@@ -175,9 +215,8 @@ def test_refresh_installed_extension_delegates():
 
     assert result is gnome_extension.RefreshResult.REFRESHED
     args = mock_refresh.call_args.args
-    assert args[0].name == "extension.js"
-    assert args[1].name == "metadata.json"
-    assert str(args[2]) == "/dest"
+    assert str(args[0]) == "/repo"
+    assert str(args[1]) == "/dest"
 
 
 # --- unit rendering ----------------------------------------------------------

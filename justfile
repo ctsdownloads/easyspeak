@@ -34,7 +34,7 @@ lint *args=('--statistics'):
 # Lint the GNOME Shell extension JS (use --fix to autocorrect)
 [group('codestyle')]
 lint-js *args:
-    eslint src/extension.js {{ args }}
+    eslint src/extension.js src/extension-helpers.js {{ args }}
 
 # Static type checking (use --pretty for error details)
 [group('safety')]
@@ -118,10 +118,13 @@ gate: (clean '--quiet') (package '--quiet')
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q core
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q core
     # Python package should bundle the GNOME Shell extension assets, which
-    # core.gnome_extension copies into the user's extensions dir at startup
+    # core.gnome_extension copies into the user's extensions dir at startup.
+    # extension.js imports extension-helpers.js, so the helper must ship too.
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q extension.js
+    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q extension-helpers.js
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q metadata.json
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q extension.js
+    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q extension-helpers.js
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q metadata.json
 
 # Verify package version is same as Git tag
