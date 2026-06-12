@@ -57,3 +57,33 @@ def audio_server():
     """Skip the test unless an audio server is available to play into."""
     if not _audio_server_reachable():
         pytest.skip("no PulseAudio/PipeWire server reachable")
+
+
+def _user_systemd_reachable():
+    """True when a user systemd manager answers (``systemctl --user`` works).
+
+    Headless CI usually has the systemctl binary but no per-user manager/bus, so
+    ``--user`` commands fail to connect; ``show-environment`` needs that bus and
+    returns non-zero when it's absent, making it a clean reachability probe.
+    """
+    if shutil.which("systemctl") is None:
+        return False
+    try:
+        return (
+            subprocess.run(
+                ["systemctl", "--user", "show-environment"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=5,
+            ).returncode
+            == 0
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
+@pytest.fixture(scope="session")
+def user_systemd():
+    """Skip the test unless a user systemd manager is reachable."""
+    if not _user_systemd_reachable():
+        pytest.skip("no user systemd session (systemctl --user unavailable)")
