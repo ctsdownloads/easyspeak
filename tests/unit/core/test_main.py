@@ -414,8 +414,8 @@ class TestEasySpeakAudio:
         assert easy.stream is None
 
     def test_close_stream_swallows_oserror(self):
-        """A stream already torn down (close raises OSError) is ignored and the
-        handle is still cleared."""
+        """A failing stop_stream is ignored, close() still runs to release the
+        resources, and the handle is cleared."""
         easy = EasySpeak()
         stream = Mock()
         stream.stop_stream.side_effect = OSError("already closed")
@@ -423,6 +423,7 @@ class TestEasySpeakAudio:
 
         easy._close_stream()  # must not raise
 
+        stream.close.assert_called_once()
         assert easy.stream is None
 
     def test_close_stream_noop_when_already_closed(self):

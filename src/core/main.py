@@ -179,13 +179,14 @@ class EasySpeak:
     def _close_stream(self):
         """Release the microphone so other apps — and GNOME's privacy mic
         indicator — see it as free. The PyAudio instance is kept for reopening."""
-        if self.stream is not None:
+        if self.stream is None:
+            return
+        for release in (self.stream.stop_stream, self.stream.close):
             try:
-                self.stream.stop_stream()
-                self.stream.close()
+                release()
             except OSError:
-                pass  # already torn down; nothing to release
-            self.stream = None
+                pass
+        self.stream = None
 
     def flush_stream(self):
         """Flush any remaining audio data from the stream buffer."""
