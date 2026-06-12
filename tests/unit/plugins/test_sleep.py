@@ -19,7 +19,9 @@ def test_handle_sleep_commands(mock_core, command):
 
     assert result is True
     mock_core.deactivate.assert_called_once()
-    assert mock_core.speak.called
+    # Announce only the attempt; the tray controller confirms or explains once
+    # it knows whether sleep actually engaged, so don't promise the tray here.
+    mock_core.speak.assert_called_once_with("Going to sleep.")
 
 
 @pytest.mark.parametrize(

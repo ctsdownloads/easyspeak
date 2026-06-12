@@ -64,9 +64,14 @@ class Tray:
     mouse-grid plugin tolerates a missing extension.
     """
 
-    def __init__(self, control_file=CONTROL_FILE):
+    def __init__(self, control_file=CONTROL_FILE, speak=None):
         self._control_file = Path(control_file)
         self._sleep_requested = False
+        # Spoken feedback callback (core.speak). The plugin only announces the
+        # *attempt* ("Going to sleep."); the tray confirms or, when it can't
+        # actually sleep, explains — since only it knows whether sleep engaged.
+        # Defaults to a no-op so the tray works headless and in tests.
+        self._speak = speak or (lambda _text: None)
 
     # --- lifecycle hooks called by the daemon ---
 
@@ -120,9 +125,13 @@ class Tray:
                 "Tray indicator unavailable; staying awake so you keep a way to "
                 "reactivate."
             )
+            self._speak(
+                "I couldn't reach the tray, so I'll stay awake and keep listening."
+            )
             return TrayAction.CONTINUE
         release_mic()
         print("Muted; microphone released. Waiting for reactivation...")
+        self._speak("Reactivate me from the tray when you need me.")
         next_repush = time.monotonic() + MUTED_REPUSH_INTERVAL
         while True:
             command = self.take_command()

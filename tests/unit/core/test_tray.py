@@ -105,7 +105,7 @@ class TestPoll:
     """
 
     def _tray(self, commands):
-        tray = Tray()
+        tray = Tray(speak=Mock())
         tray.take_command = Mock(side_effect=commands)
         tray.set_state = Mock()
         return tray
@@ -139,6 +139,8 @@ class TestPoll:
         acquire.assert_called_once()
         tray.set_state.assert_any_call(STATE_MUTED)
         tray.set_state.assert_any_call(STATE_LISTENING)
+        # Sleep engaged: the tray confirms it with the reactivation hint.
+        tray._speak.assert_any_call("Reactivate me from the tray when you need me.")
 
     def test_idle_loop_sleeps_until_a_command_arrives(self):
         """While asleep, empty polls sleep and loop; a later 'unmute' wakes it."""
@@ -202,6 +204,11 @@ class TestPoll:
         assert action is TrayAction.CONTINUE
         release.assert_not_called()
         acquire.assert_not_called()
+        # The user was told "Going to sleep." by the plugin, so explain why it
+        # didn't, instead of leaving them with a false promise.
+        tray._speak.assert_any_call(
+            "I couldn't reach the tray, so I'll stay awake and keep listening."
+        )
 
     def test_repushes_muted_state_while_asleep(self):
         """The muted state is re-asserted periodically so the indicator recovers
