@@ -404,11 +404,12 @@ def handle(cmd, core):
 
 **Mouse grid: "Failed to show grid — is extension enabled?"**
 
-EasySpeak auto-installs the GNOME Shell extension to
-`~/.local/share/gnome-shell/extensions/easyspeak-grid@local/` on first
-run (look for a `mousegrid: installed ...` message at startup). On
-Wayland, GNOME Shell only scans for new extensions at login, so you
-typically have to **log out and back in** before it becomes loadable.
+You don't install the extension yourself — EasySpeak does it automatically
+on startup, copying it to
+`~/.local/share/gnome-shell/extensions/easyspeak-grid@local/` and keeping it
+up to date (look for an `easyspeak: installed ...` or `easyspeak: updated ...`
+message). On Wayland, GNOME Shell only scans for new extensions at login, so
+you typically have to **log out and back in** before it becomes loadable.
 
 After re-login, enable it from the command line:
 
