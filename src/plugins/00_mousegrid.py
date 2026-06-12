@@ -96,7 +96,7 @@ DIRECTIONS = {
 
 
 # This plugin drives the GNOME Shell extension over D-Bus (see dbus_call); core
-# owns installing, refreshing, and enabling it (easyspeak.core.extension_install).
+# owns installing, refreshing, and enabling it (easyspeak.core.gnome_extension).
 
 
 def setup(c):

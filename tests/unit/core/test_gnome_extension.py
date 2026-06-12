@@ -1,9 +1,9 @@
-"""Tests for the easyspeak.core.extension_install module."""
+"""Tests for the easyspeak.core.gnome_extension module."""
 
 from unittest.mock import Mock, patch
 
 import pytest
-from easyspeak.core import extension_install
+from easyspeak.core import gnome_extension
 
 UNIT_NAME = "easyspeak-extension-refresh.service"
 
@@ -18,7 +18,7 @@ def test_refresh_extension_files_installs_when_dest_missing(tmp_path):
     (src / "metadata.json").write_text("{}")
     dest = tmp_path / "dest"  # does not exist yet
 
-    refreshed = extension_install.refresh_extension_files(
+    refreshed = gnome_extension.refresh_extension_files(
         src / "extension.js", src / "metadata.json", dest
     )
 
@@ -37,7 +37,7 @@ def test_refresh_extension_files_overwrites_when_changed(tmp_path):
     (dest / "extension.js").write_text("old")
     (dest / "metadata.json").write_text("{}")
 
-    refreshed = extension_install.refresh_extension_files(
+    refreshed = gnome_extension.refresh_extension_files(
         src / "extension.js", src / "metadata.json", dest
     )
 
@@ -55,14 +55,14 @@ def test_refresh_extension_files_noop_when_identical(tmp_path):
     (dest / "extension.js").write_text("same")
     (dest / "metadata.json").write_text("{}")
 
-    refreshed = extension_install.refresh_extension_files(
+    refreshed = gnome_extension.refresh_extension_files(
         src / "extension.js", src / "metadata.json", dest
     )
 
     assert refreshed is False
 
 
-@patch.object(extension_install.shutil, "copy2", side_effect=PermissionError("ro"))
+@patch.object(gnome_extension.shutil, "copy2", side_effect=PermissionError("ro"))
 def test_refresh_extension_files_write_failure_returns_false(mock_copy, tmp_path):
     """A write error (e.g. read-only dest) is swallowed, leaving the existing
     install untouched rather than crashing startup."""
@@ -75,7 +75,7 @@ def test_refresh_extension_files_write_failure_returns_false(mock_copy, tmp_path
     (dest / "extension.js").write_text("old")
     (dest / "metadata.json").write_text("{}")
 
-    refreshed = extension_install.refresh_extension_files(
+    refreshed = gnome_extension.refresh_extension_files(
         src / "extension.js", src / "metadata.json", dest
     )
 
@@ -87,7 +87,7 @@ def test_refresh_extension_files_missing_source(tmp_path):
     src = tmp_path / "src"  # no files created
     dest = tmp_path / "dest"
 
-    refreshed = extension_install.refresh_extension_files(
+    refreshed = gnome_extension.refresh_extension_files(
         src / "extension.js", src / "metadata.json", dest
     )
 
@@ -99,23 +99,23 @@ def test_refresh_extension_files_missing_source(tmp_path):
 
 
 def test_extension_source_dir_holds_bundled_assets():
-    src = extension_install.extension_source_dir()
+    src = gnome_extension.extension_source_dir()
     # Assets are package data in src/ (the easyspeak package), next to core/.
     assert (src / "extension.js").is_file()
     assert (src / "metadata.json").is_file()
-    assert (src / "core" / "extension_install.py").is_file()
+    assert (src / "core" / "gnome_extension.py").is_file()
 
 
 def test_extension_dest_dir(tmp_path):
-    with patch.object(extension_install.Path, "home", return_value=tmp_path):
-        dest = extension_install.extension_dest_dir()
+    with patch.object(gnome_extension.Path, "home", return_value=tmp_path):
+        dest = gnome_extension.extension_dest_dir()
     assert dest == (
         tmp_path
         / ".local"
         / "share"
         / "gnome-shell"
         / "extensions"
-        / extension_install.GRID_EXTENSION_UUID
+        / gnome_extension.GRID_EXTENSION_UUID
     )
 
 
@@ -124,16 +124,14 @@ def test_refresh_installed_extension_delegates():
 
     with (
         patch.object(
-            extension_install, "extension_source_dir", return_value=Path("/repo")
+            gnome_extension, "extension_source_dir", return_value=Path("/repo")
         ),
+        patch.object(gnome_extension, "extension_dest_dir", return_value=Path("/dest")),
         patch.object(
-            extension_install, "extension_dest_dir", return_value=Path("/dest")
-        ),
-        patch.object(
-            extension_install, "refresh_extension_files", return_value=True
+            gnome_extension, "refresh_extension_files", return_value=True
         ) as mock_refresh,
     ):
-        result = extension_install.refresh_installed_extension()
+        result = gnome_extension.refresh_installed_extension()
 
     assert result is True
     args = mock_refresh.call_args.args
@@ -146,18 +144,18 @@ def test_refresh_installed_extension_delegates():
 
 
 def test_unit_text_contains_ordering_and_execstart():
-    text = extension_install._unit_text()
-    assert f"WantedBy={extension_install.PRE_SHELL_TARGET}" in text
-    assert f"Before={extension_install.PRE_SHELL_TARGET}" in text
+    text = gnome_extension._unit_text()
+    assert f"WantedBy={gnome_extension.PRE_SHELL_TARGET}" in text
+    assert f"Before={gnome_extension.PRE_SHELL_TARGET}" in text
     assert "org.gnome.Shell@user.service" in text
     assert "Type=oneshot" in text
     assert "ExecStart=" in text
-    assert "extension_install.py" in text
+    assert "gnome_extension.py" in text
 
 
 def test_unit_path(tmp_path):
-    with patch.object(extension_install.Path, "home", return_value=tmp_path):
-        assert extension_install._unit_path() == (
+    with patch.object(gnome_extension.Path, "home", return_value=tmp_path):
+        assert gnome_extension._unit_path() == (
             tmp_path / ".config" / "systemd" / "user" / UNIT_NAME
         )
 
@@ -167,45 +165,45 @@ def test_unit_path(tmp_path):
 
 def test_is_enabled_true():
     with patch.object(
-        extension_install.subprocess,
+        gnome_extension.subprocess,
         "run",
         return_value=Mock(returncode=0, stdout="enabled\n"),
     ):
-        assert extension_install._is_enabled() is True
+        assert gnome_extension._is_enabled() is True
 
 
 def test_is_enabled_false_when_disabled():
     with patch.object(
-        extension_install.subprocess,
+        gnome_extension.subprocess,
         "run",
         return_value=Mock(returncode=1, stdout="disabled\n"),
     ):
-        assert extension_install._is_enabled() is False
+        assert gnome_extension._is_enabled() is False
 
 
 # --- install_refresh_unit ----------------------------------------------------
 
 
 def test_install_refresh_unit_no_systemd():
-    with patch.object(extension_install.shutil, "which", return_value=None):
-        assert extension_install.install_refresh_unit() is None
+    with patch.object(gnome_extension.shutil, "which", return_value=None):
+        assert gnome_extension.install_refresh_unit() is None
 
 
 def test_install_refresh_unit_new_install(tmp_path):
     with (
         patch.object(
-            extension_install.shutil, "which", return_value="/usr/bin/systemctl"
+            gnome_extension.shutil, "which", return_value="/usr/bin/systemctl"
         ),
-        patch.object(extension_install.Path, "home", return_value=tmp_path),
+        patch.object(gnome_extension.Path, "home", return_value=tmp_path),
         patch.object(
-            extension_install.subprocess, "run", return_value=Mock(returncode=0)
+            gnome_extension.subprocess, "run", return_value=Mock(returncode=0)
         ) as mock_run,
     ):
-        status = extension_install.install_refresh_unit()
+        status = gnome_extension.install_refresh_unit()
 
     unit = tmp_path / ".config" / "systemd" / "user" / UNIT_NAME
     assert unit.is_file()
-    assert unit.read_text() == extension_install._unit_text()
+    assert unit.read_text() == gnome_extension._unit_text()
     assert status == f"installed systemd user unit {UNIT_NAME}"
     cmds = [call.args[0] for call in mock_run.call_args_list]
     assert ["systemctl", "--user", "daemon-reload"] in cmds
@@ -215,20 +213,20 @@ def test_install_refresh_unit_new_install(tmp_path):
 def test_install_refresh_unit_noop_when_current_and_enabled(tmp_path):
     unit = tmp_path / ".config" / "systemd" / "user" / UNIT_NAME
     unit.parent.mkdir(parents=True)
-    unit.write_text(extension_install._unit_text())
+    unit.write_text(gnome_extension._unit_text())
 
     with (
         patch.object(
-            extension_install.shutil, "which", return_value="/usr/bin/systemctl"
+            gnome_extension.shutil, "which", return_value="/usr/bin/systemctl"
         ),
-        patch.object(extension_install.Path, "home", return_value=tmp_path),
+        patch.object(gnome_extension.Path, "home", return_value=tmp_path),
         patch.object(
-            extension_install.subprocess,
+            gnome_extension.subprocess,
             "run",
             return_value=Mock(returncode=0, stdout="enabled\n"),
         ) as mock_run,
     ):
-        status = extension_install.install_refresh_unit()
+        status = gnome_extension.install_refresh_unit()
 
     assert status is None
     # Only the is-enabled probe ran — no rewrite, no daemon-reload, no enable.
@@ -239,15 +237,15 @@ def test_install_refresh_unit_noop_when_current_and_enabled(tmp_path):
 def test_install_refresh_unit_current_but_disabled_enables(tmp_path):
     unit = tmp_path / ".config" / "systemd" / "user" / UNIT_NAME
     unit.parent.mkdir(parents=True)
-    unit.write_text(extension_install._unit_text())
+    unit.write_text(gnome_extension._unit_text())
 
     with (
         patch.object(
-            extension_install.shutil, "which", return_value="/usr/bin/systemctl"
+            gnome_extension.shutil, "which", return_value="/usr/bin/systemctl"
         ),
-        patch.object(extension_install.Path, "home", return_value=tmp_path),
+        patch.object(gnome_extension.Path, "home", return_value=tmp_path),
         patch.object(
-            extension_install.subprocess,
+            gnome_extension.subprocess,
             "run",
             side_effect=[
                 Mock(returncode=1, stdout="disabled\n"),  # is-enabled
@@ -255,7 +253,7 @@ def test_install_refresh_unit_current_but_disabled_enables(tmp_path):
             ],
         ) as mock_run,
     ):
-        status = extension_install.install_refresh_unit()
+        status = gnome_extension.install_refresh_unit()
 
     assert status == f"enabled systemd user unit {UNIT_NAME}"
     cmds = [call.args[0] for call in mock_run.call_args_list]
@@ -272,16 +270,16 @@ def test_install_refresh_unit_rewrites_when_changed(tmp_path):
 
     with (
         patch.object(
-            extension_install.shutil, "which", return_value="/usr/bin/systemctl"
+            gnome_extension.shutil, "which", return_value="/usr/bin/systemctl"
         ),
-        patch.object(extension_install.Path, "home", return_value=tmp_path),
+        patch.object(gnome_extension.Path, "home", return_value=tmp_path),
         patch.object(
-            extension_install.subprocess, "run", return_value=Mock(returncode=0)
+            gnome_extension.subprocess, "run", return_value=Mock(returncode=0)
         ),
     ):
-        status = extension_install.install_refresh_unit()
+        status = gnome_extension.install_refresh_unit()
 
-    assert unit.read_text() == extension_install._unit_text()
+    assert unit.read_text() == gnome_extension._unit_text()
     assert status == f"installed systemd user unit {UNIT_NAME}"
 
 
@@ -292,15 +290,15 @@ def test_install_refresh_unit_read_error_treated_as_changed(tmp_path):
 
     with (
         patch.object(
-            extension_install.shutil, "which", return_value="/usr/bin/systemctl"
+            gnome_extension.shutil, "which", return_value="/usr/bin/systemctl"
         ),
-        patch.object(extension_install.Path, "home", return_value=tmp_path),
-        patch.object(extension_install.Path, "read_text", side_effect=OSError("boom")),
+        patch.object(gnome_extension.Path, "home", return_value=tmp_path),
+        patch.object(gnome_extension.Path, "read_text", side_effect=OSError("boom")),
         patch.object(
-            extension_install.subprocess, "run", return_value=Mock(returncode=0)
+            gnome_extension.subprocess, "run", return_value=Mock(returncode=0)
         ),
     ):
-        status = extension_install.install_refresh_unit()
+        status = gnome_extension.install_refresh_unit()
 
     assert status == f"installed systemd user unit {UNIT_NAME}"
 
@@ -308,13 +306,13 @@ def test_install_refresh_unit_read_error_treated_as_changed(tmp_path):
 def test_install_refresh_unit_write_failure_returns_none(tmp_path):
     with (
         patch.object(
-            extension_install.shutil, "which", return_value="/usr/bin/systemctl"
+            gnome_extension.shutil, "which", return_value="/usr/bin/systemctl"
         ),
-        patch.object(extension_install.Path, "home", return_value=tmp_path),
-        patch.object(extension_install.Path, "write_text", side_effect=OSError("ro")),
-        patch.object(extension_install.subprocess, "run") as mock_run,
+        patch.object(gnome_extension.Path, "home", return_value=tmp_path),
+        patch.object(gnome_extension.Path, "write_text", side_effect=OSError("ro")),
+        patch.object(gnome_extension.subprocess, "run") as mock_run,
     ):
-        status = extension_install.install_refresh_unit()
+        status = gnome_extension.install_refresh_unit()
 
     assert status is None
     mock_run.assert_not_called()
@@ -323,11 +321,11 @@ def test_install_refresh_unit_write_failure_returns_none(tmp_path):
 def test_install_refresh_unit_enable_failure_returns_none(tmp_path):
     with (
         patch.object(
-            extension_install.shutil, "which", return_value="/usr/bin/systemctl"
+            gnome_extension.shutil, "which", return_value="/usr/bin/systemctl"
         ),
-        patch.object(extension_install.Path, "home", return_value=tmp_path),
+        patch.object(gnome_extension.Path, "home", return_value=tmp_path),
         patch.object(
-            extension_install.subprocess,
+            gnome_extension.subprocess,
             "run",
             side_effect=[
                 Mock(returncode=0),  # daemon-reload
@@ -335,7 +333,7 @@ def test_install_refresh_unit_enable_failure_returns_none(tmp_path):
             ],
         ),
     ):
-        status = extension_install.install_refresh_unit()
+        status = gnome_extension.install_refresh_unit()
 
     assert status is None
 
@@ -345,9 +343,9 @@ def test_install_refresh_unit_enable_failure_returns_none(tmp_path):
 
 def test_main_refreshes_and_returns_zero():
     with patch.object(
-        extension_install, "refresh_installed_extension", return_value=True
+        gnome_extension, "refresh_installed_extension", return_value=True
     ) as mock_refresh:
-        assert extension_install.main() == 0
+        assert gnome_extension.main() == 0
     mock_refresh.assert_called_once_with()
 
 
@@ -363,40 +361,40 @@ class TestEnsureExtension:
 
     @pytest.fixture(autouse=True)
     def _stub_refresh_unit(self):
-        with patch.object(extension_install, "install_refresh_unit", return_value=None):
+        with patch.object(gnome_extension, "install_refresh_unit", return_value=None):
             yield
 
-    @patch.object(extension_install.shutil, "which", return_value=None)
+    @patch.object(gnome_extension.shutil, "which", return_value=None)
     def test_no_gnome_cli(self, mock_which, capsys):
         """No gnome-extensions on PATH (non-GNOME): silent no-op."""
-        extension_install.ensure_extension()
+        gnome_extension.ensure_extension()
 
         assert capsys.readouterr().err == ""
 
-    @patch.object(extension_install.subprocess, "run", side_effect=OSError("nope"))
+    @patch.object(gnome_extension.subprocess, "run", side_effect=OSError("nope"))
     @patch.object(
-        extension_install.shutil, "which", return_value="/usr/bin/gnome-extensions"
+        gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
     def test_list_oserror(self, mock_which, mock_run, capsys):
         """`gnome-extensions list` raising OSError is swallowed silently."""
-        extension_install.ensure_extension()
+        gnome_extension.ensure_extension()
 
         assert capsys.readouterr().err == ""
 
     @patch.object(
-        extension_install.subprocess, "run", return_value=Mock(returncode=1, stdout="")
+        gnome_extension.subprocess, "run", return_value=Mock(returncode=1, stdout="")
     )
     @patch.object(
-        extension_install.shutil, "which", return_value="/usr/bin/gnome-extensions"
+        gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
     def test_list_returncode_nonzero(self, mock_which, mock_run, capsys):
         """`gnome-extensions list` returning non-zero: silent no-op."""
-        extension_install.ensure_extension()
+        gnome_extension.ensure_extension()
 
         assert capsys.readouterr().err == ""
 
     @patch.object(
-        extension_install.shutil, "which", return_value="/usr/bin/gnome-extensions"
+        gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
     def test_already_installed_and_enabled(self, mock_which, capsys):
         """UUID in both `list` and `list --enabled`, bundle unchanged: announce."""
@@ -408,15 +406,15 @@ class TestEnsureExtension:
         )
         with (
             patch.object(
-                extension_install.subprocess,
+                gnome_extension.subprocess,
                 "run",
                 side_effect=[listed, listed_enabled],
             ) as mock_run,
             patch.object(
-                extension_install, "refresh_extension_files", return_value=False
+                gnome_extension, "refresh_extension_files", return_value=False
             ),
         ):
-            extension_install.ensure_extension()
+            gnome_extension.ensure_extension()
 
         captured = capsys.readouterr()
         assert "already installed and enabled" in captured.err
@@ -425,7 +423,7 @@ class TestEnsureExtension:
         assert mock_run.call_count == 2
 
     @patch.object(
-        extension_install.shutil, "which", return_value="/usr/bin/gnome-extensions"
+        gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
     def test_already_installed_refreshes_changed_bundle(self, mock_which, capsys):
         """Installed+enabled but the bundled extension changed: refresh and tell
@@ -434,15 +432,13 @@ class TestEnsureExtension:
         listed_enabled = Mock(returncode=0, stdout="easyspeak-grid@local\n")
         with (
             patch.object(
-                extension_install.subprocess,
+                gnome_extension.subprocess,
                 "run",
                 side_effect=[listed, listed_enabled],
             ) as mock_run,
-            patch.object(
-                extension_install, "refresh_extension_files", return_value=True
-            ),
+            patch.object(gnome_extension, "refresh_extension_files", return_value=True),
         ):
-            extension_install.ensure_extension()
+            gnome_extension.ensure_extension()
 
         captured = capsys.readouterr()
         assert "updated GNOME extension easyspeak-grid@local" in captured.err
@@ -451,7 +447,7 @@ class TestEnsureExtension:
         assert mock_run.call_count == 2
 
     @patch.object(
-        extension_install.shutil, "which", return_value="/usr/bin/gnome-extensions"
+        gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
     def test_reports_unit_install(self, mock_which, capsys):
         """ensure_extension surfaces whatever install_refresh_unit reports."""
@@ -459,26 +455,26 @@ class TestEnsureExtension:
         listed_enabled = Mock(returncode=0, stdout="easyspeak-grid@local\n")
         with (
             patch.object(
-                extension_install.subprocess,
+                gnome_extension.subprocess,
                 "run",
                 side_effect=[listed, listed_enabled],
             ),
             patch.object(
-                extension_install, "refresh_extension_files", return_value=False
+                gnome_extension, "refresh_extension_files", return_value=False
             ),
             patch.object(
-                extension_install,
+                gnome_extension,
                 "install_refresh_unit",
                 return_value=f"installed systemd user unit {UNIT_NAME}",
             ) as mock_unit,
         ):
-            extension_install.ensure_extension()
+            gnome_extension.ensure_extension()
 
         mock_unit.assert_called_once_with()
         assert f"installed systemd user unit {UNIT_NAME}" in capsys.readouterr().err
 
     @patch.object(
-        extension_install.shutil, "which", return_value="/usr/bin/gnome-extensions"
+        gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
     def test_installed_but_disabled_enable_succeeds(self, mock_which, capsys):
         """UUID in `list` but not in `list --enabled`: flip it on and announce."""
@@ -486,11 +482,11 @@ class TestEnsureExtension:
         listed_enabled = Mock(returncode=0, stdout="other-on@two.org\n")
         enabled = Mock(returncode=0, stdout="")
         with patch.object(
-            extension_install.subprocess,
+            gnome_extension.subprocess,
             "run",
             side_effect=[listed, listed_enabled, enabled],
         ) as mock_run:
-            extension_install.ensure_extension()
+            gnome_extension.ensure_extension()
 
         captured = capsys.readouterr()
         assert "enabled GNOME extension easyspeak-grid@local" in captured.err
@@ -503,7 +499,7 @@ class TestEnsureExtension:
         ]
 
     @patch.object(
-        extension_install.shutil, "which", return_value="/usr/bin/gnome-extensions"
+        gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
     def test_installed_but_disabled_enable_fails(self, mock_which, capsys):
         """Installed-but-disabled and `enable` fails: hint, no log-out wording."""
@@ -511,11 +507,11 @@ class TestEnsureExtension:
         listed_enabled = Mock(returncode=0, stdout="")
         enabled = Mock(returncode=1, stdout="")
         with patch.object(
-            extension_install.subprocess,
+            gnome_extension.subprocess,
             "run",
             side_effect=[listed, listed_enabled, enabled],
         ):
-            extension_install.ensure_extension()
+            gnome_extension.ensure_extension()
 
         captured = capsys.readouterr()
         assert "installed but disabled, and could not be enabled" in captured.err
@@ -523,35 +519,35 @@ class TestEnsureExtension:
         # The "log out and back in" hint is only for fresh installs.
         assert "log out" not in captured.err
 
-    @patch.object(extension_install.Path, "is_file", return_value=False)
+    @patch.object(gnome_extension.Path, "is_file", return_value=False)
     @patch.object(
-        extension_install.subprocess, "run", return_value=Mock(returncode=0, stdout="")
+        gnome_extension.subprocess, "run", return_value=Mock(returncode=0, stdout="")
     )
     @patch.object(
-        extension_install.shutil, "which", return_value="/usr/bin/gnome-extensions"
+        gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
     def test_source_files_missing(self, mock_which, mock_run, mock_is_file, capsys):
         """When extension source files aren't at the project root: polite note."""
-        extension_install.ensure_extension()
+        gnome_extension.ensure_extension()
 
         captured = capsys.readouterr()
         assert "easyspeak: note:" in captured.err
         assert "source files not found" in captured.err
 
     @patch.object(
-        extension_install.subprocess, "run", return_value=Mock(returncode=0, stdout="")
+        gnome_extension.subprocess, "run", return_value=Mock(returncode=0, stdout="")
     )
     @patch.object(
-        extension_install.shutil, "which", return_value="/usr/bin/gnome-extensions"
+        gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
-    @patch.object(extension_install.shutil, "copy2", side_effect=PermissionError("ro"))
+    @patch.object(gnome_extension.shutil, "copy2", side_effect=PermissionError("ro"))
     def test_copy_fails(
         self, mock_copy, mock_which, mock_run, tmp_path, monkeypatch, capsys
     ):
         """copy2 raising OSError: polite note, no enable attempt."""
         monkeypatch.setenv("HOME", str(tmp_path))
 
-        extension_install.ensure_extension()
+        gnome_extension.ensure_extension()
 
         captured = capsys.readouterr()
         assert "easyspeak: note:" in captured.err
@@ -561,7 +557,7 @@ class TestEnsureExtension:
         assert mock_run.call_count == 2
 
     @patch.object(
-        extension_install.shutil, "which", return_value="/usr/bin/gnome-extensions"
+        gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
     def test_install_and_enable_success(
         self, mock_which, tmp_path, monkeypatch, capsys
@@ -573,11 +569,11 @@ class TestEnsureExtension:
         listed_enabled = Mock(returncode=0, stdout="other-on@two.org\n")
         enabled = Mock(returncode=0, stdout="")
         with patch.object(
-            extension_install.subprocess,
+            gnome_extension.subprocess,
             "run",
             side_effect=[listed, listed_enabled, enabled],
         ):
-            extension_install.ensure_extension()
+            gnome_extension.ensure_extension()
 
         dest = (
             tmp_path
@@ -594,7 +590,7 @@ class TestEnsureExtension:
         assert "installed and enabled" in captured.err
 
     @patch.object(
-        extension_install.shutil, "which", return_value="/usr/bin/gnome-extensions"
+        gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
     def test_install_succeeds_enable_returncode_nonzero(
         self, mock_which, tmp_path, monkeypatch, capsys
@@ -606,11 +602,11 @@ class TestEnsureExtension:
         listed_enabled = Mock(returncode=0, stdout="")
         enabled = Mock(returncode=1, stdout="")
         with patch.object(
-            extension_install.subprocess,
+            gnome_extension.subprocess,
             "run",
             side_effect=[listed, listed_enabled, enabled],
         ):
-            extension_install.ensure_extension()
+            gnome_extension.ensure_extension()
 
         captured = capsys.readouterr()
         assert "log out and back in" in captured.err
@@ -619,7 +615,7 @@ class TestEnsureExtension:
         assert "gnome-extensions enable" not in captured.err
 
     @patch.object(
-        extension_install.shutil, "which", return_value="/usr/bin/gnome-extensions"
+        gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
     def test_install_succeeds_enable_oserror(
         self, mock_which, tmp_path, monkeypatch, capsys
@@ -630,11 +626,11 @@ class TestEnsureExtension:
         listed = Mock(returncode=0, stdout="other@one.com\n")
         listed_enabled = Mock(returncode=0, stdout="")
         with patch.object(
-            extension_install.subprocess,
+            gnome_extension.subprocess,
             "run",
             side_effect=[listed, listed_enabled, OSError("boom")],
         ):
-            extension_install.ensure_extension()
+            gnome_extension.ensure_extension()
 
         captured = capsys.readouterr()
         assert "log out and back in" in captured.err

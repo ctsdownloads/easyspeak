@@ -327,7 +327,7 @@ easyspeak/
 │   │   ├── __init__.py
 │   │   ├── __main__.py
 │   │   ├── config.py          # Tuning constants + Whisper model factory
-│   │   ├── extension_install.py  # Installs/refreshes/enables the extension
+│   │   ├── gnome_extension.py  # Installs/refreshes/enables the extension
 │   │   └── main.py            # EasySpeak class + main loop
 │   └── plugins
 │       ├── __init__.py

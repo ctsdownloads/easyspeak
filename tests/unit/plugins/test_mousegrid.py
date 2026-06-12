@@ -30,7 +30,7 @@ def reset_mousegrid_state():
 
 def test_setup(mock_core):
     """setup() stores the core reference. Installing/refreshing/enabling the
-    GNOME extension is core's job now (easyspeak.core.extension_install), not
+    GNOME extension is core's job now (easyspeak.core.gnome_extension), not
     the plugin's."""
     mousegrid_plugin.setup(mock_core)
 

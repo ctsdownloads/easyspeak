@@ -31,7 +31,7 @@ from .config import (
     WHISPER_MODEL,
     load_whisper_model,
 )
-from .extension_install import ensure_extension
+from .gnome_extension import ensure_extension
 from .speech import SpeechPipeline, suppressed_c_stderr
 from .tray import Tray, TrayAction
 
