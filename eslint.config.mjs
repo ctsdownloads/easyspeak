@@ -6,7 +6,7 @@
 // (undefined names, unused vars) without trying to resolve modules.
 export default [
   {
-    files: ["extension.js"],
+    files: ["src/extension.js"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",

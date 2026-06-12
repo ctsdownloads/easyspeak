@@ -6,10 +6,11 @@ same extension for the panel indicator (``SetState`` over D-Bus). Core therefore
 owns its lifecycle — installing it, keeping the installed copy current, and
 enabling it — and calls :func:`ensure_extension` once at startup.
 
-The extension ships at the project root (``extension.js`` + ``metadata.json``)
-and is copied into the user's extension directory. GNOME only auto-installs on
-first run and, on Wayland, only loads extension code at login — it never reloads
-a changed file in a running session. Core's startup refresh runs *after* the
+The extension ships as package data inside the ``easyspeak`` package
+(``extension.js`` + ``metadata.json``) and is copied into the user's extension
+directory. GNOME only auto-installs on first run and, on Wayland, only loads
+extension code at login — it never reloads a changed file in a running session.
+Core's startup refresh runs *after* the
 shell has already read the extensions directory, so on its own it is always one
 login behind. To close that gap we also install a tiny ``oneshot`` systemd
 *user* unit ordered *before* the shell (via ``gnome-session-pre.target``) that
@@ -32,13 +33,16 @@ REFRESH_UNIT_NAME = "easyspeak-extension-refresh.service"
 PRE_SHELL_TARGET = "gnome-session-pre.target"
 
 
-def project_root():
-    """Repo root that holds the bundled extension.js / metadata.json.
+def extension_source_dir():
+    """Directory holding the bundled extension.js / metadata.json.
 
-    This module lives at ``src/core/extension_install.py``, so the root is two
-    levels up from ``src/core``.
+    The assets are package data inside the ``easyspeak`` package, so they live
+    in ``src/`` — one level up from this module at ``src/core`` — which becomes
+    ``site-packages/easyspeak/`` in an installed wheel. Resolving relative to
+    the package (not the repo root) makes them findable in both editable and
+    wheel installs.
     """
-    return Path(__file__).resolve().parents[2]
+    return Path(__file__).resolve().parents[1]
 
 
 def extension_dest_dir():
@@ -85,12 +89,12 @@ def refresh_extension_files(src_ext, src_meta, dest_dir):
 
 
 def refresh_installed_extension():
-    """Refresh the installed extension from the bundled copy at the repo root.
+    """Refresh the installed extension from the bundled package-data copy.
 
     Path-resolving wrapper around :func:`refresh_extension_files`; this is what
     the systemd unit runs at the start of each login.
     """
-    root = project_root()
+    root = extension_source_dir()
     return refresh_extension_files(
         root / "extension.js",
         root / "metadata.json",
@@ -236,7 +240,7 @@ def ensure_extension():
     )
     dest_dir = extension_dest_dir()
 
-    root = project_root()
+    root = extension_source_dir()
     src_ext = root / "extension.js"
     src_meta = root / "metadata.json"
 

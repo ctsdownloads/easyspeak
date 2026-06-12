@@ -319,14 +319,15 @@ These are just examples. Edit `apps.py` to add your own apps.
 
 ```
 easyspeak/
-├── extension.js               # GNOME Shell extension
-├── metadata.json              # Extension metadata
 ├── pyproject.toml
 ├── src
+│   ├── extension.js           # GNOME Shell extension (bundled as package data)
+│   ├── metadata.json          # Extension metadata
 │   ├── core
 │   │   ├── __init__.py
 │   │   ├── __main__.py
 │   │   ├── config.py          # Tuning constants + Whisper model factory
+│   │   ├── extension_install.py  # Installs/refreshes/enables the extension
 │   │   └── main.py            # EasySpeak class + main loop
 │   └── plugins
 │       ├── __init__.py
