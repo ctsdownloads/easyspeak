@@ -52,7 +52,7 @@ class EasySpeak:
         # voice model is loaded only once.
         self.speech = SpeechPipeline()
         # GNOME panel indicator: owns the icon and the asleep lifecycle.
-        self.tray = Tray()
+        self.tray = Tray(speak=self.speak)
 
     # --- Utilities for plugins ---
 

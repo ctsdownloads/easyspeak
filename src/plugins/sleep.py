@@ -24,7 +24,11 @@ SLEEP_PHRASES = ("go to sleep", "goto sleep", "stop listening")
 def handle(cmd, core):
     cmd_lower = cmd.lower().strip()
     if any(phrase in cmd_lower for phrase in SLEEP_PHRASES):
-        core.speak("Going to sleep. Reactivate me from the tray when you need me.")
+        # Announce only the attempt. The tray controller confirms once sleep
+        # actually engages ("Reactivate me from the tray...") or, if it can't
+        # reach the indicator, explains and stays awake — so we never promise a
+        # tray that isn't there.
+        core.speak("Going to sleep.")
         core.deactivate()
         return True
     return None
