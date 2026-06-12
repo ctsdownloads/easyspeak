@@ -132,14 +132,34 @@ WantedBy={PRE_SHELL_TARGET}
 """
 
 
+def _run_systemctl(*args):
+    """Run a ``systemctl --user`` command, returning the CompletedProcess or
+    None if it could not be executed.
+
+    ``check=False`` already keeps non-zero exits from raising, but an
+    un-execable systemctl (vanished after the initial ``which`` probe, a PATH
+    race, an exec failure) still raises OSError. Swallowing it here keeps the
+    refresh-unit install best-effort and non-fatal, so it can never abort
+    startup from :func:`ensure_extension`.
+    """
+    try:
+        return subprocess.run(
+            ["systemctl", "--user", *args],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return None
+
+
 def _is_enabled():
-    result = subprocess.run(
-        ["systemctl", "--user", "is-enabled", REFRESH_UNIT_NAME],
-        capture_output=True,
-        text=True,
-        check=False,
+    result = _run_systemctl("is-enabled", REFRESH_UNIT_NAME)
+    return (
+        result is not None
+        and result.returncode == 0
+        and result.stdout.strip() == "enabled"
     )
-    return result.returncode == 0 and result.stdout.strip() == "enabled"
 
 
 def install_refresh_unit():
@@ -167,22 +187,12 @@ def install_refresh_unit():
             unit_path.write_text(desired)
         except OSError:
             return None
-        subprocess.run(
-            ["systemctl", "--user", "daemon-reload"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
+        _run_systemctl("daemon-reload")
     elif _is_enabled():
         return None  # already installed, current, and enabled
 
-    enabled = subprocess.run(
-        ["systemctl", "--user", "enable", REFRESH_UNIT_NAME],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if enabled.returncode != 0:
+    enabled = _run_systemctl("enable", REFRESH_UNIT_NAME)
+    if enabled is None or enabled.returncode != 0:
         return None
     return (
         f"{'installed' if changed else 'enabled'} systemd user unit {REFRESH_UNIT_NAME}"
