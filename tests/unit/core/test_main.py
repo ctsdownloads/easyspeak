@@ -613,6 +613,30 @@ class TestEasySpeakRun:
         with patch("easyspeak.core.speech.SpeechPipeline.ensure") as mock_ensure:
             yield mock_ensure
 
+    @pytest.fixture(autouse=True)
+    def _stub_ensure_extension(self):
+        """Keep run() from touching gnome-extensions / systemctl at startup."""
+        with patch("easyspeak.core.main.ensure_extension") as mock_ensure_ext:
+            yield mock_ensure_ext
+
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch.object(EasySpeak, "load_plugins")
+    def test_run_ensures_extension(
+        self,
+        mock_load_plugins,
+        mock_whisper_model,
+        mock_wakeword_model,
+        _stub_ensure_extension,
+    ):
+        """run() installs/enables the GNOME extension before loading plugins."""
+        easy = EasySpeak()
+        easy.plugins = []  # exit early after the ensure call
+
+        easy.run()
+
+        _stub_ensure_extension.assert_called_once_with()
+
     @patch("easyspeak.core.main.WakeWordModel")
     @patch("easyspeak.core.main.load_whisper_model")
     @patch.object(EasySpeak, "load_plugins")

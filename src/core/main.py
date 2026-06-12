@@ -31,6 +31,7 @@ from .config import (
     WHISPER_MODEL,
     load_whisper_model,
 )
+from .extension_install import ensure_extension
 from .speech import SpeechPipeline, suppressed_c_stderr
 from .tray import Tray, TrayAction
 
@@ -253,6 +254,11 @@ class EasySpeak:
             f"cpu_threads={WHISPER_CPU_THREADS or 'auto'})..."
         )
         self.whisper = load_whisper_model()
+
+        # The GNOME Shell extension powers both the panel indicator and the
+        # mouse grid, so core (not a plugin) owns installing/refreshing/enabling
+        # it before anything starts driving it over D-Bus.
+        ensure_extension()
 
         print("\nLoading plugins...")
         self.load_plugins()

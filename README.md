@@ -345,9 +345,9 @@ easyspeak/
     └── plugins                # tests for src/plugins/
 ```
 
-On first start, the `mousegrid` plugin auto-installs the GNOME Shell
-extension to the user-local extensions directory (unless GNOME already
-sees it via a system-wide install). Files copied:
+On first start, core auto-installs the GNOME Shell extension to the
+user-local extensions directory (unless GNOME already sees it via a
+system-wide install). Files copied:
 
 ```
 ~/.local/share/gnome-shell/extensions/easyspeak-grid@local/
