@@ -181,6 +181,15 @@ def test_is_enabled_false_when_disabled():
         assert gnome_extension._is_enabled() is False
 
 
+def test_is_enabled_false_when_systemctl_unexecable():
+    """An OSError from systemctl (vanished/exec failure) reports 'not enabled'
+    rather than propagating and crashing startup."""
+    with patch.object(
+        gnome_extension.subprocess, "run", side_effect=OSError("no exec")
+    ):
+        assert gnome_extension._is_enabled() is False
+
+
 # --- install_refresh_unit ----------------------------------------------------
 
 
@@ -208,6 +217,22 @@ def test_install_refresh_unit_new_install(tmp_path):
     cmds = [call.args[0] for call in mock_run.call_args_list]
     assert ["systemctl", "--user", "daemon-reload"] in cmds
     assert ["systemctl", "--user", "enable", UNIT_NAME] in cmds
+
+
+def test_install_refresh_unit_systemctl_unexecable_returns_none(tmp_path):
+    """If systemctl can't be executed (OSError on the enable call), the install
+    is a no-op rather than crashing — the unit file is still written, but no
+    status is reported since it couldn't be enabled."""
+    with (
+        patch.object(
+            gnome_extension.shutil, "which", return_value="/usr/bin/systemctl"
+        ),
+        patch.object(gnome_extension.Path, "home", return_value=tmp_path),
+        patch.object(gnome_extension.subprocess, "run", side_effect=OSError("no exec")),
+    ):
+        status = gnome_extension.install_refresh_unit()
+
+    assert status is None
 
 
 def test_install_refresh_unit_noop_when_current_and_enabled(tmp_path):
