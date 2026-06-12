@@ -38,6 +38,10 @@ CONTROL_FILE = Path.home() / ".cache" / "easyspeak" / "control"
 # How long to idle between control-file probes while the assistant is asleep.
 SLEEP_POLL_INTERVAL = 0.2
 
+# How often to re-assert the muted state while asleep, so the indicator recovers
+# if GNOME Shell or the extension reloads (which leaves it hidden by default).
+MUTED_REPUSH_INTERVAL = 5.0
+
 
 class TrayAction(enum.Enum):
     """What ``Tray.poll`` is telling the audio loop to do next."""
@@ -101,12 +105,25 @@ class Tray:
     def _sleep(self, release_mic, acquire_mic):
         """Release the mic and idle until the tray asks to resume or quit.
 
+        Pushes the muted state first and refuses to sleep unless it lands:
+        reactivation only ever arrives via the extension's menu, so releasing
+        the mic while the indicator is missing (no GNOME/extension) would strand
+        the daemon with no way back. While asleep the muted state is re-asserted
+        every ``MUTED_REPUSH_INTERVAL`` seconds so the icon recovers if GNOME
+        Shell or the extension reloads (it would otherwise come back hidden).
+
         Freeing the stream also clears GNOME's privacy microphone indicator, an
         OS-level 'not listening' cue alongside our own muted glyph.
         """
+        if not self.set_state(STATE_MUTED):
+            print(
+                "Tray indicator unavailable; staying awake so you keep a way to "
+                "reactivate."
+            )
+            return TrayAction.CONTINUE
         release_mic()
-        self.set_state(STATE_MUTED)
         print("Muted; microphone released. Waiting for reactivation...")
+        next_repush = time.monotonic() + MUTED_REPUSH_INTERVAL
         while True:
             command = self.take_command()
             if command == COMMAND_QUIT:
@@ -115,6 +132,9 @@ class Tray:
                 acquire_mic()
                 self.set_state(STATE_LISTENING)
                 return TrayAction.RESUME
+            if time.monotonic() >= next_repush:
+                self.set_state(STATE_MUTED)
+                next_repush = time.monotonic() + MUTED_REPUSH_INTERVAL
             time.sleep(SLEEP_POLL_INTERVAL)
 
     def set_state(self, state):
@@ -142,13 +162,19 @@ class Tray:
 
         Reads the one-shot control file the extension writes, then deletes it so
         each menu click fires exactly once. A missing file is the common case
-        (every idle iteration), so it's checked cheaply first.
+        (every idle iteration), so it's checked cheaply first. The delete is
+        best-effort and kept separate from the read: a command that was read
+        successfully is returned even if the unlink fails (e.g. the file vanished
+        in a race), rather than being silently dropped.
         """
         try:
             if not self._control_file.exists():
                 return None
             command = self._control_file.read_text().strip()
-            self._control_file.unlink()
         except OSError:
             return None
+        try:
+            self._control_file.unlink()
+        except OSError:
+            pass  # already gone or a transient error; the command still stands
         return command or None
