@@ -110,7 +110,7 @@ gate: (clean '--quiet') (package '--quiet')
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q core
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q core
     # Python package should bundle the GNOME Shell extension assets, which
-    # core.extension_install copies into the user's extensions dir at startup
+    # core.gnome_extension copies into the user's extensions dir at startup
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q extension.js
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q metadata.json
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q extension.js
