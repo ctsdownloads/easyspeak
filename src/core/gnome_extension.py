@@ -104,7 +104,7 @@ def refresh_extension_files(src_dir, dest_dir):
     except OSError as e:
         _discard_staged(dest_dir)
         print(
-            f"easyspeak: note: could not refresh GNOME extension in {dest_dir} ({e})",
+            f"easyspeak: note: could not write GNOME extension to {dest_dir} ({e})",
             file=sys.stderr,
         )
         return RefreshResult.ERROR
@@ -241,7 +241,6 @@ def ensure_extension():
     )
     dest_dir = extension_dest_dir()
     root = extension_source_dir()
-    srcs = [root / name for name in EXTENSION_ASSETS]
 
     if installed and already_enabled:
         result = refresh_extension_files(root, dest_dir)
@@ -262,7 +261,7 @@ def ensure_extension():
         return
 
     if not installed:
-        if not all(s.is_file() for s in srcs):
+        if not all((root / name).is_file() for name in EXTENSION_ASSETS):
             print(
                 f"easyspeak: note: could not auto-install GNOME extension — "
                 f"source files not found at {root}. The panel indicator and "
@@ -272,12 +271,13 @@ def ensure_extension():
             )
             return
 
-        refresh_extension_files(root, dest_dir)
-        if not all((dest_dir / name).is_file() for name in EXTENSION_ASSETS):
+        if refresh_extension_files(root, dest_dir) is RefreshResult.ERROR:
+            # refresh_extension_files already reported the write error (with the
+            # OSError detail) on stderr; add only the consequence, not a second
+            # description of the same failure.
             print(
-                f"easyspeak: note: could not install GNOME extension to "
-                f"{dest_dir}. The panel indicator and grid commands will "
-                f"not work until it is installed manually.",
+                "easyspeak: note: the panel indicator and grid commands will "
+                "not work until the GNOME extension is installed manually.",
                 file=sys.stderr,
             )
             return

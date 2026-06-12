@@ -119,7 +119,7 @@ def test_refresh_extension_files_write_failure_returns_error(
 
     assert refreshed is gnome_extension.RefreshResult.ERROR
     assert (dest / "extension.js").read_text() == "old"
-    assert "could not refresh GNOME extension" in capsys.readouterr().err
+    assert "could not write GNOME extension" in capsys.readouterr().err
 
 
 def test_refresh_extension_files_no_partial_overwrite_on_midway_failure(tmp_path):
@@ -689,7 +689,10 @@ class TestEnsureExtension:
 
         captured = capsys.readouterr()
         assert "easyspeak: note:" in captured.err
-        assert "could not install GNOME extension" in captured.err
+        # The write failure itself is described once, by refresh_extension_files,
+        # with the OSError detail; ensure_extension adds only the consequence.
+        assert "could not write GNOME extension" in captured.err
+        assert "installed manually" in captured.err
         # Only the two probe calls (`list` and `list --enabled`); no `enable`
         # attempt after copy failure.
         assert mock_run.call_count == 2
