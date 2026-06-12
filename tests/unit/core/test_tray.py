@@ -1,6 +1,7 @@
 """Tests for the GNOME panel-indicator bridge (core.tray)."""
 
 import itertools
+import subprocess
 import sys
 from unittest.mock import MagicMock, Mock, patch
 
@@ -48,6 +49,15 @@ class TestSetState:
     @patch("easyspeak.core.tray.subprocess.run", side_effect=OSError("no gdbus"))
     def test_swallows_missing_gdbus(self, mock_run):
         """On a non-GNOME desktop (no gdbus) set_state degrades to a no-op."""
+        assert Tray().set_state(STATE_LISTENING) is False
+
+    @patch(
+        "easyspeak.core.tray.subprocess.run",
+        side_effect=subprocess.TimeoutExpired(cmd="gdbus", timeout=5),
+    )
+    def test_reports_failure_on_timeout(self, mock_run):
+        """A wedged session bus times out and reports failure instead of hanging
+        the audio loop."""
         assert Tray().set_state(STATE_LISTENING) is False
 
 
