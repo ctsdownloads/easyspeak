@@ -103,9 +103,17 @@ package *args:
 # Runs plausibility checks against freshly built packages
 [group('release')]
 gate: (clean '--quiet') (package '--quiet')
-    # Python package should not contain tests (MANIFEST.in)
+    # Python package must not contain markdown, tests and dev tooling configuration
+    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep CONTRIBUTING.md
     ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep tests
+    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep eslint.config.mjs
+    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep flake.nix
+    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep flake.lock
+    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep CONTRIBUTING.md
     ! tar tfz dist/easyspeak_linux-*.tar.gz | grep tests
+    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep eslint.config.mjs
+    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep flake.nix
+    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep flake.lock
     # Python package should contain Core module
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q core
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q core
