@@ -125,7 +125,9 @@ Before=org.gnome.Shell@user.service org.gnome.Shell@wayland.service org.gnome.Sh
 
 [Service]
 Type=oneshot
-ExecStart={python} {script}
+# Quote both arguments: systemd splits ExecStart on whitespace, so an
+# interpreter or module path containing spaces would otherwise break the unit.
+ExecStart="{python}" "{script}"
 
 [Install]
 WantedBy={PRE_SHELL_TARGET}

@@ -1,5 +1,6 @@
 """Tests for the easyspeak.core.gnome_extension module."""
 
+import sys
 from unittest.mock import Mock, patch
 
 import pytest
@@ -149,7 +150,9 @@ def test_unit_text_contains_ordering_and_execstart():
     assert f"Before={gnome_extension.PRE_SHELL_TARGET}" in text
     assert "org.gnome.Shell@user.service" in text
     assert "Type=oneshot" in text
-    assert "ExecStart=" in text
+    # Both ExecStart arguments are quoted so a space in the interpreter or
+    # module path can't make systemd mis-split the command.
+    assert f'ExecStart="{sys.executable}" "' in text
     assert "gnome_extension.py" in text
 
 
