@@ -1,5 +1,6 @@
 """Tests for the GNOME panel-indicator bridge (core.tray)."""
 
+import itertools
 import sys
 from unittest.mock import MagicMock, Mock, patch
 
@@ -84,6 +85,16 @@ class TestTakeCommand:
         tray = Tray(control_file=control)
 
         assert tray.take_command() is None
+
+    def test_returns_command_even_when_unlink_fails(self, tmp_path):
+        """A command read successfully isn't dropped if the delete fails (e.g.
+        the file vanished in a race between read and unlink)."""
+        control = tmp_path / "control"
+        control.write_text("unmute\n")
+        tray = Tray(control_file=control)
+
+        with patch("easyspeak.core.tray.Path.unlink", side_effect=OSError("gone")):
+            assert tray.take_command() == "unmute"
 
 
 class TestPoll:
@@ -178,6 +189,43 @@ class TestPoll:
 
         assert first is TrayAction.RESUME
         assert second is TrayAction.CONTINUE
+
+    def test_refuses_to_sleep_when_indicator_unavailable(self):
+        """If the muted state can't be pushed (no working indicator), stay awake
+        rather than release the mic with no menu to reactivate from."""
+        tray = self._tray(["mute"])
+        tray.set_state = Mock(return_value=False)
+        release, acquire = Mock(), Mock()
+
+        action = tray.poll(release, acquire)
+
+        assert action is TrayAction.CONTINUE
+        release.assert_not_called()
+        acquire.assert_not_called()
+
+    def test_repushes_muted_state_while_asleep(self):
+        """The muted state is re-asserted periodically so the indicator recovers
+        after a GNOME Shell / extension reload."""
+        tray = self._tray(["mute", None, None, "unmute"])
+        release, acquire = Mock(), Mock()
+
+        # monotonic jumps far past MUTED_REPUSH_INTERVAL each call, so the
+        # threshold is crossed on every idle iteration.
+        with (
+            patch("easyspeak.core.tray.time.sleep"),
+            patch(
+                "easyspeak.core.tray.time.monotonic",
+                side_effect=itertools.count(0, 100),
+            ),
+        ):
+            action = tray.poll(release, acquire)
+
+        assert action is TrayAction.RESUME
+        muted_pushes = [
+            c for c in tray.set_state.call_args_list if c.args == (STATE_MUTED,)
+        ]
+        # Entry push + at least one periodic re-push while idling.
+        assert len(muted_pushes) >= 2
 
 
 class TestLifecycleHooks:
