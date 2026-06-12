@@ -23,7 +23,7 @@ def test_refresh_extension_files_installs_when_dest_missing(tmp_path):
         src / "extension.js", src / "metadata.json", dest
     )
 
-    assert refreshed is True
+    assert refreshed is gnome_extension.RefreshResult.REFRESHED
     assert (dest / "extension.js").read_text() == "new"
     assert (dest / "metadata.json").read_text() == "{}"
 
@@ -42,7 +42,7 @@ def test_refresh_extension_files_overwrites_when_changed(tmp_path):
         src / "extension.js", src / "metadata.json", dest
     )
 
-    assert refreshed is True
+    assert refreshed is gnome_extension.RefreshResult.REFRESHED
     assert (dest / "extension.js").read_text() == "new"
 
 
@@ -60,7 +60,7 @@ def test_refresh_extension_files_noop_when_identical(tmp_path):
         src / "extension.js", src / "metadata.json", dest
     )
 
-    assert refreshed is False
+    assert refreshed is gnome_extension.RefreshResult.UNCHANGED
 
 
 @patch.object(gnome_extension.shutil, "copy2", side_effect=PermissionError("ro"))
@@ -82,12 +82,12 @@ def test_refresh_extension_files_write_failure_returns_false(
         src / "extension.js", src / "metadata.json", dest
     )
 
-    assert refreshed is False
+    assert refreshed is gnome_extension.RefreshResult.ERROR
     assert (dest / "extension.js").read_text() == "old"
     assert "could not refresh GNOME extension" in capsys.readouterr().err
 
 
-def test_refresh_extension_files_missing_source(tmp_path):
+def test_refresh_extension_files_missing_source(tmp_path, capsys):
     src = tmp_path / "src"  # no files created
     dest = tmp_path / "dest"
 
@@ -95,8 +95,9 @@ def test_refresh_extension_files_missing_source(tmp_path):
         src / "extension.js", src / "metadata.json", dest
     )
 
-    assert refreshed is False
+    assert refreshed is gnome_extension.RefreshResult.ERROR
     assert not dest.exists()
+    assert "sources missing" in capsys.readouterr().err
 
 
 # --- path helpers ------------------------------------------------------------
@@ -132,12 +133,14 @@ def test_refresh_installed_extension_delegates():
         ),
         patch.object(gnome_extension, "extension_dest_dir", return_value=Path("/dest")),
         patch.object(
-            gnome_extension, "refresh_extension_files", return_value=True
+            gnome_extension,
+            "refresh_extension_files",
+            return_value=gnome_extension.RefreshResult.REFRESHED,
         ) as mock_refresh,
     ):
         result = gnome_extension.refresh_installed_extension()
 
-    assert result is True
+    assert result is gnome_extension.RefreshResult.REFRESHED
     args = mock_refresh.call_args.args
     assert args[0].name == "extension.js"
     assert args[1].name == "metadata.json"
@@ -442,7 +445,9 @@ class TestEnsureExtension:
                 side_effect=[listed, listed_enabled],
             ) as mock_run,
             patch.object(
-                gnome_extension, "refresh_extension_files", return_value=False
+                gnome_extension,
+                "refresh_extension_files",
+                return_value=gnome_extension.RefreshResult.UNCHANGED,
             ),
         ):
             gnome_extension.ensure_extension()
@@ -467,7 +472,11 @@ class TestEnsureExtension:
                 "run",
                 side_effect=[listed, listed_enabled],
             ) as mock_run,
-            patch.object(gnome_extension, "refresh_extension_files", return_value=True),
+            patch.object(
+                gnome_extension,
+                "refresh_extension_files",
+                return_value=gnome_extension.RefreshResult.REFRESHED,
+            ),
         ):
             gnome_extension.ensure_extension()
 
@@ -491,7 +500,9 @@ class TestEnsureExtension:
                 side_effect=[listed, listed_enabled],
             ),
             patch.object(
-                gnome_extension, "refresh_extension_files", return_value=False
+                gnome_extension,
+                "refresh_extension_files",
+                return_value=gnome_extension.RefreshResult.UNCHANGED,
             ),
             patch.object(
                 gnome_extension,

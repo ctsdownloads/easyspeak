@@ -1,24 +1,15 @@
 """Install, refresh, and enable the bundled GNOME Shell extension.
 
-The extension is core infrastructure, not a single plugin's concern: the
-mousegrid plugin drives it for pointer control, while ``core.tray`` drives the
-same extension for the panel indicator (``SetState`` over D-Bus). Core therefore
-owns its lifecycle — installing it, keeping the installed copy current, and
-enabling it — and calls :func:`ensure_extension` once at startup.
-
-The extension ships as package data inside the ``easyspeak`` package
-(``extension.js`` + ``metadata.json``) and is copied into the user's extension
-directory. GNOME only auto-installs on first run and, on Wayland, only loads
-extension code at login — it never reloads a changed file in a running session.
-Core's startup refresh runs *after* the
-shell has already read the extensions directory, so on its own it is always one
-login behind. To close that gap we also install a tiny ``oneshot`` systemd
-*user* unit ordered *before* the shell (via ``gnome-session-pre.target``) that
-re-copies the bundled extension at the start of every login. The unit runs as
-the user and only writes to the user's home; it never runs on the GDM greeter
-(a separate ``gdm`` user with its own shell) and needs no elevated privileges.
+Core owns the extension's lifecycle because both the mousegrid plugin and
+``core.tray`` drive it over D-Bus; :func:`ensure_extension` runs once at startup.
+The extension ships as package data and is copied into the user's extensions
+dir. On Wayland GNOME only loads extension code at login, so the startup copy is
+always one login behind; a ``oneshot`` systemd *user* unit ordered before the
+shell re-copies it at the start of every login to close that gap. The unit runs
+as the user, writes only to ``$HOME``, and needs no privileges.
 """
 
+import enum
 import filecmp
 import shutil
 import subprocess
@@ -26,22 +17,19 @@ import sys
 from pathlib import Path
 
 GRID_EXTENSION_UUID = "easyspeak-grid@local"
-
-# systemd user unit that refreshes the extension before the shell loads it.
 REFRESH_UNIT_NAME = "easyspeak-extension-refresh.service"
-# Target reached early in the GNOME session, before org.gnome.Shell@*.service.
-PRE_SHELL_TARGET = "gnome-session-pre.target"
+PRE_SHELL_TARGET = "gnome-session-pre.target"  # reached before org.gnome.Shell@*
+
+
+class RefreshResult(enum.Enum):
+    REFRESHED = "refreshed"
+    UNCHANGED = "unchanged"
+    ERROR = "error"
 
 
 def extension_source_dir():
-    """Directory holding the bundled extension.js / metadata.json.
-
-    The assets are package data inside the ``easyspeak`` package, so they live
-    in ``src/`` — one level up from this module at ``src/core`` — which becomes
-    ``site-packages/easyspeak/`` in an installed wheel. Resolving relative to
-    the package (not the repo root) makes them findable in both editable and
-    wheel installs.
-    """
+    """Package dir holding the bundled assets (``src/``), resolved relative to
+    this module so it works in both editable and wheel installs."""
     return Path(__file__).resolve().parents[1]
 
 
@@ -58,17 +46,17 @@ def extension_dest_dir():
 
 
 def refresh_extension_files(src_ext, src_meta, dest_dir):
-    """Copy the bundled extension into ``dest_dir`` if it differs from the
-    installed copy. Returns True if anything was written.
-
-    GNOME only auto-installs on first run, so without this an installed copy
-    from an older version lingers forever and improvements to extension.js
-    (e.g. the tray indicator) never reach the user. Best-effort: a missing
-    source or a write failure returns False rather than disturbing a working
-    install.
-    """
+    """Copy the bundled extension into ``dest_dir`` when it differs from the
+    installed copy. Best-effort: returns ``REFRESHED`` if written, ``UNCHANGED``
+    if already current, or ``ERROR`` (noted on stderr) when the sources are
+    missing or the copy fails, leaving any working install untouched."""
     if not (src_ext.is_file() and src_meta.is_file()):
-        return False
+        print(
+            f"easyspeak: note: bundled GNOME extension sources missing at "
+            f"{src_ext.parent}",
+            file=sys.stderr,
+        )
+        return RefreshResult.ERROR
     dest_ext = dest_dir / "extension.js"
     dest_meta = dest_dir / "metadata.json"
     try:
@@ -79,25 +67,22 @@ def refresh_extension_files(src_ext, src_meta, dest_dir):
             and filecmp.cmp(src_meta, dest_meta, shallow=False)
         )
         if unchanged:
-            return False
+            return RefreshResult.UNCHANGED
         dest_dir.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src_ext, dest_ext)
         shutil.copy2(src_meta, dest_meta)
-        return True
+        return RefreshResult.REFRESHED
     except OSError as e:
         print(
             f"easyspeak: note: could not refresh GNOME extension in {dest_dir} ({e})",
             file=sys.stderr,
         )
-        return False
+        return RefreshResult.ERROR
 
 
 def refresh_installed_extension():
-    """Refresh the installed extension from the bundled package-data copy.
-
-    Path-resolving wrapper around :func:`refresh_extension_files`; this is what
-    the systemd unit runs at the start of each login.
-    """
+    """Refresh the installed extension from the bundled copy; run by the systemd
+    unit at each login."""
     root = extension_source_dir()
     return refresh_extension_files(
         root / "extension.js",
@@ -111,26 +96,21 @@ def _unit_path():
 
 
 def _unit_text():
-    """Render the systemd user unit, baking in the current interpreter and the
-    absolute path of this module so the oneshot runs identically at login."""
+    """Render the systemd user unit, baking in the interpreter and module path."""
     python = sys.executable
     script = Path(__file__).resolve()
     return f"""\
 [Unit]
 Description=Refresh the EasySpeak GNOME Shell extension before GNOME Shell loads it
-# Bring the installed copy of the bundled extension up to date *before* the
-# shell reads the extensions directory, so a changed extension.js takes effect
-# on this login instead of the next one. On Wayland the shell only loads
-# extension code at login and never reloads it, so the startup refresh (which
-# runs after login) is always one login behind. Running here closes that gap.
-# Listed shell units that don't exist on a given session are ignored.
+# Runs before the shell reads the extensions dir so a changed extension.js takes
+# effect on this login, not the next (on Wayland the shell only loads extensions
+# at login). Missing shell units are ignored.
 Before={PRE_SHELL_TARGET}
 Before=org.gnome.Shell@user.service org.gnome.Shell@wayland.service org.gnome.Shell@x11.service
 
 [Service]
 Type=oneshot
-# Quote both arguments: systemd splits ExecStart on whitespace, so an
-# interpreter or module path containing spaces would otherwise break the unit.
+# Quoted: systemd splits ExecStart on whitespace.
 ExecStart="{python}" "{script}"
 
 [Install]
@@ -139,15 +119,9 @@ WantedBy={PRE_SHELL_TARGET}
 
 
 def _run_systemctl(*args):
-    """Run a ``systemctl --user`` command, returning the CompletedProcess or
-    None if it could not be executed.
-
-    ``check=False`` already keeps non-zero exits from raising, but an
-    un-execable systemctl (vanished after the initial ``which`` probe, a PATH
-    race, an exec failure) still raises OSError. Swallowing it here keeps the
-    refresh-unit install best-effort and non-fatal, so it can never abort
-    startup from :func:`ensure_extension`.
-    """
+    """Run a ``systemctl --user`` command, or return None if it can't be exec'd —
+    an un-execable systemctl raises OSError despite ``check=False``, and the
+    refresh-unit install must stay non-fatal."""
     try:
         return subprocess.run(
             ["systemctl", "--user", *args],
@@ -169,15 +143,11 @@ def _is_enabled():
 
 
 def install_refresh_unit():
-    """Install and enable the pre-shell refresh unit. Returns a short status
-    string describing what changed, or None when there was nothing to do or the
-    operation is not applicable (no systemd, write/enable failure).
-
-    Idempotent: rewrites the unit only when its rendered content changed, and
-    only runs ``enable`` when the unit is new/changed or not yet enabled.
-    """
+    """Install and enable the pre-shell refresh unit, returning a short status
+    string or None when nothing changed or it isn't applicable (no systemd,
+    write/enable failure). Idempotent."""
     if shutil.which("systemctl") is None:
-        return None  # not a systemd session
+        return None
 
     unit_path = _unit_path()
     desired = _unit_text()
@@ -195,7 +165,7 @@ def install_refresh_unit():
             return None
         _run_systemctl("daemon-reload")
     elif _is_enabled():
-        return None  # already installed, current, and enabled
+        return None
 
     enabled = _run_systemctl("enable", REFRESH_UNIT_NAME)
     if enabled is None or enabled.returncode != 0:
@@ -206,25 +176,12 @@ def install_refresh_unit():
 
 
 def ensure_extension():
-    """Install the GNOME Shell extension if needed, enable it, and keep it
-    current.
-
-    Installs/enables the pre-shell refresh unit, then probes state with
-    ``gnome-extensions list`` (covers both system and user paths) and
-    ``gnome-extensions list --enabled``, reporting exactly what it did: found it
-    already enabled, refreshed a changed bundle, enabled a previously disabled
-    install (e.g. the user toggled it off or a GNOME Shell version bump
-    auto-disabled it), or freshly installed and enabled. Silently skipped on
-    non-GNOME systems. Non-fatal on missing source files or write failures —
-    emits a polite note and lets startup proceed.
-    """
+    """Install the bundled extension if missing, keep the installed copy current,
+    and enable it, reporting what it did. Skipped on non-GNOME desktops; non-fatal
+    on missing sources or write failures."""
     if shutil.which("gnome-extensions") is None:
-        return  # not a GNOME-based desktop
+        return
 
-    # Install/enable the systemd user unit that refreshes the bundled extension
-    # before GNOME Shell loads it at login, so a changed extension.js takes
-    # effect on the next login rather than the one after (the refresh below runs
-    # after the shell has already read the extensions directory).
     unit_status = install_refresh_unit()
     if unit_status:
         print(f"easyspeak: {unit_status}", file=sys.stderr)
@@ -248,7 +205,7 @@ def ensure_extension():
         return
 
     installed = GRID_EXTENSION_UUID in listed.stdout.split()
-    # If the --enabled probe failed we don't know; fall through and try
+    # A failed --enabled probe leaves this False, so we fall through and try
     # enabling (a no-op when it's already on).
     already_enabled = (
         listed_enabled.returncode == 0
@@ -261,21 +218,21 @@ def ensure_extension():
     src_meta = root / "metadata.json"
 
     if installed and already_enabled:
-        # Steady state — but still refresh the on-disk copy if the bundled
-        # extension changed since it was installed (GNOME only copies on first
-        # run). The refreshed code loads at the next login on Wayland.
-        if refresh_extension_files(src_ext, src_meta, dest_dir):
+        result = refresh_extension_files(src_ext, src_meta, dest_dir)
+        if result is RefreshResult.REFRESHED:
             print(
                 f"easyspeak: updated GNOME extension {GRID_EXTENSION_UUID} to "
                 f"the bundled version — log out and back in to load it",
                 file=sys.stderr,
             )
-        else:
+        elif result is RefreshResult.UNCHANGED:
             print(
                 f"easyspeak: GNOME extension {GRID_EXTENSION_UUID} "
                 f"already installed and enabled",
                 file=sys.stderr,
             )
+        # ERROR was already noted by refresh_extension_files; stay quiet rather
+        # than claim a healthy install.
         return
 
     if not installed:
@@ -302,9 +259,8 @@ def ensure_extension():
             )
             return
 
-    # First-time installs require GNOME Shell to rescan, which on Wayland
-    # only happens at login. `enable` will fail with "Unknown extension"
-    # until then — we treat that as "installed, log back in to use".
+    # On Wayland GNOME only rescans at login, so enable fails with "Unknown
+    # extension" until then — treated as "installed, log back in to use".
     try:
         enabled = subprocess.run(
             ["gnome-extensions", "enable", GRID_EXTENSION_UUID],
@@ -317,7 +273,6 @@ def ensure_extension():
         ok = False
 
     if installed:
-        # Was installed but disabled — we just flipped it on (or tried to).
         if ok:
             print(
                 f"easyspeak: enabled GNOME extension {GRID_EXTENSION_UUID} "
