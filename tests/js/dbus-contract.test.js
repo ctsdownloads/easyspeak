@@ -19,11 +19,14 @@ function declaredMethods(src) {
 
 // Handler keys in the object literal passed to wrapJSObject(DBUS_INTERFACE, {...}).
 function wiredHandlers(src) {
-    const start = src.indexOf('wrapJSObject(DBUS_INTERFACE, {');
-    assert.notEqual(start, -1, 'could not locate the wrapJSObject handler map');
+    // Tolerate incidental whitespace/newlines between the call's tokens so a
+    // reformat (e.g. prettier wrapping the args) doesn't break the contract test.
+    const match = /wrapJSObject\(\s*DBUS_INTERFACE\s*,\s*\{/.exec(src);
+    assert.notEqual(match, null, 'could not locate the wrapJSObject handler map');
 
-    // Walk braces from the map's opening `{` to its matching `}`.
-    const open = src.indexOf('{', start);
+    // Walk braces from the map's opening `{` (the last char the regex matched)
+    // to its matching `}`.
+    const open = match.index + match[0].length - 1;
     let depth = 0;
     let end = -1;
     for (let i = open; i < src.length; i++) {

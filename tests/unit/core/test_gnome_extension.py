@@ -695,6 +695,43 @@ class TestEnsureExtension:
         assert mock_run.call_count == 2
 
     @patch.object(
+        gnome_extension.subprocess, "run", return_value=Mock(returncode=0, stdout="")
+    )
+    @patch.object(
+        gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
+    )
+    def test_install_failure_leaves_no_partial_extension(
+        self, mock_which, mock_run, tmp_path, monkeypatch
+    ):
+        """A failed first install leaves nothing half-applied and never enables."""
+        monkeypatch.setenv("HOME", str(tmp_path))
+
+        real_copy = gnome_extension.shutil.copy2
+        calls = {"n": 0}
+
+        def flaky_copy(s, d, *a, **k):
+            calls["n"] += 1
+            if calls["n"] == 2:  # fail the second asset, mid-install
+                raise OSError("disk full")
+            return real_copy(s, d, *a, **k)
+
+        with patch.object(gnome_extension.shutil, "copy2", side_effect=flaky_copy):
+            gnome_extension.ensure_extension()
+
+        dest = (
+            tmp_path
+            / ".local"
+            / "share"
+            / "gnome-shell"
+            / "extensions"
+            / "easyspeak-grid@local"
+        )
+        for name in gnome_extension.EXTENSION_ASSETS:
+            assert not (dest / name).is_file()
+        assert not list(dest.glob(".*.tmp"))
+        assert mock_run.call_count == 2  # probes only, no enable
+
+    @patch.object(
         gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
     def test_install_and_enable_success(
