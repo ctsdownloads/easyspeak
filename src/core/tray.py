@@ -42,6 +42,9 @@ SLEEP_POLL_INTERVAL = 0.2
 # if GNOME Shell or the extension reloads (which leaves it hidden by default).
 MUTED_REPUSH_INTERVAL = 5.0
 
+# Cap the gdbus call so a wedged session bus can't hang the audio loop.
+GDBUS_TIMEOUT = 5.0
+
 
 class TrayAction(enum.Enum):
     """What ``Tray.poll`` is telling the audio loop to do next."""
@@ -161,10 +164,12 @@ class Tray:
             str(state),
         ]
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=GDBUS_TIMEOUT
+            )
             return result.returncode == 0
-        except OSError:
-            return False  # gdbus missing (non-GNOME); nothing to update
+        except (OSError, subprocess.TimeoutExpired):
+            return False  # gdbus missing (non-GNOME) or a wedged bus
 
     def take_command(self):
         """Return and clear the latest menu command, or None if none is pending.

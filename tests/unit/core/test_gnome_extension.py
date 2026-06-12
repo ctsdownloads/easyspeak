@@ -1,5 +1,6 @@
 """Tests for the easyspeak.core.gnome_extension module."""
 
+import subprocess
 import sys
 from unittest.mock import Mock, patch
 
@@ -231,6 +232,16 @@ def test_is_enabled_false_when_systemctl_unexecable():
         assert gnome_extension._is_enabled() is False
 
 
+def test_is_enabled_false_when_systemctl_times_out():
+    """A wedged user bus times out instead of hanging startup."""
+    with patch.object(
+        gnome_extension.subprocess,
+        "run",
+        side_effect=subprocess.TimeoutExpired(cmd="systemctl", timeout=5),
+    ):
+        assert gnome_extension._is_enabled() is False
+
+
 # --- install_refresh_unit ----------------------------------------------------
 
 
@@ -443,6 +454,20 @@ class TestEnsureExtension:
     )
     def test_list_oserror(self, mock_which, mock_run, capsys):
         """`gnome-extensions list` raising OSError is swallowed silently."""
+        gnome_extension.ensure_extension()
+
+        assert capsys.readouterr().err == ""
+
+    @patch.object(
+        gnome_extension.subprocess,
+        "run",
+        side_effect=subprocess.TimeoutExpired(cmd="gnome-extensions", timeout=5),
+    )
+    @patch.object(
+        gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
+    )
+    def test_list_timeout(self, mock_which, mock_run, capsys):
+        """A wedged `gnome-extensions` probe times out instead of hanging."""
         gnome_extension.ensure_extension()
 
         assert capsys.readouterr().err == ""

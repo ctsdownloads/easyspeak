@@ -20,6 +20,9 @@ GRID_EXTENSION_UUID = "easyspeak-grid@local"
 REFRESH_UNIT_NAME = "easyspeak-extension-refresh.service"
 PRE_SHELL_TARGET = "gnome-session-pre.target"  # reached before org.gnome.Shell@*
 
+# Cap each helper subprocess so a wedged session/user bus can't hang startup.
+SUBPROCESS_TIMEOUT = 5.0
+
 
 class RefreshResult(enum.Enum):
     REFRESHED = "refreshed"
@@ -138,8 +141,9 @@ def _run_systemctl(*args):
             capture_output=True,
             text=True,
             check=False,
+            timeout=SUBPROCESS_TIMEOUT,
         )
-    except OSError:
+    except (OSError, subprocess.TimeoutExpired):
         return None
 
 
@@ -202,14 +206,16 @@ def ensure_extension():
             capture_output=True,
             text=True,
             check=False,
+            timeout=SUBPROCESS_TIMEOUT,
         )
         listed_enabled = subprocess.run(
             ["gnome-extensions", "list", "--enabled"],
             capture_output=True,
             text=True,
             check=False,
+            timeout=SUBPROCESS_TIMEOUT,
         )
-    except OSError:
+    except (OSError, subprocess.TimeoutExpired):
         return
     if listed.returncode != 0:
         return
@@ -277,9 +283,10 @@ def ensure_extension():
             capture_output=True,
             text=True,
             check=False,
+            timeout=SUBPROCESS_TIMEOUT,
         )
         ok = enabled.returncode == 0
-    except OSError:
+    except (OSError, subprocess.TimeoutExpired):
         ok = False
 
     if installed:
