@@ -64,9 +64,11 @@ def test_refresh_extension_files_noop_when_identical(tmp_path):
 
 
 @patch.object(gnome_extension.shutil, "copy2", side_effect=PermissionError("ro"))
-def test_refresh_extension_files_write_failure_returns_false(mock_copy, tmp_path):
-    """A write error (e.g. read-only dest) is swallowed, leaving the existing
-    install untouched rather than crashing startup."""
+def test_refresh_extension_files_write_failure_returns_false(
+    mock_copy, tmp_path, capsys
+):
+    """A write error (e.g. read-only dest) is swallowed and noted on stderr,
+    leaving the existing install untouched rather than crashing startup."""
     src = tmp_path / "src"
     src.mkdir()
     (src / "extension.js").write_text("new")
@@ -82,6 +84,7 @@ def test_refresh_extension_files_write_failure_returns_false(mock_copy, tmp_path
 
     assert refreshed is False
     assert (dest / "extension.js").read_text() == "old"
+    assert "could not refresh GNOME extension" in capsys.readouterr().err
 
 
 def test_refresh_extension_files_missing_source(tmp_path):

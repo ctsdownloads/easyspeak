@@ -84,7 +84,11 @@ def refresh_extension_files(src_ext, src_meta, dest_dir):
         shutil.copy2(src_ext, dest_ext)
         shutil.copy2(src_meta, dest_meta)
         return True
-    except OSError:
+    except OSError as e:
+        print(
+            f"easyspeak: note: could not refresh GNOME extension in {dest_dir} ({e})",
+            file=sys.stderr,
+        )
         return False
 
 
