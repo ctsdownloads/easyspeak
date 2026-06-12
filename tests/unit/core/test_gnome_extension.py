@@ -87,6 +87,38 @@ def test_refresh_extension_files_write_failure_returns_error(
     assert "could not refresh GNOME extension" in capsys.readouterr().err
 
 
+def test_refresh_extension_files_no_partial_overwrite_on_midway_failure(tmp_path):
+    """A copy failing partway through leaves the existing install untouched and
+    no temp files behind, since files are staged then moved."""
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "extension.js").write_text("new")
+    (src / "metadata.json").write_text("new")
+    dest = tmp_path / "dest"
+    dest.mkdir()
+    (dest / "extension.js").write_text("old")
+    (dest / "metadata.json").write_text("old")
+
+    real_copy = gnome_extension.shutil.copy2
+    calls = {"n": 0}
+
+    def flaky_copy(s, d, *a, **k):
+        calls["n"] += 1
+        if calls["n"] == 2:  # fail the second copy, mid-refresh
+            raise OSError("disk full")
+        return real_copy(s, d, *a, **k)
+
+    with patch.object(gnome_extension.shutil, "copy2", side_effect=flaky_copy):
+        refreshed = gnome_extension.refresh_extension_files(
+            src / "extension.js", src / "metadata.json", dest
+        )
+
+    assert refreshed is gnome_extension.RefreshResult.ERROR
+    assert (dest / "extension.js").read_text() == "old"
+    assert (dest / "metadata.json").read_text() == "old"
+    assert not list(dest.glob(".*.tmp"))
+
+
 def test_refresh_extension_files_missing_source(tmp_path, capsys):
     src = tmp_path / "src"  # no files created
     dest = tmp_path / "dest"
