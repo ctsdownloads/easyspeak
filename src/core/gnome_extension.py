@@ -49,7 +49,8 @@ def refresh_extension_files(src_ext, src_meta, dest_dir):
     """Copy the bundled extension into ``dest_dir`` when it differs from the
     installed copy. Best-effort: returns ``REFRESHED`` if written, ``UNCHANGED``
     if already current, or ``ERROR`` (noted on stderr) when the sources are
-    missing or the copy fails, leaving any working install untouched."""
+    missing or the copy fails. Both files are staged then moved into place, so a
+    failure leaves any working install untouched."""
     if not (src_ext.is_file() and src_meta.is_file()):
         print(
             f"easyspeak: note: bundled GNOME extension sources missing at "
@@ -59,6 +60,8 @@ def refresh_extension_files(src_ext, src_meta, dest_dir):
         return RefreshResult.ERROR
     dest_ext = dest_dir / "extension.js"
     dest_meta = dest_dir / "metadata.json"
+    tmp_ext = dest_dir / ".extension.js.tmp"
+    tmp_meta = dest_dir / ".metadata.json.tmp"
     try:
         unchanged = (
             dest_ext.is_file()
@@ -69,10 +72,17 @@ def refresh_extension_files(src_ext, src_meta, dest_dir):
         if unchanged:
             return RefreshResult.UNCHANGED
         dest_dir.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src_ext, dest_ext)
-        shutil.copy2(src_meta, dest_meta)
+        shutil.copy2(src_ext, tmp_ext)
+        shutil.copy2(src_meta, tmp_meta)
+        tmp_meta.replace(dest_meta)
+        tmp_ext.replace(dest_ext)
         return RefreshResult.REFRESHED
     except OSError as e:
+        for tmp in (tmp_ext, tmp_meta):
+            try:
+                tmp.unlink()
+            except OSError:
+                pass
         print(
             f"easyspeak: note: could not refresh GNOME extension in {dest_dir} ({e})",
             file=sys.stderr,
