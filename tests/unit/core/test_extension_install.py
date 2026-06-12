@@ -98,11 +98,12 @@ def test_refresh_extension_files_missing_source(tmp_path):
 # --- path helpers ------------------------------------------------------------
 
 
-def test_project_root_holds_bundled_extension():
-    root = extension_install.project_root()
-    # src/core/extension_install.py -> root is two levels up from src/core.
-    assert (root / "extension.js").is_file()
-    assert (root / "src" / "core" / "extension_install.py").is_file()
+def test_extension_source_dir_holds_bundled_assets():
+    src = extension_install.extension_source_dir()
+    # Assets are package data in src/ (the easyspeak package), next to core/.
+    assert (src / "extension.js").is_file()
+    assert (src / "metadata.json").is_file()
+    assert (src / "core" / "extension_install.py").is_file()
 
 
 def test_extension_dest_dir(tmp_path):
@@ -122,7 +123,9 @@ def test_refresh_installed_extension_delegates():
     from pathlib import Path
 
     with (
-        patch.object(extension_install, "project_root", return_value=Path("/repo")),
+        patch.object(
+            extension_install, "extension_source_dir", return_value=Path("/repo")
+        ),
         patch.object(
             extension_install, "extension_dest_dir", return_value=Path("/dest")
         ),

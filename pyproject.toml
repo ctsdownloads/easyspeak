@@ -111,6 +111,12 @@ extend-ignore = ["D", "E722"]
 [tool.setuptools.package-dir]
 easyspeak = "src"
 
+# The bundled GNOME Shell extension is package data: core.extension_install
+# copies it into the user's extensions directory at startup, so it must ship
+# inside the wheel (alongside the easyspeak package), not just the sdist.
+[tool.setuptools.package-data]
+easyspeak = ["extension.js", "metadata.json"]
+
 [tool.setuptools_scm]
 local_scheme = "no-local-version"
 
