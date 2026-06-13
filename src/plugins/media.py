@@ -73,17 +73,18 @@ def handle(cmd, core):
     # Whole-word match so "stop tracking" (eye tracking) isn't caught by "track".
     words = cmd.split()
     stop_music = "stop" in words and any(
-        word in words for word in ("music", "song", "playback", "track", "player")
+        word in words
+        for word in ("music", "song", "playback", "track", "player", "playing", "play")
     )
-
-    if "play" in cmd and "pause" not in cmd:
-        core.speak("Playing.")
-        media_control("play", core)
-        return True
 
     if "pause" in cmd or stop_music:
         core.speak("Paused.")
         media_control("pause", core)
+        return True
+
+    if "play" in cmd and "pause" not in cmd:
+        core.speak("Playing.")
+        media_control("play", core)
         return True
 
     if "next" in cmd or "skip" in cmd:
