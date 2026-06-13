@@ -11,6 +11,7 @@ close that gap. The unit runs as the user, writes only to ``$HOME``, and needs
 no privileges.
 """
 
+import contextlib
 import enum
 import filecmp
 import shutil
@@ -61,10 +62,8 @@ def _staged_tmp(dest_dir, name):
 def _discard_staged(dest_dir):
     """Remove any ``.<asset>.tmp`` files a previous refresh may have left."""
     for name in EXTENSION_ASSETS:
-        try:
+        with contextlib.suppress(OSError):
             _staged_tmp(dest_dir, name).unlink()
-        except OSError:
-            pass
 
 
 def refresh_extension_files(src_dir, dest_dir):
@@ -131,7 +130,9 @@ Description=Refresh the EasySpeak GNOME Shell extension before GNOME Shell loads
 # effect on this login, not the next (on Wayland the shell only loads extensions
 # at login). Missing shell units are ignored.
 Before={PRE_SHELL_TARGET}
-Before=org.gnome.Shell@user.service org.gnome.Shell@wayland.service org.gnome.Shell@x11.service
+Before=org.gnome.Shell@user.service
+Before=org.gnome.Shell@wayland.service
+Before=org.gnome.Shell@x11.service
 
 [Service]
 Type=oneshot

@@ -325,9 +325,11 @@ class TestSuppressedCStderr:
 
         broken = Mock()
         broken.fileno.side_effect = ValueError("no fd")
-        with patch("easyspeak.core.speech.sys.stderr", broken):
-            with suppressed_c_stderr():  # must not raise
-                pass
+        with (
+            patch("easyspeak.core.speech.sys.stderr", broken),
+            suppressed_c_stderr(),  # must not raise
+        ):
+            pass
 
     def test_passes_through_when_fd_snapshot_fails(self):
         """When os.dup can't snapshot the fd (e.g. fd exhaustion) the helper
@@ -340,9 +342,9 @@ class TestSuppressedCStderr:
             patch("easyspeak.core.speech.sys.stderr", stderr),
             patch("easyspeak.core.speech.os.dup", side_effect=OSError("too many fds")),
             patch("easyspeak.core.speech.os.dup2") as mock_dup2,
-        ):
-            with suppressed_c_stderr():  # must not raise
-                pass
+            suppressed_c_stderr(),
+        ):  # must not raise
+            pass
 
         mock_dup2.assert_not_called()  # never got far enough to redirect
 
@@ -384,9 +386,9 @@ class TestSuppressedCStderr:
             ),
             patch("easyspeak.core.speech.os.close"),
             patch("builtins.open", mock_open()),
-        ):
-            with suppressed_c_stderr():  # must not raise
-                pass
+            suppressed_c_stderr(),
+        ):  # must not raise
+            pass
 
     def test_flushes_stderr_before_redirecting(self):
         """Buffered stderr is flushed before the fd is swapped, so pending output
@@ -406,8 +408,8 @@ class TestSuppressedCStderr:
             ),
             patch("easyspeak.core.speech.os.close"),
             patch("builtins.open", mock_open()),
+            suppressed_c_stderr(),
         ):
-            with suppressed_c_stderr():
-                pass
+            pass
 
         assert order.index("flush") < order.index("dup2")

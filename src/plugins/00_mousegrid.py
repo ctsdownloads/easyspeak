@@ -8,6 +8,7 @@ Features:
 """
 
 import atexit
+import contextlib
 import re
 import subprocess
 
@@ -174,19 +175,13 @@ atexit.register(cleanup)
 
 def parse_number_sequence(text):
     """Extract ALL numbers from text as a sequence. '3 7 5' -> [3, 7, 5]"""
-    numbers = []
-
     # Replace word numbers with digits
     text_lower = text.lower()
     for word, num in WORD_TO_NUM.items():
         text_lower = re.sub(rf"\b{word}\b", str(num), text_lower)
 
     # Extract all single digits (grid zones are 1-9)
-    for char in text_lower:
-        if char.isdigit() and char != "0":
-            numbers.append(int(char))
-
-    return numbers
+    return [int(char) for char in text_lower if char.isdigit() and char != "0"]
 
 
 def parse_count(text):
@@ -400,24 +395,26 @@ def handle(cmd, core):
     cmd_lower = cmd.lower().strip()
 
     # "Again" - reopen at last position
-    if any(w in cmd_lower for w in ["again", "repeat", "reopen"]):
-        if last_bounds:
-            screen_size = get_screen_size()
-            grid_bounds = last_bounds
-            grid_active = True
-            dbus_call("Show", screen_size[0], screen_size[1])
-            dbus_call("Update", *last_bounds)
-            core.speak("Grid")
-            print("Grid reopened at last position")
-            listen_for_grid_commands(core)
-            return True
+    if any(w in cmd_lower for w in ["again", "repeat", "reopen"]) and last_bounds:
+        screen_size = get_screen_size()
+        grid_bounds = last_bounds
+        grid_active = True
+        dbus_call("Show", screen_size[0], screen_size[1])
+        dbus_call("Update", *last_bounds)
+        core.speak("Grid")
+        print("Grid reopened at last position")
+        listen_for_grid_commands(core)
+        return True
 
     # Show grid
-    if any(w in cmd_lower for w in GRID_TRIGGERS):
-        if "close" not in cmd_lower and "hide" not in cmd_lower:
-            show_grid()
-            listen_for_grid_commands(core)
-            return True
+    if (
+        any(w in cmd_lower for w in GRID_TRIGGERS)
+        and "close" not in cmd_lower
+        and "hide" not in cmd_lower
+    ):
+        show_grid()
+        listen_for_grid_commands(core)
+        return True
 
     return None
 
@@ -429,12 +426,10 @@ def listen_for_grid_commands(core):
     print("Grid mode: say numbers (e.g. '3 7 5'), nudge, scroll, click, close")
 
     while grid_active:
-        try:
+        with contextlib.suppress(Exception):
             core.stream.read(
                 core.stream.get_read_available(), exception_on_overflow=False
             )
-        except:
-            pass
 
         first = core.wait_for_speech(timeout=10)
         if not first:
@@ -443,7 +438,10 @@ def listen_for_grid_commands(core):
         audio = first + core.record_until_silence()
         cmd = core.transcribe(
             audio,
-            prompt="one two three four five six seven eight nine click double right scroll nudge up down left right close cancel mark drag",
+            prompt=(
+                "one two three four five six seven eight nine click double "
+                "right scroll nudge up down left right close cancel mark drag"
+            ),
         )
         if not cmd:
             continue

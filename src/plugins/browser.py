@@ -2,6 +2,7 @@
 Browser Plugin - Qutebrowser voice control via IPC
 """
 
+import contextlib
 import re
 import sys
 import time
@@ -80,17 +81,71 @@ BOOKMARKS = {
 }
 
 # Smart scroll JS - finds the actual scrollable element (works on split-pane layouts)
-SCROLL_DOWN_JS = "(function(){var el=document.elementFromPoint(window.innerWidth/2,window.innerHeight/2);while(el){if(el.scrollHeight>el.clientHeight&&getComputedStyle(el).overflowY!=='visible'){el.scrollBy(0,300);return}el=el.parentElement}window.scrollBy(0,300)})()"
+SCROLL_DOWN_JS = (
+    "(function(){"
+    "var el=document.elementFromPoint(window.innerWidth/2,window.innerHeight/2);"
+    "while(el){"
+    "if(el.scrollHeight>el.clientHeight&&getComputedStyle(el).overflowY!=='visible'){"
+    "el.scrollBy(0,300);return}"
+    "el=el.parentElement}"
+    "window.scrollBy(0,300)"
+    "})()"
+)
 
-SCROLL_UP_JS = "(function(){var el=document.elementFromPoint(window.innerWidth/2,window.innerHeight/2);while(el){if(el.scrollHeight>el.clientHeight&&getComputedStyle(el).overflowY!=='visible'){el.scrollBy(0,-300);return}el=el.parentElement}window.scrollBy(0,-300)})()"
+SCROLL_UP_JS = (
+    "(function(){"
+    "var el=document.elementFromPoint(window.innerWidth/2,window.innerHeight/2);"
+    "while(el){"
+    "if(el.scrollHeight>el.clientHeight&&getComputedStyle(el).overflowY!=='visible'){"
+    "el.scrollBy(0,-300);return}"
+    "el=el.parentElement}"
+    "window.scrollBy(0,-300)"
+    "})()"
+)
 
-PAGE_DOWN_JS = "(function(){var el=document.elementFromPoint(window.innerWidth/2,window.innerHeight/2);while(el){if(el.scrollHeight>el.clientHeight&&getComputedStyle(el).overflowY!=='visible'){el.scrollBy(0,el.clientHeight*0.9);return}el=el.parentElement}window.scrollBy(0,window.innerHeight*0.9)})()"
+PAGE_DOWN_JS = (
+    "(function(){"
+    "var el=document.elementFromPoint(window.innerWidth/2,window.innerHeight/2);"
+    "while(el){"
+    "if(el.scrollHeight>el.clientHeight&&getComputedStyle(el).overflowY!=='visible'){"
+    "el.scrollBy(0,el.clientHeight*0.9);return}"
+    "el=el.parentElement}"
+    "window.scrollBy(0,window.innerHeight*0.9)"
+    "})()"
+)
 
-PAGE_UP_JS = "(function(){var el=document.elementFromPoint(window.innerWidth/2,window.innerHeight/2);while(el){if(el.scrollHeight>el.clientHeight&&getComputedStyle(el).overflowY!=='visible'){el.scrollBy(0,-el.clientHeight*0.9);return}el=el.parentElement}window.scrollBy(0,-window.innerHeight*0.9)})()"
+PAGE_UP_JS = (
+    "(function(){"
+    "var el=document.elementFromPoint(window.innerWidth/2,window.innerHeight/2);"
+    "while(el){"
+    "if(el.scrollHeight>el.clientHeight&&getComputedStyle(el).overflowY!=='visible'){"
+    "el.scrollBy(0,-el.clientHeight*0.9);return}"
+    "el=el.parentElement}"
+    "window.scrollBy(0,-window.innerHeight*0.9)"
+    "})()"
+)
 
-SCROLL_TOP_JS = "(function(){var el=document.elementFromPoint(window.innerWidth/2,window.innerHeight/2);while(el){if(el.scrollHeight>el.clientHeight&&getComputedStyle(el).overflowY!=='visible'){el.scrollTo(0,0);return}el=el.parentElement}window.scrollTo(0,0)})()"
+SCROLL_TOP_JS = (
+    "(function(){"
+    "var el=document.elementFromPoint(window.innerWidth/2,window.innerHeight/2);"
+    "while(el){"
+    "if(el.scrollHeight>el.clientHeight&&getComputedStyle(el).overflowY!=='visible'){"
+    "el.scrollTo(0,0);return}"
+    "el=el.parentElement}"
+    "window.scrollTo(0,0)"
+    "})()"
+)
 
-SCROLL_BOTTOM_JS = "(function(){var el=document.elementFromPoint(window.innerWidth/2,window.innerHeight/2);while(el){if(el.scrollHeight>el.clientHeight&&getComputedStyle(el).overflowY!=='visible'){el.scrollTo(0,el.scrollHeight);return}el=el.parentElement}window.scrollTo(0,document.body.scrollHeight)})()"
+SCROLL_BOTTOM_JS = (
+    "(function(){"
+    "var el=document.elementFromPoint(window.innerWidth/2,window.innerHeight/2);"
+    "while(el){"
+    "if(el.scrollHeight>el.clientHeight&&getComputedStyle(el).overflowY!=='visible'){"
+    "el.scrollTo(0,el.scrollHeight);return}"
+    "el=el.parentElement}"
+    "window.scrollTo(0,document.body.scrollHeight)"
+    "})()"
+)
 
 
 # Lines this plugin requires in ~/.config/qutebrowser/config.py. Each is
@@ -179,10 +234,7 @@ def parse_hint_numbers(cmd):
     """Extract hint numbers from spoken words"""
     clean = re.sub(r"[.,!?\-]", " ", cmd.lower())
     words = clean.split()
-    digits = []
-    for word in words:
-        if word in HINT_NUMBERS:
-            digits.append(HINT_NUMBERS[word])
+    digits = [HINT_NUMBERS[word] for word in words if word in HINT_NUMBERS]
     return "".join(digits)
 
 
@@ -201,7 +253,7 @@ def looks_like_hint(cmd):
 
 
 def parse_hint_number(cmd):
-    """Parse spoken numbers into hint string. 'zero two' -> '02', 'ninety three' -> '93'"""
+    """Parse spoken numbers into a hint string ('zero two' -> '02')."""
     # Number word mappings
     NUM_WORDS = {
         "zero": "0",
@@ -293,10 +345,8 @@ def listen_for_hint(core):
     time.sleep(0.3)
 
     # Clear audio buffer
-    try:
+    with contextlib.suppress(Exception):
         core.stream.read(core.stream.get_read_available(), exception_on_overflow=False)
-    except:
-        pass
 
     # Wait for speech
     first = core.wait_for_speech(timeout=10)
@@ -422,12 +472,10 @@ def browser_mode(core):
     print("Say commands directly. 'exit browser' to leave.")
 
     while True:
-        try:
+        with contextlib.suppress(Exception):
             core.stream.read(
                 core.stream.get_read_available(), exception_on_overflow=False
             )
-        except:
-            pass
 
         first = core.wait_for_speech(timeout=30)
         if not first:
@@ -606,7 +654,7 @@ def handle_browser_command(cmd_lower, core):
             return True
 
     # Load quickmark (user-saved)
-    if cmd_lower.startswith("go to ") or cmd_lower.startswith("open "):
+    if cmd_lower.startswith(("go to ", "open ")):
         target = cmd_lower.replace("go to ", "").replace("open ", "").strip()
 
         # Check predefined bookmarks first
@@ -632,7 +680,7 @@ def handle_browser_command(cmd_lower, core):
         return None  # Let another plugin handle "open X"
 
     # --- Search ---
-    if cmd_lower.startswith("search ") or cmd_lower.startswith("search for "):
+    if cmd_lower.startswith(("search ", "search for ")):
         query = cmd_lower.replace("search for ", "").replace("search ", "").strip()
         if query:
             url = f"https://duckduckgo.com/?q={query.replace(' ', '+')}"

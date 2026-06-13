@@ -162,7 +162,8 @@ class SpeechPipeline:
             # once instead of speak() rebuilding a dead pipeline on every phrase.
             time.sleep(SPEECH_SPAWN_GRACE)
             if not (self._alive(self._piper) and self._alive(self._player)):
-                raise OSError("speech pipeline exited immediately after start")
+                msg = "speech pipeline exited immediately after start"
+                raise OSError(msg)
         except Exception:
             self._kill_speech()  # don't leak a half-spawned pipeline
             raise
@@ -202,10 +203,8 @@ class SpeechPipeline:
         for name in ("stdin", "stdout", "stderr"):
             handle = getattr(proc, name, None)  # tolerate a handle missing these
             if handle is not None:
-                try:
+                with contextlib.suppress(AttributeError, OSError):
                     handle.close()
-                except (AttributeError, OSError):
-                    pass
         try:
             proc.kill()
             proc.wait(timeout=1)
