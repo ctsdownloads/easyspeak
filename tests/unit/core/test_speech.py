@@ -27,7 +27,7 @@ class TestSpeechPipeline:
 
     @patch("shutil.which", return_value="/usr/bin/pw-play")
     @patch("subprocess.Popen")
-    def test_speak(self, mock_popen, mock_which, capsys):
+    def test_speak(self, mock_popen, mock_which, readlog):
         """When speak is called then it streams the phrase to a warm piper process."""
         pipe = SpeechPipeline()
 
@@ -41,7 +41,7 @@ class TestSpeechPipeline:
         pipe.speak("Hello world")
 
         # Check that text was printed
-        captured = capsys.readouterr()
+        captured = readlog()
         assert "💬 Hello world" in captured.out
 
         # Pipeline spawned: player + piper
@@ -55,7 +55,7 @@ class TestSpeechPipeline:
         assert mock_piper.stdin.flush.called
 
     @patch("subprocess.Popen")
-    def test_speak_reuses_warm_piper(self, mock_popen, capsys):
+    def test_speak_reuses_warm_piper(self, mock_popen, readlog):
         """When speak is called twice then the piper process is reused (model loaded once)."""
         pipe = SpeechPipeline()
         mock_player = Mock()

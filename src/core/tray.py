@@ -19,9 +19,12 @@ signals the open mic.
 
 import contextlib
 import enum
+import logging
 import subprocess
 import time
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 # Display states pushed to the indicator. The extension owns the icon/label
 # mapping; it shows the indicator only for "muted" and hides it otherwise.
@@ -125,7 +128,7 @@ class Tray:
         OS-level 'not listening' cue alongside our own muted glyph.
         """
         if not self.set_state(STATE_MUTED):
-            print(
+            logger.warning(
                 "Tray indicator unavailable; staying awake so you keep a way to "
                 "reactivate."
             )
@@ -134,7 +137,7 @@ class Tray:
             )
             return TrayAction.CONTINUE
         release_mic()
-        print("Muted; microphone released. Waiting for reactivation...")
+        logger.info("Muted; microphone released. Waiting for reactivation...")
         self._speak("Reactivate me from the tray when you need me.")
         next_repush = time.monotonic() + MUTED_REPUSH_INTERVAL
         while True:

@@ -21,43 +21,43 @@ def test_setup(mock_ensure):
 
 
 @patch("easyspeak.plugins.dictation.shutil.which", return_value=None)
-def test_ensure_gnome_accessibility_no_gsettings(mock_which, capsys):
+def test_ensure_gnome_accessibility_no_gsettings(mock_which, readlog):
     """No gsettings on PATH (non-GNOME): silent no-op."""
     dictation.ensure_gnome_accessibility()
 
-    captured = capsys.readouterr()
+    captured = readlog()
     assert captured.err == ""
 
 
 @patch("easyspeak.plugins.dictation.subprocess.run")
 @patch("easyspeak.plugins.dictation.shutil.which", return_value="/usr/bin/gsettings")
-def test_ensure_gnome_accessibility_schema_missing(mock_which, mock_run, capsys):
+def test_ensure_gnome_accessibility_schema_missing(mock_which, mock_run, readlog):
     """gsettings present but schema lookup fails: silent no-op."""
     mock_run.return_value = Mock(returncode=1, stdout="")
 
     dictation.ensure_gnome_accessibility()
 
-    captured = capsys.readouterr()
+    captured = readlog()
     assert captured.err == ""
     mock_run.assert_called_once()  # only 'get' is attempted, no 'set'
 
 
 @patch("easyspeak.plugins.dictation.subprocess.run")
 @patch("easyspeak.plugins.dictation.shutil.which", return_value="/usr/bin/gsettings")
-def test_ensure_gnome_accessibility_already_on(mock_which, mock_run, capsys):
+def test_ensure_gnome_accessibility_already_on(mock_which, mock_run, readlog):
     """Setting is already true: silent no-op, no 'set' call."""
     mock_run.return_value = Mock(returncode=0, stdout="true\n")
 
     dictation.ensure_gnome_accessibility()
 
-    captured = capsys.readouterr()
+    captured = readlog()
     assert captured.err == ""
     mock_run.assert_called_once()
 
 
 @patch("easyspeak.plugins.dictation.subprocess.run")
 @patch("easyspeak.plugins.dictation.shutil.which", return_value="/usr/bin/gsettings")
-def test_ensure_gnome_accessibility_enables(mock_which, mock_run, capsys):
+def test_ensure_gnome_accessibility_enables(mock_which, mock_run, readlog):
     """Setting is false and 'set' succeeds: prints enabled message + re-login hint."""
     mock_run.side_effect = [
         Mock(returncode=0, stdout="false\n"),  # get
@@ -66,7 +66,7 @@ def test_ensure_gnome_accessibility_enables(mock_which, mock_run, capsys):
 
     dictation.ensure_gnome_accessibility()
 
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "enabled GNOME toolkit-accessibility" in captured.err
     assert "log out" in captured.err
     assert mock_run.call_count == 2
@@ -74,7 +74,7 @@ def test_ensure_gnome_accessibility_enables(mock_which, mock_run, capsys):
 
 @patch("easyspeak.plugins.dictation.subprocess.run")
 @patch("easyspeak.plugins.dictation.shutil.which", return_value="/usr/bin/gsettings")
-def test_ensure_gnome_accessibility_set_fails(mock_which, mock_run, capsys):
+def test_ensure_gnome_accessibility_set_fails(mock_which, mock_run, readlog):
     """Setting is false but 'set' fails: prints WARNING."""
     mock_run.side_effect = [
         Mock(returncode=0, stdout="false\n"),  # get
@@ -83,18 +83,18 @@ def test_ensure_gnome_accessibility_set_fails(mock_which, mock_run, capsys):
 
     dictation.ensure_gnome_accessibility()
 
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "WARNING" in captured.err
     assert "could not enable" in captured.err
 
 
 @patch("easyspeak.plugins.dictation.subprocess.run", side_effect=OSError("nope"))
 @patch("easyspeak.plugins.dictation.shutil.which", return_value="/usr/bin/gsettings")
-def test_ensure_gnome_accessibility_oserror(mock_which, mock_run, capsys):
+def test_ensure_gnome_accessibility_oserror(mock_which, mock_run, readlog):
     """subprocess.run raising OSError is swallowed silently."""
     dictation.ensure_gnome_accessibility()
 
-    captured = capsys.readouterr()
+    captured = readlog()
     assert captured.err == ""
 
 

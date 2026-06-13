@@ -1,9 +1,13 @@
 """Tests for the core main module."""
 
+import argparse
+import logging
 import shutil
 import sys
 from importlib import import_module
 from unittest.mock import MagicMock, call, patch
+
+import pytest
 
 
 def test_dunder_main_module():
@@ -22,6 +26,29 @@ def test_main_run(mock_easyspeak):
     sys.modules["pyaudio"] = MagicMock()
     from easyspeak.core import main
 
-    main.run()
+    main.run([])
 
     assert mock_easyspeak.mock_calls == [call(), call().run()]
+
+
+@pytest.mark.parametrize(
+    ("flags", "env", "expected"),
+    [
+        ({"verbose": True, "quiet": False}, None, logging.DEBUG),
+        ({"verbose": False, "quiet": True}, None, logging.WARNING),
+        ({"verbose": False, "quiet": False}, "WARNING", logging.WARNING),
+        ({"verbose": False, "quiet": False}, None, logging.INFO),
+        ({"verbose": False, "quiet": False}, "bogus", logging.INFO),
+    ],
+)
+def test_resolve_log_level(flags, env, expected, monkeypatch):
+    """CLI flags win, then EASYSPEAK_LOG_LEVEL, then INFO (invalid -> INFO)."""
+    sys.modules["pyaudio"] = MagicMock()
+    from easyspeak.core import main
+
+    if env is None:
+        monkeypatch.delenv("EASYSPEAK_LOG_LEVEL", raising=False)
+    else:
+        monkeypatch.setenv("EASYSPEAK_LOG_LEVEL", env)
+
+    assert main._resolve_log_level(argparse.Namespace(**flags)) == expected

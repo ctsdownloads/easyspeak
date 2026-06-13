@@ -9,8 +9,11 @@ Features:
 
 import atexit
 import contextlib
+import logging
 import re
 import subprocess
+
+logger = logging.getLogger(__name__)
 
 NAME = "mousegrid"
 DESCRIPTION = "Voice-controlled mouse grid"
@@ -226,9 +229,9 @@ def show_grid():
     if dbus_call("Show", screen_size[0], screen_size[1]):
         grid_active = True
         core.speak("Grid")
-        print(f"Grid shown ({screen_size[0]}x{screen_size[1]})")
+        logger.info("Grid shown (%sx%s)", screen_size[0], screen_size[1])
     else:
-        print("Failed to show grid - is extension enabled?")
+        logger.warning("Failed to show grid - is extension enabled?")
 
 
 def close_grid():
@@ -278,7 +281,7 @@ def update_grid(zone):
     grid_bounds = (new_x, new_y, zone_w, zone_h)
 
     cx, cy = get_center()
-    print(f"  → Zone {zone}: {zone_w}x{zone_h} center=({cx}, {cy})")
+    logger.debug("  → Zone %s: %sx%s center=(%s, %s)", zone, zone_w, zone_h, cx, cy)
     return dbus_call("Update", new_x, new_y, zone_w, zone_h)
 
 
@@ -325,7 +328,7 @@ def do_scroll(direction, count=1):
     grid_active = False
     grid_bounds = None
 
-    print(f"  → Scroll {direction} x{count}")
+    logger.debug("  → Scroll %s x%s", direction, count)
     return dbus_call("Scroll", cx, cy, direction, count)
 
 
@@ -349,7 +352,7 @@ def nudge_grid(direction, count=1):
 
     grid_bounds = (x, y, w, h)
     cx, cy = get_center()
-    print(f"  → Nudge {direction} x{count}: center=({cx}, {cy})")
+    logger.debug("  → Nudge %s x%s: center=(%s, %s)", direction, count, cx, cy)
     return dbus_call("Update", x, y, w, h)
 
 
@@ -359,25 +362,25 @@ def start_drag():
     if not center:
         return False
     drag_start = center
-    print(f"  → Drag start: {center}")
+    logger.debug("  → Drag start: %s", center)
     dbus_call("StartDrag", center[0], center[1])
 
     # Reset grid to full screen so user can navigate to destination
     grid_bounds = (0, 0, screen_size[0], screen_size[1])
     dbus_call("Update", 0, 0, screen_size[0], screen_size[1])
-    print("  → Grid reset - navigate to drop location")
+    logger.debug("  → Grid reset - navigate to drop location")
     return True
 
 
 def end_drag():
     global drag_start, grid_bounds, grid_active, last_bounds
     if not drag_start:
-        print("  → No drag in progress")
+        logger.debug("  → No drag in progress")
         return False
     center = get_center()
     if not center:
         return False
-    print(f"  → Drag end: {center}")
+    logger.debug("  → Drag end: %s", center)
     dbus_call("EndDrag", center[0], center[1])
     last_bounds = grid_bounds
     grid_active = False
@@ -402,7 +405,7 @@ def handle(cmd, core):
         dbus_call("Show", screen_size[0], screen_size[1])
         dbus_call("Update", *last_bounds)
         core.speak("Grid")
-        print("Grid reopened at last position")
+        logger.info("Grid reopened at last position")
         listen_for_grid_commands(core)
         return True
 
@@ -423,7 +426,7 @@ def listen_for_grid_commands(core):
     """Continuous listening while grid active"""
     global grid_active, drag_start
 
-    print("Grid mode: say numbers (e.g. '3 7 5'), nudge, scroll, click, close")
+    logger.info("Grid mode: say numbers (e.g. '3 7 5'), nudge, scroll, click, close")
 
     while grid_active:
         with contextlib.suppress(Exception):
@@ -447,7 +450,7 @@ def listen_for_grid_commands(core):
             continue
 
         cmd_lower = cmd.lower().strip()
-        print(f"  ← {cmd_lower}")
+        logger.debug("  ← %s", cmd_lower)
 
         # === Exit ===
         if any(
@@ -464,7 +467,7 @@ def listen_for_grid_commands(core):
             ]
         ):
             close_grid()
-            print("Grid closed")
+            logger.info("Grid closed")
             return
 
         # === Drag ===
@@ -510,6 +513,6 @@ def listen_for_grid_commands(core):
         # === Zone numbers (chained) ===
         zones = parse_number_sequence(cmd_lower)
         if zones:
-            print(f"  → Zones: {zones}")
+            logger.debug("  → Zones: %s", zones)
             process_zones(zones)
             continue

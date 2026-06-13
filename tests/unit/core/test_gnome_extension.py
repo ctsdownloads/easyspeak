@@ -106,7 +106,7 @@ def test_refresh_extension_files_discards_stale_temp_up_front(tmp_path):
 
 @patch.object(gnome_extension.shutil, "copy2", side_effect=PermissionError("ro"))
 def test_refresh_extension_files_write_failure_returns_error(
-    mock_copy, tmp_path, capsys
+    mock_copy, tmp_path, readlog
 ):
     """A write error (e.g. read-only dest) is swallowed and noted on stderr,
     leaving the existing install untouched rather than crashing startup."""
@@ -119,7 +119,7 @@ def test_refresh_extension_files_write_failure_returns_error(
 
     assert refreshed is gnome_extension.RefreshResult.ERROR
     assert (dest / "extension.js").read_text() == "old"
-    assert "could not write GNOME extension" in capsys.readouterr().err
+    assert "could not write GNOME extension" in readlog().err
 
 
 def test_refresh_extension_files_no_partial_overwrite_on_midway_failure(tmp_path):
@@ -148,7 +148,7 @@ def test_refresh_extension_files_no_partial_overwrite_on_midway_failure(tmp_path
     assert not list(dest.glob(".*.tmp"))
 
 
-def test_refresh_extension_files_missing_source(tmp_path, capsys):
+def test_refresh_extension_files_missing_source(tmp_path, readlog):
     src = tmp_path / "src"  # no files created
     dest = tmp_path / "dest"
 
@@ -156,7 +156,7 @@ def test_refresh_extension_files_missing_source(tmp_path, capsys):
 
     assert refreshed is gnome_extension.RefreshResult.ERROR
     assert not dest.exists()
-    assert "sources missing" in capsys.readouterr().err
+    assert "sources missing" in readlog().err
 
 
 def test_refresh_extension_files_partial_source_missing_helper(tmp_path):
@@ -481,21 +481,21 @@ class TestEnsureExtension:
             yield
 
     @patch.object(gnome_extension.shutil, "which", return_value=None)
-    def test_no_gnome_cli(self, mock_which, capsys):
+    def test_no_gnome_cli(self, mock_which, readlog):
         """No gnome-extensions on PATH (non-GNOME): silent no-op."""
         gnome_extension.ensure_extension()
 
-        assert capsys.readouterr().err == ""
+        assert readlog().err == ""
 
     @patch.object(gnome_extension.subprocess, "run", side_effect=OSError("nope"))
     @patch.object(
         gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
-    def test_list_oserror(self, mock_which, mock_run, capsys):
+    def test_list_oserror(self, mock_which, mock_run, readlog):
         """`gnome-extensions list` raising OSError is swallowed silently."""
         gnome_extension.ensure_extension()
 
-        assert capsys.readouterr().err == ""
+        assert readlog().err == ""
 
     @patch.object(
         gnome_extension.subprocess,
@@ -505,11 +505,11 @@ class TestEnsureExtension:
     @patch.object(
         gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
-    def test_list_timeout(self, mock_which, mock_run, capsys):
+    def test_list_timeout(self, mock_which, mock_run, readlog):
         """A wedged `gnome-extensions` probe times out instead of hanging."""
         gnome_extension.ensure_extension()
 
-        assert capsys.readouterr().err == ""
+        assert readlog().err == ""
 
     @patch.object(
         gnome_extension.subprocess, "run", return_value=Mock(returncode=1, stdout="")
@@ -517,16 +517,16 @@ class TestEnsureExtension:
     @patch.object(
         gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
-    def test_list_returncode_nonzero(self, mock_which, mock_run, capsys):
+    def test_list_returncode_nonzero(self, mock_which, mock_run, readlog):
         """`gnome-extensions list` returning non-zero: silent no-op."""
         gnome_extension.ensure_extension()
 
-        assert capsys.readouterr().err == ""
+        assert readlog().err == ""
 
     @patch.object(
         gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
-    def test_already_installed_and_enabled(self, mock_which, capsys):
+    def test_already_installed_and_enabled(self, mock_which, readlog):
         """UUID in both `list` and `list --enabled`, bundle unchanged: announce."""
         listed = Mock(
             returncode=0, stdout="other@one.com\neasyspeak-grid@local\nthird@two.org\n"
@@ -548,7 +548,7 @@ class TestEnsureExtension:
         ):
             gnome_extension.ensure_extension()
 
-        captured = capsys.readouterr()
+        captured = readlog()
         assert "already installed and enabled" in captured.err
         assert "easyspeak-grid@local" in captured.err
         # No `enable` call needed — only the two probe calls.
@@ -557,7 +557,7 @@ class TestEnsureExtension:
     @patch.object(
         gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
-    def test_already_installed_refreshes_changed_bundle(self, mock_which, capsys):
+    def test_already_installed_refreshes_changed_bundle(self, mock_which, readlog):
         """Installed+enabled but the bundled extension changed: refresh and tell
         the user to re-login so GNOME loads the new code."""
         listed = Mock(returncode=0, stdout="easyspeak-grid@local\n")
@@ -576,7 +576,7 @@ class TestEnsureExtension:
         ):
             gnome_extension.ensure_extension()
 
-        captured = capsys.readouterr()
+        captured = readlog()
         assert "updated GNOME extension easyspeak-grid@local" in captured.err
         assert "log out and back in" in captured.err
         # Still only the two probe calls — refresh is file I/O, not a subprocess.
@@ -585,7 +585,7 @@ class TestEnsureExtension:
     @patch.object(
         gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
-    def test_reports_unit_install(self, mock_which, capsys):
+    def test_reports_unit_install(self, mock_which, readlog):
         """ensure_extension surfaces whatever install_refresh_unit reports."""
         listed = Mock(returncode=0, stdout="easyspeak-grid@local\n")
         listed_enabled = Mock(returncode=0, stdout="easyspeak-grid@local\n")
@@ -609,12 +609,12 @@ class TestEnsureExtension:
             gnome_extension.ensure_extension()
 
         mock_unit.assert_called_once_with()
-        assert f"installed systemd user unit {UNIT_NAME}" in capsys.readouterr().err
+        assert f"installed systemd user unit {UNIT_NAME}" in readlog().err
 
     @patch.object(
         gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
-    def test_installed_but_disabled_enable_succeeds(self, mock_which, capsys):
+    def test_installed_but_disabled_enable_succeeds(self, mock_which, readlog):
         """UUID in `list` but not in `list --enabled`: flip it on and announce."""
         listed = Mock(returncode=0, stdout="other@one.com\neasyspeak-grid@local\n")
         listed_enabled = Mock(returncode=0, stdout="other-on@two.org\n")
@@ -626,7 +626,7 @@ class TestEnsureExtension:
         ) as mock_run:
             gnome_extension.ensure_extension()
 
-        captured = capsys.readouterr()
+        captured = readlog()
         assert "enabled GNOME extension easyspeak-grid@local" in captured.err
         assert "was installed but disabled" in captured.err
         assert mock_run.call_count == 3
@@ -639,7 +639,7 @@ class TestEnsureExtension:
     @patch.object(
         gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
-    def test_installed_but_disabled_enable_fails(self, mock_which, capsys):
+    def test_installed_but_disabled_enable_fails(self, mock_which, readlog):
         """Installed-but-disabled and `enable` fails: hint, no log-out wording."""
         listed = Mock(returncode=0, stdout="easyspeak-grid@local\n")
         listed_enabled = Mock(returncode=0, stdout="")
@@ -651,7 +651,7 @@ class TestEnsureExtension:
         ):
             gnome_extension.ensure_extension()
 
-        captured = capsys.readouterr()
+        captured = readlog()
         assert "installed but disabled, and could not be enabled" in captured.err
         assert "gnome-extensions enable easyspeak-grid@local" in captured.err
         # The "log out and back in" hint is only for fresh installs.
@@ -664,12 +664,12 @@ class TestEnsureExtension:
     @patch.object(
         gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
-    def test_source_files_missing(self, mock_which, mock_run, mock_is_file, capsys):
+    def test_source_files_missing(self, mock_which, mock_run, mock_is_file, readlog):
         """When extension source files aren't at the project root: polite note."""
         gnome_extension.ensure_extension()
 
-        captured = capsys.readouterr()
-        assert "easyspeak: note:" in captured.err
+        captured = readlog()
+        assert "could not auto-install GNOME extension" in captured.err
         assert "source files not found" in captured.err
 
     @patch.object(
@@ -680,15 +680,15 @@ class TestEnsureExtension:
     )
     @patch.object(gnome_extension.shutil, "copy2", side_effect=PermissionError("ro"))
     def test_copy_fails(
-        self, mock_copy, mock_which, mock_run, tmp_path, monkeypatch, capsys
+        self, mock_copy, mock_which, mock_run, tmp_path, monkeypatch, readlog
     ):
         """copy2 raising OSError: polite note, no enable attempt."""
         monkeypatch.setenv("HOME", str(tmp_path))
 
         gnome_extension.ensure_extension()
 
-        captured = capsys.readouterr()
-        assert "easyspeak: note:" in captured.err
+        captured = readlog()
+        assert "installed manually" in captured.err
         # The write failure itself is described once, by refresh_extension_files,
         # with the OSError detail; ensure_extension adds only the consequence.
         assert "could not write GNOME extension" in captured.err
@@ -738,7 +738,7 @@ class TestEnsureExtension:
         gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
     def test_install_and_enable_success(
-        self, mock_which, tmp_path, monkeypatch, capsys
+        self, mock_which, tmp_path, monkeypatch, readlog
     ):
         """Happy path: copies files and enables, prints success message."""
         monkeypatch.setenv("HOME", str(tmp_path))
@@ -764,14 +764,14 @@ class TestEnsureExtension:
         assert (dest / "extension.js").is_file()
         assert (dest / "metadata.json").is_file()
 
-        captured = capsys.readouterr()
+        captured = readlog()
         assert "installed and enabled" in captured.err
 
     @patch.object(
         gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
     def test_install_succeeds_enable_returncode_nonzero(
-        self, mock_which, tmp_path, monkeypatch, capsys
+        self, mock_which, tmp_path, monkeypatch, readlog
     ):
         """Install succeeds, but `enable` returns non-zero: log-out hint."""
         monkeypatch.setenv("HOME", str(tmp_path))
@@ -786,7 +786,7 @@ class TestEnsureExtension:
         ):
             gnome_extension.ensure_extension()
 
-        captured = capsys.readouterr()
+        captured = readlog()
         assert "log out and back in" in captured.err
         # No manual `gnome-extensions enable` instruction — next startup
         # picks it up via the installed-but-disabled branch.
@@ -796,7 +796,7 @@ class TestEnsureExtension:
         gnome_extension.shutil, "which", return_value="/usr/bin/gnome-extensions"
     )
     def test_install_succeeds_enable_oserror(
-        self, mock_which, tmp_path, monkeypatch, capsys
+        self, mock_which, tmp_path, monkeypatch, readlog
     ):
         """Install succeeds, but `enable` raises OSError: log-out hint."""
         monkeypatch.setenv("HOME", str(tmp_path))
@@ -810,5 +810,5 @@ class TestEnsureExtension:
         ):
             gnome_extension.ensure_extension()
 
-        captured = capsys.readouterr()
+        captured = readlog()
         assert "log out and back in" in captured.err

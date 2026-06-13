@@ -5,8 +5,10 @@ Loads plugins from plugins/ folder automatically.
 Uses OpenWakeWord for fast wake detection.
 """
 
+import argparse
 import contextlib
 import importlib
+import logging
 import os
 import subprocess
 import sys
@@ -36,6 +38,8 @@ from .config import (
 from .gnome_extension import ensure_extension
 from .speech import SpeechPipeline, suppressed_c_stderr
 from .tray import Tray, TrayAction
+
+logger = logging.getLogger(__name__)
 
 # =============================================================================
 # CORE CLASS
@@ -104,7 +108,7 @@ class EasySpeak:
     def load_plugins(self):
         plugins_dir = Path(__file__).parent.parent / "plugins"
         if not plugins_dir.exists():
-            print("No plugins directory found")
+            logger.warning("No plugins directory found")
             return
 
         sys.path.insert(0, str(plugins_dir.parent))
@@ -122,11 +126,13 @@ class EasySpeak:
                         module.setup(self)
 
                     self.plugins.append(module)
-                    print(f"  ✓ Loaded: {module.NAME}")
+                    logger.info("  ✓ Loaded: %s", module.NAME)
                 else:
-                    print(f"  ✗ Invalid plugin: {file.name} (missing NAME or handle)")
+                    logger.warning(
+                        "  ✗ Invalid plugin: %s (missing NAME or handle)", file.name
+                    )
             except Exception as e:
-                print(f"  ✗ Failed to load {file.name}: {e}")
+                logger.warning("  ✗ Failed to load %s: %s", file.name, e)
 
     def get_all_commands(self):
         """Get all commands from all plugins for help text"""
@@ -164,8 +170,8 @@ class EasySpeak:
                     return True
                 if result is False:
                     return False
-            except Exception as e:
-                print(f"Plugin error ({plugin.NAME}): {e}")
+            except Exception:
+                logger.exception("Plugin error (%s)", plugin.NAME)
 
         self._report_not_understood()
         return True
@@ -341,7 +347,7 @@ class EasySpeak:
             else:
                 cmd = self.transcribe(heard + self.record_until_silence())
                 if cmd:
-                    print(f"👂 {cmd}")
+                    logger.info("👂 %s", cmd)
                     if not self.route_command(cmd.lower().strip(".,!? ")):
                         return True
                     self._reset_detector()
@@ -358,12 +364,14 @@ class EasySpeak:
         return False
 
     def run(self):
-        print("Loading OpenWakeWord...")
+        logger.info("Loading OpenWakeWord...")
         self.wakeword = WakeWordModel()
 
-        print(
-            f"Loading Whisper ({WHISPER_MODEL}, {WHISPER_COMPUTE_TYPE}, "
-            f"cpu_threads={WHISPER_CPU_THREADS or 'auto'})..."
+        logger.info(
+            "Loading Whisper (%s, %s, cpu_threads=%s)...",
+            WHISPER_MODEL,
+            WHISPER_COMPUTE_TYPE,
+            WHISPER_CPU_THREADS or "auto",
         )
         self.whisper = load_whisper_model()
 
@@ -372,22 +380,22 @@ class EasySpeak:
         # it before anything starts driving it over D-Bus.
         ensure_extension()
 
-        print("\nLoading plugins...")
+        logger.info("\nLoading plugins...")
         self.load_plugins()
 
         if not self.plugins:
-            print("No plugins loaded. Exiting.")
+            logger.error("No plugins loaded. Exiting.")
             return
 
         # Warm up the text-to-speech pipeline now so the piper model is loaded
         # during startup, not on the first spoken response.
-        print("Warming up speech...")
+        logger.info("Warming up speech...")
         try:
             self.speech.ensure()
         except OSError:
-            print("Speech unavailable; continuing without it.")
+            logger.warning("Speech unavailable; continuing without it.")
 
-        print("""
+        logger.info("""
 ╔══════════════════════════════════════════╗
 ║            EasySpeak                     ║
 ╠══════════════════════════════════════════╣
@@ -406,7 +414,7 @@ class EasySpeak:
             self._open_stream()
 
             self.tray.started()
-            print("Listening for wake word...")
+            logger.info("Listening for wake word...")
             audio_buffer = []
 
             while True:
@@ -418,7 +426,7 @@ class EasySpeak:
                 if action is TrayAction.RESUME:
                     self._reset_detector()
                     audio_buffer = []
-                    print("Listening for wake word...")
+                    logger.info("Listening for wake word...")
                     continue
 
                 pcm = self.stream.read(1280, exception_on_overflow=False)
@@ -437,7 +445,7 @@ class EasySpeak:
                         continue
                     self.last_wake_time = now
 
-                    print(f"🎤 Wake! (confidence: {score:.2f})")
+                    logger.info("🎤 Wake! (confidence: %.2f)", score)
 
                     self._reset_detector()
                     audio_buffer = []
@@ -447,10 +455,10 @@ class EasySpeak:
                         break
 
                     audio_buffer = []
-                    print("Listening for wake word...")
+                    logger.info("Listening for wake word...")
 
         except KeyboardInterrupt:
-            print("\nBye!")
+            logger.info("\nBye!")
         finally:
             # Hide the indicator so the daemon's exit doesn't leave a stale icon.
             self.tray.stopped()
@@ -462,7 +470,49 @@ class EasySpeak:
                 self.audio.terminate()
 
 
-def run():
+def _resolve_log_level(args):
+    """Pick the log level: CLI flags win, then EASYSPEAK_LOG_LEVEL, else INFO."""
+    if args.verbose:
+        return logging.DEBUG
+    if args.quiet:
+        return logging.WARNING
+    name = os.environ.get("EASYSPEAK_LOG_LEVEL", "INFO").upper()
+    level = logging.getLevelName(name)
+    return level if isinstance(level, int) else logging.INFO
+
+
+def configure_logging(level):
+    """Route EasySpeak's own loggers to stderr, message-only.
+
+    Output stays as terse as the previous print()-based UI (no level or
+    timestamp prefixes); the level only gates which messages appear. Only the
+    "easyspeak" and "plugins" hierarchies are configured, so importing the
+    package as a library leaves the root logger untouched.
+    """
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(message)s"))
+    for name in ("easyspeak", "plugins"):
+        log = logging.getLogger(name)
+        log.handlers.clear()
+        log.addHandler(handler)
+        log.setLevel(level)
+        log.propagate = False
+
+
+def run(argv=None):
     """Start the application."""
+    parser = argparse.ArgumentParser(
+        prog="easyspeak", description="Voice control for Linux desktops."
+    )
+    verbosity = parser.add_mutually_exclusive_group()
+    verbosity.add_argument(
+        "-v", "--verbose", action="store_true", help="show debug output"
+    )
+    verbosity.add_argument(
+        "-q", "--quiet", action="store_true", help="show only warnings and errors"
+    )
+    args = parser.parse_args(argv)
+
+    configure_logging(_resolve_log_level(args))
     app = EasySpeak()
     app.run()

@@ -120,7 +120,6 @@ ignore = [
 
   # --- Intentional project policy ---
   "ANN",     # type annotations not enforced project-wide; mypy covers used types
-  "T201",    # print() is legitimate terminal output for this CLI app
   "S603",    # subprocess use is how a desktop voice controller works, by design
   "S607",    # binaries (piper, wl-copy, ...) resolved via PATH for portability
   "PLC0415", # imports inside functions lazily load optional deps (cv2, ...)
