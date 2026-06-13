@@ -3,6 +3,7 @@ Head Tracking Plugin - Cursor control via SixDRepNet
 Uses 6D rotation representation for smooth head pose estimation
 """
 
+import contextlib
 import math
 import subprocess
 import threading
@@ -195,7 +196,7 @@ def run_tracking():
 
         frame = cv2.flip(frame, 1)  # Mirror
 
-        pitch, yaw, roll = model.predict(frame)
+        pitch, yaw, _roll = model.predict(frame)
 
         if len(pitch) == 0:
             continue
@@ -419,12 +420,10 @@ def listen_for_tracking_commands(core):
     print("Tracking mode: freeze, nudge, click, or stop tracking")
 
     while tracking_active:
-        try:
+        with contextlib.suppress(Exception):
             core.stream.read(
                 core.stream.get_read_available(), exception_on_overflow=False
             )
-        except:
-            pass
 
         first = core.wait_for_speech(timeout=10)
         if not first:
@@ -433,7 +432,10 @@ def listen_for_tracking_commands(core):
         audio = first + core.record_until_silence()
         cmd = core.transcribe(
             audio,
-            prompt="click double click right click freeze go nudge up down left right recalibrate stop tracking close cancel",
+            prompt=(
+                "click double click right click freeze go nudge up down left "
+                "right recalibrate stop tracking close cancel"
+            ),
         )
         if not cmd:
             continue

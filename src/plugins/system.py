@@ -69,7 +69,7 @@ def volume_mute(core):
 
 
 def volume_max(core):
-    """Jump near the top (85%, not a blast). No media key does this, so set it directly."""
+    """Jump near the top (85%, not a blast); no media key does this."""
     core.host_run(["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "85%"])
 
 

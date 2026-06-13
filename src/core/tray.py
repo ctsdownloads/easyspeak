@@ -17,6 +17,7 @@ running it stays hidden because GNOME's own microphone privacy icon already
 signals the open mic.
 """
 
+import contextlib
 import enum
 import subprocess
 import time
@@ -187,8 +188,7 @@ class Tray:
             command = self._control_file.read_text().strip()
         except OSError:
             return None
-        try:
+        # already gone or a transient error; the command still stands
+        with contextlib.suppress(OSError):
             self._control_file.unlink()
-        except OSError:
-            pass  # already gone or a transient error; the command still stands
         return command or None

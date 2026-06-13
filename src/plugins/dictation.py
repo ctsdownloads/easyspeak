@@ -21,7 +21,11 @@ COMMANDS = [
 core = None
 
 # Prompt to bias Whisper toward recognizing punctuation commands
-DICTATION_PROMPT = "comma, period, new sentence, new paragraph, new line, question mark, exclamation mark, colon, semicolon, stop notes, backspace, space, tab, enter, apostrophe, quote, dash, hyphen, at sign, hashtag, percent"
+DICTATION_PROMPT = (
+    "comma, period, new sentence, new paragraph, new line, question mark, "
+    "exclamation mark, colon, semicolon, stop notes, backspace, space, tab, "
+    "enter, apostrophe, quote, dash, hyphen, at sign, hashtag, percent"
+)
 
 
 def ensure_gnome_accessibility():
@@ -84,16 +88,16 @@ text = sys.argv[1] if len(sys.argv) > 1 else ""
 def find_focused_editable(obj, depth=0):
     if depth > 25:
         return None
-    try:
+    with contextlib.suppress(Exception):
         state = obj.get_state_set()
-        if state.contains(Atspi.StateType.FOCUSED) and state.contains(Atspi.StateType.EDITABLE):
+        if state.contains(Atspi.StateType.FOCUSED) and state.contains(
+            Atspi.StateType.EDITABLE
+        ):
             return obj
         for i in range(obj.get_child_count()):
-            result = find_focused_editable(obj.get_child_at_index(i), depth+1)
+            result = find_focused_editable(obj.get_child_at_index(i), depth + 1)
             if result:
                 return result
-    except:
-        pass
     return None
 
 desktop = Atspi.get_desktop(0)
@@ -103,7 +107,7 @@ for i in range(desktop.get_child_count()):
     if result:
         try:
             pos = result.get_caret_offset()
-        except:
+        except Exception:
             pos = -1
 
         # Handle special characters
@@ -134,7 +138,7 @@ def format_text(text):
     """Convert spoken punctuation to actual punctuation"""
     text = text.strip()
 
-    # Strip ALL punctuation Whisper auto-adds - only explicit commands create punctuation
+    # Strip ALL punctuation Whisper auto-adds; only explicit commands add it back
     text = re.sub(r"[.,!?;:]+", "", text)
     text = text.strip()
 

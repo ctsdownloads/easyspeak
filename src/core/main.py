@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 EasySpeak Core - Voice Control for Linux
 
@@ -6,6 +5,7 @@ Loads plugins from plugins/ folder automatically.
 Uses OpenWakeWord for fast wake detection.
 """
 
+import contextlib
 import importlib
 import os
 import subprocess
@@ -231,21 +231,18 @@ class EasySpeak:
         if self.stream is None:
             return
         for release in (self.stream.stop_stream, self.stream.close):
-            try:
+            with contextlib.suppress(OSError):
                 release()
-            except OSError:
-                pass
         self.stream = None
 
     def flush_stream(self):
         """Flush any remaining audio data from the stream buffer."""
-        try:
+        # intentionally suppress everything to prevent cleanup failures
+        with contextlib.suppress(Exception):
             self.stream.read(
                 self.stream.get_read_available(),
                 exception_on_overflow=False,
             )
-        except:
-            pass  # intentionally catch all to prevent cleanup failures
 
     def is_silence(self, audio_chunk):
         return np.abs(audio_chunk).mean() < SILENCE_THRESHOLD
@@ -278,12 +275,11 @@ class EasySpeak:
 
     def transcribe(self, audio_data, prompt=None):
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-            wf = wave.open(f.name, "wb")
-            wf.setnchannels(1)
-            wf.setsampwidth(2)
-            wf.setframerate(16000)
-            wf.writeframes(audio_data)
-            wf.close()
+            with wave.open(f.name, "wb") as wf:
+                wf.setnchannels(1)
+                wf.setsampwidth(2)
+                wf.setframerate(16000)
+                wf.writeframes(audio_data)
 
             use_prompt = prompt or COMMAND_PROMPT
             segments, _ = self.whisper.transcribe(
