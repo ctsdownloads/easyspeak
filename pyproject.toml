@@ -77,7 +77,7 @@ unittest = [
 ]
 
 [project.scripts]
-easyspeak = "easyspeak.core.main:run"
+easyspeak = "easyspeak.core.cli:run"
 
 [project.urls]
 "Source Code" = "https://github.com/ctsdownloads/easyspeak"
