@@ -11,7 +11,7 @@ NAME = "sleep"
 DESCRIPTION = "Deactivate (sleep) until reactivated from the tray"
 
 COMMANDS = [
-    "go to sleep / stop listening - release the mic; reactivate from the tray icon",
+    "go to sleep / stop listening - release the mic (reactivate from the tray icon)",
 ]
 
 # Matched as substrings against the wake-stripped command. Kept tight so they

@@ -313,6 +313,7 @@ These are just examples. Edit `apps.py` to add your own apps.
 | Command | Action |
 |---------|--------|
 | help | List all commands |
+| go to sleep / stop listening | Release the mic (reactivate from the tray icon) |
 | stop / exit / quit | Exit EasySpeak |
 
 ## File Structure

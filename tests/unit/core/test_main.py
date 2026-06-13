@@ -337,9 +337,8 @@ class TestEasySpeakRouteCommand:
         result = easy.route_command("unknown command")
 
         assert result is True
-        mock_speak.assert_called_once_with(
-            "I didn't understand. Say help for commands."
-        )
+        mock_speak.assert_called_once_with("Sorry, I didn't understand.")
+        assert easy.keep_listening is False
 
     @patch.object(EasySpeak, "speak")
     def test_route_command_plugin_error(
@@ -365,6 +364,109 @@ class TestEasySpeakRouteCommand:
         assert result is True
         mock_multiple_plugins[0].handle.assert_called_once()
         mock_multiple_plugins[1].handle.assert_called_once()
+
+    @patch.object(EasySpeak, "_show_help")
+    @patch.object(EasySpeak, "speak")
+    @patch("time.time")
+    def test_route_command_second_miss_shows_help_and_keeps_listening(
+        self, mock_time, mock_speak, mock_show_help, mock_plugin_no_handle
+    ):
+        """A second miss (spaced past the grace window) escalates to help and
+        re-arms listening."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin_no_handle]
+        mock_time.side_effect = [100.0, 200.0]
+
+        easy.route_command("first gibberish")
+        result = easy.route_command("second gibberish")
+
+        assert result is True
+        assert mock_speak.call_args_list == [
+            (("Sorry, I didn't understand.",),),
+            (("I didn't understand.",),),
+        ]
+        mock_show_help.assert_called_once_with()
+        assert easy.keep_listening is True
+        assert easy.help_shown is True
+
+    @patch.object(EasySpeak, "_show_help")
+    @patch.object(EasySpeak, "speak")
+    @patch("time.time")
+    def test_route_command_does_not_repeat_help_after_first_escalation(
+        self, mock_time, mock_speak, mock_show_help, mock_plugin_no_handle
+    ):
+        """Once help has been shown, further misses only apologise (no repeat)
+        but still keep the mic open for another try."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin_no_handle]
+        mock_time.side_effect = [100.0, 200.0, 300.0]
+
+        easy.route_command("miss one")
+        easy.route_command("miss two")
+        easy.keep_listening = False
+        easy.route_command("miss three")
+
+        mock_show_help.assert_called_once_with()
+        assert mock_speak.call_args_list == [
+            (("Sorry, I didn't understand.",),),
+            (("I didn't understand.",),),
+            (("I didn't understand.",),),
+        ]
+        assert easy.keep_listening is True
+
+    @patch.object(EasySpeak, "speak")
+    @patch("time.time")
+    def test_route_command_drops_misses_inside_the_grace_window(
+        self, mock_time, mock_speak, mock_plugin_no_handle
+    ):
+        """A miss arriving within the grace window of the last one (e.g. the mic
+        hearing our own apology) is silently dropped — no feedback, no escalation."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin_no_handle]
+        mock_time.side_effect = [100.0, 101.0]  # 1s apart, inside the grace window
+
+        easy.route_command("real miss")
+        easy.route_command("sorry i didn't understand")
+
+        mock_speak.assert_called_once_with("Sorry, I didn't understand.")
+        assert easy.misunderstand_count == 1
+        assert easy.help_shown is False
+        assert easy.keep_listening is False
+        assert easy.unrecognized is False
+
+    @patch.object(EasySpeak, "_show_help")
+    @patch.object(EasySpeak, "speak")
+    @patch("time.time")
+    def test_route_command_understood_resets_streak_and_help(
+        self, mock_time, mock_speak, mock_show_help, mock_plugin_no_handle, mock_plugin
+    ):
+        """An understood command clears the streak and re-arms help for next
+        time (a successful 'help' command therefore lets it show again)."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin_no_handle]
+        mock_time.side_effect = [100.0, 200.0]
+
+        easy.route_command("miss one")
+        easy.route_command("miss two")
+        assert easy.misunderstand_count == 2
+        assert easy.help_shown is True
+
+        easy.plugins = [mock_plugin]  # this one handles it
+        easy.route_command("good command")
+
+        assert easy.misunderstand_count == 0
+        assert easy.help_shown is False
+
+    def test_show_help_delegates_to_plugin_that_provides_it(self):
+        """_show_help calls show_help on the first plugin that exposes it."""
+        easy = EasySpeak()
+        without = Mock(spec=[])  # no show_help attribute
+        with_help = Mock(spec=["show_help"])
+        easy.plugins = [without, with_help]
+
+        easy._show_help()
+
+        with_help.show_help.assert_called_once_with(easy)
 
 
 class TestEasySpeakAudio:
@@ -845,6 +947,133 @@ class TestEasySpeakRun:
     @patch("easyspeak.core.main.load_whisper_model")
     @patch.object(EasySpeak, "load_plugins")
     @patch.object(EasySpeak, "wait_for_speech")
+    @patch.object(EasySpeak, "record_until_silence")
+    @patch.object(EasySpeak, "transcribe")
+    @patch.object(EasySpeak, "route_command")
+    @patch.object(EasySpeak, "flush_stream")
+    def test_run_keeps_listening_after_help(
+        self,
+        mock_flush_stream,
+        mock_route_command,
+        mock_transcribe,
+        mock_record,
+        mock_wait,
+        mock_load_plugins,
+        mock_whisper_model,
+        mock_wakeword_model,
+        mock_pyaudio,
+        mock_time,
+        mock_subprocess_run,
+        mock_plugin,
+    ):
+        """When route_command re-arms keep_listening (help shown), the loop
+        drains speech and listens for a follow-up command without a new wake
+        word."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin]
+        easy.speech = Mock()
+        mock_time.return_value = 100.0
+
+        mock_audio = Mock()
+        mock_stream = Mock()
+        pcm_data = b"\x00\x00" * 1280
+        mock_stream.read.side_effect = [pcm_data, KeyboardInterrupt()]
+        mock_audio.open.return_value = mock_stream
+        mock_pyaudio.PyAudio.return_value = mock_audio
+
+        mock_wakeword_instance = Mock()
+        mock_wakeword_instance.predict.return_value = {"hey_jarvis": 0.8}
+        mock_wakeword_model.return_value = mock_wakeword_instance
+
+        mock_wait.return_value = b"audio_data"
+        mock_record.return_value = b"more_audio"
+        mock_transcribe.return_value = "gibberish"
+
+        def route(_cmd):
+            """First call mimics a help-miss (re-arms the loop); the rest pass."""
+            if mock_route_command.call_count == 1:
+                easy.unrecognized = True
+                easy.keep_listening = True
+            return True
+
+        mock_route_command.side_effect = route
+
+        easy.run()
+
+        assert mock_route_command.call_count == 2
+        assert mock_wait.call_count == 2
+        # Once between the two captures, once on shutdown.
+        assert easy.speech.drain.call_count == 2
+
+    @patch("subprocess.run")
+    @patch("time.time")
+    @patch("easyspeak.core.main.pyaudio")
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch.object(EasySpeak, "load_plugins")
+    @patch.object(EasySpeak, "wait_for_speech")
+    @patch.object(EasySpeak, "record_until_silence")
+    @patch.object(EasySpeak, "transcribe")
+    @patch.object(EasySpeak, "route_command")
+    @patch.object(EasySpeak, "flush_stream")
+    def test_run_drains_after_an_unrecognised_command(
+        self,
+        mock_flush_stream,
+        mock_route_command,
+        mock_transcribe,
+        mock_record,
+        mock_wait,
+        mock_load_plugins,
+        mock_whisper_model,
+        mock_wakeword_model,
+        mock_pyaudio,
+        mock_time,
+        mock_subprocess_run,
+        mock_plugin,
+    ):
+        """A single unrecognised command drains speech before resuming the wake
+        word, so the still-playing apology can't be misheard into an escalation.
+        """
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin]
+        easy.speech = Mock()
+        mock_time.return_value = 100.0
+
+        mock_audio = Mock()
+        mock_stream = Mock()
+        pcm_data = b"\x00\x00" * 1280
+        mock_stream.read.side_effect = [pcm_data, KeyboardInterrupt()]
+        mock_audio.open.return_value = mock_stream
+        mock_pyaudio.PyAudio.return_value = mock_audio
+
+        mock_wakeword_instance = Mock()
+        mock_wakeword_instance.predict.return_value = {"hey_jarvis": 0.8}
+        mock_wakeword_model.return_value = mock_wakeword_instance
+
+        mock_wait.return_value = b"audio_data"
+        mock_record.return_value = b"more_audio"
+        mock_transcribe.return_value = "gibberish"
+
+        def route(_cmd):
+            """A soft-apology miss: sets unrecognized but never keep_listening."""
+            easy.unrecognized = True
+            return True
+
+        mock_route_command.side_effect = route
+
+        easy.run()
+
+        assert easy.keep_listening is False
+        # Once after the miss, once on shutdown — though we never kept listening.
+        assert easy.speech.drain.call_count == 2
+
+    @patch("subprocess.run")
+    @patch("time.time")
+    @patch("easyspeak.core.main.pyaudio")
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch.object(EasySpeak, "load_plugins")
+    @patch.object(EasySpeak, "wait_for_speech")
     @patch.object(EasySpeak, "speak")
     @patch.object(EasySpeak, "flush_stream")
     def test_run_wake_word_detected_no_speech(
@@ -1126,6 +1355,7 @@ class TestEasySpeakRun:
         mock_stream.close.assert_called_once()
         mock_audio.terminate.assert_called_once()
 
+    @patch.object(EasySpeak, "flush_stream")
     @patch("easyspeak.core.main.pyaudio")
     @patch("easyspeak.core.main.WakeWordModel")
     @patch("easyspeak.core.main.load_whisper_model")
@@ -1136,10 +1366,12 @@ class TestEasySpeakRun:
         mock_whisper_model,
         mock_wakeword_model,
         mock_pyaudio,
+        mock_flush_stream,
         mock_plugin,
     ):
-        """A RESUME (woke from sleep) skips the audio read and loops again; the
-        next CONTINUE proceeds to read."""
+        """A RESUME (woke from sleep) resets the detector and flushes the mic so
+        it starts fresh, skips the audio read, and loops again; the next
+        CONTINUE proceeds to read."""
         easy = EasySpeak()
         easy.plugins = [mock_plugin]
         easy.tray = Mock()
@@ -1150,11 +1382,15 @@ class TestEasySpeakRun:
         mock_audio = Mock()
         mock_audio.open.return_value = mock_stream
         mock_pyaudio.PyAudio.return_value = mock_audio
-        mock_wakeword_model.return_value = Mock()
+        mock_wakeword_instance = Mock()
+        mock_wakeword_model.return_value = mock_wakeword_instance
 
         easy.run()
 
-        # RESUME read nothing; only the CONTINUE iteration reached the mic.
+        # Resume behaves like a fresh start: detector reset and mic flushed,
+        # without consuming the main-loop read (only CONTINUE reaches the mic).
+        mock_wakeword_instance.reset.assert_called_once()
+        mock_flush_stream.assert_called_once()
         mock_stream.read.assert_called_once()
 
     @patch("easyspeak.core.main.pyaudio")
