@@ -41,6 +41,7 @@ LOCAL_APPS = {
     "inkscape": "inkscape",
     "logs": "gnome-logs",
     "maps": "gnome-maps",
+    "music app": "gnome-music",
     "music player": "gnome-music",
     "nautilus": "nautilus",
     "radio": "shortwave",
