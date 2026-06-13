@@ -39,7 +39,8 @@ def configure(level):
         log.setLevel(level)
         log.propagate = False
     logger.debug(
-        "logging configured: level=%s, stderr, message-only, loggers=%s",
+        "logging configured: level=%s, stderr, format=%r, loggers=%s",
         logging.getLevelName(level),
+        fmt,
         ", ".join(_PACKAGE_LOGGERS),
     )
