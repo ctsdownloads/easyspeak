@@ -197,9 +197,7 @@ def looks_like_hint(cmd):
         return True
     # Check if all words are number words
     words = cmd.lower().split()
-    if len(words) <= 3 and all(w.strip(".,!?") in HINT_NUMBERS for w in words):
-        return True
-    return False
+    return len(words) <= 3 and all(w.strip(".,!?") in HINT_NUMBERS for w in words)
 
 
 def parse_hint_number(cmd):

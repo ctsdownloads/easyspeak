@@ -273,10 +273,8 @@ def update_grid(zone):
     new_y = y + row * zone_h
 
     # Only clamp if actually going off-screen (shouldn't happen, but safety)
-    if new_x < 0:
-        new_x = 0
-    if new_y < 0:
-        new_y = 0
+    new_x = max(new_x, 0)
+    new_y = max(new_y, 0)
     if new_x + zone_w > screen_size[0]:
         new_x = screen_size[0] - zone_w
     if new_y + zone_h > screen_size[1]:

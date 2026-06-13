@@ -105,7 +105,7 @@ for i in range(desktop.get_child_count()):
             pos = result.get_caret_offset()
         except:
             pos = -1
-        
+
         # Handle special characters
         for char in text:
             if char == chr(8):  # backspace
@@ -115,7 +115,7 @@ for i in range(desktop.get_child_count()):
             else:
                 result.insert_text(pos, char, len(char.encode('utf-8')))
                 pos += 1
-        
+
         print("OK")
         sys.exit(0)
 
