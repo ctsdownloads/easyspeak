@@ -68,6 +68,16 @@ def volume_mute(core):
     _media_key(core, KEY_MUTE, ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"])
 
 
+def volume_max(core):
+    """Jump near the top (85%, not a blast). No media key does this, so set it directly."""
+    core.host_run(["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "85%"])
+
+
+def volume_min(core):
+    """Drop low (15%, still audible — not a mute), set directly like volume_max."""
+    core.host_run(["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "15%"])
+
+
 def brightness_up(core):
     _media_key(
         core,
@@ -100,6 +110,13 @@ def handle(cmd, core):
     # Volume -- "louder"/"quieter" etc. work on their own, without "volume"/"sound".
     # Match whole words so "silent" doesn't fire on "silently", "softer" on "softest"...
     words = cmd.split()
+    if "very" in words:
+        if "loud" in words or "louder" in words:
+            volume_max(core)
+            return True
+        if any(w in words for w in ("silent", "quiet", "quieter", "soft", "softer")):
+            volume_min(core)
+            return True
     louder = "louder" in words
     quieter = any(word in words for word in ("quieter", "softer", "silent"))
     # No spoken feedback for volume/mute: GNOME's native OSD and chime already

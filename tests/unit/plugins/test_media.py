@@ -129,19 +129,31 @@ def test_handle_play_commands(
     [
         ("pause", "pause", "Paused."),
         ("pause music", "pause", "Paused."),
+        ("pause the music", "pause", "Paused."),
         ("pause the song", "pause", "Paused."),
+        ("stop the music", "pause", "Paused."),
+        ("stop music", "pause", "Paused."),
+        ("stop the song", "pause", "Paused."),
     ],
 )
 @patch.object(media, "media_control", return_value=True)
 def test_handle_pause_commands(
     mock_media_control, command, expected_action, expected_speech, mock_core
 ):
-    """When handle receives a pause command then it calls media_control and speaks."""
+    """Pause and "stop the music" both pause playback and speak."""
     result = media.handle(command, mock_core)
 
     assert result is True
     assert mock_media_control.call_args.args == (expected_action, mock_core)
     assert mock_core.speak.call_args.args[0] == expected_speech
+
+
+@pytest.mark.parametrize("command", ["stop", "stop tracking", "stop it"])
+@patch.object(media, "media_control", return_value=True)
+def test_handle_ignores_bare_stop(mock_media_control, command, mock_core):
+    """A bare "stop" is not a media command — it's left for the exit command."""
+    assert media.handle(command, mock_core) is None
+    assert not mock_media_control.called
 
 
 @pytest.mark.parametrize(

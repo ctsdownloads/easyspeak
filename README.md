@@ -274,9 +274,10 @@ Built-in bookmarks: youtube, google, gmail, github, reddit, twitter, facebook, a
 | close [app] | Close application |
 
 Default apps in `plugins/apps.py` (edit to match your system):
-- firefox, steam, spotify, calculator, settings, files, terminal, browser
+- firefox, steam, spotify, calculator, settings, files, terminal, browser, music player
 
-These are just examples. Edit `apps.py` to add your own apps.
+These are just examples. Edit `apps.py` to add your own apps. Some accept
+spoken aliases — e.g. "open music app" works the same as "open music player".
 
 ### Files
 
@@ -287,6 +288,7 @@ These are just examples. Edit `apps.py` to add your own apps.
 | open pictures | Open Pictures folder |
 | open music | Open Music folder |
 | open videos | Open Videos folder |
+| open projects | Open Projects folder |
 | open home | Open home folder |
 | open desktop | Open Desktop folder |
 
@@ -295,7 +297,7 @@ These are just examples. Edit `apps.py` to add your own apps.
 | Command | Action |
 |---------|--------|
 | play | Resume playback |
-| pause | Pause playback |
+| pause / stop the music | Pause playback |
 | next / skip | Next track |
 | previous / back | Previous track |
 
@@ -303,10 +305,13 @@ These are just examples. Edit `apps.py` to add your own apps.
 
 | Command | Action |
 |---------|--------|
-| volume up/down | Adjust volume |
+| volume up/down (or louder / quieter) | Adjust volume one step (repeat to keep going) |
+| very loud / very silent | Jump straight to near-max (85%) / low (15%, not muted) |
 | mute | Toggle mute |
 | brightness up/down | Adjust brightness |
 | do not disturb on/off | Toggle notifications |
+
+Volume changes are silent — GNOME's own on-screen display and chime acknowledge them.
 
 ### General
 

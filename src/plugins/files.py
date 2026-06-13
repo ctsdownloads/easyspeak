@@ -9,7 +9,7 @@ DESCRIPTION = "Folder navigation"
 
 COMMANDS = [
     "open [folder] - open folder in file manager",
-    "Folders: documents, downloads, pictures, music, videos, home, desktop",
+    "Folders: documents, downloads, pictures, music, videos, projects, home, desktop",
 ]
 
 FOLDERS = {
@@ -18,6 +18,7 @@ FOLDERS = {
     "pictures": "~/Pictures",
     "music": "~/Music",
     "videos": "~/Videos",
+    "projects": "~/Projects",
     "home": "~",
     "desktop": "~/Desktop",
 }

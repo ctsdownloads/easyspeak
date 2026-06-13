@@ -439,6 +439,8 @@ def test_close_registered_terminal(mock_core):
         ["open spotify", "spotify"],
         ["launch files", "files"],
         ["open calculator", "calculator"],
+        ["open music player", "music player"],
+        ["open music app", "music app"],
     ],
 )
 def test_handle_open_installed_app(mock_launch_app, mock_core, command, app_name):

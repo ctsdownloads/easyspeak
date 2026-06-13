@@ -77,6 +77,7 @@ def test_open_folder_returns_false_when_no_file_manager_found(
         ("open pictures", "pictures", "Opening pictures."),
         ("open music", "music", "Opening music."),
         ("open videos", "videos", "Opening videos."),
+        ("open projects", "projects", "Opening projects."),
         ("open home", "home", "Opening home."),
         ("open desktop", "desktop", "Opening desktop."),
     ],

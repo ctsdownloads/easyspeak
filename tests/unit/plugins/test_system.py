@@ -150,6 +150,50 @@ def test_handle_volume_commands(
 
 
 @pytest.mark.parametrize(
+    ["command", "expected_func"],
+    [
+        ("very loud", "volume_max"),
+        ("make it very loud", "volume_max"),
+        ("very louder", "volume_max"),
+        ("very silent", "volume_min"),
+        ("very quiet", "volume_min"),
+        ("very soft", "volume_min"),
+    ],
+)
+@patch.object(system, "volume_max")
+@patch.object(system, "volume_min")
+def test_handle_extreme_volume_commands(
+    mock_volume_min, mock_volume_max, command, expected_func, mock_core
+):
+    """ "very loud"/"very silent" jump straight to max/min volume, silently."""
+    func_map = {"volume_max": mock_volume_max, "volume_min": mock_volume_min}
+
+    result = system.handle(command, mock_core)
+
+    assert result is True
+    assert not mock_core.speak.called
+    assert func_map[expected_func].call_args.args[0] == mock_core
+
+
+def test_volume_max_sets_near_full_volume(mock_core):
+    """volume_max sets the default sink to 85% directly (no media key for it)."""
+    system.volume_max(mock_core)
+
+    mock_core.host_run.assert_called_once_with(
+        ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "85%"]
+    )
+
+
+def test_volume_min_sets_very_low_volume(mock_core):
+    """volume_min drops the default sink to 15% — quiet but not muted."""
+    system.volume_min(mock_core)
+
+    mock_core.host_run.assert_called_once_with(
+        ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "15%"]
+    )
+
+
+@pytest.mark.parametrize(
     ["command", "expected_speech", "expected_func"],
     [
         ("brightness up", "Brighter.", "brightness_up"),
