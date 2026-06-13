@@ -17,7 +17,7 @@ COMMANDS = [
 # Matched as substrings against the wake-stripped command. Kept tight so they
 # don't swallow unrelated phrases; "goto" covers a common transcription of
 # "go to", and "stop listening" also covers "stop listening now". Bare "stop"
-# is deliberately excluded — it means quit (handled by the base plugin).
+# is deliberately excluded — too ambiguous to mean sleep.
 SLEEP_PHRASES = ("go to sleep", "goto sleep", "stop listening")
 
 

@@ -16,12 +16,10 @@ def test_setup(mock_core):
 @pytest.mark.parametrize(
     ["command", "expected_return"],
     [
-        ["stop", False],
         ["exit", False],
         ["quit", False],
         ["goodbye", False],
         ["bye", False],
-        ["STOP", False],
         ["EXIT", False],
         ["QUIT", False],
     ],
@@ -37,12 +35,10 @@ def test_handle_exit_commands(mock_core, command, expected_return):
 @pytest.mark.parametrize(
     ["command", "expected_return"],
     [
-        ["jarvis stop", False],
         ["jarvis exit", False],
         ["jarvis quit", False],
-        ["computer stop", False],
         ["computer exit", False],
-        ["hey stop", False],
+        ["computer quit", False],
     ],
 )
 def test_handle_exit_commands_with_prefix(mock_core, command, expected_return):
@@ -97,6 +93,8 @@ def test_handle_help_commands(mock_show_help, mock_core, command, expected_retur
         ["volume up"],
         ["grid"],
         ["some random command"],
+        ["stop"],
+        ["jarvis stop"],
     ],
 )
 def test_handle_unrecognized_commands(mock_core, command):

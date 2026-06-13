@@ -69,7 +69,7 @@ def media_control(action, core):
 
 
 def handle(cmd, core):
-    # "stop the music" means pause; bare "stop" is left for the exit command.
+    # "stop the music"/"stop playing" mean pause; bare "stop" isn't a media command.
     # Whole-word match so "stop tracking" (eye tracking) isn't caught by "track".
     words = cmd.split()
     stop_music = "stop" in words and any(

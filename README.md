@@ -322,7 +322,7 @@ Volume changes are silent — GNOME's own on-screen display and chime acknowledg
 |---------|--------|
 | help | List all commands |
 | go to sleep / stop listening | Release the mic (reactivate from the tray icon) |
-| stop / exit / quit | Exit EasySpeak |
+| quit / exit / goodbye | Exit EasySpeak |
 
 ## File Structure
 
