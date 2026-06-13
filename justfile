@@ -5,28 +5,28 @@
 @help:
     just --list --unsorted
 
-# Run codestyle and safety checks, tests, packaging and cleanup
+# Run codestyle and safety checks, tests, packaging checks and cleanup
 [group('lifecycle')]
-all: codestyle safety test package clean
+all: codestyle safety test gate clean
 
 # Remove build artifacts and reports (use -v for verbose, -n for dry-run)
 [group('lifecycle')]
 clean *args:
     uvx pyclean . {{ args }} --debris all --erase .benchmarks result results.json --yes
 
-# Run all code style checks (format, lint)
+# Run all code style checks (format, lint, lint-js)
 [group('codestyle')]
 codestyle:
     -just format
     -just lint
     -just lint-js
 
-# Consistent code style (use -- to apply, --diff to preview)
+# Check Python code style (use -- to apply, --diff to preview)
 [group('codestyle')]
 format *args=('--check'):
     uvx ruff format {{ args }}
 
-# Ultra-fast linting (use -- for details, --fix to autocorrect)
+# Lint the Python code (use -- for details, --fix to autocorrect)
 [group('codestyle')]
 lint *args=('--statistics'):
     uvx ruff check {{ args }}
@@ -59,9 +59,18 @@ requirements:
     uv lock --upgrade
     git diff --color --exit-code uv.lock
 
+# Run test suite and show coverage (unit tests, integration, acceptance)
+[group('tests')]
+test: test-js pytest coverage integration acceptance
+
+# Unit-test the GNOME Shell extension's pure JS helpers (needs node >= 22.5)
+[group('tests')]
+test-js *args:
+    node --test --experimental-test-coverage --test-coverage-include='src/**' tests/js/*.test.js {{ args }}
+
 # Run test suite against all supported Python versions, show coverage
 [group('tests')]
-test *args:
+test-pythons *args:
     -UV_PYTHON=3.10 just pytest {{ args }}
     -UV_PYTHON=3.11 just pytest {{ args }}
     -UV_PYTHON=3.12 just pytest {{ args }}
@@ -86,13 +95,8 @@ integration *args=('-v'):
 
 # Run acceptance tests (Gherkin scenarios via pytest-bdd)
 [group('tests')]
-acceptance *args:
+acceptance *args=('-v'):
     uv run --extra=acceptance pytest tests/acceptance {{ args }}
-
-# Unit-test the GNOME Shell extension's pure JS helpers (needs node >= 21)
-[group('tests')]
-test-js *args:
-    node --test tests/js/*.test.js {{ args }}
 
 # Run Whisper benchmarks (writes results.json for bencher.dev)
 [group('tests')]
