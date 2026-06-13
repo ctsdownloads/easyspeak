@@ -106,8 +106,65 @@ warn_unused_ignores = true
 addopts = "--ignore=tests/acceptance --ignore=tests/benchmarks --ignore=tests/integration"
 
 [tool.ruff.lint]
-extend-select = ["I"]  # "ALL" one day
-extend-ignore = ["D", "E722"]
+select = ["ALL"]
+ignore = [
+  # --- Conflicts with the Ruff formatter (per Ruff's own recommendation) ---
+  "COM812",  # missing-trailing-comma
+  "COM819",  # prohibited-trailing-comma
+  "ISC001",  # single-line-implicit-string-concatenation
+  "ISC002",  # multi-line-implicit-string-concatenation
+  "Q000", "Q001", "Q002", "Q003",  # quote style is the formatter's job
+  "W191",    # tab-indentation
+  "E111", "E114", "E117",  # indentation (formatter-owned)
+  "D206", "D300",  # docstring whitespace/quotes (formatter-owned)
+
+  # --- Intentional project policy ---
+  "ANN",     # type annotations not enforced project-wide; mypy covers used types
+  "T201",    # print() is legitimate terminal output for this CLI app
+  "S603",    # subprocess use is how a desktop voice controller works, by design
+  "S607",    # binaries (piper, wl-copy, ...) resolved via PATH for portability
+  "PLC0415", # imports inside functions lazily load optional deps (cv2, ...)
+  "PLW0603", # module-level global state is part of the runtime/plugin design
+  "PLW0602", # ditto: globals declared for clarity even when only read
+  "C901",    # cyclomatic-complexity threshold not enforced
+  "PLR0911", "PLR0912", "PLR0913", "PLR0915",  # other complexity thresholds
+  "PLR2004", # magic-value comparisons read fine in audio/threshold code
+
+  # --- TODO: remove each entry as the code is fixed in a follow-up commit ---
+  # docstrings (enforced on src/ — being written):
+  "D101", "D102", "D103", "D107", "D200", "D205", "D209", "D212", "D415",
+  # autofixable style:
+  "RET505", "PLR1730", "FURB110", "W293", "SIM103",
+  # manual cleanups:
+  "E501", "N806", "E722", "SIM102", "SIM105", "SIM115", "SIM117",
+  "S110", "BLE001", "TRY300", "TRY301", "TRY003",
+  "PERF203", "PERF401", "PIE810",
+  "PTH107", "PTH111", "PTH119", "PTH123",
+  "EM101", "EXE001", "FBT002", "RUF005", "RUF059", "PLW1510",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = [
+  "S101",    # asserts are the whole point of a test
+  "D",       # docstrings enforced on src/, not on tests
+  "SLF001",  # tests legitimately reach into private members
+  "ARG",     # pytest fixtures are injected as (often unused) arguments
+  "INP001",  # test packages need no __init__.py
+  "PLC0415", # local imports inside tests are fine
+  "PLW1510", # subprocess.run in tests need not pass check=
+  "PT006", "PT007", "PT011", "PT018", "PT019",  # pytest style latitude in tests
+  "S108",    # hardcoded /tmp paths are fine in tests
+  "S310",    # url open in tests is controlled
+  "E501",    # long lines (param tables, fixtures) tolerated in tests
+  "ERA001",  # commented-out code tolerated in tests
+  "TC003",   # no need to guard stdlib imports behind TYPE_CHECKING in tests
+  "EM101", "TRY003",  # inline exception messages fine in tests
+]
+"src/plugins/00_*.py" = ["N999"]    # numeric prefix sets plugin load order
+"src/plugins/zz_base.py" = ["N999"] # zz_ prefix loads the base plugin last
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.setuptools.package-dir]
 easyspeak = "src"
