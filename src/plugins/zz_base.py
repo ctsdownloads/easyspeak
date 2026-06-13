@@ -40,11 +40,17 @@ def handle(cmd, core):
 
 
 def show_help(core):
-    print("\n=== Available Commands ===")
+    """List every plugin's commands on the terminal.
+
+    Printed rather than logged: it is the direct reply to an explicit "help"
+    request (the spoken reply tells the user to read the terminal), so it must
+    appear regardless of the configured log verbosity.
+    """
+    print("\n=== Available Commands ===")  # noqa: T201
     for plugin in core.plugins:
         if hasattr(plugin, "COMMANDS"):
-            print(f"\n{plugin.NAME}:")
+            print(f"\n{plugin.NAME}:")  # noqa: T201
             for cmd in plugin.COMMANDS:
-                print(f"  • {cmd}")
-    print()
+                print(f"  • {cmd}")  # noqa: T201
+    print()  # noqa: T201
     core.speak("Check the terminal for available commands.")

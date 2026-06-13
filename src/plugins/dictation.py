@@ -2,10 +2,12 @@
 Dictation Plugin - Voice to text via AT-SPI
 """
 
+import logging
 import re
 import shutil
 import subprocess
-import sys
+
+logger = logging.getLogger(__name__)
 
 NAME = "dictation"
 DESCRIPTION = "Voice dictation into any text field"
@@ -56,16 +58,13 @@ def ensure_gnome_accessibility():
             check=False,
         )
         if result.returncode == 0:
-            print(
-                "dictation: enabled GNOME toolkit-accessibility — "
-                "log out and back in for dictation to work",
-                file=sys.stderr,
+            logger.info(
+                "enabled GNOME toolkit-accessibility — "
+                "log out and back in for dictation to work"
             )
         else:
-            print(
-                "dictation: WARNING could not enable GNOME "
-                "toolkit-accessibility; dictation will not work",
-                file=sys.stderr,
+            logger.warning(
+                "could not enable GNOME toolkit-accessibility; dictation will not work"
             )
     except OSError:
         pass
@@ -232,7 +231,7 @@ def handle(cmd, core):
     if ("notes" in cmd or "note" in cmd) and "stop" not in cmd:
         core.speak("Dictation")
 
-        print("🎙️ Dictation mode - say 'stop notes' to end")
+        logger.info("🎙️ Dictation mode - say 'stop notes' to end")
 
         while True:
             # Clear buffer and wait for speech
@@ -242,7 +241,7 @@ def handle(cmd, core):
             first = core.wait_for_speech(timeout=30)
 
             if not first:
-                print("   (waiting...)")
+                logger.debug("   (waiting...)")
                 continue
 
             audio = first + core.record_until_silence()
@@ -252,7 +251,7 @@ def handle(cmd, core):
                 continue
 
             text = text.strip().lower()
-            print(f"   Raw: {text}")
+            logger.debug("   Raw: %s", text)
 
             # Check for exit - include mishearings
             if any(
@@ -277,7 +276,7 @@ def handle(cmd, core):
 
             # Format and insert
             formatted = format_text(text)
-            print(f"📝 {formatted}")
+            logger.info("📝 %s", formatted)
 
             if formatted:
                 # Add space before words, not before punctuation

@@ -109,7 +109,7 @@ class TestEasySpeakPlugins:
 
     @patch("importlib.import_module")
     @patch("sys.path")
-    def test_load_plugins_no_directory(self, mock_syspath, mock_import, capsys):
+    def test_load_plugins_no_directory(self, mock_syspath, mock_import, readlog):
         """Test load_plugins when plugins directory doesn't exist."""
         easy = EasySpeak()
 
@@ -117,14 +117,14 @@ class TestEasySpeakPlugins:
         with patch.object(Path, "exists", return_value=False):
             easy.load_plugins()
 
-        captured = capsys.readouterr()
+        captured = readlog()
         assert "No plugins directory found" in captured.out
         assert easy.plugins == []
 
     @patch("importlib.import_module")
     @patch("sys.path")
     def test_load_plugins_valid_plugin(
-        self, mock_syspath, mock_import, mock_plugin_with_setup, capsys
+        self, mock_syspath, mock_import, mock_plugin_with_setup, readlog
     ):
         """Test load_plugins with a valid plugin."""
         easy = EasySpeak()
@@ -147,13 +147,13 @@ class TestEasySpeakPlugins:
         assert easy.plugins[0] == mock_plugin_with_setup
         mock_plugin_with_setup.setup.assert_called_once_with(easy)
 
-        captured = capsys.readouterr()
+        captured = readlog()
         assert "✓ Loaded: TestPlugin" in captured.out
 
     @patch("importlib.import_module")
     @patch("sys.path")
     def test_load_plugins_skip_underscore_files(
-        self, mock_syspath, mock_import, capsys
+        self, mock_syspath, mock_import, readlog
     ):
         """Test that files starting with underscore are skipped."""
         easy = EasySpeak()
@@ -175,7 +175,7 @@ class TestEasySpeakPlugins:
 
     @patch("importlib.import_module")
     @patch("sys.path")
-    def test_load_plugins_invalid_plugin(self, mock_syspath, mock_import, capsys):
+    def test_load_plugins_invalid_plugin(self, mock_syspath, mock_import, readlog):
         """Test load_plugins with an invalid plugin (missing NAME or handle)."""
         easy = EasySpeak()
 
@@ -197,12 +197,12 @@ class TestEasySpeakPlugins:
         # Check that plugin was not loaded
         assert easy.plugins == []
 
-        captured = capsys.readouterr()
+        captured = readlog()
         assert "Invalid plugin: invalid_plugin.py" in captured.out
 
     @patch("importlib.import_module")
     @patch("sys.path")
-    def test_load_plugins_import_error(self, mock_syspath, mock_import, capsys):
+    def test_load_plugins_import_error(self, mock_syspath, mock_import, readlog):
         """Test load_plugins when import fails."""
         easy = EasySpeak()
 
@@ -223,7 +223,7 @@ class TestEasySpeakPlugins:
         # Check that plugin was not loaded
         assert easy.plugins == []
 
-        captured = capsys.readouterr()
+        captured = readlog()
         assert "Failed to load broken_plugin.py" in captured.out
 
     def test_load_plugins_loads_all_shipped_plugins(self):
@@ -342,7 +342,7 @@ class TestEasySpeakRouteCommand:
 
     @patch.object(EasySpeak, "speak")
     def test_route_command_plugin_error(
-        self, mock_speak, mock_plugin_with_error, capsys
+        self, mock_speak, mock_plugin_with_error, readlog
     ):
         """Test route_command when plugin raises an exception."""
         easy = EasySpeak()
@@ -350,7 +350,7 @@ class TestEasySpeakRouteCommand:
 
         result = easy.route_command("test command")
 
-        captured = capsys.readouterr()
+        captured = readlog()
         assert "Plugin error (TestPlugin)" in captured.out
         assert result is True
         mock_speak.assert_called_once()
@@ -744,7 +744,7 @@ class TestEasySpeakRun:
     @patch("easyspeak.core.main.load_whisper_model")
     @patch.object(EasySpeak, "load_plugins")
     def test_run_no_plugins(
-        self, mock_load_plugins, mock_whisper_model, mock_wakeword_model, capsys
+        self, mock_load_plugins, mock_whisper_model, mock_wakeword_model, readlog
     ):
         """Test run method exits early when no plugins are loaded."""
         easy = EasySpeak()
@@ -761,7 +761,7 @@ class TestEasySpeakRun:
         mock_load_plugins.assert_called_once()
 
         # Check output
-        captured = capsys.readouterr()
+        captured = readlog()
         assert "No plugins loaded. Exiting." in captured.out
 
     @patch("subprocess.run")
@@ -807,7 +807,7 @@ class TestEasySpeakRun:
         mock_subprocess_run,
         mock_plugin,
         _stub_speech_warmup,
-        capsys,
+        readlog,
     ):
         """When warmup fails (e.g. piper missing) then run still starts."""
         _stub_speech_warmup.side_effect = OSError()
@@ -822,7 +822,7 @@ class TestEasySpeakRun:
 
         easy.run()  # must not raise
 
-        assert "Speech unavailable" in capsys.readouterr().out
+        assert "Speech unavailable" in readlog().out
 
     @patch("subprocess.run")
     @patch("easyspeak.core.main.pyaudio")
@@ -837,7 +837,7 @@ class TestEasySpeakRun:
         mock_pyaudio,
         mock_subprocess_run,
         mock_plugin,
-        capsys,
+        readlog,
     ):
         """Test run method handles KeyboardInterrupt gracefully."""
         easy = EasySpeak()
@@ -858,7 +858,7 @@ class TestEasySpeakRun:
         mock_audio.terminate.assert_called_once()
 
         # Check output
-        captured = capsys.readouterr()
+        captured = readlog()
         assert "Bye!" in captured.out
 
     @patch("subprocess.run")
@@ -886,7 +886,7 @@ class TestEasySpeakRun:
         mock_time,
         mock_subprocess_run,
         mock_plugin,
-        capsys,
+        readlog,
     ):
         """Test run method when wake word is detected and command is processed."""
         easy = EasySpeak()
@@ -922,7 +922,7 @@ class TestEasySpeakRun:
         easy.run()
 
         # Check that wake word was detected
-        captured = capsys.readouterr()
+        captured = readlog()
         assert "Wake!" in captured.out
         assert "test command" in captured.out
 
@@ -1148,7 +1148,7 @@ class TestEasySpeakRun:
         mock_time,
         mock_subprocess_run,
         mock_plugin,
-        capsys,
+        readlog,
     ):
         """Test run method when wake word is detected but no speech follows."""
         easy = EasySpeak()
@@ -1216,7 +1216,6 @@ class TestEasySpeakRun:
         mock_time,
         mock_subprocess_run,
         mock_plugin,
-        capsys,
     ):
         """Test run method respects wake word cooldown period."""
         easy = EasySpeak()
@@ -1289,7 +1288,7 @@ class TestEasySpeakRun:
         mock_time,
         mock_subprocess_run,
         mock_plugin,
-        capsys,
+        readlog,
     ):
         """Test run method exits when route_command returns False."""
         easy = EasySpeak()
@@ -1344,7 +1343,7 @@ class TestEasySpeakRun:
         mock_time,
         mock_subprocess_run,
         mock_plugin,
-        capsys,
+        readlog,
     ):
         """Test run method manages audio buffer correctly when it exceeds 50 items."""
         easy = EasySpeak()

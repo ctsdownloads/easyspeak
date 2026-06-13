@@ -3,10 +3,12 @@ Browser Plugin - Qutebrowser voice control via IPC
 """
 
 import contextlib
+import logging
 import re
-import sys
 import time
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 NAME = "browser"
 DESCRIPTION = "Qutebrowser voice control"
@@ -200,16 +202,17 @@ def ensure_qutebrowser_config():
 
     verb = "wrote" if not existing else "updated"
     added = "; ".join(missing)
-    print(f"browser: {verb} {cfg} (added: {added})", file=sys.stderr)
+    logger.debug("%s %s (added: %s)", verb, cfg, added)
 
 
 def _note_missing_qb_lines(cfg, lines, reason):
     """Politely tell the user to add missing qutebrowser config lines."""
     body = "\n".join(f"  {line}" for line in lines)
-    print(
-        f"browser: note: {cfg} {reason}. "
-        f"Please make sure your qutebrowser config includes:\n{body}",
-        file=sys.stderr,
+    logger.warning(
+        "%s %s. Please make sure your qutebrowser config includes:\n%s",
+        cfg,
+        reason,
+        body,
     )
 
 
@@ -221,7 +224,7 @@ def setup(c):
 
 def qb(command):
     """Send command to qutebrowser via IPC"""
-    print(f"  🌐 qutebrowser :{command}")
+    logger.debug("  🌐 qutebrowser :%s", command)
     core.host_run(["qutebrowser", f":{command}"])
 
 
@@ -339,7 +342,7 @@ def parse_spoken_url(spoken):
 
 def listen_for_hint(core):
     """Listen for hint number after showing hints"""
-    print("  🔢 Say hint number (e.g. 'zero two'), 'exit links' to cancel")
+    logger.info("  🔢 Say hint number (e.g. 'zero two'), 'exit links' to cancel")
 
     # Small delay to let hints render
     time.sleep(0.3)
@@ -351,9 +354,9 @@ def listen_for_hint(core):
     # Wait for speech
     first = core.wait_for_speech(timeout=10)
     if not first:
-        print("  ⏱ Timeout - hints cancelled")
+        logger.info("  ⏱ Timeout - hints cancelled")
         qb("mode-leave")
-        print("  [listen_for_hint returning - timeout]")
+        logger.debug("  [listen_for_hint returning - timeout]")
         return
 
     audio = first + core.record_until_silence()
@@ -362,7 +365,7 @@ def listen_for_hint(core):
     )
 
     if not cmd:
-        print("  [listen_for_hint - no transcription, waiting again]")
+        logger.debug("  [listen_for_hint - no transcription, waiting again]")
         # Try one more time
         first = core.wait_for_speech(timeout=5)
         if first:
@@ -372,11 +375,11 @@ def listen_for_hint(core):
             )
         if not cmd:
             qb("mode-leave")
-            print("  [listen_for_hint returning - no transcription]")
+            logger.debug("  [listen_for_hint returning - no transcription]")
             return
 
     cmd_lower = cmd.lower().strip(".,!? ")
-    print(f"  ← {cmd_lower}")
+    logger.debug("  ← %s", cmd_lower)
 
     # Cancel
     if cmd_lower in [
@@ -389,15 +392,15 @@ def listen_for_hint(core):
         "exit",
     ]:
         qb("mode-leave")
-        print("  ✗ Hints cancelled")
-        print("  [listen_for_hint returning - cancelled]")
+        logger.info("  ✗ Hints cancelled")
+        logger.debug("  [listen_for_hint returning - cancelled]")
         return
 
     # Parse hint number
     hint = parse_hint_number(cmd_lower)
 
     if hint:
-        print(f"  🔤 Hint: '{cmd_lower}' → '{hint}'")
+        logger.debug("  🔤 Hint: '%s' → '%s'", cmd_lower, hint)
         qb(f"hint-follow {hint}")
         # Wait for page to load, then clear any stuck state
         time.sleep(1.0)
@@ -406,18 +409,18 @@ def listen_for_hint(core):
         # Try phonetic fallback
         hint = parse_hint_numbers(cmd_lower)
         if hint:
-            print(f"  🔤 Phonetic: '{cmd_lower}' → '{hint}'")
+            logger.debug("  🔤 Phonetic: '%s' → '%s'", cmd_lower, hint)
             qb(f"hint-follow {hint}")
             # Wait for page to load, then clear any stuck state
             time.sleep(1.0)
             qb("fake-key <Escape>")
         else:
             # Not a hint - might be a browser command, pass it through
-            print(f"  ↪ Not a hint, trying as command: '{cmd_lower}'")
+            logger.debug("  ↪ Not a hint, trying as command: '%s'", cmd_lower)
             qb("mode-leave")
             handle_browser_command(cmd_lower, core)
 
-    print("  [listen_for_hint returning - complete]")
+    logger.debug("  [listen_for_hint returning - complete]")
 
 
 # Global control phrases owned by the sleep and base plugins. This plugin is
@@ -455,11 +458,11 @@ def handle(cmd, core):
     try:
         result = handle_browser_command(cmd_lower, core)
         if result:
-            print("  → Entering browser mode...")
+            logger.info("  → Entering browser mode...")
             browser_mode(core)
             return True
-    except Exception as e:
-        print(f"  ! Browser error: {e}")
+    except Exception:
+        logger.exception("  ! Browser error")
         return True
 
     return None
@@ -468,8 +471,8 @@ def handle(cmd, core):
 def browser_mode(core):
     """Continuous listening for browser commands"""
     core.speak("Browser")
-    print("=== BROWSER MODE ACTIVE ===")
-    print("Say commands directly. 'exit browser' to leave.")
+    logger.info("=== BROWSER MODE ACTIVE ===")
+    logger.info("Say commands directly. 'exit browser' to leave.")
 
     while True:
         with contextlib.suppress(Exception):
@@ -488,7 +491,7 @@ def browser_mode(core):
             continue
 
         cmd_lower = cmd.lower().strip(".,!? ")
-        print(f"  [browser] {cmd_lower}")
+        logger.debug("  [browser] %s", cmd_lower)
 
         # Exit browser mode - require explicit phrase
         if cmd_lower in [
@@ -498,19 +501,19 @@ def browser_mode(core):
             "quit browser",
             "close browser",
         ]:
-            print("=== BROWSER MODE EXIT ===")
+            logger.info("=== BROWSER MODE EXIT ===")
             return
 
         # Grid triggers - escape to grid mode
         grid_triggers = {"grid", "grit", "grip", "mouse", "pointer", "cursor"}
         if any(w in cmd_lower for w in grid_triggers):
-            print("=== BROWSER MODE EXIT → GRID ===")
+            logger.info("=== BROWSER MODE EXIT → GRID ===")
             core.route_command(cmd_lower)
             return
 
         # Handle browser command
         if not handle_browser_command(cmd_lower, core):
-            print(f"  ? Unknown: {cmd_lower}")
+            logger.debug("  ? Unknown: %s", cmd_lower)
 
 
 def handle_browser_command(cmd_lower, core):
@@ -695,14 +698,14 @@ def handle_browser_command(cmd_lower, core):
         stripped = re.sub(r"[^0-9a-z]", "", cmd_lower)
         if stripped.replace("o", "0").isdigit():
             hint = stripped.replace("o", "0")
-            print(f"  🔤 Direct digits: '{cmd_lower}' → '{hint}'")
+            logger.debug("  🔤 Direct digits: '%s' → '%s'", cmd_lower, hint)
             qb(f"hint-follow {hint}")
             return True
 
         # Try phonetic parsing
         hint = parse_hint_numbers(cmd_lower)
         if hint and hint.isdigit():
-            print(f"  🔤 Phonetic parsed: '{cmd_lower}' → '{hint}'")
+            logger.debug("  🔤 Phonetic parsed: '%s' → '%s'", cmd_lower, hint)
             qb(f"hint-follow {hint}")
             return True
 

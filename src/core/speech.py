@@ -8,6 +8,7 @@ ALSA/JACK probe spew PortAudio emits when the input side (PyAudio) starts up.
 
 import contextlib
 import json
+import logging
 import os
 import shutil
 import subprocess
@@ -16,6 +17,8 @@ import time
 from subprocess import TimeoutExpired
 
 from .config import PIPER_MODEL
+
+logger = logging.getLogger(__name__)
 
 # Seconds to wait after spawning the piper -> player pipeline before trusting
 # it: long enough for an immediate failure (bad model, bad flag) to surface,
@@ -178,7 +181,7 @@ class SpeechPipeline:
         text = text.strip()
         if not text:
             return
-        print(f"💬 {text}")
+        logger.info("💬 %s", text)
         for _ in range(2):
             try:
                 self.ensure()

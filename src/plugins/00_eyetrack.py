@@ -4,10 +4,13 @@ Uses 6D rotation representation for smooth head pose estimation
 """
 
 import contextlib
+import logging
 import math
 import subprocess
 import threading
 import time
+
+logger = logging.getLogger(__name__)
 
 NAME = "headtrack"
 DESCRIPTION = "Head tracking for cursor control"
@@ -137,11 +140,11 @@ def run_tracking():
     import cv2
     from sixdrepnet import SixDRepNet
 
-    print("Loading SixDRepNet model...")
+    logger.info("Loading SixDRepNet model...")
     model = SixDRepNet(gpu_id=-1)  # CPU mode
 
     SCREEN_W, SCREEN_H = get_screen_size()
-    print(f"Screen: {SCREEN_W}x{SCREEN_H}")
+    logger.debug("Screen: %sx%s", SCREEN_W, SCREEN_H)
 
     cap = cv2.VideoCapture(1)  # Integrated webcam
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
@@ -149,7 +152,7 @@ def run_tracking():
     cap.set(cv2.CAP_PROP_FPS, 30)
 
     if not cap.isOpened():
-        print("Cannot open webcam!")
+        logger.error("Cannot open webcam!")
         tracking_active = False
         return
 
@@ -182,8 +185,8 @@ def run_tracking():
     cursor_x = SCREEN_W // 2
     cursor_y = SCREEN_H // 2
 
-    print("Head tracking started. Look at center of screen...")
-    print("Say 'recalibrate' to reset center, 'stop tracking' to end")
+    logger.info("Head tracking started. Look at center of screen...")
+    logger.info("Say 'recalibrate' to reset center, 'stop tracking' to end")
 
     calibration_frames = 0
     calibration_yaw = 0.0
@@ -213,7 +216,7 @@ def run_tracking():
             if calibration_frames >= 10:
                 center_yaw = calibration_yaw / 10
                 center_pitch = calibration_pitch / 10
-                print(f"Calibrated: center=({center_yaw:.1f}, {center_pitch:.1f})")
+                logger.info("Calibrated: center=(%.1f, %.1f)", center_yaw, center_pitch)
             continue
 
         # Apply one-euro filter to raw values
@@ -335,7 +338,7 @@ def run_tracking():
 
     cap.release()
     tracking_active = False
-    print("Tracking stopped.")
+    logger.info("Tracking stopped.")
 
 
 def start_tracking():
@@ -417,7 +420,7 @@ def listen_for_tracking_commands(core):
 
     SCREEN_W, SCREEN_H = get_screen_size()
 
-    print("Tracking mode: freeze, nudge, click, or stop tracking")
+    logger.info("Tracking mode: freeze, nudge, click, or stop tracking")
 
     while tracking_active:
         with contextlib.suppress(Exception):
@@ -441,7 +444,7 @@ def listen_for_tracking_commands(core):
             continue
 
         cmd_lower = cmd.lower().strip()
-        print(f"  ← {cmd_lower}")
+        logger.debug("  ← %s", cmd_lower)
 
         # Exit commands
         if any(
@@ -466,12 +469,12 @@ def listen_for_tracking_commands(core):
         # Freeze/Go
         if any(w in cmd_lower for w in ["freeze", "free", "rees", "frees"]):
             frozen = True
-            print(f"  → Frozen at ({int(cursor_x)}, {int(cursor_y)})")
+            logger.debug("  → Frozen at (%d, %d)", int(cursor_x), int(cursor_y))
             continue
 
         if cmd_lower in ["go", "go go", "unfreeze", "resume", "track"]:
             frozen = False
-            print("  → Resumed")
+            logger.debug("  → Resumed")
             continue
 
         # Nudge (only when frozen)

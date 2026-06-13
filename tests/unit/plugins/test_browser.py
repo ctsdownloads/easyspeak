@@ -182,7 +182,7 @@ def test_parse_spoken_url_with_existing_protocol():
 
 
 @patch.object(browser, "core")
-def test_qb(mock_core, capsys):
+def test_qb(mock_core, readlog):
     """Test sending command to qutebrowser."""
     command = "reload"
 
@@ -190,7 +190,7 @@ def test_qb(mock_core, capsys):
 
     assert mock_core.host_run.call_count == 1
     assert mock_core.host_run.call_args.args[0] == ["qutebrowser", ":reload"]
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "🌐 qutebrowser :reload" in captured.out
 
 
@@ -537,14 +537,14 @@ def test_handle_browser_command_bookmark_save(mock_qb, mock_core):
     ],
 )
 @patch.object(browser, "qb")
-def test_handle_browser_command_direct_hint(mock_qb, command, hint, mock_core, capsys):
+def test_handle_browser_command_direct_hint(mock_qb, command, hint, mock_core, readlog):
     """Test handling direct hint number input."""
     result = browser.handle_browser_command(command, mock_core)
 
     assert result is True
     assert mock_qb.called
     assert mock_qb.call_args.args[0] == f"hint-follow {hint}"
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "Direct digits" in captured.out
 
 
@@ -645,7 +645,7 @@ def test_handle_unmatched_command(mock_handle_cmd, mock_core):
 @patch.object(browser, "handle_browser_command")
 @patch.object(browser, "browser_mode")
 def test_handle_browser_command_exception(
-    mock_browser_mode, mock_handle_cmd, mock_core, capsys
+    mock_browser_mode, mock_handle_cmd, mock_core, readlog
 ):
     """Test handle function handles exceptions gracefully."""
     mock_handle_cmd.side_effect = Exception("Test error")
@@ -653,8 +653,8 @@ def test_handle_browser_command_exception(
     result = browser.handle("back", mock_core)
 
     assert result is True
-    captured = capsys.readouterr()
-    assert "Browser error:" in captured.out
+    captured = readlog()
+    assert "Browser error" in captured.out
 
 
 # Tests for listen_for_hint function.
@@ -662,7 +662,7 @@ def test_handle_browser_command_exception(
 
 @patch("time.sleep")
 @patch.object(browser, "qb")
-def test_listen_for_hint_timeout(mock_qb, mock_sleep, mock_core_factory, capsys):
+def test_listen_for_hint_timeout(mock_qb, mock_sleep, mock_core_factory, readlog):
     """When no speech is detected, hints are cancelled and mode-leave is called."""
     mock_core = mock_core_factory(wait_for_speech_values=[None])
 
@@ -670,14 +670,14 @@ def test_listen_for_hint_timeout(mock_qb, mock_sleep, mock_core_factory, capsys)
 
     assert mock_qb.called
     assert mock_qb.call_args.args[0] == "mode-leave"
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "Timeout - hints cancelled" in captured.out
 
 
 @patch("time.sleep")
 @patch.object(browser, "qb")
 def test_listen_for_hint_no_transcription_timeout(
-    mock_qb, mock_sleep, mock_core_factory, capsys
+    mock_qb, mock_sleep, mock_core_factory, readlog
 ):
     """When transcription fails twice, hints are cancelled."""
     mock_core = mock_core_factory(
@@ -688,14 +688,14 @@ def test_listen_for_hint_no_transcription_timeout(
 
     assert mock_qb.called
     assert mock_qb.call_args.args[0] == "mode-leave"
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "no transcription" in captured.out
 
 
 @patch("time.sleep")
 @patch.object(browser, "qb")
 def test_listen_for_hint_no_transcription_retry_success(
-    mock_qb, mock_sleep, mock_core_factory, capsys
+    mock_qb, mock_sleep, mock_core_factory, readlog
 ):
     """When first transcription fails but second succeeds, hint is followed."""
     mock_core = mock_core_factory(
@@ -725,7 +725,7 @@ def test_listen_for_hint_no_transcription_retry_success(
 @patch("time.sleep")
 @patch.object(browser, "qb")
 def test_listen_for_hint_cancel(
-    mock_qb, mock_sleep, cancel_command, mock_core_factory, capsys
+    mock_qb, mock_sleep, cancel_command, mock_core_factory, readlog
 ):
     """When cancel command is spoken, hints are cancelled."""
     mock_core = mock_core_factory(
@@ -736,14 +736,14 @@ def test_listen_for_hint_cancel(
 
     assert mock_qb.called
     assert mock_qb.call_args.args[0] == "mode-leave"
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "Hints cancelled" in captured.out
 
 
 @patch("time.sleep")
 @patch.object(browser, "qb")
 def test_listen_for_hint_successful_hint(
-    mock_qb, mock_sleep, mock_core_factory, capsys
+    mock_qb, mock_sleep, mock_core_factory, readlog
 ):
     """When a valid hint number is spoken, it is followed."""
     mock_core = mock_core_factory(
@@ -755,14 +755,14 @@ def test_listen_for_hint_successful_hint(
     assert mock_qb.call_count == 2
     assert mock_qb.call_args_list[0].args[0] == "hint-follow 02"
     assert mock_qb.call_args_list[1].args[0] == "fake-key <Escape>"
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "Hint:" in captured.out
 
 
 @patch("time.sleep")
 @patch.object(browser, "qb")
 def test_listen_for_hint_phonetic_fallback(
-    mock_qb, mock_sleep, mock_core_factory, capsys
+    mock_qb, mock_sleep, mock_core_factory, readlog
 ):
     """When parse_hint_number returns empty but parse_hint_numbers succeeds (defensive coding)."""
     # Note: In practice, since NUM_WORDS is a superset of HINT_NUMBERS,
@@ -779,14 +779,14 @@ def test_listen_for_hint_phonetic_fallback(
     assert mock_qb.call_count == 2
     assert mock_qb.call_args_list[0].args[0] == "hint-follow 0"
     assert mock_qb.call_args_list[1].args[0] == "fake-key <Escape>"
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "Phonetic:" in captured.out
 
 
 @patch("time.sleep")
 @patch.object(browser, "qb")
 def test_listen_for_hint_audio_buffer_exception(
-    mock_qb, mock_sleep, mock_core_factory, capsys
+    mock_qb, mock_sleep, mock_core_factory, readlog
 ):
     """When clearing audio buffer raises exception, it is caught and ignored."""
     mock_core = mock_core_factory(
@@ -800,7 +800,7 @@ def test_listen_for_hint_audio_buffer_exception(
     # Should still work despite the exception
     assert mock_qb.called
     assert mock_qb.call_args.args[0] == "mode-leave"
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "Timeout - hints cancelled" in captured.out
 
 
@@ -808,7 +808,7 @@ def test_listen_for_hint_audio_buffer_exception(
 @patch.object(browser, "handle_browser_command")
 @patch.object(browser, "qb")
 def test_listen_for_hint_not_a_hint_pass_through(
-    mock_qb, mock_handle_cmd, mock_sleep, mock_core_factory, capsys
+    mock_qb, mock_handle_cmd, mock_sleep, mock_core_factory, readlog
 ):
     """When command is not a hint, it is passed to handle_browser_command."""
     mock_core = mock_core_factory(
@@ -821,7 +821,7 @@ def test_listen_for_hint_not_a_hint_pass_through(
     assert mock_qb.call_args.args[0] == "mode-leave"
     assert mock_handle_cmd.called
     assert mock_handle_cmd.call_args.args == ("go back", mock_core)
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "Not a hint, trying as command" in captured.out
 
 
@@ -829,7 +829,7 @@ def test_listen_for_hint_not_a_hint_pass_through(
 
 
 @patch.object(browser, "handle_browser_command")
-def test_browser_mode_timeout_continue(mock_handle_cmd, mock_core_factory, capsys):
+def test_browser_mode_timeout_continue(mock_handle_cmd, mock_core_factory, readlog):
     """When wait_for_speech times out, browser_mode continues listening."""
     mock_core = mock_core_factory(
         wait_for_speech_values=[None, b"audio"], transcribe_values=["exit browser"]
@@ -839,14 +839,14 @@ def test_browser_mode_timeout_continue(mock_handle_cmd, mock_core_factory, capsy
 
     assert mock_core.speak.call_count == 1
     assert mock_core.speak.call_args.args[0] == "Browser"
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "BROWSER MODE ACTIVE" in captured.out
     assert "BROWSER MODE EXIT" in captured.out
 
 
 @patch.object(browser, "handle_browser_command")
 def test_browser_mode_no_transcription_continue(
-    mock_handle_cmd, mock_core_factory, capsys
+    mock_handle_cmd, mock_core_factory, readlog
 ):
     """When transcribe returns None, browser_mode continues listening."""
     mock_core = mock_core_factory(
@@ -856,7 +856,7 @@ def test_browser_mode_no_transcription_continue(
 
     browser.browser_mode(mock_core)
 
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "BROWSER MODE EXIT" in captured.out
 
 
@@ -871,7 +871,7 @@ def test_browser_mode_no_transcription_continue(
     ],
 )
 @patch.object(browser, "handle_browser_command")
-def test_browser_mode_exit(mock_handle_cmd, exit_command, mock_core_factory, capsys):
+def test_browser_mode_exit(mock_handle_cmd, exit_command, mock_core_factory, readlog):
     """When exit browser command is spoken, browser_mode exits."""
     mock_core = mock_core_factory(
         wait_for_speech_values=[b"audio"], transcribe_values=[exit_command]
@@ -879,7 +879,7 @@ def test_browser_mode_exit(mock_handle_cmd, exit_command, mock_core_factory, cap
 
     browser.browser_mode(mock_core)
 
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "BROWSER MODE EXIT" in captured.out
     assert exit_command in captured.out
 
@@ -897,7 +897,7 @@ def test_browser_mode_exit(mock_handle_cmd, exit_command, mock_core_factory, cap
 )
 @patch.object(browser, "handle_browser_command")
 def test_browser_mode_grid_trigger(
-    mock_handle_cmd, grid_trigger, mock_core_factory, capsys
+    mock_handle_cmd, grid_trigger, mock_core_factory, readlog
 ):
     """When grid trigger word is detected, browser_mode exits to grid mode."""
     mock_core = mock_core_factory(
@@ -908,12 +908,12 @@ def test_browser_mode_grid_trigger(
 
     assert mock_core.route_command.call_count == 1
     assert mock_core.route_command.call_args.args[0] == grid_trigger
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "BROWSER MODE EXIT → GRID" in captured.out
 
 
 @patch.object(browser, "handle_browser_command", return_value=False)
-def test_browser_mode_unknown_command(mock_handle_cmd, mock_core_factory, capsys):
+def test_browser_mode_unknown_command(mock_handle_cmd, mock_core_factory, readlog):
     """When an unknown command is spoken, browser_mode prints unknown message."""
     mock_core = mock_core_factory(
         wait_for_speech_values=[b"audio1", b"audio2"],
@@ -922,13 +922,13 @@ def test_browser_mode_unknown_command(mock_handle_cmd, mock_core_factory, capsys
 
     browser.browser_mode(mock_core)
 
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "? Unknown: unknown command" in captured.out
 
 
 @patch.object(browser, "handle_browser_command")
 def test_browser_mode_audio_buffer_exception(
-    mock_handle_cmd, mock_core_factory, capsys
+    mock_handle_cmd, mock_core_factory, readlog
 ):
     """When clearing audio buffer raises exception, it is caught and ignored."""
     mock_core = mock_core_factory(
@@ -940,7 +940,7 @@ def test_browser_mode_audio_buffer_exception(
     browser.browser_mode(mock_core)
 
     # Should still work despite the exception
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "BROWSER MODE EXIT" in captured.out
 
 
@@ -967,7 +967,7 @@ def test_handle_browser_command_open_returns_none(mock_qb_open, mock_core):
 
 
 @patch.object(browser, "qb")
-def test_handle_browser_command_phonetic_hint_not_digit(mock_qb, mock_core, capsys):
+def test_handle_browser_command_phonetic_hint_not_digit(mock_qb, mock_core, readlog):
     """When looks_like_hint but phonetic parsing fails, returns None."""
     result = browser.handle_browser_command("xy", mock_core)
 
@@ -976,7 +976,7 @@ def test_handle_browser_command_phonetic_hint_not_digit(mock_qb, mock_core, caps
 
 
 @patch.object(browser, "qb")
-def test_handle_browser_command_phonetic_hint_parsing(mock_qb, mock_core, capsys):
+def test_handle_browser_command_phonetic_hint_parsing(mock_qb, mock_core, readlog):
     """When looks_like_hint and phonetic parsing succeeds, hint is followed."""
     # Use a short command with number words that looks like a hint
     result = browser.handle_browser_command("one", mock_core)
@@ -984,7 +984,7 @@ def test_handle_browser_command_phonetic_hint_parsing(mock_qb, mock_core, capsys
     assert result is True
     assert mock_qb.called
     assert mock_qb.call_args.args[0] == "hint-follow 1"
-    captured = capsys.readouterr()
+    captured = readlog()
     assert "Phonetic parsed:" in captured.out
 
 
@@ -1002,7 +1002,7 @@ def _read_cfg(home):
     return (home / ".config" / "qutebrowser" / "config.py").read_text()
 
 
-def test_ensure_qutebrowser_config_fresh(fake_home, capsys):
+def test_ensure_qutebrowser_config_fresh(fake_home, readlog):
     """When the file is missing, both required lines are written."""
     browser.ensure_qutebrowser_config()
 
@@ -1010,15 +1010,15 @@ def test_ensure_qutebrowser_config_fresh(fake_home, capsys):
     assert "config.load_autoconfig(False)" in content
     assert "c.hints.chars = '0123456789'" in content
 
-    captured = capsys.readouterr()
-    assert "browser: wrote" in captured.err
+    captured = readlog()
+    assert "wrote" in captured.err
     assert "config.load_autoconfig(False)" in captured.err
 
 
-def test_ensure_qutebrowser_config_idempotent(fake_home, capsys):
+def test_ensure_qutebrowser_config_idempotent(fake_home, readlog):
     """A second call on an already-correct file is silent and doesn't rewrite."""
     browser.ensure_qutebrowser_config()
-    capsys.readouterr()  # discard the "wrote" message from the first call
+    readlog()  # discard the "wrote" message from the first call
 
     cfg = fake_home / ".config" / "qutebrowser" / "config.py"
     mtime_before = cfg.stat().st_mtime
@@ -1026,11 +1026,11 @@ def test_ensure_qutebrowser_config_idempotent(fake_home, capsys):
     browser.ensure_qutebrowser_config()
 
     assert cfg.stat().st_mtime == mtime_before
-    captured = capsys.readouterr()
+    captured = readlog()
     assert captured.err == ""
 
 
-def test_ensure_qutebrowser_config_appends_missing(fake_home, capsys):
+def test_ensure_qutebrowser_config_appends_missing(fake_home, readlog):
     """User content + one of our lines: we append only what's missing."""
     cfg = fake_home / ".config" / "qutebrowser" / "config.py"
     cfg.parent.mkdir(parents=True)
@@ -1045,8 +1045,8 @@ def test_ensure_qutebrowser_config_appends_missing(fake_home, capsys):
     assert "c.tabs.background = True" in content
     assert "c.hints.chars = '0123456789'" in content
 
-    captured = capsys.readouterr()
-    assert "browser: updated" in captured.err
+    captured = readlog()
+    assert "updated" in captured.err
     assert "c.hints.chars = '0123456789'" in captured.err
     # The other required line was already present — shouldn't be listed as added.
     assert "added: config.load_autoconfig" not in captured.err
@@ -1066,20 +1066,20 @@ def test_ensure_qutebrowser_config_no_trailing_newline(fake_home):
     assert "c.hints.chars = '0123456789'" in content
 
 
-def test_ensure_qutebrowser_config_mkdir_fails(fake_home, capsys):
+def test_ensure_qutebrowser_config_mkdir_fails(fake_home, readlog):
     """mkdir OSError routes to the polite note with all required lines."""
     with patch.object(browser.Path, "mkdir", side_effect=PermissionError("denied")):
         browser.ensure_qutebrowser_config()
 
-    captured = capsys.readouterr()
-    assert "browser: note:" in captured.err
+    captured = readlog()
+    assert "Please make sure your qutebrowser config includes" in captured.err
     assert "could not create" in captured.err
     # Lists both required lines since we don't know what's there.
     assert "config.load_autoconfig(False)" in captured.err
     assert "c.hints.chars = '0123456789'" in captured.err
 
 
-def test_ensure_qutebrowser_config_read_fails(fake_home, capsys):
+def test_ensure_qutebrowser_config_read_fails(fake_home, readlog):
     """read_text OSError routes to the polite note with all required lines."""
     cfg = fake_home / ".config" / "qutebrowser" / "config.py"
     cfg.parent.mkdir(parents=True)
@@ -1088,13 +1088,13 @@ def test_ensure_qutebrowser_config_read_fails(fake_home, capsys):
     with patch.object(browser.Path, "read_text", side_effect=PermissionError("nope")):
         browser.ensure_qutebrowser_config()
 
-    captured = capsys.readouterr()
-    assert "browser: note:" in captured.err
+    captured = readlog()
+    assert "Please make sure your qutebrowser config includes" in captured.err
     assert "could not read" in captured.err
     assert "config.load_autoconfig(False)" in captured.err
 
 
-def test_ensure_qutebrowser_config_write_fails(fake_home, capsys):
+def test_ensure_qutebrowser_config_write_fails(fake_home, readlog):
     """Read-only file: warning lists only the lines that still need adding."""
     cfg = fake_home / ".config" / "qutebrowser" / "config.py"
     cfg.parent.mkdir(parents=True)
@@ -1103,8 +1103,8 @@ def test_ensure_qutebrowser_config_write_fails(fake_home, capsys):
     with patch.object(browser.Path, "write_text", side_effect=PermissionError("ro")):
         browser.ensure_qutebrowser_config()
 
-    captured = capsys.readouterr()
-    assert "browser: note:" in captured.err
+    captured = readlog()
+    assert "Please make sure your qutebrowser config includes" in captured.err
     assert "is read-only" in captured.err
     # Only the still-missing line should be listed.
     assert "c.hints.chars = '0123456789'" in captured.err
