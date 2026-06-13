@@ -84,6 +84,7 @@ easyspeak = "easyspeak.core.main:run"
 
 [tool.coverage.report]
 exclude_also = ["if __name__ == .__main__.:"]
+fail_under = 99
 show_missing = true
 
 [tool.coverage.run]

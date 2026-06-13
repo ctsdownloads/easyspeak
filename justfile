@@ -66,7 +66,9 @@ test: test-js pytest coverage integration acceptance
 # Unit-test the GNOME Shell extension's pure JS helpers (needs node >= 22.5)
 [group('tests')]
 test-js *args:
-    node --test --experimental-test-coverage --test-coverage-include='src/**' tests/js/*.test.js {{ args }}
+    node --experimental-test-coverage --test-coverage-include='src/**' \
+        --test-coverage-lines=99 --test-coverage-branches=99 --test-coverage-functions=99 \
+        --test tests/js/*.test.js {{ args }}
 
 # Run test suite against all supported Python versions, show coverage
 [group('tests')]
