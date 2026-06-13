@@ -162,7 +162,7 @@ class EasySpeak:
                     self.misunderstand_count = 0
                     self.help_shown = False
                     return True
-                elif result is False:
+                if result is False:
                     return False
             except Exception as e:
                 print(f"Plugin error ({plugin.NAME}): {e}")
@@ -285,7 +285,7 @@ class EasySpeak:
             wf.writeframes(audio_data)
             wf.close()
 
-            use_prompt = prompt if prompt else COMMAND_PROMPT
+            use_prompt = prompt or COMMAND_PROMPT
             segments, _ = self.whisper.transcribe(
                 f.name, initial_prompt=use_prompt, beam_size=1, vad_filter=True
             )

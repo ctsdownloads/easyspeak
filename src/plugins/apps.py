@@ -167,7 +167,7 @@ def launch_app(name, core):
     if app_type == "flatpak":
         core.host_run(["flatpak", "run", app_id], background=True)
         return True
-    elif app_type == "local":
+    if app_type == "local":
         core.host_run([app_id], background=True)
         return True
     return False
@@ -178,7 +178,7 @@ def close_app(name, core):
     if app_type == "flatpak":
         core.host_run(["flatpak", "kill", app_id])
         return True
-    elif app_type == "local":
+    if app_type == "local":
         core.host_run(["pkill", "-f", app_id])
         return True
     return False

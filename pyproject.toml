@@ -133,8 +133,6 @@ ignore = [
   # --- TODO: remove each entry as the code is fixed in a follow-up commit ---
   # docstrings (enforced on src/ — being written):
   "D101", "D102", "D103", "D107", "D200", "D205", "D209", "D212", "D415",
-  # autofixable style:
-  "RET505", "PLR1730", "FURB110", "W293", "SIM103",
   # manual cleanups:
   "E501", "N806", "E722", "SIM102", "SIM105", "SIM115", "SIM117",
   "S110", "BLE001", "TRY300", "TRY301", "TRY003",

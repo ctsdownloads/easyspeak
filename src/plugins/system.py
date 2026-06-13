@@ -125,10 +125,10 @@ def handle(cmd, core):
         if "up" in cmd or louder:
             volume_up(core)
             return True
-        elif "down" in cmd or quieter:
+        if "down" in cmd or quieter:
             volume_down(core)
             return True
-        elif "mute" in cmd or "unmute" in cmd:
+        if "mute" in cmd or "unmute" in cmd:
             volume_mute(core)
             return True
 
@@ -142,7 +142,7 @@ def handle(cmd, core):
             core.speak("Brighter.")
             brightness_up(core)
             return True
-        elif "down" in cmd or "dimmer" in cmd or "darker" in cmd:
+        if "down" in cmd or "dimmer" in cmd or "darker" in cmd:
             core.speak("Dimmer.")
             brightness_down(core)
             return True
@@ -153,7 +153,7 @@ def handle(cmd, core):
             core.speak("Do not disturb on.")
             dnd_on(core)
             return True
-        elif "off" in cmd or "disable" in cmd:
+        if "off" in cmd or "disable" in cmd:
             core.speak("Do not disturb off.")
             dnd_off(core)
             return True
