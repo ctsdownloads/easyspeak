@@ -18,6 +18,8 @@ WAKE_COOLDOWN = 3.0  # Seconds to ignore wake word after trigger
 SILENCE_THRESHOLD = 300
 SILENCE_DURATION = 0.3
 
+MISUNDERSTAND_GRACE = 4.0  # Seconds to ignore repeat misses after feedback
+
 # --- Models ---
 PIPER_MODEL = os.environ.get(
     "EASYSPEAK_PIPER_MODEL",

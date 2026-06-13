@@ -21,6 +21,7 @@ from openwakeword.model import Model as WakeWordModel
 
 from .config import (
     COMMAND_PROMPT,
+    MISUNDERSTAND_GRACE,
     SILENCE_DURATION,
     SILENCE_THRESHOLD,
     WAKE_COOLDOWN,
@@ -48,6 +49,11 @@ class EasySpeak:
         self.audio = None
         self.stream = None
         self.last_wake_time = 0
+        self.misunderstand_count = 0
+        self.help_shown = False
+        self.keep_listening = False
+        self.unrecognized = False
+        self.last_misunderstand_time = 0
         # Persistent text-to-speech pipeline (piper -> audio player) so the
         # voice model is loaded only once.
         self.speech = SpeechPipeline()
@@ -141,6 +147,7 @@ class EasySpeak:
         ]:
             cmd = cmd.replace(wake, "").strip()
         cmd = cmd.strip(".,!? ")
+        self.unrecognized = False
 
         if not cmd:
             return True
@@ -149,14 +156,53 @@ class EasySpeak:
             try:
                 result = plugin.handle(cmd, self)
                 if result is True:
+                    self.misunderstand_count = 0
+                    self.help_shown = False
                     return True
                 elif result is False:
                     return False
             except Exception as e:
                 print(f"Plugin error ({plugin.NAME}): {e}")
 
-        self.speak("I didn't understand. Say help for commands.")
+        self._report_not_understood()
         return True
+
+    def _report_not_understood(self):
+        """Give gentle spoken feedback that no plugin matched the command.
+
+        Misses within MISUNDERSTAND_GRACE of the last one are dropped: that
+        burst is almost always the open mic transcribing this very feedback, and
+        reacting would cascade into the help screen with no one having spoken; a
+        real retry lands after the feedback plays out, past the window. The
+        first real miss apologises, the next escalates to the command list
+        (shown once per streak), and further misses keep the mic open without
+        repeating it. The feedback never says "help" — the open mic would
+        transcribe it and fire the help command in a loop.
+        """
+        now = time.time()
+        if now - self.last_misunderstand_time < MISUNDERSTAND_GRACE:
+            return
+        self.last_misunderstand_time = now
+
+        self.unrecognized = True
+        self.misunderstand_count += 1
+        if self.misunderstand_count == 1:
+            self.speak("Sorry, I didn't understand.")
+            return
+
+        self.speak("I didn't understand.")
+        if not self.help_shown:
+            self._show_help()
+            self.help_shown = True
+        self.keep_listening = True
+
+    def _show_help(self):
+        """Display the command list via the plugin that owns it (the base
+        plugin's ``show_help``), so the help text isn't duplicated here."""
+        for plugin in self.plugins:
+            if hasattr(plugin, "show_help"):
+                plugin.show_help(self)
+                return
 
     # --- Audio ---
 
@@ -246,6 +292,59 @@ class EasySpeak:
 
     # --- Main loop ---
 
+    def _reset_detector(self):
+        """Clear the wake detector's feature buffer and drop buffered mic audio,
+        so stale or half-primed state can't fire a spurious wake."""
+        self.wakeword.reset()
+        self.flush_stream()
+
+    def _play_wake_chime(self):
+        """Play the wake acknowledgement sound, then flush the audio it bled
+        into the mic so it isn't mistaken for the user speaking."""
+        subprocess.run(
+            ["paplay", "/usr/share/sounds/freedesktop/stereo/message.oga"],
+            capture_output=True,
+        )
+        self.flush_stream()
+
+    def _drain_feedback(self):
+        """Wait for the spoken "didn't understand" feedback to finish playing,
+        then flush the mic. speak() is non-blocking, so flushing alone leaves the
+        still-playing tail for the open mic to transcribe into the next
+        escalation (e.g. opening help) with no one having spoken."""
+        self.speech.drain()
+        self.flush_stream()
+
+    def _capture_command_session(self):
+        """Capture and route commands after a wake until none is pending.
+
+        Usually one command, but a repeated misunderstanding shows help and
+        re-arms keep_listening so the user can retry without the wake word.
+        After any "didn't understand" the feedback is drained before listening
+        again. Returns True if a command asked the daemon to exit.
+        """
+        self.keep_listening = True
+        while self.keep_listening:
+            self.keep_listening = False
+            self.unrecognized = False
+
+            first = self.wait_for_speech(timeout=5)
+            if first:
+                audio = first + self.record_until_silence()
+                cmd = self.transcribe(audio)
+                if cmd:
+                    print(f"👂 {cmd}")
+                    if not self.route_command(cmd.lower().strip(".,!? ")):
+                        return True
+                    self.wakeword.reset()
+                    self.flush_stream()
+            else:
+                self.speak("I didn't hear anything.")
+
+            if self.unrecognized:
+                self._drain_feedback()
+        return False
+
     def run(self):
         print("Loading OpenWakeWord...")
         self.wakeword = WakeWordModel()
@@ -305,6 +404,7 @@ class EasySpeak:
                 if action is TrayAction.QUIT:
                     break
                 if action is TrayAction.RESUME:
+                    self._reset_detector()
                     audio_buffer = []
                     print("Listening for wake word...")
                     continue
@@ -320,7 +420,6 @@ class EasySpeak:
                 score = prediction.get(WAKE_WORD, 0)
 
                 if score > WAKE_THRESHOLD:
-                    # Cooldown check - ignore if triggered recently
                     now = time.time()
                     if now - self.last_wake_time < WAKE_COOLDOWN:
                         continue
@@ -328,35 +427,12 @@ class EasySpeak:
 
                     print(f"🎤 Wake! (confidence: {score:.2f})")
 
-                    # Reset everything
-                    self.wakeword.reset()
+                    self._reset_detector()
                     audio_buffer = []
-                    self.flush_stream()
+                    self._play_wake_chime()
 
-                    # Audio feedback first
-                    subprocess.run(
-                        ["paplay", "/usr/share/sounds/freedesktop/stereo/message.oga"],
-                        capture_output=True,
-                    )
-
-                    # Flush any audio captured during beep
-                    self.flush_stream()
-
-                    # Wait for user to start speaking (up to 5 seconds)
-                    first = self.wait_for_speech(timeout=5)
-
-                    if first:
-                        # User started speaking, record until they stop
-                        audio = first + self.record_until_silence()
-                        cmd = self.transcribe(audio)
-                        if cmd:
-                            print(f"👂 {cmd}")
-                            if not self.route_command(cmd.lower().strip(".,!? ")):
-                                break
-                            self.wakeword.reset()
-                            self.flush_stream()
-                    else:
-                        self.speak("I didn't hear anything.")
+                    if self._capture_command_session():
+                        break
 
                     audio_buffer = []
                     print("Listening for wake word...")
