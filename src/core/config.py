@@ -19,6 +19,7 @@ SILENCE_THRESHOLD = 300
 SILENCE_DURATION = 0.3
 
 MISUNDERSTAND_GRACE = 4.0  # Seconds to ignore repeat misses after feedback
+FOLLOWUP_IDLE_ROUNDS = 2  # Quiet listens tolerated before a command session ends
 
 # --- Models ---
 PIPER_MODEL = os.environ.get(

@@ -155,7 +155,10 @@ easyspeak                              # the project execution script
 
 Activate the venv each time you open a new terminal.
 
-Say "Hey Jarvis" followed by a command.
+Say "Hey Jarvis" followed by a command. After a command that gives no spoken
+reply (such as volume changes), EasySpeak keeps listening for a few seconds so
+you can chain commands — say "louder", "louder", "louder" without repeating the
+wake word each time.
 
 ## Commands
 

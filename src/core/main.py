@@ -21,6 +21,7 @@ from openwakeword.model import Model as WakeWordModel
 
 from .config import (
     COMMAND_PROMPT,
+    FOLLOWUP_IDLE_ROUNDS,
     MISUNDERSTAND_GRACE,
     SILENCE_DURATION,
     SILENCE_THRESHOLD,
@@ -53,6 +54,7 @@ class EasySpeak:
         self.help_shown = False
         self.keep_listening = False
         self.unrecognized = False
+        self.spoke = False
         self.last_misunderstand_time = 0
         # Persistent text-to-speech pipeline (piper -> audio player) so the
         # voice model is loaded only once.
@@ -72,6 +74,7 @@ class EasySpeak:
 
     def speak(self, text):
         """Speak a phrase. Stable plugin-facing API; delegates to the pipeline."""
+        self.spoke = True
         self.speech.speak(text)
 
     def tap_key(self, keycode):
@@ -316,31 +319,45 @@ class EasySpeak:
         self.flush_stream()
 
     def _capture_command_session(self):
-        """Capture and route commands after a wake until none is pending.
+        """Capture and route commands after a wake, staying open for follow-ups.
 
-        Usually one command, but a repeated misunderstanding shows help and
-        re-arms keep_listening so the user can retry without the wake word.
-        After any "didn't understand" the feedback is drained before listening
-        again. Returns True if a command asked the daemon to exit.
+        After a recognized command that gave no spoken reply (e.g. volume), the
+        mic stays open so the user can chain commands ("louder", "louder") at
+        their own pace without repeating the wake word; the session ends once a
+        couple of quiet listens (FOLLOWUP_IDLE_ROUNDS) pass, the wake-time
+        silence times out, or a command speaks (whose reply the open mic would
+        otherwise hear). A repeated misunderstanding still re-arms keep_listening
+        for the help retry, and its feedback is drained before listening again.
+        Returns True if a command asked the daemon to exit.
         """
         self.keep_listening = True
+        awake = True
+        quiet = 0
         while self.keep_listening:
             self.keep_listening = False
             self.unrecognized = False
+            self.spoke = False
 
-            first = self.wait_for_speech(timeout=5)
-            if first:
-                audio = first + self.record_until_silence()
-                cmd = self.transcribe(audio)
+            heard = self.wait_for_speech(timeout=5)
+            if heard is None:
+                if awake:
+                    self.speak("I didn't hear anything.")
+            else:
+                cmd = self.transcribe(heard + self.record_until_silence())
                 if cmd:
                     print(f"👂 {cmd}")
                     if not self.route_command(cmd.lower().strip(".,!? ")):
                         return True
                     self.wakeword.reset()
                     self.flush_stream()
-            else:
-                self.speak("I didn't hear anything.")
+                    if not self.unrecognized and not self.spoke:
+                        quiet = 0
+                        self.keep_listening = True
+                elif not awake:
+                    quiet += 1
+                    self.keep_listening = quiet < FOLLOWUP_IDLE_ROUNDS
 
+            awake = False
             if self.unrecognized:
                 self._drain_feedback()
         return False
