@@ -105,22 +105,22 @@ def test_dnd_functions(func, expected_command, mock_core):
 
 
 @pytest.mark.parametrize(
-    ["command", "expected_speech", "expected_func"],
+    ["command", "expected_func"],
     [
-        ("volume up", "Volume up.", "volume_up"),
-        ("volume louder", "Volume up.", "volume_up"),
-        ("louder", "Volume up.", "volume_up"),
-        ("make it louder", "Volume up.", "volume_up"),
-        ("sound up", "Volume up.", "volume_up"),
-        ("volume down", "Volume down.", "volume_down"),
-        ("volume quieter", "Volume down.", "volume_down"),
-        ("volume softer", "Volume down.", "volume_down"),
-        ("more silent", "Volume down.", "volume_down"),
-        ("make it quieter", "Volume down.", "volume_down"),
-        ("sound down", "Volume down.", "volume_down"),
-        ("volume mute", "Toggled mute.", "volume_mute"),
-        ("volume unmute", "Toggled mute.", "volume_mute"),
-        ("mute", "Toggled mute.", "volume_mute"),
+        ("volume up", "volume_up"),
+        ("volume louder", "volume_up"),
+        ("louder", "volume_up"),
+        ("make it louder", "volume_up"),
+        ("sound up", "volume_up"),
+        ("volume down", "volume_down"),
+        ("volume quieter", "volume_down"),
+        ("volume softer", "volume_down"),
+        ("more silent", "volume_down"),
+        ("make it quieter", "volume_down"),
+        ("sound down", "volume_down"),
+        ("volume mute", "volume_mute"),
+        ("volume unmute", "volume_mute"),
+        ("mute", "volume_mute"),
     ],
 )
 @patch.object(system, "volume_up")
@@ -131,11 +131,11 @@ def test_handle_volume_commands(
     mock_volume_down,
     mock_volume_up,
     command,
-    expected_speech,
     expected_func,
     mock_core,
 ):
-    """When volume commands are handled, the correct function is called and speech is produced."""
+    """Volume commands call the right function and stay silent — GNOME's native
+    OSD and chime acknowledge the change."""
     func_map = {
         "volume_up": mock_volume_up,
         "volume_down": mock_volume_down,
@@ -145,7 +145,7 @@ def test_handle_volume_commands(
     result = system.handle(command, mock_core)
 
     assert result is True
-    assert mock_core.speak.call_args.args[0] == expected_speech
+    assert not mock_core.speak.called
     assert func_map[expected_func].call_args.args[0] == mock_core
 
 
