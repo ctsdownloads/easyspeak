@@ -376,8 +376,9 @@ def listen_for_hint(core):
 # routed before them (filename order), and qb() would spawn a fresh qutebrowser
 # window for each — e.g. "stop" -> :stop, "go to sleep" -> :quickmark-load
 # sleep. Decline them so they fall through to the plugin that actually owns
-# them (deactivate / quit). Exact-matched quit words mirror zz_base; the sleep
-# phrases are substring-matched to match sleep.py.
+# them (deactivate / quit). Exact-matched quit words mirror zz_base, plus a
+# bare "stop" — no longer a quit word, but it still must not reach qb, which
+# would open qutebrowser. The sleep phrases are substring-matched per sleep.py.
 RESERVED_GLOBAL_EXACT = ("stop", "exit", "quit", "goodbye", "bye")
 RESERVED_GLOBAL_SUBSTR = ("go to sleep", "goto sleep", "stop listening")
 

@@ -613,7 +613,7 @@ def test_handle_browser_command_enters_mode(
 @pytest.mark.parametrize(
     "command",
     [
-        "stop",  # quit word — owned by the base plugin
+        "stop",  # declined defensively so qb can't open on a bare "stop"
         "quit",
         "go to sleep",  # sleep phrases — owned by the sleep plugin
         "goto sleep",

@@ -7,7 +7,7 @@ DESCRIPTION = "Help and exit commands"
 
 COMMANDS = [
     "help - list all commands",
-    "stop/exit/quit - exit EasySpeak",
+    "quit/exit/goodbye - exit EasySpeak",
 ]
 
 core = None
@@ -21,13 +21,13 @@ def setup(c):
 def handle(cmd, core):
     cmd_lower = cmd.lower().strip()
 
-    # Exit - but NOT if it's "stop tracking" etc
+    # Exit - but NOT if it's "quit tracking" etc
     if "tracking" not in cmd_lower:
-        if cmd_lower in ["stop", "exit", "quit", "goodbye", "bye"]:
+        if cmd_lower in ["exit", "quit", "goodbye", "bye"]:
             core.speak("Goodbye.")
             return False  # Signal to exit
-        # Also match "jarvis stop" etc
-        if any(cmd_lower.endswith(x) for x in [" stop", " exit", " quit"]):
+        # Also match "jarvis quit" etc
+        if any(cmd_lower.endswith(x) for x in [" exit", " quit"]):
             core.speak("Goodbye.")
             return False
 

@@ -153,7 +153,7 @@ def test_handle_pause_commands(
 @pytest.mark.parametrize("command", ["stop", "stop tracking", "stop it"])
 @patch.object(media, "media_control", return_value=True)
 def test_handle_ignores_bare_stop(mock_media_control, command, mock_core):
-    """A bare "stop" is not a media command — it's left for the exit command."""
+    """A bare "stop" is not a media command."""
     assert media.handle(command, mock_core) is None
     assert not mock_media_control.called
 
