@@ -22,7 +22,7 @@ class CapturedLog:
 def _restore_easyspeak_loggers():
     """Snapshot and restore the package loggers around each test.
 
-    ``main.configure_logging`` mutates the ``easyspeak`` and ``plugins`` loggers
+    ``log.configure`` mutates the ``easyspeak`` and ``plugins`` loggers
     (handlers, level, ``propagate``); restoring them keeps a test that calls it
     from leaking that state into later tests that rely on ``caplog``.
     """

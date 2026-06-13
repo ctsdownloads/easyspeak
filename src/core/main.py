@@ -5,7 +5,6 @@ Loads plugins from plugins/ folder automatically.
 Uses OpenWakeWord for fast wake detection.
 """
 
-import argparse
 import contextlib
 import importlib
 import logging
@@ -468,51 +467,3 @@ class EasySpeak:
                 self.stream.close()
             if self.audio is not None:
                 self.audio.terminate()
-
-
-def _resolve_log_level(args):
-    """Pick the log level: CLI flags win, then EASYSPEAK_LOG_LEVEL, else INFO."""
-    if args.verbose:
-        return logging.DEBUG
-    if args.quiet:
-        return logging.WARNING
-    name = os.environ.get("EASYSPEAK_LOG_LEVEL", "INFO").upper()
-    level = logging.getLevelName(name)
-    return level if isinstance(level, int) else logging.INFO
-
-
-def configure_logging(level):
-    """Route EasySpeak's own loggers to stderr, message-only.
-
-    Output stays as terse as the previous print()-based UI (no level or
-    timestamp prefixes); the level only gates which messages appear. Only the
-    "easyspeak" and "plugins" hierarchies are configured, so importing the
-    package as a library leaves the root logger untouched.
-    """
-    handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter("%(message)s"))
-    for name in ("easyspeak", "plugins"):
-        log = logging.getLogger(name)
-        log.handlers.clear()
-        log.addHandler(handler)
-        log.setLevel(level)
-        log.propagate = False
-
-
-def run(argv=None):
-    """Start the application."""
-    parser = argparse.ArgumentParser(
-        prog="easyspeak", description="Voice control for Linux desktops."
-    )
-    verbosity = parser.add_mutually_exclusive_group()
-    verbosity.add_argument(
-        "-v", "--verbose", action="store_true", help="show debug output"
-    )
-    verbosity.add_argument(
-        "-q", "--quiet", action="store_true", help="show only warnings and errors"
-    )
-    args = parser.parse_args(argv)
-
-    configure_logging(_resolve_log_level(args))
-    app = EasySpeak()
-    app.run()

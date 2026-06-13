@@ -6,7 +6,7 @@ Application entry point when executed as a module, e.g.
     python -m easyspeak.core
 """
 
-from .main import run
+from .cli import run
 
 if __name__ == "__main__":
     run()
