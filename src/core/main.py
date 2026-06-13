@@ -348,8 +348,7 @@ class EasySpeak:
                     print(f"👂 {cmd}")
                     if not self.route_command(cmd.lower().strip(".,!? ")):
                         return True
-                    self.wakeword.reset()
-                    self.flush_stream()
+                    self._reset_detector()
                     if not self.unrecognized and not self.spoke:
                         quiet = 0
                         self.keep_listening = True

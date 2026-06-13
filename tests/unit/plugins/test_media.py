@@ -134,6 +134,8 @@ def test_handle_play_commands(
         ("stop the music", "pause", "Paused."),
         ("stop music", "pause", "Paused."),
         ("stop the song", "pause", "Paused."),
+        ("stop playing music", "pause", "Paused."),
+        ("stop playing", "pause", "Paused."),
     ],
 )
 @patch.object(media, "media_control", return_value=True)
