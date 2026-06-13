@@ -70,23 +70,23 @@ def media_control(action, core):
 
 def handle(cmd, core):
     if "play" in cmd and "pause" not in cmd:
-        media_control("play", core)
         core.speak("Playing.")
+        media_control("play", core)
         return True
 
     if "pause" in cmd:
-        media_control("pause", core)
         core.speak("Paused.")
+        media_control("pause", core)
         return True
 
     if "next" in cmd or "skip" in cmd:
-        media_control("next", core)
         core.speak("Next.")
+        media_control("next", core)
         return True
 
     if "previous" in cmd or "back" in cmd:
-        media_control("previous", core)
         core.speak("Previous.")
+        media_control("previous", core)
         return True
 
     return None  # Not handled

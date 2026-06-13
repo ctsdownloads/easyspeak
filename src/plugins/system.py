@@ -102,45 +102,43 @@ def handle(cmd, core):
     words = cmd.split()
     louder = "louder" in words
     quieter = any(word in words for word in ("quieter", "softer", "silent"))
+    # No spoken feedback for volume/mute: GNOME's native OSD and chime already
+    # acknowledge the change (and a spoken reply would be inaudible once muted).
     if "volume" in cmd or "sound" in cmd or louder or quieter:
         if "up" in cmd or louder:
             volume_up(core)
-            core.speak("Volume up.")
             return True
         elif "down" in cmd or quieter:
             volume_down(core)
-            core.speak("Volume down.")
             return True
         elif "mute" in cmd or "unmute" in cmd:
             volume_mute(core)
-            core.speak("Toggled mute.")
             return True
 
     if "mute" in cmd:
         volume_mute(core)
-        core.speak("Toggled mute.")
         return True
 
     # Brightness
     if "brightness" in cmd or "screen" in cmd:
         if "up" in cmd or "brighter" in cmd:
-            brightness_up(core)
             core.speak("Brighter.")
+            brightness_up(core)
             return True
         elif "down" in cmd or "dimmer" in cmd or "darker" in cmd:
-            brightness_down(core)
             core.speak("Dimmer.")
+            brightness_down(core)
             return True
 
     # Do Not Disturb
     if "do not disturb" in cmd or "dnd" in cmd or "notifications" in cmd:
         if "on" in cmd or "enable" in cmd:
-            dnd_on(core)
             core.speak("Do not disturb on.")
+            dnd_on(core)
             return True
         elif "off" in cmd or "disable" in cmd:
-            dnd_off(core)
             core.speak("Do not disturb off.")
+            dnd_off(core)
             return True
 
     return None  # Not handled

@@ -602,8 +602,8 @@ def handle_browser_command(cmd_lower, core):
     ) and " as " in cmd_lower:
         name = cmd_lower.split(" as ")[-1].strip()
         if name:
-            qb(f"quickmark-save {name}")
             core.speak(f"Saved as {name}.")
+            qb(f"quickmark-save {name}")
             return True
 
     # Load quickmark (user-saved)
@@ -613,15 +613,15 @@ def handle_browser_command(cmd_lower, core):
         # Check predefined bookmarks first
         for site, url in BOOKMARKS.items():
             if site == target:
-                qb_open(url)
                 core.speak(f"Opening {site}.")
+                qb_open(url)
                 return True
 
         # Try as spoken URL (contains "dot")
         if "dot" in target or "." in target:
             url = parse_spoken_url(target)
-            qb_open(url)
             core.speak(f"Opening {url}.")
+            qb_open(url)
             return True
 
         # Don't catch generic "open X" - let other plugins handle it
@@ -637,8 +637,8 @@ def handle_browser_command(cmd_lower, core):
         query = cmd_lower.replace("search for ", "").replace("search ", "").strip()
         if query:
             url = f"https://duckduckgo.com/?q={query.replace(' ', '+')}"
-            qb_open(url)
             core.speak(f"Searching for {query}.")
+            qb_open(url)
             return True
 
     # --- Phonetic hint selection (LAST - only if nothing else matched) ---
