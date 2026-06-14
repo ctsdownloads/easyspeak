@@ -55,7 +55,7 @@ extensions directory (unless GNOME already sees it via a system-wide install).
 Files copied:
 
 ```
-~/.local/share/gnome-shell/extensions/easyspeak-grid@local/
+~/.local/share/gnome-shell/extensions/easyspeak@local/
 ├── extension.js
 ├── extension-helpers.js
 └── metadata.json

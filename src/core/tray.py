@@ -1,7 +1,7 @@
 """GNOME panel-indicator bridge and asleep-state lifecycle for the daemon.
 
 The daemon is voice-first and otherwise headless; this module gives it a
-top-panel microphone icon (served by the bundled ``easyspeak-grid@local`` GNOME
+top-panel microphone icon (served by the bundled ``easyspeak@local`` GNOME
 Shell extension) and owns everything about it so the audio loop in ``core.main``
 stays about audio. It runs without a D-Bus server of its own via two
 one-directional channels:
@@ -209,9 +209,9 @@ class Tray:
             "--dest",
             "org.gnome.Shell",
             "--object-path",
-            "/org/easyspeak/Grid",
+            "/org/easyspeak/Desktop",
             "--method",
-            "org.easyspeak.Grid.SetState",
+            "org.easyspeak.Desktop.SetState",
             str(state),
         ]
         try:

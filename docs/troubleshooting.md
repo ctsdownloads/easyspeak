@@ -4,7 +4,7 @@
 
 You don't install the extension yourself — EasySpeak does it automatically on
 startup, copying it to
-`~/.local/share/gnome-shell/extensions/easyspeak-grid@local/` and keeping it up
+`~/.local/share/gnome-shell/extensions/easyspeak@local/` and keeping it up
 to date (look for an `easyspeak: installed ...` or `easyspeak: updated ...`
 message). On Wayland, GNOME Shell only scans for new extensions at login, so you
 typically have to **log out and back in** before it becomes loadable.
@@ -12,19 +12,19 @@ typically have to **log out and back in** before it becomes loadable.
 After re-login, enable it from the command line:
 
 ```bash
-gnome-extensions enable easyspeak-grid@local
+gnome-extensions enable easyspeak@local
 ```
 
-…or open the **Extensions** GNOME app and toggle *EasySpeak Grid* on.
+…or open the **Extensions** GNOME app and toggle *EasySpeak* on.
 
 To remove it later:
 
 ```bash
-gnome-extensions disable easyspeak-grid@local
-rm -rf ~/.local/share/gnome-shell/extensions/easyspeak-grid@local
+gnome-extensions disable easyspeak@local
+rm -rf ~/.local/share/gnome-shell/extensions/easyspeak@local
 ```
 
-…or click the trash icon next to *EasySpeak Grid* in the Extensions app.
+…or click the trash icon next to *EasySpeak* in the Extensions app.
 
 ## Dictation not working
 

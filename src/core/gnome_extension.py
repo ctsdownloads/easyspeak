@@ -22,7 +22,10 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-GRID_EXTENSION_UUID = "easyspeak-grid@local"
+EXTENSION_UUID = "easyspeak@local"
+# Pre-rename UUID (the extension was "easyspeak-grid@local" when it was just a
+# mouse grid). A leftover copy is cleaned up at startup; see migrate_legacy_extension.
+LEGACY_EXTENSION_UUID = "easyspeak-grid@local"
 REFRESH_UNIT_NAME = "easyspeak-extension-refresh.service"
 PRE_SHELL_TARGET = "gnome-session-pre.target"  # reached before org.gnome.Shell@*
 
@@ -51,16 +54,14 @@ def extension_source_dir():
     return Path(__file__).resolve().parents[1]
 
 
+def extensions_root():
+    """User-local directory GNOME Shell reads installed extensions from."""
+    return Path.home() / ".local" / "share" / "gnome-shell" / "extensions"
+
+
 def extension_dest_dir():
-    """User-local install location GNOME Shell reads extensions from."""
-    return (
-        Path.home()
-        / ".local"
-        / "share"
-        / "gnome-shell"
-        / "extensions"
-        / GRID_EXTENSION_UUID
-    )
+    """User-local install location for the bundled extension."""
+    return extensions_root() / EXTENSION_UUID
 
 
 def _staged_tmp(dest_dir, name):
@@ -212,6 +213,40 @@ def install_refresh_unit():
     )
 
 
+def migrate_legacy_extension():
+    """Remove the pre-rename extension install so it can't double-load.
+
+    The extension's UUID changed from ``easyspeak-grid@local`` to
+    ``easyspeak@local`` (it long outgrew being just a mouse grid). A leftover
+    copy under the old UUID would stay enabled and add a second panel indicator
+    and grid that the daemon no longer drives, so clean it up: disable it (so
+    GNOME drops it from the enabled set) then delete its directory. Best-effort
+    throughout — returns True if a legacy install was found and removed.
+
+    One-off migration shim: once users have had a release or two to upgrade past
+    ``easyspeak-grid@local`` this can be removed (call site and tests included).
+    """
+    legacy_dir = extensions_root() / LEGACY_EXTENSION_UUID
+    if not legacy_dir.is_dir():
+        return False
+    with contextlib.suppress(OSError, subprocess.TimeoutExpired):
+        subprocess.run(
+            ["gnome-extensions", "disable", LEGACY_EXTENSION_UUID],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=SUBPROCESS_TIMEOUT,
+        )
+    shutil.rmtree(legacy_dir, ignore_errors=True)
+    logger.info(
+        "removed the legacy %s extension (renamed to %s) — log out and back in "
+        "to load the new one",
+        LEGACY_EXTENSION_UUID,
+        EXTENSION_UUID,
+    )
+    return True
+
+
 def ensure_extension():
     """Install, refresh, and enable the bundled extension, reporting what it did.
 
@@ -221,6 +256,8 @@ def ensure_extension():
     """
     if shutil.which("gnome-extensions") is None:
         return
+
+    migrate_legacy_extension()
 
     unit_status = install_refresh_unit()
     if unit_status:
@@ -246,12 +283,12 @@ def ensure_extension():
     if listed.returncode != 0:
         return
 
-    installed = GRID_EXTENSION_UUID in listed.stdout.split()
+    installed = EXTENSION_UUID in listed.stdout.split()
     # A failed --enabled probe leaves this False, so we fall through and try
     # enabling (a no-op when it's already on).
     already_enabled = (
         listed_enabled.returncode == 0
-        and GRID_EXTENSION_UUID in listed_enabled.stdout.split()
+        and EXTENSION_UUID in listed_enabled.stdout.split()
     )
     dest_dir = extension_dest_dir()
     root = extension_source_dir()
@@ -262,12 +299,12 @@ def ensure_extension():
             logger.info(
                 "updated GNOME extension %s to the bundled version — "
                 "log out and back in to load it",
-                GRID_EXTENSION_UUID,
+                EXTENSION_UUID,
             )
         elif result is RefreshResult.UNCHANGED:
             logger.info(
                 "GNOME extension %s already installed and enabled",
-                GRID_EXTENSION_UUID,
+                EXTENSION_UUID,
             )
         # ERROR was already noted by refresh_extension_files; stay quiet rather
         # than claim a healthy install.
@@ -297,7 +334,7 @@ def ensure_extension():
     # extension" until then — treated as "installed, log back in to use".
     try:
         enabled = subprocess.run(
-            ["gnome-extensions", "enable", GRID_EXTENSION_UUID],
+            ["gnome-extensions", "enable", EXTENSION_UUID],
             capture_output=True,
             text=True,
             check=False,
@@ -311,21 +348,21 @@ def ensure_extension():
         if ok:
             logger.info(
                 "enabled GNOME extension %s (was installed but disabled)",
-                GRID_EXTENSION_UUID,
+                EXTENSION_UUID,
             )
         else:
             logger.warning(
                 "GNOME extension %s is installed but disabled, and could not "
                 "be enabled. Try: gnome-extensions enable %s",
-                GRID_EXTENSION_UUID,
-                GRID_EXTENSION_UUID,
+                EXTENSION_UUID,
+                EXTENSION_UUID,
             )
         return
 
     if ok:
         logger.info(
             "installed and enabled GNOME extension %s at %s",
-            GRID_EXTENSION_UUID,
+            EXTENSION_UUID,
             dest_dir,
         )
     else:

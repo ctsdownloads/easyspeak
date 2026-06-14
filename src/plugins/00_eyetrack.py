@@ -103,9 +103,9 @@ def dbus_call(method, *args):
         "--dest",
         "org.gnome.Shell",
         "--object-path",
-        "/org/easyspeak/Grid",
+        "/org/easyspeak/Desktop",
         "--method",
-        f"org.easyspeak.Grid.{method}",
+        f"org.easyspeak.Desktop.{method}",
     ]
     cmd.extend(str(a) for a in args)
     result = host_run(cmd)
@@ -122,9 +122,9 @@ def get_screen_size():
             "--dest",
             "org.gnome.Shell",
             "--object-path",
-            "/org/easyspeak/Grid",
+            "/org/easyspeak/Desktop",
             "--method",
-            "org.easyspeak.Grid.GetScreenSize",
+            "org.easyspeak.Desktop.GetScreenSize",
         ]
     )
 
