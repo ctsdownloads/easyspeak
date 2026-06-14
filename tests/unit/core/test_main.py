@@ -722,6 +722,57 @@ class TestEasySpeakRun:
         with patch("easyspeak.core.main.ensure_extension") as mock_ensure_ext:
             yield mock_ensure_ext
 
+    @pytest.fixture(autouse=True)
+    def _stub_hotkey(self):
+        """Keep run() from reading real /dev/input; hotkey has its own tests.
+
+        take_activation() defaults to False so the loop never enters the
+        push-to-talk branch unless a test opts in.
+        """
+        with patch("easyspeak.core.main.HotkeyListener") as mock_cls:
+            listener = mock_cls.return_value
+            listener.take_activation.return_value = False
+            yield listener
+
+    @patch("subprocess.run")
+    @patch("easyspeak.core.main.pyaudio")
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch.object(EasySpeak, "load_plugins")
+    @patch.object(EasySpeak, "_reset_detector")
+    @patch.object(EasySpeak, "_run_push_to_talk")
+    def test_run_hotkey_activation_runs_push_to_talk(
+        self,
+        mock_ptt,
+        mock_reset,
+        mock_load_plugins,
+        mock_whisper_model,
+        mock_wakeword_model,
+        mock_pyaudio,
+        mock_subprocess_run,
+        mock_plugin,
+        _stub_hotkey,
+    ):
+        """A hotkey press runs push-to-talk and skips wake-word detection."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin]
+
+        # Fire the hotkey on the first iteration, then fall through to a read
+        # that ends the loop on the next iteration.
+        _stub_hotkey.take_activation.side_effect = [True, False]
+
+        mock_stream = Mock()
+        mock_stream.read.side_effect = KeyboardInterrupt()
+        mock_audio = Mock()
+        mock_audio.open.return_value = mock_stream
+        mock_pyaudio.PyAudio.return_value = mock_audio
+
+        easy.run()
+
+        mock_ptt.assert_called_once_with()
+        _stub_hotkey.start.assert_called_once_with()
+        _stub_hotkey.stop.assert_called_once_with()
+
     @patch("easyspeak.core.main.WakeWordModel")
     @patch("easyspeak.core.main.load_whisper_model")
     @patch.object(EasySpeak, "load_plugins")
@@ -1478,3 +1529,94 @@ class TestEasySpeakRun:
         easy.run()
 
         easy.tray.poll.assert_called_with(easy._close_stream, easy._open_stream)
+
+
+class TestEasySpeakShouldContinue:
+    """Tests for the push-to-talk-aware capture guards."""
+
+    def test_wait_for_speech_stops_when_should_continue_false(self):
+        """A False predicate ends the wait immediately, reading nothing."""
+        easy = EasySpeak()
+        easy.stream = Mock()
+
+        result = easy.wait_for_speech(timeout=5, should_continue=lambda: False)
+
+        assert result is None
+        easy.stream.read.assert_not_called()
+
+    def test_wait_for_speech_runs_while_should_continue_true(self):
+        """A True predicate lets the wait proceed and return detected speech."""
+        easy = EasySpeak()
+        easy.stream = Mock()
+        loud = np.array([1000] * 1600, dtype=np.int16).tobytes()
+        easy.stream.read = Mock(return_value=loud)
+
+        result = easy.wait_for_speech(timeout=5, should_continue=lambda: True)
+
+        assert result == loud
+
+    def test_record_until_silence_stops_when_should_continue_false(self):
+        """A False predicate cuts the recording short before reading."""
+        easy = EasySpeak()
+        easy.stream = Mock()
+
+        result = easy.record_until_silence(should_continue=lambda: False)
+
+        assert result == b""
+        easy.stream.read.assert_not_called()
+
+    def test_record_until_silence_runs_while_should_continue_true(self):
+        """A True predicate records normally until the silence window."""
+        easy = EasySpeak()
+        easy.stream = Mock()
+        loud = np.array([1000] * 1600, dtype=np.int16).tobytes()
+        silent = np.array([10] * 1600, dtype=np.int16).tobytes()
+        easy.stream.read = Mock(side_effect=[loud] * 6 + [silent] * 10)
+
+        result = easy.record_until_silence(should_continue=lambda: True)
+
+        assert isinstance(result, bytes)
+        assert len(result) > 0
+
+
+class TestEasySpeakPushToTalk:
+    """Tests for hotkey-driven dictation hand-off."""
+
+    def test_register_push_to_talk_stores_handler(self):
+        """The dictation plugin's registration is kept for the hotkey to run."""
+        easy = EasySpeak()
+        handler = Mock()
+
+        easy.register_push_to_talk(handler)
+
+        assert easy._push_to_talk is handler
+
+    def test_run_push_to_talk_without_handler_warns(self, readlog):
+        """With no dictation plugin registered the press warns and no-ops."""
+        easy = EasySpeak()
+        easy._push_to_talk = None
+
+        with patch.object(easy, "_play_wake_chime") as chime:
+            easy._run_push_to_talk()
+
+        assert "no dictation handler" in readlog().err.lower()
+        chime.assert_not_called()
+
+    @patch("subprocess.run")
+    def test_run_push_to_talk_acks_then_runs_handler(self, mock_run):
+        """A press chimes (no spoken prompt) and runs the handler gated on hold."""
+        easy = EasySpeak()
+        easy.speak = Mock()  # the silent path must speak no prompt
+        handler = Mock()
+        easy.register_push_to_talk(handler)
+
+        with (
+            patch.object(easy, "_reset_detector") as reset,
+            patch.object(easy, "_play_wake_chime") as chime,
+        ):
+            easy._run_push_to_talk()
+
+        reset.assert_called_once_with()
+        chime.assert_called_once_with()
+        handler.assert_called_once_with(easy.hotkey.is_held)
+        easy.speak.assert_not_called()

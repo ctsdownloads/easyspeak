@@ -75,6 +75,12 @@ def setup(c):
     global core
     core = c
     ensure_gnome_accessibility()
+    # Offer dictation to the keyboard (silent) activation path too: core runs
+    # this while the hotkey combo is held, with no wake word spoken.
+    if hasattr(c, "register_push_to_talk"):
+        c.register_push_to_talk(
+            lambda should_continue: run_push_to_talk(c, should_continue)
+        )
 
 
 # insert_text() outcomes — kept distinct so the spoken feedback is accurate:
@@ -220,6 +226,61 @@ def format_text(text):
     return text.strip()
 
 
+def _dictate_utterance(core, text):
+    """Format one transcribed utterance, insert it, and give error feedback.
+
+    Shared by the voice ``notes`` flow and the push-to-talk hotkey. Returns True
+    when dictation should stop because insertion failed and the user was told
+    why (no focused field, or the backend isn't set up); False to keep going.
+    Text that formats to nothing is a silent no-op.
+    """
+    formatted = format_text(text)
+    if not formatted:
+        return False
+    logger.info("📝 %s", formatted)
+    # Add a leading space before words, but not before punctuation.
+    if formatted[0].isalpha():
+        formatted = " " + formatted
+    status = insert_text(formatted)
+    if status == NO_FOCUS:
+        core.speak("No text field focused.")
+        return True
+    if status == BACKEND_ERROR:
+        core.speak("Dictation isn't set up on this system.")
+        return True
+    return False
+
+
+# How long each push-to-talk listen waits before looping; kept short so a key
+# release ends dictation promptly (the wait also re-checks the held state).
+PTT_LISTEN_TIMEOUT = 2
+
+
+def run_push_to_talk(core, should_continue):
+    """Dictate while the activation keys are held (the silent-activation path).
+
+    Mirrors the voice ``notes`` loop but is gated on ``should_continue`` — a
+    predicate that is True while the keys remain held — instead of a spoken
+    "stop notes": each utterance captured from ``core`` is formatted and
+    inserted until the keys are released. The capture waits re-check
+    ``should_continue`` so releasing stops dictation promptly.
+    """
+    logger.info("🎙️ Push-to-talk dictation — release to end")
+    while should_continue():
+        core.flush_stream()
+        first = core.wait_for_speech(
+            timeout=PTT_LISTEN_TIMEOUT, should_continue=should_continue
+        )
+        if not first:
+            continue
+        audio = first + core.record_until_silence(should_continue=should_continue)
+        text = core.transcribe(audio, prompt=DICTATION_PROMPT)
+        if not text:
+            continue
+        if _dictate_utterance(core, text.strip().lower()):
+            return
+
+
 def handle(cmd, core):
     """Enter dictation mode on "notes"; return None for other commands.
 
@@ -273,21 +334,8 @@ def handle(cmd, core):
                 return True
 
             # Format and insert
-            formatted = format_text(text)
-            logger.info("📝 %s", formatted)
-
-            if formatted:
-                # Add space before words, not before punctuation
-                if formatted[0].isalpha():
-                    formatted = " " + formatted
-
-                status = insert_text(formatted)
-                if status == NO_FOCUS:
-                    core.speak("No text field focused.")
-                    return True
-                if status == BACKEND_ERROR:
-                    core.speak("Dictation isn't set up on this system.")
-                    return True
+            if _dictate_utterance(core, text):
+                return True
 
         return True
 

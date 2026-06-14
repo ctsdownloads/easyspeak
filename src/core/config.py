@@ -21,6 +21,19 @@ SILENCE_DURATION = 0.3
 MISUNDERSTAND_GRACE = 4.0  # Seconds to ignore repeat misses after feedback
 FOLLOWUP_IDLE_ROUNDS = 2  # Quiet listens tolerated before a command session ends
 
+# --- Keyboard (silent) activation ---
+# Hold this combo to dictate without the wake word; release to stop. Accepts the
+# aliases ctrl/shift/alt/super or raw evdev key names, joined with '+'. Needs
+# read access to /dev/input (be in the 'input' group). Set EASYSPEAK_HOTKEY=0
+# to turn the feature off.
+HOTKEY_COMBO = os.environ.get("EASYSPEAK_HOTKEY_COMBO", "ctrl+shift")
+HOTKEY_ENABLED = os.environ.get("EASYSPEAK_HOTKEY", "1").lower() not in (
+    "0",
+    "false",
+    "no",
+    "off",
+)
+
 # --- Models ---
 PIPER_MODEL = os.environ.get(
     "EASYSPEAK_PIPER_MODEL",

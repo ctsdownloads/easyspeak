@@ -30,6 +30,10 @@ instance and use its small public API (`speak`, `host_run`, `transcribe`,
 
 ::: core.tray
 
+## core.hotkey
+
+::: core.hotkey
+
 ## core.mediakeys
 
 ::: core.mediakeys
