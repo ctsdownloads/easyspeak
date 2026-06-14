@@ -20,6 +20,7 @@ easyspeak/
 │   ├── core
 │   │   ├── __init__.py
 │   │   ├── __main__.py
+│   │   ├── about.py           # Standalone libadwaita "About" window
 │   │   ├── cli.py             # CLI entry point: argument parsing + logging
 │   │   ├── config.py          # Tuning constants + Whisper model factory
 │   │   ├── gnome_extension.py # Installs/refreshes/enables the extension

@@ -53,6 +53,10 @@ dependencies = [
   "onnxruntime<1.24 ; python_full_version < '3.11'",
   "pyaudio>=0.2.14",
 ]
+# Not listed above: the "About" window (core.about) needs PyGObject + the GTK4
+# and libadwaita typelibs. On Linux those are system packages (PyGObject's own
+# recommended install path), not pip wheels, so they're a documented runtime
+# requirement rather than a dependency — the dialog simply no-ops without them.
 
 [project.optional-dependencies]
 acceptance = [

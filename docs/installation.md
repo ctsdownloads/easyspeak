@@ -25,6 +25,7 @@ sudo dnf install \
   wireplumber \
   at-spi2-core \
   python3-gobject \
+  libadwaita \
   qutebrowser \
   glib2 \
   ffmpeg-free \
@@ -34,6 +35,10 @@ sudo dnf install \
   python3.12-devel \
   gcc
 ```
+
+`python3-gobject` and `libadwaita` power the tray menu's **About EasySpeak**
+window. They ship with any GNOME desktop, so they're usually already present;
+they're listed here for the sake of minimal or non-GNOME installs.
 
 ## 2. Python packages
 

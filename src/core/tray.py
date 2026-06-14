@@ -21,8 +21,11 @@ import contextlib
 import enum
 import logging
 import subprocess
+import sys
 import time
 from pathlib import Path
+
+from .about import DOCS_URL
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +38,12 @@ STATE_MUTED = "muted"
 COMMAND_QUIT = "quit"
 COMMAND_MUTE = "mute"
 COMMAND_UNMUTE = "unmute"
+COMMAND_HELP = "help"  # open the documentation page in the default browser
+COMMAND_ABOUT = "about"  # open the libadwaita About window
+
+# The About window is its own process: the indicator lives in a GNOME Shell
+# extension that can't host GTK, so the daemon spawns this module instead.
+ABOUT_MODULE = "easyspeak.core.about"
 
 # Shared with the extension's ScreenshotManager, which creates ~/.cache/easyspeak.
 CONTROL_FILE = Path.home() / ".cache" / "easyspeak" / "control"
@@ -113,12 +122,43 @@ class Tray:
         command = self.take_command()
         if command == COMMAND_QUIT:
             return TrayAction.QUIT
+        if self._run_menu_action(command):
+            return TrayAction.CONTINUE
         if command == COMMAND_MUTE or self._sleep_requested:
             self._sleep_requested = False
             return self._sleep(release_mic, acquire_mic)
         return TrayAction.CONTINUE
 
     # --- internals ---
+
+    def _run_menu_action(self, command):
+        """Handle a fire-and-forget menu command (Help/About).
+
+        Returns True if it was one of those side-effect actions so callers can
+        carry on without touching the sleep/quit lifecycle. The indicator menu
+        is only shown while asleep, so in practice these fire from the idle loop
+        in :meth:`_sleep`; ``poll`` handles them too so the path isn't lifecycle-
+        dependent.
+        """
+        if command == COMMAND_HELP:
+            self._spawn(["xdg-open", DOCS_URL], "documentation page")
+            return True
+        if command == COMMAND_ABOUT:
+            self._spawn([sys.executable, "-m", ABOUT_MODULE], "About window")
+            return True
+        return False
+
+    def _spawn(self, cmd, what):
+        """Launch a detached helper process (best-effort).
+
+        Fire-and-forget: the daemon doesn't wait on or reap it, and a missing
+        binary just logs rather than disturbing the audio loop, mirroring the
+        rest of the controller's tolerance of a non-GNOME desktop.
+        """
+        try:
+            subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except OSError:
+            logger.warning("Couldn't open the %s.", what, exc_info=True)
 
     def _sleep(self, release_mic, acquire_mic):
         """Release the mic and idle until the tray asks to resume or quit.
@@ -154,6 +194,7 @@ class Tray:
                 acquire_mic()
                 self.set_state(STATE_LISTENING)
                 return TrayAction.RESUME
+            self._run_menu_action(command)
             if time.monotonic() >= next_repush:
                 self.set_state(STATE_MUTED)
                 next_repush = time.monotonic() + MUTED_REPUSH_INTERVAL
