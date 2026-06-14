@@ -53,10 +53,7 @@ Current and in active development:
 - [Troubleshooting](troubleshooting.md) — common problems and fixes
 - [How It Works](how-it-works.md) — the architecture
 - [API Reference](reference/core.md) — generated from the source docstrings
-
-## License
-
-GPL-3.0 License. See [LICENSE](https://github.com/ctsdownloads/easyspeak/blob/main/LICENSE) for details.
+- [License](license.md)
 
 ## Acknowledgments
 

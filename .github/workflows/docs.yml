@@ -60,4 +60,10 @@ jobs:
 
       - name: Deploy development docs
         if: github.ref == 'refs/heads/dev'
-        run: uv run --extra docs mike deploy --push dev
+        run: |
+          uv run --extra docs mike deploy --push dev
+          # Until the first release sets the default to "latest", point the
+          # site root at the dev docs so the Pages root resolves instead of 404.
+          if ! uv run --extra docs mike list | grep -q '\[latest\]'; then
+            uv run --extra docs mike set-default --push dev
+          fi
