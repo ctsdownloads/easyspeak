@@ -466,3 +466,117 @@ def test_handle_dictation_mode_with_prompt(mock_format, mock_insert, mock_core_f
     assert mock_core.transcribe.call_count == 2
     first_call = mock_core.transcribe.call_args_list[0]
     assert first_call.kwargs["prompt"] == dictation.DICTATION_PROMPT
+
+
+# Tests for the push-to-talk (silent activation) path.
+
+
+def _holds(times):
+    """Return a should_continue predicate True for ``times`` polls then False."""
+    state = {"n": 0}
+
+    def should_continue():
+        state["n"] += 1
+        return state["n"] <= times
+
+    return should_continue
+
+
+@patch.object(dictation, "ensure_gnome_accessibility")
+def test_setup_registers_push_to_talk(mock_ensure):
+    """setup() registers the push-to-talk session with a core that supports it."""
+    mock_core = Mock()
+
+    dictation.setup(mock_core)
+
+    mock_core.register_push_to_talk.assert_called_once()
+    assert callable(mock_core.register_push_to_talk.call_args.args[0])
+
+
+@patch.object(dictation, "ensure_gnome_accessibility")
+def test_setup_skips_registration_without_support(mock_ensure):
+    """A core lacking register_push_to_talk (older/mocked) is tolerated."""
+    core = Mock(spec=["speak"])  # no register_push_to_talk attribute
+
+    dictation.setup(core)  # must not raise
+
+
+@patch("easyspeak.plugins.dictation.insert_text", return_value=dictation.INSERTED)
+@patch("easyspeak.plugins.dictation.format_text", return_value="Hello")
+def test_run_push_to_talk_inserts_until_released(mock_format, mock_insert):
+    """While held, each utterance is formatted and inserted via AT-SPI."""
+    core = Mock()
+    core.wait_for_speech = Mock(return_value=b"audio1")
+    core.record_until_silence = Mock(return_value=b"audio2")
+    core.transcribe = Mock(return_value="hello")
+
+    dictation.run_push_to_talk(core, _holds(1))
+
+    assert mock_insert.call_count == 1
+    assert mock_insert.call_args.args == (" Hello",)
+    # The capture is gated on the held state so a release can cut it short.
+    assert core.wait_for_speech.call_args.kwargs["should_continue"] is not None
+    assert core.record_until_silence.call_args.kwargs["should_continue"] is not None
+
+
+@patch("easyspeak.plugins.dictation.insert_text")
+def test_run_push_to_talk_skips_silence(mock_insert):
+    """A listen that returns no speech loops without inserting."""
+    core = Mock()
+    core.wait_for_speech = Mock(return_value=None)
+
+    dictation.run_push_to_talk(core, _holds(1))
+
+    mock_insert.assert_not_called()
+    core.transcribe.assert_not_called()
+
+
+@patch("easyspeak.plugins.dictation.insert_text")
+def test_run_push_to_talk_skips_empty_transcription(mock_insert):
+    """An empty transcription is skipped."""
+    core = Mock()
+    core.wait_for_speech = Mock(return_value=b"audio1")
+    core.record_until_silence = Mock(return_value=b"audio2")
+    core.transcribe = Mock(return_value="")
+
+    dictation.run_push_to_talk(core, _holds(1))
+
+    mock_insert.assert_not_called()
+
+
+@patch("easyspeak.plugins.dictation.insert_text", return_value=dictation.NO_FOCUS)
+@patch("easyspeak.plugins.dictation.format_text", return_value="Hello")
+def test_run_push_to_talk_no_focus_stops(mock_format, mock_insert):
+    """No focused field is spoken once and ends the session."""
+    core = Mock()
+    core.wait_for_speech = Mock(return_value=b"audio1")
+    core.record_until_silence = Mock(return_value=b"audio2")
+    core.transcribe = Mock(return_value="hello")
+
+    dictation.run_push_to_talk(core, _holds(5))
+
+    core.speak.assert_called_once_with("No text field focused.")
+
+
+@patch("easyspeak.plugins.dictation.insert_text", return_value=dictation.BACKEND_ERROR)
+@patch("easyspeak.plugins.dictation.format_text", return_value="Hello")
+def test_run_push_to_talk_backend_error_stops(mock_format, mock_insert):
+    """A backend error gives the setup hint once and ends the session."""
+    core = Mock()
+    core.wait_for_speech = Mock(return_value=b"audio1")
+    core.record_until_silence = Mock(return_value=b"audio2")
+    core.transcribe = Mock(return_value="hello")
+
+    dictation.run_push_to_talk(core, _holds(5))
+
+    core.speak.assert_called_once_with("Dictation isn't set up on this system.")
+
+
+@patch("easyspeak.plugins.dictation.insert_text")
+@patch("easyspeak.plugins.dictation.format_text", return_value="")
+def test_dictate_utterance_noop_on_empty_format(mock_format, mock_insert):
+    """Text that formats to nothing inserts nothing and keeps dictating."""
+    core = Mock()
+
+    assert dictation._dictate_utterance(core, "   ") is False
+    mock_insert.assert_not_called()

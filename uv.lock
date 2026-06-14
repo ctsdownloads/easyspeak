@@ -553,6 +553,7 @@ wheels = [
 name = "easyspeak-linux"
 source = { editable = "." }
 dependencies = [
+    { name = "evdev-binary", marker = "sys_platform == 'linux'" },
     { name = "faster-whisper" },
     { name = "jeepney" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
@@ -596,6 +597,7 @@ unittest = [
 [package.metadata]
 requires-dist = [
     { name = "coverage", extras = ["toml"], marker = "extra == 'unittest'", specifier = ">=7.14" },
+    { name = "evdev-binary", marker = "sys_platform == 'linux'", specifier = ">=1.7" },
     { name = "faster-whisper", specifier = ">=1.2.1" },
     { name = "jeepney", specifier = ">=0.9" },
     { name = "mike", marker = "extra == 'docs'", specifier = ">=2.1" },
@@ -618,6 +620,21 @@ requires-dist = [
     { name = "types-pyaudio", marker = "extra == 'mypy'", specifier = ">=0.2.16.20250801" },
 ]
 provides-extras = ["acceptance", "benchmark", "docs", "head-tracking", "integration", "mypy", "unittest"]
+
+[[package]]
+name = "evdev-binary"
+version = "1.9.3"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/05/ee/7ba59ead34defda81e04fec90a376f03a2e35ec144d5610a6d6519476c1d/evdev_binary-1.9.3-cp310-cp310-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:f0ed8723b5382e37c7d6b32ed4e4963205fa4f7a8d6c8d53c70b43e1174b13e7", size = 109989, upload-time = "2026-02-05T21:59:18.763Z" },
+    { url = "https://files.pythonhosted.org/packages/f4/18/11911004b181403ba6c8f719a56bfea2dbcc5f629696706caaf8021a3584/evdev_binary-1.9.3-cp310-cp310-musllinux_1_2_x86_64.whl", hash = "sha256:91507a6dd721bb8037f67f0a9bbbc32b7b4e5536324f71818a0e58290197f649", size = 111359, upload-time = "2026-02-05T21:59:20.719Z" },
+    { url = "https://files.pythonhosted.org/packages/72/88/65adf424f8f99401677a94ec07903f4880e03d0ac63cd63153780c8e6415/evdev_binary-1.9.3-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:2d90c4126398fa6a5f760fec7cee8a42f87fd266e4a37aa9c36b7958c4a1ae7b", size = 110997, upload-time = "2026-02-05T21:59:22.38Z" },
+    { url = "https://files.pythonhosted.org/packages/5f/3e/1e7fa235b4766dd1198c4d832c1560d8abcea14d32759914e6e74bf20006/evdev_binary-1.9.3-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:ed6419bca316890c80deb6bd31b1d04e441b013e826aa3122ffe4528a094c7e3", size = 112295, upload-time = "2026-02-05T21:59:23.636Z" },
+    { url = "https://files.pythonhosted.org/packages/1e/30/645606224343ecc02599b731a9090180519b84276c7331bb7805aeb907a5/evdev_binary-1.9.3-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:53bda21275627cc28008bd94dc1ba324c3c24debd0a4b779a64242f19697d681", size = 111362, upload-time = "2026-02-05T21:59:25.167Z" },
+    { url = "https://files.pythonhosted.org/packages/cf/63/b9bb5d2fdf836581821f2ebce82b8b35ec8718482e8f78ec1733ed97fd9b/evdev_binary-1.9.3-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:4404fc4222c9c6670b91ab07784b9d0ed06b6138079f91216d0e9238fcd89df3", size = 112497, upload-time = "2026-02-05T21:59:26.424Z" },
+    { url = "https://files.pythonhosted.org/packages/9d/36/c109d26825e66847721e004708ee4c4b46b2b2c4a22a5b84e40fed051336/evdev_binary-1.9.3-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:ef92f0259d3bd1d9b449a4ea1ff7b747064a98c4c55844e3f1cbe880c2efe25c", size = 111512, upload-time = "2026-02-05T21:59:27.538Z" },
+    { url = "https://files.pythonhosted.org/packages/08/c3/3c4a5e2ca1a07c15db1afa48acf090ec906464bb428fb6b930a4028ca7bf/evdev_binary-1.9.3-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:1eb0166c89d96dfe56187b18155323f655bdfdf2695777df29b33c44e48ffc74", size = 112661, upload-time = "2026-02-05T21:59:28.727Z" },
+]
 
 [[package]]
 name = "exceptiongroup"

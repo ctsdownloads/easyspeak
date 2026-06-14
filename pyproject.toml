@@ -42,6 +42,9 @@ keywords = [
 readme = "README.md"
 requires-python = ">=3.10, <3.14"
 dependencies = [
+  # Prebuilt wheel (provides `import evdev`) for raw /dev/input hold-to-dictate;
+  # avoids the source build's kernel-header requirement. Linux-only by nature.
+  "evdev-binary>=1.7 ; sys_platform == 'linux'",
   "faster-whisper>=1.2.1",
   "jeepney>=0.9",
   "numpy>=2.2.6",

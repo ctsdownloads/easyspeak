@@ -22,6 +22,8 @@ from openwakeword.model import Model as WakeWordModel
 from .config import (
     COMMAND_PROMPT,
     FOLLOWUP_IDLE_ROUNDS,
+    HOTKEY_COMBO,
+    HOTKEY_ENABLED,
     MISUNDERSTAND_GRACE,
     SILENCE_DURATION,
     SILENCE_THRESHOLD,
@@ -34,6 +36,7 @@ from .config import (
     load_whisper_model,
 )
 from .gnome_extension import ensure_extension
+from .hotkey import HotkeyListener
 from .speech import SpeechPipeline, suppressed_c_stderr
 from .tray import Tray, TrayAction
 
@@ -72,6 +75,10 @@ class EasySpeak:
         self.speech = SpeechPipeline()
         # GNOME panel indicator: owns the icon and the asleep lifecycle.
         self.tray = Tray(speak=self.speak)
+        # Hold-to-dictate keyboard activation; the dictation plugin registers
+        # the session to run while the combo is held (see register_push_to_talk).
+        self.hotkey = HotkeyListener(HOTKEY_COMBO, HOTKEY_ENABLED)
+        self._push_to_talk = None
 
     # --- Utilities for plugins ---
 
@@ -112,6 +119,16 @@ class EasySpeak:
         and speak, first.
         """
         self.tray.request_sleep()
+
+    def register_push_to_talk(self, handler):
+        """Register the dictation session the hotkey runs while its combo is held.
+
+        Plugin-facing: the dictation plugin registers here in its setup() so core
+        can drive keyboard (silent) activation without importing a plugin
+        directly. ``handler`` takes one ``should_continue`` predicate and runs
+        until it returns False (the keys are released).
+        """
+        self._push_to_talk = handler
 
     # --- Plugin management ---
 
@@ -277,16 +294,20 @@ class EasySpeak:
         """Return True if the audio chunk's mean amplitude is below the threshold."""
         return np.abs(audio_chunk).mean() < SILENCE_THRESHOLD
 
-    def record_until_silence(self):
+    def record_until_silence(self, should_continue=None):
         """Record mic audio until a short silence, capped at five seconds.
 
-        Returns the captured PCM bytes. Plugin-facing.
+        Returns the captured PCM bytes. Plugin-facing. ``should_continue``
+        (used by push-to-talk) lets a key release cut the recording short
+        instead of waiting out the silence window.
         """
         frames = []
         silent_chunks = 0
         chunks_needed = int(SILENCE_DURATION * 16000 / 1600)
 
         for i in range(int(5 * 16000 / 1600)):
+            if should_continue is not None and not should_continue():
+                break
             pcm = self.stream.read(1600, exception_on_overflow=False)
             frames.append(pcm)
 
@@ -300,13 +321,16 @@ class EasySpeak:
 
         return b"".join(frames)
 
-    def wait_for_speech(self, timeout=5):
+    def wait_for_speech(self, timeout=5, should_continue=None):
         """Block until speech is heard, returning its first PCM chunk.
 
         Returns None if nothing is heard within ``timeout`` seconds.
-        Plugin-facing.
+        Plugin-facing. ``should_continue`` (used by push-to-talk) returns None
+        early once it goes False, so a key release ends the wait.
         """
         for _ in range(int(timeout * 16000 / 1600)):
+            if should_continue is not None and not should_continue():
+                return None
             pcm = self.stream.read(1600, exception_on_overflow=False)
             if not self.is_silence(np.frombuffer(pcm, dtype=np.int16)):
                 return pcm
@@ -364,6 +388,24 @@ class EasySpeak:
         """
         self.speech.drain()
         self.flush_stream()
+
+    def _run_push_to_talk(self):
+        """Run a hotkey-triggered dictation session for as long as the keys are held.
+
+        Triggered from the main loop when the silent-activation combo fires.
+        Acknowledges with the wake chime — but speaks no prompt, this being the
+        *silent* path — then hands off to the registered dictation handler,
+        gating it on the still-held key state so releasing the keys ends it.
+        Warns and does nothing if no handler is registered (e.g. the dictation
+        plugin didn't load).
+        """
+        if self._push_to_talk is None:
+            logger.warning("Hotkey pressed but no dictation handler is registered.")
+            return
+        logger.info("⌨️  Hotkey dictation")
+        self._reset_detector()
+        self._play_wake_chime()
+        self._push_to_talk(self.hotkey.is_held)
 
     def _capture_command_session(self):
         """Capture and route commands after a wake, staying open for follow-ups.
@@ -464,6 +506,9 @@ class EasySpeak:
             self._open_stream()
 
             self.tray.started()
+            # Start keyboard (silent) activation; no-op if disabled or no
+            # /dev/input access. Plugins have registered their handlers by now.
+            self.hotkey.start()
             logger.info("Listening for wake word...")
             audio_buffer = []
 
@@ -474,6 +519,14 @@ class EasySpeak:
                 if action is TrayAction.QUIT:
                     break
                 if action is TrayAction.RESUME:
+                    self._reset_detector()
+                    audio_buffer = []
+                    logger.info("Listening for wake word...")
+                    continue
+
+                # Keyboard activation bypasses the wake word: dictate while held.
+                if self.hotkey.take_activation():
+                    self._run_push_to_talk()
                     self._reset_detector()
                     audio_buffer = []
                     logger.info("Listening for wake word...")
@@ -512,6 +565,7 @@ class EasySpeak:
         finally:
             # Hide the indicator so the daemon's exit doesn't leave a stale icon.
             self.tray.stopped()
+            self.hotkey.stop()
             self.speech.drain()
             if self.stream is not None:
                 self.stream.stop_stream()
