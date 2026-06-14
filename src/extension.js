@@ -17,7 +17,7 @@ import {
 
 const DBUS_INTERFACE = `
 <node>
-  <interface name="org.easyspeak.Grid">
+  <interface name="org.easyspeak.Desktop">
     <!-- Grid overlay -->
     <method name="Show">
       <arg type="i" direction="in" name="width"/>
@@ -673,7 +673,7 @@ export default class EasySpeakGridExtension {
             SetState: (state) => this._tray.setState(state),
         });
 
-        this._dbus.export(Gio.DBus.session, '/org/easyspeak/Grid');
+        this._dbus.export(Gio.DBus.session, '/org/easyspeak/Desktop');
     }
 
     disable() {

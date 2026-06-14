@@ -31,8 +31,8 @@ class TestSetState:
         cmd = mock_run.call_args.args[0]
         assert cmd[0] == "gdbus"
         assert "org.gnome.Shell" in cmd
-        assert "/org/easyspeak/Grid" in cmd
-        assert "org.easyspeak.Grid.SetState" in cmd
+        assert "/org/easyspeak/Desktop" in cmd
+        assert "org.easyspeak.Desktop.SetState" in cmd
         assert cmd[-1] == STATE_LISTENING
 
     @patch("easyspeak.core.tray.subprocess.run")

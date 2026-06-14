@@ -1,7 +1,7 @@
 {
-  "name": "EasySpeak Grid",
-  "description": "Voice-controlled navigation: window management, OCR click, and mouse grid",
-  "uuid": "easyspeak-grid@local",
+  "name": "EasySpeak",
+  "description": "Voice control for Linux — EasySpeak's GNOME Shell integration (panel indicator and on-screen surfaces).",
+  "uuid": "easyspeak@local",
   "shell-version": ["47", "48", "49", "50"],
-  "version": 2
+  "version": 3
 }

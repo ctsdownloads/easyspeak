@@ -72,9 +72,9 @@ def test_dbus_call(mock_host_run, method, args, expected_returncode, expected_re
     assert call_args[3] == "--dest"
     assert call_args[4] == "org.gnome.Shell"
     assert call_args[5] == "--object-path"
-    assert call_args[6] == "/org/easyspeak/Grid"
+    assert call_args[6] == "/org/easyspeak/Desktop"
     assert call_args[7] == "--method"
-    assert call_args[8] == f"org.easyspeak.Grid.{method}"
+    assert call_args[8] == f"org.easyspeak.Desktop.{method}"
     assert call_args[9:] == [str(a) for a in args]
 
 
@@ -99,8 +99,8 @@ def test_get_screen_size(mock_host_run, stdout, expected_size):
     call_args = mock_host_run.call_args.args[0]
     assert call_args[0] == "gdbus"
     assert call_args[4] == "org.gnome.Shell"
-    assert call_args[6] == "/org/easyspeak/Grid"
-    assert call_args[8] == "org.easyspeak.Grid.GetScreenSize"
+    assert call_args[6] == "/org/easyspeak/Desktop"
+    assert call_args[8] == "org.easyspeak.Desktop.GetScreenSize"
 
 
 @patch.object(eyetrack_plugin, "host_run", return_value=Mock(returncode=1, stdout=""))
