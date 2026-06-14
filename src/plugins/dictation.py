@@ -3,9 +3,11 @@ Dictation Plugin - Voice to text via AT-SPI
 """
 
 import logging
+import os
 import re
 import shutil
 import subprocess
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -76,61 +78,53 @@ def setup(c):
     ensure_gnome_accessibility()
 
 
-ATSPI_INSERT_SCRIPT = """
-import gi
-gi.require_version('Atspi', '2.0')
-from gi.repository import Atspi
-import sys
+# insert_text() outcomes — kept distinct so the spoken feedback is accurate:
+# the text went in, no editable field was focused, or the AT-SPI backend
+# couldn't even start (no PyGObject/typelib, no accessibility bus).
+INSERTED = "inserted"
+NO_FOCUS = "no_focus"
+BACKEND_ERROR = "backend_error"
 
-text = sys.argv[1] if len(sys.argv) > 1 else ""
+# The AT-SPI logic lives in a sibling module run as a script in an interpreter
+# that has PyGObject (see atspi_python). It's a real file, not an embedded
+# string, so it gets linted and unit-tested.
+ATSPI_HELPER = str(Path(__file__).with_name("_atspi_insert.py"))
 
-def find_focused_editable(obj, depth=0):
-    if depth > 25:
-        return None
-    with contextlib.suppress(Exception):
-        state = obj.get_state_set()
-        if state.contains(Atspi.StateType.FOCUSED) and state.contains(
-            Atspi.StateType.EDITABLE
-        ):
-            return obj
-        for i in range(obj.get_child_count()):
-            result = find_focused_editable(obj.get_child_at_index(i), depth + 1)
-            if result:
-                return result
-    return None
 
-desktop = Atspi.get_desktop(0)
-for i in range(desktop.get_child_count()):
-    app = desktop.get_child_at_index(i)
-    result = find_focused_editable(app)
-    if result:
-        try:
-            pos = result.get_caret_offset()
-        except Exception:
-            pos = -1
+def atspi_python():
+    """Path to the interpreter that runs the AT-SPI helper.
 
-        # Handle special characters
-        for char in text:
-            if char == chr(8):  # backspace
-                if pos > 0:
-                    result.delete_text(pos - 1, pos)
-                    pos -= 1
-            else:
-                result.insert_text(pos, char, len(char.encode('utf-8')))
-                pos += 1
-
-        print("OK")
-        sys.exit(0)
-
-print("NO_FOCUS")
-"""
+    The helper needs PyGObject and the AT-SPI typelib, which the app's own
+    venv usually lacks. ``EASYSPEAK_ATSPI_PYTHON`` lets the packaging point at
+    an interpreter that has them (the Nix flake sets it); otherwise we fall
+    back to the system ``python3``, where distro packages like ``python3-gi``
+    typically live.
+    """
+    return os.environ.get("EASYSPEAK_ATSPI_PYTHON") or "python3"
 
 
 def insert_text(text):
-    """Insert text via AT-SPI"""
-    cmd = ["python3", "-c", ATSPI_INSERT_SCRIPT, text]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    return "OK" in result.stdout
+    """Insert text via AT-SPI.
+
+    Returns one of INSERTED, NO_FOCUS or BACKEND_ERROR so the caller can give
+    feedback that matches the real cause instead of always blaming focus.
+    """
+    cmd = [atspi_python(), ATSPI_HELPER, text]
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    except OSError as exc:
+        logger.warning("dictation backend could not start: %s", exc)
+        return BACKEND_ERROR
+
+    if "OK" in result.stdout:
+        return INSERTED
+    if "NO_BACKEND" in result.stdout or result.returncode != 0:
+        logger.warning(
+            "dictation backend unavailable (PyGObject/AT-SPI missing): %s",
+            result.stderr.strip() or "no detail",
+        )
+        return BACKEND_ERROR
+    return NO_FOCUS
 
 
 def format_text(text):
@@ -283,8 +277,12 @@ def handle(cmd, core):
                 if formatted[0].isalpha():
                     formatted = " " + formatted
 
-                if not insert_text(formatted):
+                status = insert_text(formatted)
+                if status == NO_FOCUS:
                     core.speak("No text field focused.")
+                    return True
+                if status == BACKEND_ERROR:
+                    core.speak("Dictation isn't set up on this system.")
                     return True
 
         return True
