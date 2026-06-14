@@ -1,5 +1,4 @@
-"""
-Mouse Grid Plugin - Voice-controlled mouse via GNOME Shell D-Bus extension
+"""Mouse Grid Plugin - Voice-controlled mouse via GNOME Shell D-Bus extension.
 
 Features:
 - Chained numbers: "3 7 5" zooms three times in one utterance
@@ -104,15 +103,18 @@ DIRECTIONS = {
 
 
 def setup(c):
+    """Store the core reference for use by the plugin's handlers."""
     global core
     core = c
 
 
 def host_run(cmd):
+    """Run a command and capture its output (the plugin's own subprocess seam)."""
     return subprocess.run(cmd, capture_output=True, text=True)
 
 
 def dbus_call(method, *args):
+    """Call a method on the grid extension over D-Bus; True on success."""
     cmd = [
         "gdbus",
         "call",
@@ -130,7 +132,7 @@ def dbus_call(method, *args):
 
 
 def get_screen_size():
-    """Get screen size from GNOME Shell extension (accurate for Wayland)"""
+    """Get screen size from GNOME Shell extension (accurate for Wayland)."""
     result = host_run(
         [
             "gdbus",
@@ -170,6 +172,7 @@ def get_screen_size():
 
 
 def cleanup():
+    """Hide the grid on interpreter exit so no overlay is left on screen."""
     dbus_call("Hide")
 
 
@@ -177,7 +180,7 @@ atexit.register(cleanup)
 
 
 def parse_number_sequence(text):
-    """Extract ALL numbers from text as a sequence. '3 7 5' -> [3, 7, 5]"""
+    """Extract ALL numbers from text as a sequence. '3 7 5' -> [3, 7, 5]."""
     # Replace word numbers with digits
     text_lower = text.lower()
     for word, num in WORD_TO_NUM.items():
@@ -200,6 +203,7 @@ def parse_count(text):
 
 
 def parse_direction(text):
+    """Return the direction (up/down/left/right) named in text, or None."""
     for direction, words in DIRECTIONS.items():
         for word in words:
             if word in text:
@@ -208,6 +212,7 @@ def parse_direction(text):
 
 
 def get_center():
+    """Return the (x, y) center of the current grid cell, or None if no grid."""
     if not grid_bounds:
         return None
     x, y, w, h = grid_bounds
@@ -218,6 +223,7 @@ def get_center():
 
 
 def show_grid():
+    """Show the full-screen grid overlay (no-op if it is already active)."""
     global grid_active, grid_bounds, screen_size
 
     if grid_active:
@@ -235,6 +241,7 @@ def show_grid():
 
 
 def close_grid():
+    """Hide the grid overlay and clear its bounds."""
     global grid_active, grid_bounds
     dbus_call("Hide")
     grid_active = False
@@ -295,6 +302,7 @@ def process_zones(zones):
 
 
 def do_click(click_type="click"):
+    """Click at the current cell center and close the grid; False if no grid."""
     global grid_bounds, grid_active, last_bounds
 
     center = get_center()
@@ -317,6 +325,7 @@ def do_click(click_type="click"):
 
 
 def do_scroll(direction, count=1):
+    """Scroll ``count`` steps at the current cell center; False if no grid."""
     global grid_bounds, grid_active, last_bounds
 
     center = get_center()
@@ -333,6 +342,7 @@ def do_scroll(direction, count=1):
 
 
 def nudge_grid(direction, count=1):
+    """Shift the current cell ``count`` steps in a direction; False if no grid."""
     global grid_bounds
 
     if not grid_bounds:
@@ -357,6 +367,11 @@ def nudge_grid(direction, count=1):
 
 
 def start_drag():
+    """Press at the current cell center and reset the grid to full screen.
+
+    Leaves a drag in progress so a later :func:`end_drag` releases at the new
+    target. False if no grid is active.
+    """
     global drag_start, grid_bounds
     center = get_center()
     if not center:
@@ -373,6 +388,10 @@ def start_drag():
 
 
 def end_drag():
+    """Release a drag started by :func:`start_drag` and close the grid.
+
+    False if no drag is in progress or no grid is active.
+    """
     global drag_start, grid_bounds, grid_active, last_bounds
     if not drag_start:
         logger.debug("  → No drag in progress")
@@ -393,6 +412,10 @@ def end_drag():
 
 
 def handle(cmd, core):
+    """Show or reopen the grid on a trigger word, then enter grid mode.
+
+    Returns None for commands that don't open the grid.
+    """
     global grid_active, grid_bounds, last_bounds, screen_size
 
     cmd_lower = cmd.lower().strip()
@@ -423,7 +446,7 @@ def handle(cmd, core):
 
 
 def listen_for_grid_commands(core):
-    """Continuous listening while grid active"""
+    """Continuous listening while grid active."""
     global grid_active, drag_start
 
     logger.info("Grid mode: say numbers (e.g. '3 7 5'), nudge, scroll, click, close")

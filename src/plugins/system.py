@@ -1,6 +1,4 @@
-"""
-System Plugin - Volume, brightness, do not disturb
-"""
+"""System Plugin - Volume, brightness, do not disturb."""
 
 NAME = "system"
 DESCRIPTION = "System controls"
@@ -38,6 +36,7 @@ _POWER_SCREEN = [
 
 
 def setup(c):
+    """Store the core reference for use by the plugin's handlers."""
     global core
     core = c
 
@@ -53,18 +52,21 @@ def _media_key(core, keycode, fallback):
 
 
 def volume_up(core):
+    """Raise the volume one step."""
     _media_key(
         core, KEY_VOLUME_UP, ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "10%+"]
     )
 
 
 def volume_down(core):
+    """Lower the volume one step."""
     _media_key(
         core, KEY_VOLUME_DOWN, ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "10%-"]
     )
 
 
 def volume_mute(core):
+    """Toggle mute on the default audio sink."""
     _media_key(core, KEY_MUTE, ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"])
 
 
@@ -79,6 +81,7 @@ def volume_min(core):
 
 
 def brightness_up(core):
+    """Raise screen brightness one step."""
     _media_key(
         core,
         KEY_BRIGHTNESS_UP,
@@ -87,6 +90,7 @@ def brightness_up(core):
 
 
 def brightness_down(core):
+    """Lower screen brightness one step."""
     _media_key(
         core,
         KEY_BRIGHTNESS_DOWN,
@@ -95,18 +99,21 @@ def brightness_down(core):
 
 
 def dnd_on(core):
+    """Enable do-not-disturb by hiding notification banners."""
     core.host_run(
         ["gsettings", "set", "org.gnome.desktop.notifications", "show-banners", "false"]
     )
 
 
 def dnd_off(core):
+    """Disable do-not-disturb by showing notification banners again."""
     core.host_run(
         ["gsettings", "set", "org.gnome.desktop.notifications", "show-banners", "true"]
     )
 
 
 def handle(cmd, core):
+    """Route a volume/brightness/DND command; return None if none matched."""
     # Volume -- "louder"/"quieter" etc. work on their own, without "volume"/"sound".
     # Match whole words so "silent" doesn't fire on "silently", "softer" on "softest"...
     words = cmd.split()

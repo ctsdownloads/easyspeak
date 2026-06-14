@@ -1,6 +1,6 @@
-"""
-Head Tracking Plugin - Cursor control via SixDRepNet
-Uses 6D rotation representation for smooth head pose estimation
+"""Head Tracking Plugin - Cursor control via SixDRepNet.
+
+Uses a 6D rotation representation for smooth head pose estimation.
 """
 
 import contextlib
@@ -39,12 +39,13 @@ NUDGE_AMOUNT = 15
 
 
 class OneEuroFilter:
-    """
-    One-Euro Filter for smoothing noisy signals.
-    Adapts: smooth when still, responsive when moving.
+    """One-Euro filter for smoothing noisy signals.
+
+    Adaptive: smooth when the signal is still, responsive when it moves.
     """
 
     def __init__(self, freq=30.0, min_cutoff=1.0, beta=0.007, d_cutoff=1.0):
+        """Initialise the filter's cutoff/responsiveness parameters."""
         self.freq = freq
         self.min_cutoff = min_cutoff
         self.beta = beta
@@ -58,6 +59,7 @@ class OneEuroFilter:
         return 1.0 / (1.0 + tau / te)
 
     def __call__(self, x):
+        """Filter the next sample ``x`` and return the smoothed value."""
         if self.x_prev is None:
             self.x_prev = x
             return x
@@ -82,16 +84,18 @@ class OneEuroFilter:
 
 
 def setup(c):
+    """Store the core reference for use by the plugin's handlers."""
     global core
     core = c
 
 
 def host_run(cmd):
+    """Run a command and capture its output (the plugin's own subprocess seam)."""
     return subprocess.run(cmd, capture_output=True, text=True)
 
 
 def dbus_call(method, *args):
-    """Call GNOME Shell extension for cursor movement"""
+    """Call GNOME Shell extension for cursor movement."""
     cmd = [
         "gdbus",
         "call",
@@ -109,7 +113,7 @@ def dbus_call(method, *args):
 
 
 def get_screen_size():
-    """Get screen size from GNOME Shell extension"""
+    """Get screen size from GNOME Shell extension."""
     result = host_run(
         [
             "gdbus",
@@ -134,7 +138,7 @@ def get_screen_size():
 
 
 def run_tracking():
-    """Main tracking loop"""
+    """Main tracking loop."""
     global tracking_active, stop_event, cursor_x, cursor_y, frozen
 
     import cv2
@@ -342,6 +346,7 @@ def run_tracking():
 
 
 def start_tracking():
+    """Start the head-tracking thread; returns (started, message)."""
     global tracking_active, tracking_thread, stop_event, frozen
 
     if tracking_active:
@@ -356,6 +361,7 @@ def start_tracking():
 
 
 def stop_tracking():
+    """Signal the tracking thread to stop; returns (stopped, message)."""
     global tracking_active, stop_event
     stop_event.set()
     tracking_active = False
@@ -364,7 +370,7 @@ def stop_tracking():
 
 
 def recalibrate():
-    """Reset calibration - will auto-calibrate on next frames"""
+    """Reset calibration - will auto-calibrate on next frames."""
     # center_yaw/pitch are in the tracking thread scope, so restart tracking
     if tracking_active:
         stop_tracking()
@@ -375,6 +381,7 @@ def recalibrate():
 
 
 def handle(cmd, core):
+    """Start/stop tracking or run a tracking command; None if not head-tracking."""
     global cursor_x, cursor_y
     cmd_lower = cmd.lower()
 
@@ -415,7 +422,7 @@ def handle(cmd, core):
 
 
 def listen_for_tracking_commands(core):
-    """Continuous listening while tracking active"""
+    """Continuous listening while tracking active."""
     global tracking_active, cursor_x, cursor_y, frozen
 
     SCREEN_W, SCREEN_H = get_screen_size()

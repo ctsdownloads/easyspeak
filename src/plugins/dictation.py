@@ -1,6 +1,4 @@
-"""
-Dictation Plugin - Voice to text via AT-SPI
-"""
+"""Dictation Plugin - Voice to text via AT-SPI."""
 
 import logging
 import os
@@ -73,6 +71,7 @@ def ensure_gnome_accessibility():
 
 
 def setup(c):
+    """Store the core reference and enable the GNOME accessibility bridge."""
     global core
     core = c
     ensure_gnome_accessibility()
@@ -128,7 +127,7 @@ def insert_text(text):
 
 
 def format_text(text):
-    """Convert spoken punctuation to actual punctuation"""
+    """Convert spoken punctuation to actual punctuation."""
     text = text.strip()
 
     # Strip ALL punctuation Whisper auto-adds; only explicit commands add it back
@@ -222,6 +221,11 @@ def format_text(text):
 
 
 def handle(cmd, core):
+    """Enter dictation mode on "notes"; return None for other commands.
+
+    While in dictation mode it loops, transcribing speech and inserting it into
+    the focused field until "stop notes" is heard.
+    """
     if ("notes" in cmd or "note" in cmd) and "stop" not in cmd:
         core.speak("Dictation")
 

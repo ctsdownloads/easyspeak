@@ -1,6 +1,4 @@
-"""
-Browser Plugin - Qutebrowser voice control via IPC
-"""
+"""Browser Plugin - Qutebrowser voice control via IPC."""
 
 import contextlib
 import logging
@@ -217,24 +215,25 @@ def _note_missing_qb_lines(cfg, lines, reason):
 
 
 def setup(c):
+    """Store the core reference and write the required qutebrowser config."""
     global core
     core = c
     ensure_qutebrowser_config()
 
 
 def qb(command):
-    """Send command to qutebrowser via IPC"""
+    """Send command to qutebrowser via IPC."""
     logger.debug("  🌐 qutebrowser :%s", command)
     core.host_run(["qutebrowser", f":{command}"])
 
 
 def qb_open(url):
-    """Open URL in qutebrowser"""
+    """Open URL in qutebrowser."""
     core.host_run(["qutebrowser", url])
 
 
 def parse_hint_numbers(cmd):
-    """Extract hint numbers from spoken words"""
+    """Extract hint numbers from spoken words."""
     clean = re.sub(r"[.,!?\-]", " ", cmd.lower())
     words = clean.split()
     digits = [HINT_NUMBERS[word] for word in words if word in HINT_NUMBERS]
@@ -242,7 +241,7 @@ def parse_hint_numbers(cmd):
 
 
 def looks_like_hint(cmd):
-    """Check if command looks like a hint number (short, mostly digits/number words)"""
+    """Check if command looks like a hint number (short, mostly digits/number words)."""
     clean = re.sub(r"[.,!?\-\s]", "", cmd.lower())
     # Must be short
     if len(clean) > 6:
@@ -319,7 +318,7 @@ def parse_hint_number(cmd):
 
 
 def parse_spoken_url(spoken):
-    """Convert spoken URL to actual URL. 'claude dot ai' -> 'https://claude.ai'"""
+    """Convert spoken URL to actual URL. 'claude dot ai' -> 'https://claude.ai'."""
     url = spoken.lower().strip()
 
     # Replace spoken elements
@@ -341,7 +340,7 @@ def parse_spoken_url(spoken):
 
 
 def listen_for_hint(core):
-    """Listen for hint number after showing hints"""
+    """Listen for hint number after showing hints."""
     logger.info("  🔢 Say hint number (e.g. 'zero two'), 'exit links' to cancel")
 
     # Small delay to let hints render
@@ -441,6 +440,11 @@ def _is_reserved_global(cmd_lower):
 
 
 def handle(cmd, core):
+    """Enter browser mode on a browser command; return None otherwise.
+
+    A matching command launches qutebrowser (if needed) and runs the continuous
+    browser-mode loop; reserved global commands (sleep/quit) are passed through.
+    """
     cmd_lower = cmd.lower().strip(".,!? ")
 
     # Global sleep/quit commands belong to other plugins; if we matched them as
@@ -469,7 +473,7 @@ def handle(cmd, core):
 
 
 def browser_mode(core):
-    """Continuous listening for browser commands"""
+    """Continuous listening for browser commands."""
     core.speak("Browser")
     logger.info("=== BROWSER MODE ACTIVE ===")
     logger.info("Say commands directly. 'exit browser' to leave.")
@@ -517,6 +521,7 @@ def browser_mode(core):
 
 
 def handle_browser_command(cmd_lower, core):
+    """Execute a single in-browser command; False if it isn't recognised."""
     # --- Hints ---
     if cmd_lower in [
         "numbers",

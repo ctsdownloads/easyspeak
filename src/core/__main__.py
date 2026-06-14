@@ -1,5 +1,4 @@
-"""
-Application entry point when executed as a module, e.g.
+"""Application entry point when executed as a module, e.g.
 
 .. code:: console
 

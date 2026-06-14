@@ -1,5 +1,4 @@
-"""
-Sleep Plugin - Deactivate the assistant by voice.
+"""Sleep Plugin - Deactivate the assistant by voice.
 
 "Go to sleep" (or "stop listening") releases the microphone and stops wake-word
 detection until the user reactivates EasySpeak from the GNOME tray indicator. It
@@ -22,6 +21,7 @@ SLEEP_PHRASES = ("go to sleep", "goto sleep", "stop listening")
 
 
 def handle(cmd, core):
+    """Deactivate the assistant on a sleep phrase; return None otherwise."""
     cmd_lower = cmd.lower().strip()
     if any(phrase in cmd_lower for phrase in SLEEP_PHRASES):
         # Announce only the attempt. The tray controller confirms once sleep

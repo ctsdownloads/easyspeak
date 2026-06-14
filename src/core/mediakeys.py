@@ -1,7 +1,7 @@
-"""Replay multimedia keys through GNOME (Mutter) so the desktop renders its own
-native feedback — the volume OSD and the chime — rather than imitating them.
+"""Replay multimedia keys through GNOME (Mutter) for native desktop feedback.
 
-Pressing a volume key does not run any command: gnome-settings-daemon grabs the
+This lets the desktop render its own volume OSD and chime rather than imitating
+them. Pressing a volume key does not run any command: gnome-settings-daemon grabs the
 raw evdev key and handles the volume change, OSD and chime itself. The only way
 to reproduce that exactly is to replay the key. We inject it through Mutter's
 RemoteDesktop interface, which needs no special privileges. A RemoteDesktop

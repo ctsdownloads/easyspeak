@@ -35,14 +35,19 @@ EXTENSION_ASSETS = ("extension.js", "extension-helpers.js", "metadata.json")
 
 
 class RefreshResult(enum.Enum):
+    """Outcome of a single :func:`refresh_extension_files` attempt."""
+
     REFRESHED = "refreshed"
     UNCHANGED = "unchanged"
     ERROR = "error"
 
 
 def extension_source_dir():
-    """Package dir holding the bundled assets (``src/``), resolved relative to
-    this module so it works in both editable and wheel installs."""
+    """Return the package dir holding the bundled assets.
+
+    Resolved relative to this module (``src/``) so it works in both editable
+    and wheel installs.
+    """
     return Path(__file__).resolve().parents[1]
 
 
@@ -70,12 +75,14 @@ def _discard_staged(dest_dir):
 
 
 def refresh_extension_files(src_dir, dest_dir):
-    """Copy the bundled assets into ``dest_dir`` when they differ from the
-    installed copy. Best-effort: returns ``REFRESHED`` if written, ``UNCHANGED``
-    if already current, or ``ERROR`` (noted on stderr) when a source is missing
-    or a copy fails. Assets are staged then moved into place (extension.js last),
-    so a failure leaves any working install untouched and never installs
-    extension.js without the helper it imports."""
+    """Copy the bundled assets into ``dest_dir`` when they differ from it.
+
+    Best-effort: returns ``REFRESHED`` if written, ``UNCHANGED`` if already
+    current, or ``ERROR`` (noted on stderr) when a source is missing or a copy
+    fails. Assets are staged then moved into place (extension.js last), so a
+    failure leaves any working install untouched and never installs extension.js
+    without the helper it imports.
+    """
     srcs = {name: src_dir / name for name in EXTENSION_ASSETS}
     if not all(s.is_file() for s in srcs.values()):
         logger.warning("bundled GNOME extension sources missing at %s", src_dir)
@@ -107,8 +114,10 @@ def refresh_extension_files(src_dir, dest_dir):
 
 
 def refresh_installed_extension():
-    """Refresh the installed extension from the bundled copy; run by the systemd
-    unit at each login."""
+    """Refresh the installed extension from the bundled copy.
+
+    Run by the systemd user unit at each login.
+    """
     return refresh_extension_files(extension_source_dir(), extension_dest_dir())
 
 
@@ -142,9 +151,11 @@ WantedBy={PRE_SHELL_TARGET}
 
 
 def _run_systemctl(*args):
-    """Run a ``systemctl --user`` command, or return None if it can't be exec'd —
-    an un-execable systemctl raises OSError despite ``check=False``, and the
-    refresh-unit install must stay non-fatal."""
+    """Run a ``systemctl --user`` command, or return None if it can't be run.
+
+    An un-execable systemctl raises OSError despite ``check=False``, and the
+    refresh-unit install must stay non-fatal.
+    """
     try:
         return subprocess.run(
             ["systemctl", "--user", *args],
@@ -167,9 +178,11 @@ def _is_enabled():
 
 
 def install_refresh_unit():
-    """Install and enable the pre-shell refresh unit, returning a short status
-    string or None when nothing changed or it isn't applicable (no systemd,
-    write/enable failure). Idempotent."""
+    """Install and enable the pre-shell refresh unit, idempotently.
+
+    Returns a short status string, or None when nothing changed or it isn't
+    applicable (no systemd, write/enable failure).
+    """
     if shutil.which("systemctl") is None:
         return None
 
@@ -200,9 +213,12 @@ def install_refresh_unit():
 
 
 def ensure_extension():
-    """Install the bundled extension if missing, keep the installed copy current,
-    and enable it, reporting what it did. Skipped on non-GNOME desktops; non-fatal
-    on missing sources or write failures."""
+    """Install, refresh, and enable the bundled extension, reporting what it did.
+
+    Installs it if missing, keeps the installed copy current, and enables it.
+    Skipped on non-GNOME desktops; non-fatal on missing sources or write
+    failures.
+    """
     if shutil.which("gnome-extensions") is None:
         return
 
@@ -321,6 +337,7 @@ def ensure_extension():
 
 
 def main():
+    """Refresh the installed extension; entry point for the systemd unit."""
     refresh_installed_extension()
     return 0
 
