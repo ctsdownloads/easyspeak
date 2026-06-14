@@ -50,6 +50,7 @@ nav:
       - Plugins: reference/plugins.md
   - Contributing: contributing.md
   - Changelog: changelog.md
+  - License: license.md
 
 plugins:
   - search
