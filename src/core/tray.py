@@ -72,6 +72,10 @@ class Tray:
     """
 
     def __init__(self, control_file=CONTROL_FILE, speak=None):
+        """Set up the controller, optionally with a spoken-feedback callback.
+
+        ``speak`` defaults to a no-op so the tray works headless and in tests.
+        """
         self._control_file = Path(control_file)
         self._sleep_requested = False
         # Spoken feedback callback (core.speak). The plugin only announces the
@@ -91,9 +95,11 @@ class Tray:
         self.set_state(STATE_LISTENING)
 
     def request_sleep(self):
-        """Queue a deactivate (e.g. the "go to sleep" voice command); the mic is
-        released at the audio loop's next :meth:`poll`, after the current command
-        finishes."""
+        """Queue a deactivate (e.g. the "go to sleep" voice command).
+
+        The mic is released at the audio loop's next :meth:`poll`, after the
+        current command finishes.
+        """
         self._sleep_requested = True
 
     def poll(self, release_mic, acquire_mic):

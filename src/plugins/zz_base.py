@@ -1,6 +1,4 @@
-"""
-Base Plugin - Help and Exit
-"""
+"""Base Plugin - Help and Exit."""
 
 NAME = "base"
 DESCRIPTION = "Help and exit commands"
@@ -14,11 +12,17 @@ core = None
 
 
 def setup(c):
+    """Store the core reference for use by the plugin's handlers."""
     global core
     core = c
 
 
 def handle(cmd, core):
+    """Handle the help and exit commands; return None to pass others through.
+
+    Returns False to signal the daemon to exit, True if help was shown, or None
+    when the command is for another plugin.
+    """
     cmd_lower = cmd.lower().strip()
 
     # Exit - but NOT if it's "quit tracking" etc

@@ -137,9 +137,6 @@ ignore = [
   "TRY300",  # an explicit return inside try reads clearer than an else block here
   "TRY301",  # raising inside try to trigger local cleanup is intentional
   "FBT002",  # the host_run(background=...) plugin convenience flag stays positional
-
-  # --- TODO: remove as docstrings are written for src/ (see docs effort) ---
-  "D101", "D102", "D103", "D107", "D200", "D205", "D209", "D212", "D415",
 ]
 
 [tool.ruff.lint.per-file-ignores]

@@ -1,6 +1,4 @@
-"""
-Apps Plugin - Launch and close applications
-"""
+"""Apps Plugin - Launch and close applications."""
 
 import os
 
@@ -75,6 +73,7 @@ core = None
 
 
 def setup(c):
+    """Store the core reference and resolve the user's default terminal."""
     global core
     core = c
     _register_terminal(c)
@@ -146,7 +145,7 @@ def _register_from_argv(argv, core):
 
 
 def find_app(name, core):
-    """Find app - returns (type, id)"""
+    """Find app - returns (type, id)."""
     if name in FLATPAK_APPS:
         result = core.host_run(["flatpak", "info", FLATPAK_APPS[name]])
         if result.returncode == 0:
@@ -163,6 +162,7 @@ def find_app(name, core):
 
 
 def launch_app(name, core):
+    """Launch the named app (flatpak or local binary); False if not found."""
     app_type, app_id = find_app(name, core)
     if app_type == "flatpak":
         core.host_run(["flatpak", "run", app_id], background=True)
@@ -174,6 +174,7 @@ def launch_app(name, core):
 
 
 def close_app(name, core):
+    """Close the named app (flatpak kill or pkill); False if not found."""
     app_type, app_id = find_app(name, core)
     if app_type == "flatpak":
         core.host_run(["flatpak", "kill", app_id])
@@ -185,6 +186,7 @@ def close_app(name, core):
 
 
 def handle(cmd, core):
+    """Open or close an app named in the command; return None if none matched."""
     all_apps = list(FLATPAK_APPS.keys()) + list(LOCAL_APPS.keys())
 
     for app in all_apps:

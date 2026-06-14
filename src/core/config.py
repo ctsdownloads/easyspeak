@@ -48,4 +48,5 @@ def load_whisper_model(
     compute_type: str = WHISPER_COMPUTE_TYPE,
     cpu_threads: int = WHISPER_CPU_THREADS,
 ) -> WhisperModel:
+    """Build a faster-whisper model from the configured (or given) settings."""
     return WhisperModel(model_name, compute_type=compute_type, cpu_threads=cpu_threads)

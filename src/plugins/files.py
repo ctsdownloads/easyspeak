@@ -1,6 +1,4 @@
-"""
-Files Plugin - Open folders in file manager
-"""
+"""Files Plugin - Open folders in file manager."""
 
 import os
 
@@ -27,12 +25,13 @@ core = None
 
 
 def setup(c):
+    """Store the core reference for use by the plugin's handlers."""
     global core
     core = c
 
 
 def open_folder(path, core):
-    """Open folder in file manager"""
+    """Open a folder in the first available file manager; False if none found."""
     expanded = os.path.expanduser(path)
 
     file_managers = [
@@ -52,6 +51,7 @@ def open_folder(path, core):
 
 
 def handle(cmd, core):
+    """Open a known folder when the command names one; return None otherwise."""
     for folder, path in FOLDERS.items():
         if folder in cmd and (
             "open" in cmd or "go to" in cmd or "show" in cmd or "browse" in cmd

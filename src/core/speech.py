@@ -79,6 +79,7 @@ class SpeechPipeline:
     """
 
     def __init__(self):
+        """Create an idle pipeline; the subprocesses are spawned on first use."""
         self._piper = None
         self._player = None
 
@@ -231,9 +232,11 @@ class SpeechPipeline:
             SpeechPipeline._reap(proc)
 
     def drain(self):
-        """Flush pending speech and wait for playback to finish, then stop the
-        pipeline. Used on shutdown so a final phrase (e.g. "Goodbye.") is heard
-        in full before the process exits."""
+        """Flush pending speech, wait for playback, then stop the pipeline.
+
+        Used on shutdown so a final phrase (e.g. "Goodbye.") is heard in full
+        before the process exits.
+        """
         piper, player = self._piper, self._player
         self._piper = self._player = None
         if piper is not None:

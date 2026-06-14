@@ -1,6 +1,4 @@
-"""
-Media Plugin - Playback controls via MPRIS
-"""
+"""Media Plugin - Playback controls via MPRIS."""
 
 NAME = "media"
 DESCRIPTION = "Media playback controls"
@@ -16,11 +14,13 @@ core = None
 
 
 def setup(c):
+    """Store the core reference for use by the plugin's handlers."""
     global core
     core = c
 
 
 def get_media_players(core):
+    """Return the bus names of all running MPRIS media players."""
     result = core.host_run(
         [
             "dbus-send",
@@ -40,6 +40,10 @@ def get_media_players(core):
 
 
 def media_control(action, core):
+    """Send an MPRIS action (play/pause/next/previous) to every running player.
+
+    Returns False if no player is running or the action is unknown.
+    """
     players = get_media_players(core)
     if not players:
         return False
@@ -69,6 +73,7 @@ def media_control(action, core):
 
 
 def handle(cmd, core):
+    """Map a playback command to an MPRIS action; return None if not media."""
     # "stop the music"/"stop playing" mean pause; bare "stop" isn't a media command.
     # Whole-word match so "stop tracking" (eye tracking) isn't caught by "track".
     words = cmd.split()

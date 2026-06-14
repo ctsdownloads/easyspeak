@@ -1,5 +1,4 @@
-"""
-EasySpeak Core - Voice Control for Linux
+"""EasySpeak Core - Voice Control for Linux.
 
 Loads plugins from plugins/ folder automatically.
 Uses OpenWakeWord for fast wake detection.
@@ -46,7 +45,16 @@ logger = logging.getLogger(__name__)
 
 
 class EasySpeak:
+    """The voice-control daemon: wake detection, transcription, and routing.
+
+    Owns the audio pipeline (wake word -> Whisper), the loaded plugins, the
+    text-to-speech pipeline, and the panel indicator, and exposes the small
+    plugin-facing API (:meth:`speak`, :meth:`host_run`, :meth:`transcribe`, ...)
+    that plugins use to act on commands.
+    """
+
     def __init__(self):
+        """Initialise daemon state; models and audio are loaded later in run()."""
         self.plugins = []
         self.whisper = None
         self.wakeword = None
@@ -96,15 +104,25 @@ class EasySpeak:
             return False
 
     def deactivate(self):
-        """Request the assistant go to sleep: release the mic and stop wake
-        detection until reactivated from the tray. Plugin-facing; the actual
-        release happens at the next main-loop iteration (handled by the tray
-        controller) so the triggering command can finish, and speak, first."""
+        """Request the assistant go to sleep (plugin-facing).
+
+        Releases the mic and stops wake detection until reactivated from the
+        tray. The actual release happens at the next main-loop iteration
+        (handled by the tray controller) so the triggering command can finish,
+        and speak, first.
+        """
         self.tray.request_sleep()
 
     # --- Plugin management ---
 
     def load_plugins(self):
+        """Discover and import every plugin module from the ``plugins/`` dir.
+
+        Files are loaded in sorted order (numeric prefixes set load order);
+        names starting with ``_`` are skipped. A module is registered only if it
+        exposes ``NAME`` and ``handle``; its optional ``setup`` hook runs once.
+        Import or setup failures are logged and skipped, never fatal.
+        """
         plugins_dir = Path(__file__).parent.parent / "plugins"
         if not plugins_dir.exists():
             logger.warning("No plugins directory found")
@@ -134,7 +152,7 @@ class EasySpeak:
                 logger.warning("  ✗ Failed to load %s: %s", file.name, e)
 
     def get_all_commands(self):
-        """Get all commands from all plugins for help text"""
+        """Get all commands from all plugins for help text."""
         commands = []
         for plugin in self.plugins:
             if hasattr(plugin, "COMMANDS"):
@@ -205,8 +223,11 @@ class EasySpeak:
         self.keep_listening = True
 
     def _show_help(self):
-        """Display the command list via the plugin that owns it (the base
-        plugin's ``show_help``), so the help text isn't duplicated here."""
+        """Display the command list via the plugin that owns it.
+
+        Delegates to the base plugin's ``show_help`` so the help text isn't
+        duplicated here.
+        """
         for plugin in self.plugins:
             if hasattr(plugin, "show_help"):
                 plugin.show_help(self)
@@ -231,8 +252,11 @@ class EasySpeak:
             )
 
     def _close_stream(self):
-        """Release the microphone so other apps — and GNOME's privacy mic
-        indicator — see it as free. The PyAudio instance is kept for reopening."""
+        """Release the microphone so other apps see it as free.
+
+        Also clears GNOME's privacy mic indicator. The PyAudio instance is kept
+        for reopening.
+        """
         if self.stream is None:
             return
         for release in (self.stream.stop_stream, self.stream.close):
@@ -250,9 +274,14 @@ class EasySpeak:
             )
 
     def is_silence(self, audio_chunk):
+        """Return True if the audio chunk's mean amplitude is below the threshold."""
         return np.abs(audio_chunk).mean() < SILENCE_THRESHOLD
 
     def record_until_silence(self):
+        """Record mic audio until a short silence, capped at five seconds.
+
+        Returns the captured PCM bytes. Plugin-facing.
+        """
         frames = []
         silent_chunks = 0
         chunks_needed = int(SILENCE_DURATION * 16000 / 1600)
@@ -272,6 +301,11 @@ class EasySpeak:
         return b"".join(frames)
 
     def wait_for_speech(self, timeout=5):
+        """Block until speech is heard, returning its first PCM chunk.
+
+        Returns None if nothing is heard within ``timeout`` seconds.
+        Plugin-facing.
+        """
         for _ in range(int(timeout * 16000 / 1600)):
             pcm = self.stream.read(1600, exception_on_overflow=False)
             if not self.is_silence(np.frombuffer(pcm, dtype=np.int16)):
@@ -279,6 +313,11 @@ class EasySpeak:
         return None
 
     def transcribe(self, audio_data, prompt=None):
+        """Transcribe raw PCM audio to text with Whisper.
+
+        ``prompt`` biases recognition (defaults to the command vocabulary).
+        Plugin-facing.
+        """
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
             with wave.open(f.name, "wb") as wf:
                 wf.setnchannels(1)
@@ -297,14 +336,19 @@ class EasySpeak:
     # --- Main loop ---
 
     def _reset_detector(self):
-        """Clear the wake detector's feature buffer and drop buffered mic audio,
-        so stale or half-primed state can't fire a spurious wake."""
+        """Reset the wake detector and drop buffered mic audio.
+
+        Stale or half-primed state can't then fire a spurious wake.
+        """
         self.wakeword.reset()
         self.flush_stream()
 
     def _play_wake_chime(self):
-        """Play the wake acknowledgement sound, then flush the audio it bled
-        into the mic so it isn't mistaken for the user speaking."""
+        """Play the wake acknowledgement sound, then flush the mic.
+
+        Flushing drops the chime audio that bled into the mic so it isn't
+        mistaken for the user speaking.
+        """
         subprocess.run(
             ["paplay", "/usr/share/sounds/freedesktop/stereo/message.oga"],
             capture_output=True,
@@ -312,10 +356,12 @@ class EasySpeak:
         self.flush_stream()
 
     def _drain_feedback(self):
-        """Wait for the spoken "didn't understand" feedback to finish playing,
-        then flush the mic. speak() is non-blocking, so flushing alone leaves the
-        still-playing tail for the open mic to transcribe into the next
-        escalation (e.g. opening help) with no one having spoken."""
+        """Wait for the "didn't understand" feedback to finish, then flush the mic.
+
+        speak() is non-blocking, so flushing alone leaves the still-playing tail
+        for the open mic to transcribe into the next escalation (e.g. opening
+        help) with no one having spoken.
+        """
         self.speech.drain()
         self.flush_stream()
 
@@ -363,6 +409,11 @@ class EasySpeak:
         return False
 
     def run(self):
+        """Load models and plugins, then run the wake-word listen loop forever.
+
+        Blocks until the user quits (voice command, tray, or Ctrl-C), always
+        releasing the microphone and draining speech on the way out.
+        """
         logger.info("Loading OpenWakeWord...")
         self.wakeword = WakeWordModel()
 
