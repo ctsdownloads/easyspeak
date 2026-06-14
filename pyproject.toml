@@ -62,6 +62,9 @@ benchmark = [
 ]
 docs = [
   "mike>=2.1",
+  # Cap MkDocs below 2.0: the 2.0 line may drop the plugin API that
+  # mkdocstrings/mike rely on, so stay on the plugin-supporting 1.x lineage.
+  "mkdocs<2",
   "mkdocs-material>=9.5",
   "mkdocstrings[python]>=0.27",
 ]

@@ -106,6 +106,11 @@ benchmark *args:
     uv run --extra=benchmark pytest tests/benchmarks/ \
         --benchmark-json=results.json {{ args }}
 
+# Build the docs (use `serve` to serve at http://127.0.0.1:8000 with live-reload)
+[group('release')]
+docs *args=('build --strict'):
+    uv run --extra=docs mkdocs {{ args }}
+
 # Build package and check metadata
 [group('release')]
 package *args:
