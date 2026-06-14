@@ -80,10 +80,11 @@
           portaudio
         ];
 
-        # FHS-style path baked into src/core/main.py for the wake chime;
-        # doesn't exist on NixOS, so we sed-replace it during the sync step.
-        chimeFhsPath = "/usr/share/sounds/freedesktop/stereo/message.oga";
-        chimeNixPath = "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/message.oga";
+        # FHS-style sounds directory baked into the source (wake chime in
+        # core.main, error chime in core.tray); doesn't exist on NixOS, so we
+        # sed-replace it with the Nix store one during the sync step.
+        soundsFhsDir = "/usr/share/sounds/freedesktop/stereo";
+        soundsNixDir = "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo";
 
         # Piper voice model (Amy, US English) — fetched at build time so the
         # README's manual wget step isn't needed on NixOS. Piper expects the
@@ -130,7 +131,8 @@
             if [ ! -f "$stamp" ] || [ "$(cat "$stamp" 2>/dev/null || true)" != "${./.}" ]; then
               rm -rf "$src_dir"
               cp -r --no-preserve=mode,ownership "${./.}" "$src_dir"
-              sed -i 's|${chimeFhsPath}|${chimeNixPath}|g' "$src_dir/src/core/main.py"
+              sed -i 's|${soundsFhsDir}|${soundsNixDir}|g' \
+                "$src_dir/src/core/main.py" "$src_dir/src/core/tray.py"
               echo "${./.}" > "$stamp"
             fi
 

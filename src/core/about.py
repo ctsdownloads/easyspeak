@@ -14,26 +14,20 @@ a display present — which is how the unit suite exercises it.
 
 import importlib.metadata
 
-# --- Project metadata (single source of truth, shared with the tray) ---
-
 APP_ID = "io.github.ctsdownloads.EasySpeak"
 APPLICATION_NAME = "EasySpeak"
-# A themed icon that ships with every GNOME install; the project has no icon of
-# its own to bundle, and a microphone reads true for a voice assistant.
-APPLICATION_ICON = "audio-input-microphone"
+APPLICATION_ICON = "audio-input-microphone"  # from GNOME's adwaita-icon-theme
 COMMENTS = "Voice control for Linux desktops. Fully local, no cloud, Wayland-native."
 COPYRIGHT = "© Matt Hartley and the EasySpeak contributors"
 
 REPO_URL = "https://github.com/ctsdownloads/easyspeak"
 DOCS_URL = "https://ctsdownloads.github.io/easyspeak/"
 ISSUES_URL = "https://github.com/ctsdownloads/easyspeak/issues"
+DISCUSSIONS_URL = "https://github.com/ctsdownloads/easyspeak/discussions"
 
-# The author/maintainer, shown as the headline developer.
 DEVELOPER_NAME = "Matt Hartley"
 DEVELOPERS = ["Matt Hartley <matt@matthartley.com>"]
 
-# Everyone else who has landed changes (bots excluded), shown in their own
-# credit section alongside the maintainer.
 CONTRIBUTORS = [
     "Peter Bittner <peter@painless.software>",
     "Tulip Blossom <tulilirockz@outlook.com>",
@@ -69,45 +63,50 @@ def main():  # pragma: no cover - needs libadwaita and a display; run live
 
 
 def _present(app):  # pragma: no cover - needs libadwaita and a display; run live
-    """Build and present the About UI, quitting the app once it's dismissed."""
+    """Build and present the About UI, quitting the app once it's dismissed.
+
+    We need to distinguish between the modern widget (libadwaita >= 1.5)
+    and the older self-contained About window (libadwaita < 1.5).
+    For the former, we must attach the dialog to a parent window, a minimal
+    host purely to own it, and quit on close.
+    """
     from gi.repository import Adw, Gtk
 
     if hasattr(Adw, "AboutDialog"):
-        # libadwaita >= 1.5: the modern widget. A dialog attaches to a parent
-        # window; create a minimal host purely to own it, and quit on close.
         dialog = Adw.AboutDialog(
             application_name=APPLICATION_NAME,
             application_icon=APPLICATION_ICON,
             version=app_version(),
             comments=COMMENTS,
-            website=REPO_URL,
+            website=DOCS_URL,
             issue_url=ISSUES_URL,
             developer_name=DEVELOPER_NAME,
             developers=DEVELOPERS,
             copyright=COPYRIGHT,
             license_type=Gtk.License.GPL_3_0,
         )
-        dialog.add_link("Documentation", DOCS_URL)
+        dialog.add_link("Source Code", REPO_URL)
+        dialog.add_link("Discussions", DISCUSSIONS_URL)
         dialog.add_credit_section("Contributors", CONTRIBUTORS)
         host = Gtk.ApplicationWindow(application=app)
         dialog.connect("closed", lambda *_: app.quit())
         dialog.present(host)
     else:
-        # libadwaita < 1.5: the older self-contained About window.
         window = Adw.AboutWindow(
             application=app,
             application_name=APPLICATION_NAME,
             application_icon=APPLICATION_ICON,
             version=app_version(),
             comments=COMMENTS,
-            website=REPO_URL,
+            website=DOCS_URL,
             issue_url=ISSUES_URL,
             developer_name=DEVELOPER_NAME,
             developers=DEVELOPERS,
             copyright=COPYRIGHT,
             license_type=Gtk.License.GPL_3_0,
         )
-        window.add_link("Documentation", DOCS_URL)
+        window.add_link("Source Code", REPO_URL)
+        window.add_link("Discussions", DISCUSSIONS_URL)
         window.add_credit_section("Contributors", CONTRIBUTORS)
         window.present()
 

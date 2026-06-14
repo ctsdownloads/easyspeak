@@ -41,6 +41,11 @@ class TestCredits:
         assert not any("Copilot" in c for c in about.CONTRIBUTORS)
 
     def test_links_out_to_the_project(self):
-        """The repo, docs and issues links are all real https URLs."""
-        for url in (about.REPO_URL, about.DOCS_URL, about.ISSUES_URL):
+        """The repo, docs, issues and discussions links are all real https URLs."""
+        for url in (
+            about.REPO_URL,
+            about.DOCS_URL,
+            about.ISSUES_URL,
+            about.DISCUSSIONS_URL,
+        ):
             assert url.startswith("https://")

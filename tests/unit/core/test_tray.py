@@ -3,11 +3,12 @@
 import itertools
 import subprocess
 import sys
+import tempfile
 from unittest.mock import Mock, patch
 
 from easyspeak.core.about import DOCS_URL
 from easyspeak.core.tray import (
-    ABOUT_MODULE,
+    ABOUT_HELPER,
     COMMAND_ABOUT,
     COMMAND_HELP,
     COMMAND_QUIT,
@@ -245,8 +246,8 @@ class TestPoll:
 class TestMenuActions:
     """Tests for the fire-and-forget Help/About menu commands.
 
-    Both spawn a detached helper; ``subprocess.Popen`` is patched so nothing is
-    actually launched.
+    Both spawn a detached helper; ``subprocess.Popen`` is patched so nothing
+    is actually launched.
     """
 
     def _tray(self, commands):
@@ -255,28 +256,80 @@ class TestMenuActions:
         tray.set_state = Mock()
         return tray
 
+    @staticmethod
+    def _started(mock_popen):
+        """Make the patched Popen behave like a helper that opened its window.
+
+        A real GUI keeps running, so its wait() times out within the startup
+        grace; mirror that so the success path is exercised rather than the
+        failure path (a bare Mock's wait() would read as a non-zero exit).
+        """
+        mock_popen.return_value.wait.side_effect = subprocess.TimeoutExpired(
+            cmd="helper", timeout=1.5
+        )
+
     @patch("easyspeak.core.tray.subprocess.Popen")
     def test_help_opens_docs_in_default_browser(self, mock_popen):
         """A 'help' command opens the docs URL via xdg-open and carries on."""
+        self._started(mock_popen)
         tray = self._tray([COMMAND_HELP])
 
         assert tray.poll(Mock(), Mock()) is TrayAction.CONTINUE
         assert mock_popen.call_args.args[0] == ["xdg-open", DOCS_URL]
 
+    @patch.dict("easyspeak.core.tray.os.environ", {}, clear=True)
     @patch("easyspeak.core.tray.subprocess.Popen")
-    def test_about_launches_the_about_module(self, mock_popen):
-        """An 'about' command spawns the About window with the daemon's own
-        interpreter and carries on."""
+    def test_about_falls_back_to_own_interpreter(self, mock_popen):
+        """With no PyGObject interpreter configured, About runs in our own."""
+        self._started(mock_popen)
         tray = self._tray([COMMAND_ABOUT])
 
         assert tray.poll(Mock(), Mock()) is TrayAction.CONTINUE
         cmd = mock_popen.call_args.args[0]
-        assert cmd[0] == sys.executable
-        assert cmd[1:] == ["-m", ABOUT_MODULE]
+        assert cmd == [sys.executable, ABOUT_HELPER]
+
+    @patch.dict(
+        "easyspeak.core.tray.os.environ",
+        {"EASYSPEAK_ATSPI_PYTHON": "/usr/bin/gtk-python"},
+        clear=True,
+    )
+    @patch("easyspeak.core.tray.subprocess.Popen")
+    def test_about_uses_the_pygobject_interpreter_when_set(self, mock_popen):
+        """The About window needs GTK4/libadwaita, so it reuses the PyGObject
+        interpreter the AT-SPI helper runs in when EASYSPEAK_ATSPI_PYTHON is set.
+        """
+        self._started(mock_popen)
+        tray = self._tray([COMMAND_ABOUT])
+
+        assert tray.poll(Mock(), Mock()) is TrayAction.CONTINUE
+        cmd = mock_popen.call_args.args[0]
+        assert cmd == ["/usr/bin/gtk-python", ABOUT_HELPER]
+
+    @patch("easyspeak.core.tray.subprocess.run")
+    @patch("easyspeak.core.tray.subprocess.Popen")
+    def test_failed_helper_is_reported_not_swallowed(self, mock_popen, mock_run):
+        """A helper that exits non-zero at startup logs its stderr, plays the
+        error chime, and speaks an apology, rather than failing silently."""
+        proc = mock_popen.return_value
+        proc.wait.return_value = 1
+        with tempfile.TemporaryFile() as errlog:
+            errlog.write(b"ModuleNotFoundError: No module named 'gi'\n")
+            errlog.seek(0)
+            tray = self._tray([COMMAND_ABOUT])
+
+            with patch(
+                "easyspeak.core.tray.tempfile.TemporaryFile", return_value=errlog
+            ):
+                assert tray.poll(Mock(), Mock()) is TrayAction.CONTINUE
+
+        assert mock_run.call_args.args[0][0] == "paplay"
+        tray._speak.assert_called_once()
+        assert "About window" in tray._speak.call_args.args[0]
 
     @patch("easyspeak.core.tray.subprocess.Popen")
     def test_help_does_not_release_the_mic(self, mock_popen):
         """Help is a side effect only; it never touches the sleep lifecycle."""
+        self._started(mock_popen)
         tray = self._tray([COMMAND_HELP])
         release, acquire = Mock(), Mock()
 
@@ -285,10 +338,13 @@ class TestMenuActions:
         release.assert_not_called()
         acquire.assert_not_called()
 
+    @patch.dict("easyspeak.core.tray.os.environ", {}, clear=True)
     @patch("easyspeak.core.tray.subprocess.Popen")
     def test_menu_actions_work_while_asleep(self, mock_popen):
-        """Help/About fire from the idle loop (where the menu is actually shown),
-        then a later 'unmute' wakes the daemon."""
+        """Help/About fire from the idle loop (where the menu is actually
+        shown), then a later 'unmute' wakes the daemon.
+        """
+        self._started(mock_popen)
         tray = self._tray(["mute", COMMAND_HELP, COMMAND_ABOUT, "unmute"])
         release, acquire = Mock(), Mock()
 
@@ -300,12 +356,17 @@ class TestMenuActions:
         assert spawned == ["xdg-open", sys.executable]
         acquire.assert_called_once()
 
+    @patch("easyspeak.core.tray.subprocess.run")
     @patch("easyspeak.core.tray.subprocess.Popen", side_effect=OSError("no xdg-open"))
-    def test_spawn_failure_is_swallowed(self, mock_popen):
-        """A missing helper binary logs but doesn't disturb the audio loop."""
+    def test_missing_helper_binary_is_reported(self, mock_popen, mock_run):
+        """A helper that can't even launch (missing binary) chimes and speaks
+        an apology but doesn't disturb the audio loop.
+        """
         tray = self._tray([COMMAND_HELP])
 
         assert tray.poll(Mock(), Mock()) is TrayAction.CONTINUE
+        assert mock_run.call_args.args[0][0] == "paplay"
+        tray._speak.assert_called_once()
 
 
 class TestLifecycleHooks:
@@ -317,6 +378,19 @@ class TestLifecycleHooks:
         Tray().started()
 
         assert mock_run.call_args.args[0][-1] == STATE_LISTENING
+
+    @patch("easyspeak.core.tray.subprocess.run")
+    def test_started_discards_a_stale_command(self, mock_run):
+        """A command left in the control file before startup is dropped, so it
+        can't fire (e.g. pop the About window) the moment polling begins.
+        """
+        mock_run.return_value = Mock(returncode=0)
+        tray = Tray()
+        tray.take_command = Mock()
+
+        tray.started()
+
+        tray.take_command.assert_called_once()
 
     @patch("easyspeak.core.tray.subprocess.run")
     def test_stopped_hides_indicator(self, mock_run):

@@ -20,8 +20,10 @@ signals the open mic.
 import contextlib
 import enum
 import logging
+import os
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -42,11 +44,20 @@ COMMAND_HELP = "help"  # open the documentation page in the default browser
 COMMAND_ABOUT = "about"  # open the libadwaita About window
 
 # The About window is its own process: the indicator lives in a GNOME Shell
-# extension that can't host GTK, so the daemon spawns this module instead.
-ABOUT_MODULE = "easyspeak.core.about"
+# extension that can't host GTK, so the daemon spawns this script instead. It's
+# run by file path (not ``-m``) because the PyGObject interpreter it runs in (see
+# _run_menu_action) doesn't have the ``easyspeak`` package installed; about.py is
+# self-contained, so a plain path works there and in our own interpreter alike.
+ABOUT_HELPER = str(Path(__file__).with_name("about.py"))
 
 # Shared with the extension's ScreenshotManager, which creates ~/.cache/easyspeak.
 CONTROL_FILE = Path.home() / ".cache" / "easyspeak" / "control"
+
+# Desktop "something failed" sound, played alongside the spoken apology when a
+# menu helper can't open. FHS path (from sound-theme-freedesktop); the flake
+# sed-replaces this directory with the Nix store one at sync time, mirroring the
+# wake chime in core.main.
+ERROR_SOUND = "/usr/share/sounds/freedesktop/stereo/dialog-error.oga"
 
 # How long to idle between control-file probes while the assistant is asleep.
 SLEEP_POLL_INTERVAL = 0.2
@@ -57,6 +68,13 @@ MUTED_REPUSH_INTERVAL = 5.0
 
 # Cap the gdbus call so a wedged session bus can't hang the audio loop.
 GDBUS_TIMEOUT = 5.0
+
+# How long to watch a launched helper before assuming its window opened. A
+# helper that can't start (bad interpreter, missing GTK/libadwaita, no display)
+# exits within this window; a working GUI keeps running, so we stop watching and
+# leave it detached. Only paid when a helper is actually launched, and only in
+# full while one succeeds — a failure returns as soon as the process dies.
+HELPER_STARTUP_GRACE = 1.5
 
 
 class TrayAction(enum.Enum):
@@ -84,19 +102,28 @@ class Tray:
         """Set up the controller, optionally with a spoken-feedback callback.
 
         ``speak`` defaults to a no-op so the tray works headless and in tests.
+
+        For the spoken feedback callback (core.speak) the plugin only announces
+        the *attempt* ("Going to sleep."); the tray confirms or, when it can't
+        actually sleep, explains — since only it knows whether sleep engaged.
+        Defaults to a no-op so the tray works headless and in tests.
         """
         self._control_file = Path(control_file)
         self._sleep_requested = False
-        # Spoken feedback callback (core.speak). The plugin only announces the
-        # *attempt* ("Going to sleep."); the tray confirms or, when it can't
-        # actually sleep, explains — since only it knows whether sleep engaged.
-        # Defaults to a no-op so the tray works headless and in tests.
         self._speak = speak or (lambda _text: None)
 
     # --- lifecycle hooks called by the daemon ---
 
     def started(self):
-        """Daemon is up and listening; ensure the indicator is hidden."""
+        """Daemon is up and listening; ensure the indicator is hidden.
+
+        Also drop any command left in the control file from before startup. It's
+        a one-shot channel for *live* menu clicks, so a stale 'about'/'help'/
+        'quit' written during a previous session (or before the daemon was
+        running to consume it) must not fire the moment we begin polling — which
+        otherwise pops the About window open on launch.
+        """
+        self.take_command()
         self.set_state(STATE_LISTENING)
 
     def stopped(self):
@@ -139,26 +166,75 @@ class Tray:
         is only shown while asleep, so in practice these fire from the idle loop
         in :meth:`_sleep`; ``poll`` handles them too so the path isn't lifecycle-
         dependent.
+
+        The About dialog needs PyGObject + GTK4/libadwaita, which aren't in
+        the daemon's own (uv) venv. Reuse the PyGObject-equipped interpreter
+        the dictation AT-SPI helper already runs in, falling back to our own
+        interpreter when it isn't set (e.g. a plain pip install).
         """
         if command == COMMAND_HELP:
             self._spawn(["xdg-open", DOCS_URL], "documentation page")
             return True
         if command == COMMAND_ABOUT:
-            self._spawn([sys.executable, "-m", ABOUT_MODULE], "About window")
+            python = os.environ.get("EASYSPEAK_ATSPI_PYTHON", sys.executable)
+            self._spawn([python, ABOUT_HELPER], "About window")
             return True
         return False
 
     def _spawn(self, cmd, what):
-        """Launch a detached helper process (best-effort).
+        """Launch a helper process, reporting it if it fails to start.
 
-        Fire-and-forget: the daemon doesn't wait on or reap it, and a missing
-        binary just logs rather than disturbing the audio loop, mirroring the
-        rest of the controller's tolerance of a non-GNOME desktop.
+        Fire-and-forget for the success case: a helper whose window opens keeps
+        running and is left detached (never waited on or reaped). But a helper
+        that *can't* start — a bad interpreter, missing GTK/libadwaita, no
+        display, no ``xdg-open`` handler — exits within
+        :data:`HELPER_STARTUP_GRACE`; that's caught here so the menu click isn't
+        silently lost, with the cause logged and an audible apology spoken.
+
+        stderr is captured to an anonymous temp file rather than a pipe: a
+        long-lived helper keeps writing to it (GTK logs to stderr) without ever
+        blocking on a full pipe buffer we've stopped draining, and the file is
+        reclaimed by the OS once the helper exits.
+        """
+        with tempfile.TemporaryFile() as errlog:
+            try:
+                proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=errlog)
+            except OSError:
+                logger.warning("Couldn't open the %s.", what, exc_info=True)
+                self._report_failure(what)
+                return
+            returncode = self._await_startup(proc)
+            if returncode not in (None, 0):
+                errlog.seek(0)
+                detail = errlog.read().decode(errors="replace").strip()
+                logger.error(
+                    "The %s exited with code %s.%s",
+                    what,
+                    returncode,
+                    f"\n{detail}" if detail else "",
+                )
+                self._report_failure(what)
+
+    def _await_startup(self, proc):
+        """Return the helper's exit code if it dies during startup, else None.
+
+        Waits up to :data:`HELPER_STARTUP_GRACE`; a helper still running past
+        that is taken to have opened its window, so this returns None ("started,
+        leave it") rather than reaping a GUI that may stay up for minutes.
         """
         try:
-            subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        except OSError:
-            logger.warning("Couldn't open the %s.", what, exc_info=True)
+            return proc.wait(timeout=HELPER_STARTUP_GRACE)
+        except subprocess.TimeoutExpired:
+            return None
+
+    def _report_failure(self, what):
+        """Tell the user a helper couldn't open.
+
+        Error chime and a spoken apology (voice-first equivalent of GTK's error bell).
+        """
+        with contextlib.suppress(OSError):
+            subprocess.run(["paplay", ERROR_SOUND], capture_output=True)
+        self._speak(f"Sorry, I couldn't open the {what}.")
 
     def _sleep(self, release_mic, acquire_mic):
         """Release the mic and idle until the tray asks to resume or quit.
