@@ -107,9 +107,14 @@ benchmark *args:
         --benchmark-json=results.json {{ args }}
 
 # Build the docs (use `serve` to serve at http://127.0.0.1:8000 with live-reload)
-[group('release')]
+[group('docs')]
 docs *args=('build --strict'):
     uv run --extra=docs mkdocs {{ args }}
+
+# Publish versioned docs via mike (CI; e.g. `just docs-publish deploy --push dev`)
+[group('docs')]
+docs-publish *args:
+    uv run --extra=docs mike {{ args }}
 
 # Build package and check metadata
 [group('release')]
