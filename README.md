@@ -14,488 +14,52 @@ Say "Hey Jarvis" and control your desktop with your voice.
 
 > ⚠️ **Early development.** This project works but is not polished. Expect bugs, incomplete docs, and changes without notice.
 
+📖 **Full documentation: <https://ctsdownloads.github.io/easyspeak/>**
+
 ## Why EasySpeak?
 
 Linux desktop voice control is a gap. Talon exists but has a steep learning curve and costs money for the full version. Most other tools are X11-only, abandoned, or cloud-dependent.
 
-EasySpeak is:
-- **Free and open source** - GPL-3.0 licensed, no paywalls
-- **Fully local** - No cloud, no accounts, no data leaving your machine
-- **Wayland-native** - Works on modern GNOME desktops where X11 tools fail
-- **Simple** - Say "Hey Jarvis, open downloads" and it works
-- **Extensible** - Drop a Python file in plugins/ to add commands
+EasySpeak is **free and open source** (GPL-3.0), **fully local** (no cloud, no accounts), **Wayland-native**, **simple** ("Hey Jarvis, open downloads"), and **extensible** (drop a Python file in `plugins/`). Built for people with RSI, accessibility needs, hands-busy workflows, or anyone who wants to talk to their computer.
 
-Built for people with RSI, accessibility needs, hands-busy workflows, or anyone who wants to talk to their computer.
-
-## Features
-
-Current and in active development:
-
-- **Wake word activation** - Hands-free with "Hey Jarvis"
-- **Mouse grid** - Navigate anywhere on screen with voice ("grid", "3 7 5", "click")
-- **Head tracking** - Control cursor with head movement (experimental)
-- **Browser control** - Qutebrowser integration with link hints, tabs, scrolling
-- **Dictation** - Voice-to-text in any text field with punctuation commands
-- **App launcher** - Open and close applications by name
-- **Media control** - Play, pause, skip via MPRIS
-- **System controls** - Volume, brightness, do not disturb
-- **Fully local** - OpenWakeWord + Whisper + Piper, no cloud services
-- **Wayland-native** - Works properly on modern Linux desktops
-- **Plugin architecture** - Easy to extend
+- Wake word activation ("Hey Jarvis")
+- Mouse grid and experimental head tracking
+- Browser control, dictation, app launcher, media and system controls
+- OpenWakeWord + Whisper + Piper, all on-device
 
 ## Demo
 
-Click the thumbnail to watch the demo video:
-
 [![Demo](https://img.youtube.com/vi/dl5m2Zo1oIE/maxresdefault.jpg)](https://www.youtube.com/watch?v=dl5m2Zo1oIE)
 
-**Terminal output:**
+## Quickstart
 
-![Terminal](images/1.png)
-
-**Mouse grid (Files):**
-
-![Grid Files](images/2.png)
-
-**Mouse grid (Browser):**
-
-![Grid zoomed](images/3.png)
-
-**Browser (Numbers click navigation):**
-
-![Browser](images/4.png)
-
-## Requirements
-
-- Linux with GNOME Shell 47+ on Wayland
-- Python 3.12 (not 3.13 and 3.14 - see installation notes)
-- Working microphone
-- ~2GB disk space for models
-
-Tested on Fedora 43.
-
-## Installation
-
-Fedora 43's default `python3` is 3.14. Unfortunately, we depend on a few Google packages that are not available for Python 3.13+ yet.
+Requirements: Linux with GNOME Shell 47+ on Wayland, Python 3.12, a microphone, and ~2 GB disk for models. Tested on Fedora 43.
 
 ```bash
-sudo dnf install python3.12
-python3.12 --version  # Verify it's installed
-```
+# 1. System packages (Fedora; see the docs for the full list)
+sudo dnf install python3.12 python3.12-devel gcc portaudio-devel \
+  pipewire-utils wireplumber at-spi2-core python3-gobject qutebrowser \
+  glib2 ffmpeg-free pulseaudio-utils sound-theme-freedesktop
 
-### 1. System Packages
-
-```bash
-sudo dnf install \
-  pipewire-utils \
-  wireplumber \
-  at-spi2-core \
-  python3-gobject \
-  qutebrowser \
-  glib2 \
-  ffmpeg-free \
-  pulseaudio-utils \
-  sound-theme-freedesktop \
-  portaudio-devel \
-  python3.12-devel \
-  gcc
-```
-
-### 2. Python Packages
-
-```bash
-python3.12 -m venv ~/easyspeak-venv
-source ~/easyspeak-venv/bin/activate
-pip install faster-whisper openwakeword numpy pyaudio
+# 2. Get EasySpeak and run it (uv manages the virtualenv for you)
+git clone https://github.com/ctsdownloads/easyspeak.git ~/easyspeak
 cd ~/easyspeak
-pip install -e .
-```
-
-If you use `uv` you can ignore the steps that create a virtual environment and simply run:
-
-```bash
 uv run easyspeak
 ```
 
-uv will transparently create and update a virtual environment, and run easyspeak from in there.
-
-### 3. Piper TTS
-
-```bash
-mkdir -p ~/.local/bin
-cd ~/.local/bin
-wget https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz
-tar xzf piper_linux_x86_64.tar.gz
-rm piper_linux_x86_64.tar.gz
-
-echo 'export PATH="$HOME/.local/bin/piper:$PATH"' >> ~/.bashrc
-source ~/.bashrc
-
-mkdir -p ~/.local/share/piper
-cd ~/.local/share/piper
-wget -O en_US-amy-medium.onnx \
-  "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx"
-wget -O en_US-amy-medium.onnx.json \
-  "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx.json"
-```
-
-### 4. Clone Repository
-
-```bash
-git clone https://github.com/ctsdownloads/easyspeak.git ~/easyspeak
-cd ~/easyspeak
-```
-
-## Usage
-
-```bash
-source ~/easyspeak-venv/bin/activate   # Now python = venv's python3.12
-easyspeak                              # the project execution script
-```
-
-Activate the venv each time you open a new terminal.
-
-Say "Hey Jarvis" followed by a command. After a command that gives no spoken
-reply (such as volume changes), EasySpeak keeps listening for a few seconds so
-you can chain commands — say "louder", "louder", "louder" without repeating the
-wake word each time.
-
-## Commands
-
-### Mouse Grid
-
-Screen splits into a 3x3 layout (like a phone keypad):
-
-```
-1 2 3
-4 5 6
-7 8 9
-```
-
-Say **"grid"** to show it. Say a number to zoom into that zone. Keep zooming until you're over your target, then **"click"**.
-
-Chain numbers to go faster: **"3 6 3"** zooms three times at once.
-
-**Drag and drop:**
-1. Navigate to the thing you want to drag
-2. Say **"mark"** - grabs it (mousedown)
-3. Grid resets to full screen
-4. Navigate to where you want to drop it
-5. Say **"drag"** - releases it (mouseup)
-
-| Command | Action |
-|---------|--------|
-| grid | Show grid |
-| 1-9 | Zoom to zone |
-| 3 7 5 | Chain zones |
-| click | Left click |
-| double click | Double click |
-| right click | Right click |
-| middle click | Middle click |
-| up/down/left/right | Nudge position |
-| left 5, down 3, etc. | Nudge with repeat |
-| scroll up/down/left/right | Scroll at cursor |
-| scroll down 3, etc. | Scroll with repeat |
-| mark | Grab (start drag) |
-| drag | Drop (end drag) |
-| again | Reopen at last spot |
-| close | Hide grid |
-
-### Head Tracking (Experimental)
-
-Requires webcam and additional dependencies (`pip install sixdrepnet opencv-python` or `pip install .[head-tracking]`, or run via `uv run --extra head-tracking easyspeak`).
-
-| Command | Action |
-|---------|--------|
-| start tracking | Begin head tracking |
-| stop tracking | End tracking |
-| freeze | Lock cursor position |
-| go | Resume tracking |
-| recalibrate | Reset center position |
-| nudge up/down/left/right | Fine tune when frozen |
-| click | Left click |
-| double click | Double click |
-| right click | Right click |
-
-### Browser (Qutebrowser)
-
-| Command | Action |
-|---------|--------|
-| browser | Enter browser mode |
-| numbers / hints | Show link hints |
-| zero two | Click hint 02 |
-| new tab | Open new tab |
-| close tab | Close current tab |
-| tab left/right | Switch tabs |
-| tab [number] | Jump to specific tab |
-| undo tab | Restore closed tab |
-| back / forward | Navigate history |
-| reload | Refresh page |
-| scroll up/down | Scroll page |
-| page up/down | Scroll by page |
-| top / bottom | Go to top/bottom |
-| find [text] | Search in page |
-| find next/previous | Navigate matches |
-| search [query] | Web search (DuckDuckGo) |
-| go to [url] | Navigate to URL |
-| open youtube | Open bookmark |
-| exit browser | Leave browser mode |
-
-Built-in bookmarks: youtube, google, gmail, github, reddit, twitter, facebook, amazon, netflix, duckduckgo
-
-### Dictation
-
-| Command | Action |
-|---------|--------|
-| notes | Start dictation mode |
-| stop notes | End dictation mode |
-| comma | Insert , |
-| period | Insert . |
-| question mark | Insert ? |
-| exclamation mark | Insert ! |
-| colon | Insert : |
-| semicolon | Insert ; |
-| apostrophe | Insert ' |
-| quote | Insert " |
-| dash | Insert - |
-| new line | Insert newline |
-| new paragraph | Insert double newline |
-| new sentence | Insert . and capitalize next |
-| backspace | Delete character |
-| space | Insert space |
-| tab | Insert tab |
-| at sign | Insert @ |
-| hashtag | Insert # |
-| percent | Insert % |
-| asterisk | Insert * |
-
-### Apps
-
-| Command | Action |
-|---------|--------|
-| open [app] | Launch application |
-| close [app] | Close application |
-
-Default apps in `plugins/apps.py` (edit to match your system):
-- firefox, steam, spotify, calculator, settings, files, terminal, browser, music player
-
-These are just examples. Edit `apps.py` to add your own apps. Some accept
-spoken aliases — e.g. "open music app" works the same as "open music player".
-
-### Files
-
-| Command | Action |
-|---------|--------|
-| open documents | Open Documents folder |
-| open downloads | Open Downloads folder |
-| open pictures | Open Pictures folder |
-| open music | Open Music folder |
-| open videos | Open Videos folder |
-| open projects | Open Projects folder |
-| open home | Open home folder |
-| open desktop | Open Desktop folder |
-
-### Media
-
-| Command | Action |
-|---------|--------|
-| play | Resume playback |
-| pause / stop the music | Pause playback |
-| next / skip | Next track |
-| previous / back | Previous track |
-
-### System
-
-| Command | Action |
-|---------|--------|
-| volume up/down (or louder / quieter) | Adjust volume one step (repeat to keep going) |
-| very loud / very silent | Jump straight to near-max (85%) / low (15%, not muted) |
-| mute | Toggle mute |
-| brightness up/down | Adjust brightness |
-| do not disturb on/off | Toggle notifications |
-
-Volume changes are silent — GNOME's own on-screen display and chime acknowledge them.
-
-### General
-
-| Command | Action |
-|---------|--------|
-| help | List all commands |
-| go to sleep / stop listening | Release the mic (reactivate from the tray icon) |
-| quit / exit / goodbye | Exit EasySpeak |
-
-## File Structure
-
-```
-easyspeak/
-├── pyproject.toml
-├── src
-│   ├── extension.js           # GNOME Shell extension (bundled as package data)
-│   ├── metadata.json          # Extension metadata
-│   ├── core
-│   │   ├── __init__.py
-│   │   ├── __main__.py
-│   │   ├── config.py          # Tuning constants + Whisper model factory
-│   │   ├── gnome_extension.py  # Installs/refreshes/enables the extension
-│   │   └── main.py            # EasySpeak class + main loop
-│   └── plugins
-│       ├── __init__.py
-│       ├── 00_eyetrack.py     # Head tracking (experimental)
-│       ├── 00_mousegrid.py    # Grid overlay mouse control
-│       ├── apps.py            # Application launcher
-│       ├── browser.py         # Qutebrowser control + auto-config
-│       ├── dictation.py       # Voice-to-text + AT-SPI enablement
-│       ├── files.py           # Folder navigation
-│       ├── media.py           # Playback controls
-│       ├── system.py          # Volume, brightness, DND
-│       └── zz_base.py         # Help and exit
-└── tests
-    ├── benchmarks             # pytest-benchmark suites for bencher.dev
-    ├── core                   # tests for src/core/
-    └── plugins                # tests for src/plugins/
-```
-
-On first start, core auto-installs the GNOME Shell extension to the
-user-local extensions directory (unless GNOME already sees it via a
-system-wide install). Files copied:
-
-```
-~/.local/share/gnome-shell/extensions/easyspeak-grid@local/
-├── extension.js
-└── metadata.json
-```
-
-## How It Works
-
-- **Wake word**: OpenWakeWord detects "Hey Jarvis" instantly
-- **Speech-to-text**: faster-whisper transcribes commands locally
-- **Text-to-speech**: Piper provides voice feedback
-- **Mouse control**: GNOME Shell extension with Clutter virtual input
-- **Browser scroll**: JavaScript injection via qutebrowser IPC
-- **Dictation**: AT-SPI accessibility framework
-
-All processing happens locally. No data leaves your machine.
-
-## Writing Plugins
-
-Drop a Python file in `plugins/` and it gets loaded automatically.
-
-```python
-NAME = "myplugin"
-DESCRIPTION = "What it does"
-
-COMMANDS = [
-    "say hello - speaks a greeting",
-]
-
-def setup(core):
-    """Called once at startup. Store core reference if needed."""
-    pass
-
-def handle(cmd, core):
-    """Called for every voice command. Return True if handled, None to pass to next plugin."""
-    if "say hello" in cmd:
-        core.speak("Hello there!")
-        return True
-    return None
-```
-
-**Core methods you can use:**
-- `core.speak("text")` - text-to-speech response
-- `core.host_run(["cmd", "arg"])` - run shell command
-- `core.transcribe(audio)` - transcribe audio to text
-- `core.wait_for_speech()` - wait for user to start speaking
-- `core.record_until_silence()` - record until user stops
-
-**Loading order:** Plugins load alphabetically. Use number prefixes to control order (`00_mousegrid.py` loads before `apps.py`).
-
-## Troubleshooting
-
-**Mouse grid: "Failed to show grid — is extension enabled?"**
-
-You don't install the extension yourself — EasySpeak does it automatically
-on startup, copying it to
-`~/.local/share/gnome-shell/extensions/easyspeak-grid@local/` and keeping it
-up to date (look for an `easyspeak: installed ...` or `easyspeak: updated ...`
-message). On Wayland, GNOME Shell only scans for new extensions at login, so
-you typically have to **log out and back in** before it becomes loadable.
-
-After re-login, enable it from the command line:
-
-```bash
-gnome-extensions enable easyspeak-grid@local
-```
-
-…or open the **Extensions** GNOME app and toggle *EasySpeak Grid* on.
-
-To remove it later:
-
-```bash
-gnome-extensions disable easyspeak-grid@local
-rm -rf ~/.local/share/gnome-shell/extensions/easyspeak-grid@local
-```
-
-…or click the trash icon next to *EasySpeak Grid* in the Extensions app.
-
-**Dictation not working**
-
-EasySpeak enables the GNOME accessibility bridge on first run; log out and
-back in after seeing the `dictation: enabled GNOME toolkit-accessibility`
-message. If the auto-config printed a `WARNING` instead (e.g. on a
-non-GNOME or locked-down desktop), run it manually:
-
-```bash
-gsettings set org.gnome.desktop.interface toolkit-accessibility true
-# Log out and back in
-```
-
-**Browser plugin: link numbers don't work**
-
-EasySpeak appends two required lines to `~/.config/qutebrowser/config.py`
-on first run (you'll see a `browser: wrote ...` or `browser: updated ...`
-message). If you see a `browser: note: ... is read-only` or a similar
-error instead, add these lines to the config module yourself:
-
-```python
-config.load_autoconfig(False)
-c.hints.chars = '0123456789'
-```
-
-**Wake word not detecting**
-- Check microphone: `arecord -d 3 test.wav && aplay test.wav`
-- Adjust `WAKE_THRESHOLD` in core.py (lower = more sensitive)
-
-**Wake word triggers multiple times**
-
-Mic gain too high. Lower capture level:
-```bash
-alsamixer
-# Press F6 to select your mic device
-# Press Tab to switch to Capture
-# Lower to ~70
-```
-
-**Commands misheard**
-- Adjust `SILENCE_THRESHOLD` in core.py
-- Speak clearly after the beep
-
-**Piper permission denied**
-```bash
-chmod +x ~/.local/bin/piper/piper
-chmod +x ~/.local/bin/piper/espeak-ng
-```
-
-**pip install fails with PyAV/Cython errors**
-
-You're on Python 3.14 or 3.13. Use `python3.12` with a venv instead:
-```bash
-sudo dnf install python3.12 python3.12-devel
-python3.12 -m venv ~/easyspeak-venv
-source ~/easyspeak-venv/bin/activate
-pip install faster-whisper openwakeword numpy pyaudio
-cd ~/easyspeak
-pip install -e .
-```
+You also need [Piper TTS](https://ctsdownloads.github.io/easyspeak/installation/#3-piper-tts) installed for voice feedback. See the **[Installation guide](https://ctsdownloads.github.io/easyspeak/installation/)** for the venv-based path, head tracking, and full details.
+
+Then say "Hey Jarvis" followed by a command. Say "help" to list all commands.
+
+## Documentation
+
+- **[Installation](https://ctsdownloads.github.io/easyspeak/installation/)** — system packages, Python, Piper TTS
+- **[Usage](https://ctsdownloads.github.io/easyspeak/usage/)** — running the daemon, CLI flags, configuration
+- **[Commands](https://ctsdownloads.github.io/easyspeak/commands/)** — the full command reference
+- **[Writing plugins](https://ctsdownloads.github.io/easyspeak/plugins/)** — extend EasySpeak with a Python file
+- **[Troubleshooting](https://ctsdownloads.github.io/easyspeak/troubleshooting/)** — common problems and fixes
+- **[How it works](https://ctsdownloads.github.io/easyspeak/how-it-works/)** — the architecture
+- **[API reference](https://ctsdownloads.github.io/easyspeak/reference/core/)** — generated from the source docstrings
 
 ## Contributing
 
@@ -507,7 +71,7 @@ GPL-3.0 License. See [LICENSE](LICENSE) for details.
 
 ## Acknowledgments
 
-- [OpenWakeWord](https://github.com/dscripka/openWakeWord) - Wake word detection
-- [faster-whisper](https://github.com/guillaumekln/faster-whisper) - Speech recognition
-- [Piper](https://github.com/OHF-Voice/piper1-gpl) - Text-to-speech (we use the last standalone binary from the original [rhasspy/piper](https://github.com/rhasspy/piper) repo)
-- [Talon](https://talonvoice.com/) - Inspiration for voice control concepts
+- [OpenWakeWord](https://github.com/dscripka/openWakeWord) — Wake word detection
+- [faster-whisper](https://github.com/guillaumekln/faster-whisper) — Speech recognition
+- [Piper](https://github.com/OHF-Voice/piper1-gpl) — Text-to-speech (we use the last standalone binary from the original [rhasspy/piper](https://github.com/rhasspy/piper) repo)
+- [Talon](https://talonvoice.com/) — Inspiration for voice control concepts

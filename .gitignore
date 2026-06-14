@@ -49,6 +49,9 @@ requirements.txt
 Thumbs.db
 /result
 
+# Documentation site build (MkDocs)
+/site/
+
 # Project specific
 *.wav
 *.log
