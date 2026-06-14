@@ -133,8 +133,16 @@ class HotkeyListener:
         self._thread.start()
 
     def stop(self):
-        """Stop the reader thread and release the keyboard devices."""
+        """Stop the reader thread, then release the keyboard devices.
+
+        Joins the thread first so it leaves its ``select()`` loop before the fds
+        close under it — closing a fd mid-select can raise in the thread. The
+        loop wakes within one POLL_TIMEOUT, so the join returns promptly.
+        """
         self._stop.set()
+        thread, self._thread = self._thread, None
+        if thread is not None:
+            thread.join(timeout=POLL_TIMEOUT + 1.0)
         for device in self._devices:
             with contextlib.suppress(Exception):
                 device.close()

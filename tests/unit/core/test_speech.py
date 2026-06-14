@@ -1,19 +1,10 @@
 """Tests for the core speech module (persistent piper -> player pipeline)."""
 
 import subprocess
-import sys
-from unittest.mock import MagicMock, Mock, mock_open, patch
+from unittest.mock import Mock, mock_open, patch
 
 import pytest
-
-# easyspeak.core.config imports faster_whisper at module load; stub the heavy
-# deps so importing the speech module doesn't require a model or GPU.
-sys.modules["pyaudio"] = MagicMock()
-sys.modules["openwakeword"] = MagicMock()
-sys.modules["openwakeword.model"] = MagicMock()
-sys.modules["faster_whisper"] = MagicMock()
-
-from easyspeak.core.speech import SpeechPipeline  # noqa: E402
+from easyspeak.core.speech import SpeechPipeline
 
 
 class TestSpeechPipeline:

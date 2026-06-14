@@ -1,6 +1,6 @@
 """Tests for the browser plugin module."""
 
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 from easyspeak.plugins import browser
@@ -599,6 +599,7 @@ def test_handle_browser_command_enters_mode(
     mock_browser_mode, mock_handle_cmd, mock_core
 ):
     """Test handle function enters browser mode after single command."""
+    mock_core.host_run.return_value = Mock(returncode=0)
     mock_handle_cmd.return_value = True
 
     result = browser.handle("back", mock_core)
@@ -634,7 +635,8 @@ def test_handle_declines_reserved_global_commands(mock_handle_cmd, command, mock
 
 @patch.object(browser, "handle_browser_command")
 def test_handle_unmatched_command(mock_handle_cmd, mock_core):
-    """Test handle function with unmatched command."""
+    """A running browser plus an unrecognised command falls through to None."""
+    mock_core.host_run.return_value = Mock(returncode=0)
     mock_handle_cmd.return_value = None
 
     result = browser.handle("unrelated command", mock_core)
@@ -648,6 +650,7 @@ def test_handle_browser_command_exception(
     mock_browser_mode, mock_handle_cmd, mock_core, readlog
 ):
     """Test handle function handles exceptions gracefully."""
+    mock_core.host_run.return_value = Mock(returncode=0)
     mock_handle_cmd.side_effect = Exception("Test error")
 
     result = browser.handle("back", mock_core)
@@ -655,6 +658,79 @@ def test_handle_browser_command_exception(
     assert result is True
     captured = readlog()
     assert "Browser error" in captured.out
+
+
+# Tests for the "only act when a browser is running" gate.
+
+
+@pytest.mark.parametrize(
+    "command",
+    ["back", "down", "up", "top", "bottom", "reload", "02", "one"],
+)
+@patch.object(browser, "browser_mode")
+@patch.object(browser, "handle_browser_command")
+def test_handle_ignores_navigation_when_no_browser_running(
+    mock_handle_cmd, mock_browser_mode, command, mock_core
+):
+    """With no browser running, an ambiguous navigation word falls through
+    instead of launching qutebrowser and trapping the user in browser mode.
+
+    The lone host_run is the running-check itself, so nothing was launched.
+    """
+    mock_core.host_run.return_value = Mock(returncode=1)
+
+    result = browser.handle(command, mock_core)
+
+    assert result is None
+    mock_handle_cmd.assert_not_called()
+    mock_browser_mode.assert_not_called()
+    assert mock_core.host_run.call_count == 1
+    assert mock_core.host_run.call_args.args[0] == ["pgrep", "-f", "qutebrowser"]
+
+
+@patch.object(browser, "browser_mode")
+@patch.object(browser, "handle_browser_command", return_value=True)
+def test_handle_acts_on_navigation_when_browser_running(
+    mock_handle_cmd, mock_browser_mode, mock_core
+):
+    """With a browser running, a navigation word is handled as before."""
+    mock_core.host_run.return_value = Mock(returncode=0)
+
+    result = browser.handle("back", mock_core)
+
+    assert result is True
+    mock_handle_cmd.assert_called_once_with("back", mock_core)
+    mock_browser_mode.assert_called_once_with(mock_core)
+
+
+@pytest.mark.parametrize(
+    "command",
+    ["browser", "browser mode", "open browser", "launch browser"],
+)
+@patch.object(browser, "browser_mode")
+def test_handle_explicit_launch_bypasses_running_check(
+    mock_browser_mode, command, mock_core
+):
+    """Explicit "open browser" launches qutebrowser even when none is running."""
+    mock_core.host_run.return_value = Mock(returncode=1)
+
+    result = browser.handle(command, mock_core)
+
+    assert result is True
+    launch_calls = [
+        c for c in mock_core.host_run.call_args_list if c.args[0] == ["qutebrowser"]
+    ]
+    assert len(launch_calls) == 1
+    mock_browser_mode.assert_called_once_with(mock_core)
+
+
+@pytest.mark.parametrize("returncode, expected", [(0, True), (1, False)])
+def test_qutebrowser_running(returncode, expected, mock_core):
+    """_qutebrowser_running reflects pgrep's exit status."""
+    mock_core.host_run.return_value = Mock(returncode=returncode)
+
+    assert browser._qutebrowser_running(mock_core) is expected
+    assert mock_core.host_run.call_args.args[0] == ["pgrep", "-f", "qutebrowser"]
 
 
 # Tests for listen_for_hint function.

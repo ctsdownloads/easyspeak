@@ -1,8 +1,15 @@
 """Pytest fixtures for core module tests."""
 
-from unittest.mock import Mock
+import sys
+from unittest.mock import MagicMock, Mock
 
 import pytest
+
+# Stub the heavy native/model deps once for the whole core suite. conftest is
+# imported before any test module, so importing easyspeak.core.* below needs no
+# model or GPU. Assign directly (not setdefault) to override a real install too.
+for _name in ("pyaudio", "openwakeword", "openwakeword.model", "faster_whisper"):
+    sys.modules[_name] = MagicMock()
 
 
 def create_mock_plugin(name="TestPlugin", **kwargs) -> Mock:

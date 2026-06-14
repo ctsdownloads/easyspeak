@@ -282,12 +282,14 @@ def run_push_to_talk(core, should_continue):
 
 
 def handle(cmd, core):
-    """Enter dictation mode on "notes"; return None for other commands.
+    """Enter dictation mode on a whole-word "note"/"notes"; return None otherwise.
 
-    While in dictation mode it loops, transcribing speech and inserting it into
-    the focused field until "stop notes" is heard.
+    Matching whole words (not substrings) keeps unrelated words like "notebook"
+    or "noted" from triggering it. While in dictation mode it loops, transcribing
+    speech and inserting it into the focused field until "stop notes" is heard.
     """
-    if ("notes" in cmd or "note" in cmd) and "stop" not in cmd:
+    words = cmd.split()
+    if ("notes" in words or "note" in words) and "stop" not in words:
         core.speak("Dictation")
 
         logger.info("🎙️ Dictation mode - say 'stop notes' to end")
@@ -336,7 +338,5 @@ def handle(cmd, core):
             # Format and insert
             if _dictate_utterance(core, text):
                 return True
-
-        return True
 
     return None
