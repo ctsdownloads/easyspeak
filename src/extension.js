@@ -554,6 +554,21 @@ class TrayIndicator extends PanelMenu.Button {
         reactivateItem.connect('activate', () => this._writeCommand('unmute'));
         this.menu.addMenuItem(reactivateItem);
 
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+        // Help opens the docs and About shows the libadwaita window; both are
+        // handled by the daemon (which knows its own interpreter and the docs
+        // URL) via the same control-file channel as the other menu actions.
+        const helpItem = new PopupMenu.PopupMenuItem('Help');
+        helpItem.connect('activate', () => this._writeCommand('help'));
+        this.menu.addMenuItem(helpItem);
+
+        const aboutItem = new PopupMenu.PopupMenuItem('About EasySpeak');
+        aboutItem.connect('activate', () => this._writeCommand('about'));
+        this.menu.addMenuItem(aboutItem);
+
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
         const quitItem = new PopupMenu.PopupMenuItem('Quit EasySpeak');
         quitItem.connect('activate', () => {
             this._writeCommand('quit');

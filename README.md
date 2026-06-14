@@ -37,7 +37,7 @@ Requirements: Linux with GNOME Shell 47+ on Wayland, Python 3.12, a microphone, 
 ```bash
 # 1. System packages (Fedora; see the docs for the full list)
 sudo dnf install python3.12 python3.12-devel gcc portaudio-devel \
-  pipewire-utils wireplumber at-spi2-core python3-gobject qutebrowser \
+  pipewire-utils wireplumber at-spi2-core python3-gobject libadwaita qutebrowser \
   glib2 ffmpeg-free pulseaudio-utils sound-theme-freedesktop
 
 # 2. Get EasySpeak and run it (uv manages the virtualenv for you)

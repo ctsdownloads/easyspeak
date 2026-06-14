@@ -2,9 +2,14 @@
 
 import itertools
 import subprocess
+import sys
 from unittest.mock import Mock, patch
 
+from easyspeak.core.about import DOCS_URL
 from easyspeak.core.tray import (
+    ABOUT_MODULE,
+    COMMAND_ABOUT,
+    COMMAND_HELP,
     COMMAND_QUIT,
     STATE_LISTENING,
     STATE_MUTED,
@@ -235,6 +240,72 @@ class TestPoll:
         ]
         # Entry push + at least one periodic re-push while idling.
         assert len(muted_pushes) >= 2
+
+
+class TestMenuActions:
+    """Tests for the fire-and-forget Help/About menu commands.
+
+    Both spawn a detached helper; ``subprocess.Popen`` is patched so nothing is
+    actually launched.
+    """
+
+    def _tray(self, commands):
+        tray = Tray(speak=Mock())
+        tray.take_command = Mock(side_effect=commands)
+        tray.set_state = Mock()
+        return tray
+
+    @patch("easyspeak.core.tray.subprocess.Popen")
+    def test_help_opens_docs_in_default_browser(self, mock_popen):
+        """A 'help' command opens the docs URL via xdg-open and carries on."""
+        tray = self._tray([COMMAND_HELP])
+
+        assert tray.poll(Mock(), Mock()) is TrayAction.CONTINUE
+        assert mock_popen.call_args.args[0] == ["xdg-open", DOCS_URL]
+
+    @patch("easyspeak.core.tray.subprocess.Popen")
+    def test_about_launches_the_about_module(self, mock_popen):
+        """An 'about' command spawns the About window with the daemon's own
+        interpreter and carries on."""
+        tray = self._tray([COMMAND_ABOUT])
+
+        assert tray.poll(Mock(), Mock()) is TrayAction.CONTINUE
+        cmd = mock_popen.call_args.args[0]
+        assert cmd[0] == sys.executable
+        assert cmd[1:] == ["-m", ABOUT_MODULE]
+
+    @patch("easyspeak.core.tray.subprocess.Popen")
+    def test_help_does_not_release_the_mic(self, mock_popen):
+        """Help is a side effect only; it never touches the sleep lifecycle."""
+        tray = self._tray([COMMAND_HELP])
+        release, acquire = Mock(), Mock()
+
+        tray.poll(release, acquire)
+
+        release.assert_not_called()
+        acquire.assert_not_called()
+
+    @patch("easyspeak.core.tray.subprocess.Popen")
+    def test_menu_actions_work_while_asleep(self, mock_popen):
+        """Help/About fire from the idle loop (where the menu is actually shown),
+        then a later 'unmute' wakes the daemon."""
+        tray = self._tray(["mute", COMMAND_HELP, COMMAND_ABOUT, "unmute"])
+        release, acquire = Mock(), Mock()
+
+        with patch("easyspeak.core.tray.time.sleep"):
+            action = tray.poll(release, acquire)
+
+        assert action is TrayAction.RESUME
+        spawned = [c.args[0][0] for c in mock_popen.call_args_list]
+        assert spawned == ["xdg-open", sys.executable]
+        acquire.assert_called_once()
+
+    @patch("easyspeak.core.tray.subprocess.Popen", side_effect=OSError("no xdg-open"))
+    def test_spawn_failure_is_swallowed(self, mock_popen):
+        """A missing helper binary logs but doesn't disturb the audio loop."""
+        tray = self._tray([COMMAND_HELP])
+
+        assert tray.poll(Mock(), Mock()) is TrayAction.CONTINUE
 
 
 class TestLifecycleHooks:
