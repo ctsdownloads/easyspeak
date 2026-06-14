@@ -21,6 +21,21 @@
         # so the project is currently pinned to 3.12.
         python = pkgs.python312;
 
+        # The dictation plugin shells out to an AT-SPI helper that needs
+        # PyGObject + the AT-SPI typelib — which uv can't put in the app's
+        # venv (PyGObject isn't a wheel). So ship a dedicated interpreter that
+        # has it and point EASYSPEAK_ATSPI_PYTHON at it.
+        atspiPython = python.withPackages (ps: [ ps.pygobject3 ]);
+
+        # Typelibs the helper's `gi` imports resolve at runtime: GLib/GObject/
+        # Gio from glib, GIRepository from gobject-introspection, Atspi from
+        # at-spi2-core.
+        giTypelibPath = pkgs.lib.makeSearchPath "lib/girepository-1.0" [
+          pkgs.glib
+          pkgs.gobject-introspection
+          pkgs.at-spi2-core
+        ];
+
         # .git is stripped from the flake source, so setuptools_scm can't
         # infer a version. Derive a PEP 440 "local version" from whatever
         # the flake knows (clean rev > dirty rev > nothing).
@@ -45,6 +60,7 @@
           glib # libglib-2.0.so.0 + libgthread-2.0.so.0
           libGL # libGL.so.1
           libxcb # libxcb.so.1
+          at-spi2-core # libatspi.so.0 for the dictation helper's gi import
         ];
 
         # Tools the app shells out to (paplay, ffplay, piper, etc).
@@ -132,6 +148,10 @@
             export C_INCLUDE_PATH="${pkgs.portaudio}/include''${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}"
             export LIBRARY_PATH="${pkgs.portaudio}/lib''${LIBRARY_PATH:+:$LIBRARY_PATH}"
             export LD_LIBRARY_PATH='${pkgs.lib.makeLibraryPath runtimeLibs}'":''${LD_LIBRARY_PATH:-}"
+            # Dictation's AT-SPI helper runs in this PyGObject-equipped
+            # interpreter, with the typelibs it imports on GI_TYPELIB_PATH.
+            export EASYSPEAK_ATSPI_PYTHON='${atspiPython}/bin/python3'
+            export GI_TYPELIB_PATH='${giTypelibPath}'":''${GI_TYPELIB_PATH:-}"
 
             cd "$src_dir"
             # --with openwakeword: pyproject.toml leaves it commented out
@@ -173,6 +193,8 @@
             unset PYTHONPATH PYTHONHOME
 
             export LD_LIBRARY_PATH='${pkgs.lib.makeLibraryPath runtimeLibs}'":''${LD_LIBRARY_PATH:-}"
+            export EASYSPEAK_ATSPI_PYTHON='${atspiPython}/bin/python3'
+            export GI_TYPELIB_PATH='${giTypelibPath}'":''${GI_TYPELIB_PATH:-}"
             export CPPFLAGS="-I${pkgs.portaudio}/include ''${CPPFLAGS:-}"
             export LDFLAGS="-L${pkgs.portaudio}/lib -Wl,-rpath,${pkgs.portaudio}/lib ''${LDFLAGS:-}"
             export C_INCLUDE_PATH="${pkgs.portaudio}/include''${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}"

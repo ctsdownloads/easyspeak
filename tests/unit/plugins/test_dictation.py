@@ -209,37 +209,88 @@ def test_format_text_edge_cases(input_text, expected_output):
     assert result == expected_output
 
 
-@patch("subprocess.run", return_value=Mock(stdout="OK\n", stderr=""))
-def test_insert_text_success(mock_run):
-    """When text insertion succeeds the result should be True."""
+@patch("subprocess.run", return_value=Mock(returncode=0, stdout="OK\n", stderr=""))
+def test_insert_text_success(mock_run, monkeypatch):
+    """When text insertion succeeds the result should be INSERTED.
+
+    EASYSPEAK_ATSPI_PYTHON is cleared so the default-interpreter fallback is
+    what's asserted, regardless of the environment the tests run in (the Nix
+    dev shell exports it).
+    """
+    monkeypatch.delenv("EASYSPEAK_ATSPI_PYTHON", raising=False)
+
     result = dictation.insert_text("Hello world")
 
-    assert result is True
+    assert result == dictation.INSERTED
     assert mock_run.call_count == 1
     call_args = mock_run.call_args.args[0]
     assert call_args[0] == "python3"
-    assert call_args[1] == "-c"
-    assert call_args[2] == dictation.ATSPI_INSERT_SCRIPT
-    assert call_args[3] == "Hello world"
+    assert call_args[1] == dictation.ATSPI_HELPER
+    assert call_args[1].endswith("_atspi_insert.py")
+    assert call_args[2] == "Hello world"
 
 
-@patch("subprocess.run", return_value=Mock(stdout="NO_FOCUS\n", stderr=""))
+@patch(
+    "subprocess.run", return_value=Mock(returncode=0, stdout="NO_FOCUS\n", stderr="")
+)
 def test_insert_text_no_focus(mock_run):
-    """When no text field is focused the result should be False."""
+    """When no text field is focused the result should be NO_FOCUS."""
     result = dictation.insert_text("Hello world")
 
-    assert result is False
+    assert result == dictation.NO_FOCUS
 
 
-@patch("subprocess.run", return_value=Mock(stdout="OK\n", stderr=""))
+@patch(
+    "subprocess.run",
+    return_value=Mock(returncode=0, stdout="NO_BACKEND\n", stderr="No module named gi"),
+)
+def test_insert_text_backend_missing(mock_run, readlog):
+    """When the helper reports a missing backend the result is BACKEND_ERROR."""
+    result = dictation.insert_text("Hello world")
+
+    assert result == dictation.BACKEND_ERROR
+    assert "backend unavailable" in readlog().err
+
+
+@patch(
+    "subprocess.run",
+    return_value=Mock(returncode=1, stdout="", stderr="boom"),
+)
+def test_insert_text_helper_crash(mock_run, readlog):
+    """A non-zero exit from the helper is treated as a backend error."""
+    result = dictation.insert_text("Hello world")
+
+    assert result == dictation.BACKEND_ERROR
+    assert "boom" in readlog().err
+
+
+@patch("subprocess.run", side_effect=OSError("no python3"))
+def test_insert_text_interpreter_missing(mock_run, readlog):
+    """When the interpreter can't even launch the result is BACKEND_ERROR."""
+    result = dictation.insert_text("Hello world")
+
+    assert result == dictation.BACKEND_ERROR
+    assert "could not start" in readlog().err
+
+
+@patch.dict("os.environ", {"EASYSPEAK_ATSPI_PYTHON": "/opt/atspi/bin/python3"})
+@patch("subprocess.run", return_value=Mock(returncode=0, stdout="OK\n", stderr=""))
+def test_insert_text_uses_configured_interpreter(mock_run):
+    """EASYSPEAK_ATSPI_PYTHON overrides the interpreter the helper runs in."""
+    dictation.insert_text("Hello world")
+
+    assert mock_run.call_args.args[0][0] == "/opt/atspi/bin/python3"
+
+
+@patch("subprocess.run", return_value=Mock(returncode=0, stdout="OK\n", stderr=""))
 def test_insert_text_empty_string(mock_run):
-    """When inserting an empty string the result should be True."""
+    """When inserting an empty string the result should be INSERTED."""
     result = dictation.insert_text("")
 
-    assert result is True
+    assert result == dictation.INSERTED
     assert mock_run.call_count == 1
     call_args = mock_run.call_args.args[0]
-    assert call_args[3] == ""
+    assert call_args[2] == ""
 
 
 @patch("easyspeak.plugins.dictation.insert_text")
@@ -304,7 +355,7 @@ def test_handle_dictation_mode_no_space_before_punctuation(
     assert mock_insert.call_args.args == (".",)
 
 
-@patch("easyspeak.plugins.dictation.insert_text", return_value=False)
+@patch("easyspeak.plugins.dictation.insert_text", return_value=dictation.NO_FOCUS)
 @patch("easyspeak.plugins.dictation.format_text", return_value="Hello")
 def test_handle_dictation_mode_no_focus(mock_format, mock_insert, mock_core_with_audio):
     """When no text field is focused a warning should be spoken."""
@@ -314,6 +365,22 @@ def test_handle_dictation_mode_no_focus(mock_format, mock_insert, mock_core_with
 
     assert result is True
     assert ("No text field focused.",) in [
+        call.args for call in mock_core_with_audio.speak.call_args_list
+    ]
+
+
+@patch("easyspeak.plugins.dictation.insert_text", return_value=dictation.BACKEND_ERROR)
+@patch("easyspeak.plugins.dictation.format_text", return_value="Hello")
+def test_handle_dictation_mode_backend_error(
+    mock_format, mock_insert, mock_core_with_audio
+):
+    """When the AT-SPI backend is unavailable a setup hint should be spoken."""
+    mock_core_with_audio.transcribe = Mock(return_value="some text")
+
+    result = dictation.handle("notes", mock_core_with_audio)
+
+    assert result is True
+    assert ("Dictation isn't set up on this system.",) in [
         call.args for call in mock_core_with_audio.speak.call_args_list
     ]
 
