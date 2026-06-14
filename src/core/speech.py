@@ -191,6 +191,7 @@ class SpeechPipeline:
                 return
             except (BrokenPipeError, OSError, ValueError):
                 self._kill_speech()  # tear down the broken pipeline, then retry
+        logger.debug("speech pipeline unavailable; dropped phrase: %s", text)
 
     @staticmethod
     def _reap(proc):

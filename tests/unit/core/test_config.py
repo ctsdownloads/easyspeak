@@ -1,15 +1,10 @@
 """Tests for the core config module."""
 
 import importlib
-import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
-
-# Mock the heavy external dep before importing
-sys.modules["faster_whisper"] = MagicMock()
-
-from easyspeak.core import config  # noqa: E402
+from easyspeak.core import config
 
 
 @pytest.fixture(autouse=True)

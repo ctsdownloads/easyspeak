@@ -439,11 +439,25 @@ def _is_reserved_global(cmd_lower):
     )
 
 
+def _qutebrowser_running(core):
+    """Whether a qutebrowser instance is already running.
+
+    Used by :func:`handle` to gate ambiguous navigation commands: we only act
+    on them when there is actually a browser to receive them. ``pgrep -f``
+    (rather than ``-x``) matches however the binary is wrapped — e.g. a Nix
+    ``.qutebrowser-wrapped`` launcher — so an open browser isn't missed.
+    """
+    result = core.host_run(["pgrep", "-f", "qutebrowser"])
+    return getattr(result, "returncode", 1) == 0
+
+
 def handle(cmd, core):
     """Enter browser mode on a browser command; return None otherwise.
 
     A matching command launches qutebrowser (if needed) and runs the continuous
     browser-mode loop; reserved global commands (sleep/quit) are passed through.
+    Outside the explicit "open browser", navigation commands are only acted on
+    when a browser is already running, so ambiguous words can't open one.
     """
     cmd_lower = cmd.lower().strip(".,!? ")
 
@@ -457,6 +471,9 @@ def handle(cmd, core):
         core.host_run(["qutebrowser"], background=True)
         browser_mode(core)
         return True
+
+    if not _qutebrowser_running(core):
+        return None
 
     # --- Single browser commands → enters browser mode ---
     try:
@@ -521,7 +538,7 @@ def browser_mode(core):
 
 
 def handle_browser_command(cmd_lower, core):
-    """Execute a single in-browser command; False if it isn't recognised."""
+    """Execute a single in-browser command; None if it isn't recognised."""
     # --- Hints ---
     if cmd_lower in [
         "numbers",

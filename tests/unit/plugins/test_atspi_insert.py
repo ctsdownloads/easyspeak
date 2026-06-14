@@ -19,10 +19,11 @@ class FakeState:
 class FakeAccessible:
     """A minimal AT-SPI accessible node for tree-walk tests."""
 
-    def __init__(self, states=(), children=(), caret=0, *, raises=False):
+    def __init__(self, states=(), children=(), caret=0, char_count=0, *, raises=False):
         self._state = FakeState(states)
         self._children = list(children)
         self.caret = caret
+        self.char_count = char_count
         self.raises = raises
         self.inserted = []
         self.deleted = []
@@ -42,6 +43,11 @@ class FakeAccessible:
         if self.caret is None:
             raise RuntimeError("no caret")
         return self.caret
+
+    def get_character_count(self):
+        if self.char_count is None:
+            raise RuntimeError("no count")
+        return self.char_count
 
     def insert_text(self, pos, char, length):
         self.inserted.append((pos, char, length))
@@ -143,8 +149,7 @@ def test_insert_into_types_characters():
     """Plain characters are inserted at the advancing caret."""
     node = FakeAccessible(caret=0)
 
-    helper.insert_into(node, "hi")
-
+    assert helper.insert_into(node, "hi") is True
     assert node.inserted == [(0, "h", 1), (1, "i", 1)]
 
 
@@ -166,13 +171,33 @@ def test_insert_into_backspace_at_start_is_noop():
     assert node.deleted == []
 
 
-def test_insert_into_unknown_caret_starts_at_minus_one():
-    """When the caret offset can't be read, insertion still proceeds."""
-    node = FakeAccessible(caret=None)
+def test_insert_into_unreadable_caret_appends_in_order():
+    """When the caret can't be read, text appends at the end — in order.
 
-    helper.insert_into(node, "x")
+    Regression: the old code started at ``-1`` and advanced, which placed the
+    first character at the end and the rest at the start, scrambling the text.
+    """
+    node = FakeAccessible(caret=None, char_count=5)
 
-    assert node.inserted == [(-1, "x", 1)]
+    assert helper.insert_into(node, "hi") is True
+    assert node.inserted == [(5, "h", 1), (6, "i", 1)]
+
+
+def test_insert_into_no_insertion_point_reports_failure():
+    """With neither caret nor character count, nothing is inserted."""
+    node = FakeAccessible(caret=None, char_count=None)
+
+    assert helper.insert_into(node, "hi") is False
+    assert node.inserted == []
+
+
+def test_run_reports_no_focus_when_insertion_point_unknown():
+    """A focused field whose position can't be read reports NO_FOCUS, not OK."""
+    target = FakeAccessible(states=["FOCUSED", "EDITABLE"], caret=None, char_count=None)
+    desktop = FakeAccessible(children=[target])
+
+    assert helper.run(FakeAtspi(desktop), "hi") == helper.NO_FOCUS
+    assert target.inserted == []
 
 
 # --- run / main ---

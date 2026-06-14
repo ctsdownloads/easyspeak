@@ -1,21 +1,13 @@
 """Tests for the core main module."""
 
 import subprocess
-import sys
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import numpy as np
 import pytest
-
-# Mock all external dependencies before importing the module
-sys.modules["pyaudio"] = MagicMock()
-sys.modules["openwakeword"] = MagicMock()
-sys.modules["openwakeword.model"] = MagicMock()
-sys.modules["faster_whisper"] = MagicMock()
-
-from easyspeak.core.main import EasySpeak  # noqa: E402
-from easyspeak.core.tray import TrayAction  # noqa: E402
+from easyspeak.core.main import EasySpeak
+from easyspeak.core.tray import TrayAction
 
 
 class TestEasySpeakInit:

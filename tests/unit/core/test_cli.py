@@ -2,19 +2,11 @@
 
 import logging
 import shutil
-import sys
 from importlib import import_module
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import call, patch
 
 import pytest
-
-# Mock external deps before importing the module
-sys.modules["pyaudio"] = MagicMock()
-sys.modules["openwakeword"] = MagicMock()
-sys.modules["openwakeword.model"] = MagicMock()
-sys.modules["faster_whisper"] = MagicMock()
-
-from easyspeak.core import cli  # noqa: E402
+from easyspeak.core import cli
 
 
 def test_dunder_main_module():

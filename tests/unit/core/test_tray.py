@@ -2,18 +2,9 @@
 
 import itertools
 import subprocess
-import sys
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
-# Mirror the other core tests: stub heavy deps so importing the package stays
-# light (no model/GPU needed just to reach core.tray). Assign directly rather
-# than setdefault so a real install in the environment is overridden too.
-sys.modules["pyaudio"] = MagicMock()
-sys.modules["openwakeword"] = MagicMock()
-sys.modules["openwakeword.model"] = MagicMock()
-sys.modules["faster_whisper"] = MagicMock()
-
-from easyspeak.core.tray import (  # noqa: E402
+from easyspeak.core.tray import (
     COMMAND_QUIT,
     STATE_LISTENING,
     STATE_MUTED,

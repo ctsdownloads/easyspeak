@@ -3,18 +3,10 @@
 import logging
 import sys
 import types
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
-
-# Mirror the other core tests: stub heavy deps so importing the package stays
-# light. core.hotkey itself imports evdev only lazily, so it needs no stub.
-sys.modules["pyaudio"] = MagicMock()
-sys.modules["openwakeword"] = MagicMock()
-sys.modules["openwakeword.model"] = MagicMock()
-sys.modules["faster_whisper"] = MagicMock()
-
-from easyspeak.core.hotkey import HotkeyListener, parse_combo  # noqa: E402
+from easyspeak.core.hotkey import HotkeyListener, parse_combo
 
 # evdev key codes used by the fakes below (the real values).
 LEFTCTRL, RIGHTCTRL = 29, 97
@@ -218,6 +210,29 @@ class TestStop:
 
         h.stop()  # must not raise
 
+        assert h._devices == []
+
+    def test_stop_joins_reader_thread_before_closing_devices(self):
+        """The reader thread must leave select() before its fds are closed.
+
+        Closing a device out from under a blocked select() can raise in the
+        thread, so stop() joins it first. We assert the ordering directly.
+        """
+        h = HotkeyListener("ctrl+shift")
+        events = []
+        thread = Mock()
+        thread.join.side_effect = lambda **_kw: events.append("join")
+        device = Mock()
+        device.close.side_effect = lambda: events.append("close")
+        h._thread = thread
+        h._devices = [device]
+
+        h.stop()
+
+        assert h._stop.is_set()
+        thread.join.assert_called_once()
+        assert events == ["join", "close"]
+        assert h._thread is None
         assert h._devices == []
 
 

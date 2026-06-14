@@ -311,6 +311,38 @@ def test_handle_stop_notes_command(mock_insert, mock_core):
     assert not mock_insert.called
 
 
+@pytest.mark.parametrize(
+    "command",
+    ["notebook", "noted", "denote", "footnote", "notepad", "take notice"],
+)
+@patch("easyspeak.plugins.dictation.insert_text")
+def test_handle_ignores_words_merely_containing_note(mock_insert, command, mock_core):
+    """Words that only contain 'note' must not enter dictation mode.
+
+    Regression: a substring check fired dictation on 'notebook', 'noted', etc.
+    """
+    assert dictation.handle(command, mock_core) is None
+    mock_insert.assert_not_called()
+    mock_core.speak.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "command",
+    ["notes", "note", "take notes", "new note", "notes please"],
+)
+@patch("easyspeak.plugins.dictation.insert_text")
+def test_handle_enters_dictation_on_note_word(
+    mock_insert, command, mock_core_with_audio
+):
+    """'note'/'notes' as a whole word still enters dictation mode."""
+    mock_core_with_audio.transcribe = Mock(return_value="stop notes")
+
+    assert dictation.handle(command, mock_core_with_audio) is True
+    assert ("Dictation",) in [
+        call.args for call in mock_core_with_audio.speak.call_args_list
+    ]
+
+
 @patch("easyspeak.plugins.dictation.insert_text", return_value=True)
 @patch("easyspeak.plugins.dictation.format_text", return_value="Hello")
 def test_handle_dictation_mode_single_input(

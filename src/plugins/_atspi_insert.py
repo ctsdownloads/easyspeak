@@ -58,12 +58,32 @@ def find_focused_editable(atspi, obj, depth=0):
     return None
 
 
-def insert_into(target, text):
-    """Type ``text`` into ``target`` at the caret, honouring backspaces."""
-    try:
+def _insertion_point(target):
+    """Where to start inserting: the caret, else end-of-text, else None.
+
+    Falling back to the end keeps multi-character insertion in order; the old
+    code advanced from a bogus ``-1``, scattering later characters to the start.
+    None means neither the caret nor the character count was readable.
+    """
+    with contextlib.suppress(Exception):
         pos = target.get_caret_offset()
-    except Exception:
-        pos = -1
+        if pos >= 0:
+            return pos
+    with contextlib.suppress(Exception):
+        return target.get_character_count()
+    return None
+
+
+def insert_into(target, text):
+    """Type ``text`` into ``target`` at the caret, honouring backspaces.
+
+    Returns True once the text is inserted, or False if no usable insertion
+    point could be found — so the caller reports "no focus" rather than
+    scattering characters across the field.
+    """
+    pos = _insertion_point(target)
+    if pos is None:
+        return False
 
     for char in text:
         if char == BACKSPACE:
@@ -73,6 +93,7 @@ def insert_into(target, text):
         else:
             target.insert_text(pos, char, len(char.encode("utf-8")))
             pos += 1
+    return True
 
 
 def run(atspi, text):
@@ -81,8 +102,7 @@ def run(atspi, text):
     for i in range(desktop.get_child_count()):
         target = find_focused_editable(atspi, desktop.get_child_at_index(i))
         if target:
-            insert_into(target, text)
-            return OK
+            return OK if insert_into(target, text) else NO_FOCUS
     return NO_FOCUS
 
 
