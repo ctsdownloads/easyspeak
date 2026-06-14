@@ -60,6 +60,11 @@ benchmark = [
   "pytest>=8",
   "pytest-benchmark>=5",
 ]
+docs = [
+  "mike>=2.1",
+  "mkdocs-material>=9.5",
+  "mkdocstrings[python]>=0.27",
+]
 head-tracking = [
   "opencv-python>=4.13.0.90",
   "sixdrepnet>=0.1.6",
