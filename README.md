@@ -48,6 +48,13 @@ uv run easyspeak
 
 You also need [Piper TTS](https://ctsdownloads.github.io/easyspeak/installation/#3-piper-tts) installed for voice feedback. See the **[Installation guide](https://ctsdownloads.github.io/easyspeak/installation/)** for the venv-based path, head tracking, and full details.
 
+Prefer prebuilt packages? Grab the `easyspeak` app `.deb`/`.rpm` **plus a language
+pack** (e.g. `easyspeak-lang-en`) from the
+[Releases page](https://github.com/ctsdownloads/easyspeak/releases) and install them
+together — a self-contained, offline install (Python runtime, `piper`, GNOME
+extension, and speech models). See the
+**[Packaging guide](https://ctsdownloads.github.io/easyspeak/packaging/)**.
+
 Then say "Hey Jarvis" followed by a command. Say "help" to list all commands.
 
 ## Documentation

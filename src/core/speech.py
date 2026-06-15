@@ -16,7 +16,7 @@ import sys
 import time
 from subprocess import TimeoutExpired
 
-from .config import PIPER_MODEL
+from .config import PIPER_BIN, PIPER_MODEL
 
 logger = logging.getLogger(__name__)
 
@@ -150,7 +150,7 @@ class SpeechPipeline:
                 stderr=subprocess.DEVNULL,
             )
             self._piper = subprocess.Popen(
-                ["piper", "--model", PIPER_MODEL, "--output-raw"],
+                [PIPER_BIN, "--model", PIPER_MODEL, "--output-raw"],
                 stdin=subprocess.PIPE,
                 stdout=self._player.stdin,
                 stderr=subprocess.DEVNULL,

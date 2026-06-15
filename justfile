@@ -149,6 +149,8 @@ gate: (clean '--quiet') (package '--quiet')
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q extension.js
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q extension-helpers.js
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q metadata.json
+    # The desktop launcher shipped in the .deb/.rpm must be valid.
+    desktop-file-validate data/easyspeak.desktop
 
 # Verify package version is same as Git tag
 [group('release')]
@@ -166,3 +168,18 @@ ensure_version_matches tag:
 publish: package
     just ensure_version_matches ${GIT_TAG}
     uv publish
+
+# Build the /opt/easyspeak app bundle (CI/container only, not the host)
+[group('packaging')]
+stage-bundle:
+    bash packaging/stage-bundle.sh
+
+# Stage a language pack's speech models, e.g. `just stage-lang en`
+[group('packaging')]
+stage-lang code:
+    bash packaging/stage-lang.sh {{ code }}
+
+# Build .deb and .rpm locally in a clean ubuntu container -> ./dist
+[group('packaging')]
+package-native version='0.0.0':
+    bash packaging/build-in-docker.sh {{ version }}
