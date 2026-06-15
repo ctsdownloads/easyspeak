@@ -1,0 +1,75 @@
+# nfpm config — builds the EasySpeak .deb and .rpm from the staged /opt/easyspeak
+# bundle (see packaging/stage-bundle.sh). VERSION is injected from the release tag.
+#   VERSION=1.2.3 nfpm package -f packaging/nfpm.yaml -p deb
+#   VERSION=1.2.3 nfpm package -f packaging/nfpm.yaml -p rpm
+name: easyspeak
+arch: amd64
+platform: linux
+version: ${VERSION}
+section: utils
+priority: optional
+maintainer: Matt Hartley <matt@matthartley.com>
+description: |
+  Voice control for Linux desktops. Fully local, no cloud, Wayland-native.
+  Say "Hey Jarvis" and control your GNOME desktop with your voice.
+vendor: EasySpeak
+homepage: https://github.com/ctsdownloads/easyspeak
+license: GPL-3.0-only
+
+contents:
+# The self-contained bundle (standalone CPython + venv + app + piper).
+- src: /opt/easyspeak
+  dst: /opt/easyspeak
+# Launcher on PATH: symlink to the console script pyproject installs in the venv.
+# The app finds its models and bundled `piper` from its own location, so no
+# wrapper/PATH setup is needed.
+- src: /opt/easyspeak/venv/bin/easyspeak
+  dst: /usr/bin/easyspeak
+  type: symlink
+# Desktop entry (uses the stock audio-input-microphone icon from adwaita-icon-theme).
+- src: ./data/easyspeak.desktop
+  dst: /usr/share/applications/easyspeak.desktop
+- src: ./LICENSE
+  dst: /usr/share/doc/easyspeak/LICENSE
+
+overrides:
+  deb:
+    depends:
+    - libportaudio2          # pyaudio runtime — microphone capture (core)
+    - python3                # runs the AT-SPI dictation helper
+    - python3-gi             # PyGObject for the helper + About dialog
+    - gir1.2-glib-2.0        # core GLib/Gio/DBus typelibs (Atspi typelib needs DBus-1.0)
+    - gir1.2-atspi-2.0       # Atspi typelib for dictation
+    - libgtk-4-1             # About dialog
+    - libadwaita-1-0         # About dialog
+    - gir1.2-gtk-4.0
+    - gir1.2-adw-1
+    - adwaita-icon-theme     # provides the launcher icon
+    recommends:
+    - easyspeak-lang-en      # default language data; repo installs pull it automatically
+    - gnome-shell            # provides `gnome-extensions` (mouse grid / indicator)
+    - qutebrowser            # browser plugin
+    - ffmpeg                 # ffplay TTS playback fallback
+    - pipewire-bin           # pw-play
+    - wireplumber            # wpctl volume control
+    - pulseaudio-utils       # paplay (chime + TTS fallback)
+    - sound-theme-freedesktop  # wake/error chime sounds
+  rpm:
+    depends:
+    - portaudio
+    - python3
+    - python3-gobject
+    - gobject-introspection  # DBus-1.0 typelib that the Atspi typelib depends on
+    - at-spi2-core
+    - gtk4
+    - libadwaita
+    - adwaita-icon-theme
+    recommends:
+    - easyspeak-lang-en
+    - gnome-shell
+    - qutebrowser
+    - ffmpeg-free
+    - pipewire-utils
+    - wireplumber
+    - pulseaudio-utils
+    - sound-theme-freedesktop

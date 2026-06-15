@@ -16,6 +16,7 @@ easyspeak/
 ├── pyproject.toml
 ├── src
 │   ├── extension.js           # GNOME Shell extension (bundled as package data)
+│   ├── extension-helpers.js   # Pure JS helpers imported by extension.js
 │   ├── metadata.json          # Extension metadata
 │   ├── core
 │   │   ├── __init__.py

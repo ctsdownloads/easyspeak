@@ -21,6 +21,7 @@ def _restore_config(monkeypatch):
         "EASYSPEAK_WHISPER_MODEL",
         "EASYSPEAK_WHISPER_COMPUTE_TYPE",
         "EASYSPEAK_PIPER_MODEL",
+        "EASYSPEAK_PIPER_BIN",
     ]:
         monkeypatch.delenv(var, raising=False)
     importlib.reload(config)
@@ -94,3 +95,45 @@ def test_whisper_compute_type_env_override(monkeypatch):
     monkeypatch.setenv("EASYSPEAK_WHISPER_COMPUTE_TYPE", "float16")
     importlib.reload(config)
     assert config.WHISPER_COMPUTE_TYPE == "float16"
+
+
+def test_bundled_model_found(monkeypatch, tmp_path):
+    """A model present beside the venv (<prefix>/../models/...) is used."""
+    (tmp_path / "models" / "whisper" / "base.en").mkdir(parents=True)
+    monkeypatch.setattr(config.sys, "prefix", str(tmp_path / "venv"))
+    assert config._bundled_model(
+        "models", "whisper", "base.en", default="base.en"
+    ) == str(tmp_path / "models" / "whisper" / "base.en")
+
+
+def test_bundled_model_missing_falls_back(monkeypatch, tmp_path):
+    """With no bundled tree, the default (download name / path) is kept."""
+    monkeypatch.setattr(config.sys, "prefix", str(tmp_path / "venv"))
+    assert (
+        config._bundled_model("models", "whisper", "base.en", default="base.en")
+        == "base.en"
+    )
+
+
+def test_bundled_bin_found(monkeypatch, tmp_path):
+    """A binary present next to the interpreter is used by absolute path."""
+    venv_bin = tmp_path / "venv" / "bin"
+    venv_bin.mkdir(parents=True)
+    (venv_bin / "piper").touch()
+    monkeypatch.setattr(config.sys, "executable", str(venv_bin / "python"))
+    assert config._bundled_bin("piper", default="piper") == str(venv_bin / "piper")
+
+
+def test_bundled_bin_missing_falls_back(monkeypatch, tmp_path):
+    """With no co-located binary, the bare name (resolved via PATH) is kept."""
+    venv_bin = tmp_path / "venv" / "bin"
+    venv_bin.mkdir(parents=True)
+    monkeypatch.setattr(config.sys, "executable", str(venv_bin / "python"))
+    assert config._bundled_bin("piper", default="piper") == "piper"
+
+
+def test_piper_bin_env_override(monkeypatch):
+    """EASYSPEAK_PIPER_BIN overrides the discovered/default binary."""
+    monkeypatch.setenv("EASYSPEAK_PIPER_BIN", "/opt/voices/piper")
+    importlib.reload(config)
+    assert config.PIPER_BIN == "/opt/voices/piper"

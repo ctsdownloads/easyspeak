@@ -6,6 +6,8 @@ each plugin's own setup() hook, not here.
 """
 
 import os
+import sys
+from pathlib import Path
 
 from faster_whisper import WhisperModel
 
@@ -34,12 +36,36 @@ HOTKEY_ENABLED = os.environ.get("EASYSPEAK_HOTKEY", "1").lower() not in (
     "off",
 )
 
+
 # --- Models ---
-PIPER_MODEL = os.environ.get(
-    "EASYSPEAK_PIPER_MODEL",
-    os.path.expanduser("~/.local/share/piper/en_US-amy-medium.onnx"),
+def _bundled_model(*parts, default):
+    """Return a model path bundled beside the venv, or ``default`` if absent."""
+    path = Path(sys.prefix).parent.joinpath(*parts)
+    return str(path) if path.exists() else default
+
+
+def _bundled_bin(name, *, default):
+    """Return a binary path in this venv's ``bin/``, or ``default`` if absent."""
+    exe = Path(sys.executable).with_name(name)
+    return str(exe) if exe.exists() else default
+
+
+# The .deb/.rpm bundle the speech models beside the venv (under
+# /opt/easyspeak/models) and `piper` inside it. The defaults below locate them
+# from our own interpreter, so no launcher or PATH setup is needed; pip/source
+# installs have no such tree and fall back to a download name / the home dir.
+PIPER_MODEL = os.environ.get("EASYSPEAK_PIPER_MODEL") or _bundled_model(
+    "models",
+    "piper",
+    "en_US-amy-medium.onnx",
+    default=os.path.expanduser("~/.local/share/piper/en_US-amy-medium.onnx"),
 )
-WHISPER_MODEL = os.environ.get("EASYSPEAK_WHISPER_MODEL", "base.en")
+PIPER_BIN = os.environ.get("EASYSPEAK_PIPER_BIN") or _bundled_bin(
+    "piper", default="piper"
+)
+WHISPER_MODEL = os.environ.get("EASYSPEAK_WHISPER_MODEL") or _bundled_model(
+    "models", "whisper", "base.en", default="base.en"
+)
 WHISPER_COMPUTE_TYPE = os.environ.get("EASYSPEAK_WHISPER_COMPUTE_TYPE", "int8")
 try:
     # 0 == let CTranslate2 pick (uses all logical cores, which oversubscribes
