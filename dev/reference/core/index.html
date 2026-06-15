@@ -322,6 +322,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../../packaging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Packaging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../usage/" class="md-nav__link">
         
   
@@ -472,10 +499,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
             
   
   
@@ -493,8 +520,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3698,19 +3725,19 @@ each plugin's own setup() hook, not here.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/core/config.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-59">59</a></span>
-<span class="normal"><a href="#__codelineno-0-60">60</a></span>
-<span class="normal"><a href="#__codelineno-0-61">61</a></span>
-<span class="normal"><a href="#__codelineno-0-62">62</a></span>
-<span class="normal"><a href="#__codelineno-0-63">63</a></span>
-<span class="normal"><a href="#__codelineno-0-64">64</a></span>
-<span class="normal"><a href="#__codelineno-0-65">65</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_whisper_model</span><span class="p">(</span>
-<a id="__codelineno-0-60" name="__codelineno-0-60"></a>    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">WHISPER_MODEL</span><span class="p">,</span>
-<a id="__codelineno-0-61" name="__codelineno-0-61"></a>    <span class="n">compute_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">WHISPER_COMPUTE_TYPE</span><span class="p">,</span>
-<a id="__codelineno-0-62" name="__codelineno-0-62"></a>    <span class="n">cpu_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">WHISPER_CPU_THREADS</span><span class="p">,</span>
-<a id="__codelineno-0-63" name="__codelineno-0-63"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WhisperModel</span><span class="p">:</span>
-<a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a faster-whisper model from the configured (or given) settings.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-65" name="__codelineno-0-65"></a>    <span class="k">return</span> <span class="n">WhisperModel</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">compute_type</span><span class="o">=</span><span class="n">compute_type</span><span class="p">,</span> <span class="n">cpu_threads</span><span class="o">=</span><span class="n">cpu_threads</span><span class="p">)</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-85">85</a></span>
+<span class="normal"><a href="#__codelineno-0-86">86</a></span>
+<span class="normal"><a href="#__codelineno-0-87">87</a></span>
+<span class="normal"><a href="#__codelineno-0-88">88</a></span>
+<span class="normal"><a href="#__codelineno-0-89">89</a></span>
+<span class="normal"><a href="#__codelineno-0-90">90</a></span>
+<span class="normal"><a href="#__codelineno-0-91">91</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-85" name="__codelineno-0-85"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_whisper_model</span><span class="p">(</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86"></a>    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">WHISPER_MODEL</span><span class="p">,</span>
+<a id="__codelineno-0-87" name="__codelineno-0-87"></a>    <span class="n">compute_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">WHISPER_COMPUTE_TYPE</span><span class="p">,</span>
+<a id="__codelineno-0-88" name="__codelineno-0-88"></a>    <span class="n">cpu_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">WHISPER_CPU_THREADS</span><span class="p">,</span>
+<a id="__codelineno-0-89" name="__codelineno-0-89"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WhisperModel</span><span class="p">:</span>
+<a id="__codelineno-0-90" name="__codelineno-0-90"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a faster-whisper model from the configured (or given) settings.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-91" name="__codelineno-0-91"></a>    <span class="k">return</span> <span class="n">WhisperModel</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">compute_type</span><span class="o">=</span><span class="n">compute_type</span><span class="p">,</span> <span class="n">cpu_threads</span><span class="o">=</span><span class="n">cpu_threads</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4043,7 +4070,7 @@ model), so callers can warn once rather than silently failing per phrase.</p>
 <a id="__codelineno-0-150" name="__codelineno-0-150"></a>            <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
 <a id="__codelineno-0-151" name="__codelineno-0-151"></a>        <span class="p">)</span>
 <a id="__codelineno-0-152" name="__codelineno-0-152"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_piper</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
-<a id="__codelineno-0-153" name="__codelineno-0-153"></a>            <span class="p">[</span><span class="s2">&quot;piper&quot;</span><span class="p">,</span> <span class="s2">&quot;--model&quot;</span><span class="p">,</span> <span class="n">PIPER_MODEL</span><span class="p">,</span> <span class="s2">&quot;--output-raw&quot;</span><span class="p">],</span>
+<a id="__codelineno-0-153" name="__codelineno-0-153"></a>            <span class="p">[</span><span class="n">PIPER_BIN</span><span class="p">,</span> <span class="s2">&quot;--model&quot;</span><span class="p">,</span> <span class="n">PIPER_MODEL</span><span class="p">,</span> <span class="s2">&quot;--output-raw&quot;</span><span class="p">],</span>
 <a id="__codelineno-0-154" name="__codelineno-0-154"></a>            <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
 <a id="__codelineno-0-155" name="__codelineno-0-155"></a>            <span class="n">stdout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_player</span><span class="o">.</span><span class="n">stdin</span><span class="p">,</span>
 <a id="__codelineno-0-156" name="__codelineno-0-156"></a>            <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
