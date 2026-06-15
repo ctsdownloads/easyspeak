@@ -4,10 +4,10 @@ Voice control for Linux desktops. Fully local, no cloud, Wayland-native.
 
 Say "Hey Jarvis" and control your desktop with your voice.
 
-![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)
-![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)
-![Desktop](https://img.shields.io/badge/desktop-GNOME%20%7C%20Wayland-green.svg)
-![Status](https://img.shields.io/badge/status-Alpha-orange.svg)
+[![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](https://github.com/ctsdownloads/easyspeak/blob/dev/LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)](https://ctsdownloads.github.io/easyspeak/installation/)
+[![Desktop](https://img.shields.io/badge/desktop-GNOME%20%7C%20Wayland-green.svg)](https://ctsdownloads.github.io/easyspeak/how-it-works/)
+[![Status](https://img.shields.io/badge/status-Alpha-orange.svg)](https://github.com/ctsdownloads/easyspeak/releases)
 [![Pipeline](https://github.com/ctsdownloads/easyspeak/actions/workflows/pipeline.yml/badge.svg)](https://github.com/ctsdownloads/easyspeak/actions/workflows/pipeline.yml)
 [![Safety](https://github.com/ctsdownloads/easyspeak/actions/workflows/safety.yml/badge.svg)](https://github.com/ctsdownloads/easyspeak/actions/workflows/safety.yml)
 [![Benchmarks](https://img.shields.io/badge/%F0%9F%90%B0%20Bencher-performance-FD7E14.svg)](https://bencher.dev/perf/easyspeak)
@@ -66,14 +66,8 @@ Then say "Hey Jarvis" followed by a command. Say "help" to list all commands.
 - **[Troubleshooting](https://ctsdownloads.github.io/easyspeak/troubleshooting/)** — common problems and fixes
 - **[How it works](https://ctsdownloads.github.io/easyspeak/how-it-works/)** — the architecture
 - **[API reference](https://ctsdownloads.github.io/easyspeak/reference/core/)** — generated from the source docstrings
-
-## Contributing
-
-See [CONTRIBUTING](CONTRIBUTING.md).
-
-## License
-
-GPL-3.0 License. See [LICENSE](LICENSE) for details.
+- **[Contributing](https://ctsdownloads.github.io/easyspeak/contributing/)** — how to set up a dev environment and submit changes
+- **[License](https://ctsdownloads.github.io/easyspeak/license/)** — GPL-3.0
 
 ## Acknowledgments
 
