@@ -1,8 +1,8 @@
 # Contributing
 
-Contributions welcome — please open an issue first to discuss changes.
+Contributions welcome — please open an issue first to discuss bigger plans.
 
-The full contributing guide (development setup, packaging, and the release
-process) lives in the documentation:
+See the docs for the [full contributing guide][docs]. It explains development
+setup, packaging, and the release process.
 
-**<https://ctsdownloads.github.io/easyspeak/contributing/>**
+[docs]: https://ctsdownloads.github.io/easyspeak/contributing/

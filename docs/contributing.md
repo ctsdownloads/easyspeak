@@ -1,6 +1,8 @@
 # Contributing
 
-Contributions welcome. Please open an issue first to discuss changes.
+Contributions welcome. The [source code][gh:source] lives on GitHub — fork it,
+clone it, and send a pull request. Please [open an issue][gh:issues] first to
+discuss larger changes, or start a thread in [GitHub Discussions][gh:discuss].
 
 Areas that need work:
 
@@ -86,3 +88,7 @@ The packaging configuration is in `pyproject.toml`, supported by
 latest Git tag and the distance from that tag in number of commits.
 
 To publish a new release, push a new Git tag (e.g. 2.1.0) to GitHub.
+
+[gh:source]: https://github.com/ctsdownloads/easyspeak
+[gh:issues]: https://github.com/ctsdownloads/easyspeak/issues
+[gh:discuss]: https://github.com/ctsdownloads/easyspeak/discussions
