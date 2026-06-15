@@ -12,7 +12,7 @@ all: codestyle safety test gate clean
 # Remove build artifacts and reports (use -v for verbose, -n for dry-run)
 [group('lifecycle')]
 clean *args:
-    uvx pyclean . {{ args }} --debris all --erase .benchmarks result results.json --yes
+    uvx pyclean . {{ args }} --debris all --erase .benchmarks result results.json 'site/**/*' site --yes
 
 # Run all code style checks (format, lint, lint-js, lint-md, lint-yaml)
 [group('codestyle')]
