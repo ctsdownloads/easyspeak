@@ -1002,16 +1002,18 @@ the supported formats are <strong>unconfined native packages</strong> — sandbo
 <a href="https://github.com/ctsdownloads/easyspeak/releases">Releases page</a> — grab <strong>both</strong>
 the app and a language pack — and install them <strong>together</strong> (the language pack is a
 separate file, not auto-fetched from GitHub):</p>
-<p>=== "Debian / Ubuntu"</p>
-<div class="highlight"><pre><span></span><code>```bash
-sudo apt install ./easyspeak_*_amd64.deb ./easyspeak-lang-en_*_all.deb
-```
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Debian / Ubuntu</label><label for="__tabbed_1_2">Fedora / RHEL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>./easyspeak_*_amd64.deb<span class="w"> </span>./easyspeak-lang-en_*_all.deb
 </code></pre></div>
-<p>=== "Fedora / RHEL"</p>
-<div class="highlight"><pre><span></span><code>```bash
-sudo dnf install ./easyspeak-*.x86_64.rpm ./easyspeak-lang-en-*.noarch.rpm
-```
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>./easyspeak-*.x86_64.rpm<span class="w"> </span>./easyspeak-lang-en-*.noarch.rpm
 </code></pre></div>
+</div>
+</div>
+</div>
 <p>This is <strong>fully offline</strong> (assuming the system dependencies — GTK4, PortAudio,
 PyGObject, … — are already present, as on any GNOME desktop). Then launch
 <strong>EasySpeak</strong> from the applications menu, or run <code>easyspeak</code>.</p>

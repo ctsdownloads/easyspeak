@@ -888,14 +888,12 @@
   
 
 
-<!--
-This page includes the repository-root CONTRIBUTING.md verbatim via
-pymdownx.snippets, so the root file stays the single source of truth.
--->
 <h1 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h1>
 <p>Contributions welcome. Please open an issue first to discuss changes.</p>
-<p>Areas that need work:
-- More application integrations</p>
+<p>Areas that need work:</p>
+<ul>
+<li>More application integrations</li>
+</ul>
 <h2 id="planned-enhancements">Planned Enhancements<a class="headerlink" href="#planned-enhancements" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Window controls (maximize, minimize)</li>
@@ -922,7 +920,11 @@ which transparently manages virtual environments and package installation.
 uv also allows you to install several Python versions on your computer in
 parallel. We use this to test against all supported Python versions.</p>
 <h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
-<p>You need to install <code>uv</code> and <code>just</code>, e.g.</p>
+<p>First install the system build dependencies (PortAudio, GCC, Python 3.12, …)
+as described under <a href="../installation/#install-from-source">Install from source</a>
+in the Installation guide — without them the build and run steps below will
+fail.</p>
+<p>Then install <code>uv</code> and <code>just</code>, e.g.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="go">python3 -m pip install uv</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="go">uv tool install rust-just</span>
