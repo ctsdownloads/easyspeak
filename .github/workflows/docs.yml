@@ -4,8 +4,10 @@ name: Docs
 # mike commits the built site to the gh-pages branch; Pages serves from there.
 on:
   push:
-    branches: [dev]
-    tags: ["*"]
+    branches:
+    - dev
+    tags:
+    - '*'
   pull_request:  # build-only check; the deploy steps below are guarded by ref
   workflow_dispatch:
 
