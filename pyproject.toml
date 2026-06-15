@@ -111,6 +111,15 @@ warn_redundant_casts = true
 warn_unreachable = true
 warn_unused_ignores = true
 
+[tool.pymarkdown]
+plugins.md013.enabled = false  # line-length
+plugins.md024.enabled = false  # no-duplicate-heading
+plugins.md032.enabled = false  # blanks-around-lists
+plugins.md036.enabled = false  # no-emphasis-as-heading
+plugins.md040.enabled = false  # fenced-code-language
+plugins.md041.enabled = false  # first-line-heading
+plugins.md046.enabled = false  # code-block-style
+
 [tool.pytest.ini_options]
 # Folders excluded from default discovery are opt-in: they need preparation
 # the plain unit run doesn't (large model downloads, real external binaries,

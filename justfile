@@ -14,12 +14,14 @@ all: codestyle safety test gate clean
 clean *args:
     uvx pyclean . {{ args }} --debris all --erase .benchmarks result results.json --yes
 
-# Run all code style checks (format, lint, lint-js)
+# Run all code style checks (format, lint, lint-js, lint-md, lint-yaml)
 [group('codestyle')]
 codestyle:
     -just format
     -just lint
     -just lint-js
+    -just lint-md
+    -just lint-yaml
 
 # Check Python code style (use -- to apply, --diff to preview)
 [group('codestyle')]
@@ -35,6 +37,16 @@ lint *args=('--statistics'):
 [group('codestyle')]
 lint-js *args:
     eslint src/extension.js src/extension-helpers.js {{ args }}
+
+# Check Markdown: structure only, lenient on style (config in pyproject.toml)
+[group('codestyle')]
+lint-md *args:
+    git ls-files '*.md' | xargs uvx --from pymarkdownlnt pymarkdown {{ args }} scan
+
+# Check YAML formatting: minimal indent, final newline (config in .yamllint.yaml)
+[group('codestyle')]
+lint-yaml *args:
+    git ls-files '*.yml' '*.yaml' | xargs uvx yamllint -s {{ args }}
 
 # Static type checking (use --pretty for error details)
 [group('safety')]

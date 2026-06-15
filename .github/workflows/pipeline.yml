@@ -17,7 +17,9 @@ jobs:
       matrix:
         task:
         - format --diff
-        - lint --
+        - lint --diff
+        - lint-md
+        - lint-yaml
         - types
         - package
         - gate
