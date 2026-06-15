@@ -43,7 +43,12 @@ parallel. We use this to test against all supported Python versions.
 
 ### Prerequisites
 
-You need to install `uv` and `just`, e.g.
+First install the system build dependencies (PortAudio, GCC, Python 3.12, …)
+as described under [Install from source](installation.md#install-from-source)
+in the Installation guide — without them the build and run steps below will
+fail.
+
+Then install `uv` and `just`, e.g.
 
 ```console
 python3 -m pip install uv

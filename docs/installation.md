@@ -3,11 +3,43 @@
 ## Requirements
 
 - Linux with GNOME Shell 47+ on Wayland
-- Python 3.12 (not 3.13 and 3.14 — see installation notes)
 - Working microphone
 - ~2 GB disk space for models
+- Python 3.12 — **source install only** (not 3.13/3.14, see notes below); the
+  prebuilt packages bundle their own runtime
 
 Tested on Fedora 43.
+
+## Quick install (prebuilt packages)
+
+The easiest path. Download the latest **app** package and a **language pack**
+from the [Releases page](https://github.com/ctsdownloads/easyspeak/releases)
+and install them together:
+
+=== "Debian / Ubuntu"
+
+    ```bash
+    sudo apt install ./easyspeak_*_amd64.deb ./easyspeak-lang-en_*_all.deb
+    ```
+
+=== "Fedora / RHEL"
+
+    ```bash
+    sudo dnf install ./easyspeak-*.x86_64.rpm ./easyspeak-lang-en-*.noarch.rpm
+    ```
+
+This bundles the Python runtime, Piper, the GNOME Shell extension, and the speech
+models — no `pip`/`uv` step and no compiler. **Log out and back in once** after
+the first launch so GNOME loads the bundled extension. See the
+**[Packaging guide](packaging.md#install)** for offline notes, more languages,
+and hold-to-dictate setup.
+
+## Install from source
+
+For development, or to run the latest unreleased code, install from the repository.
+This path needs system build dependencies and Python 3.12.
+
+### Python 3.12
 
 Fedora 43's default `python3` is 3.14. Unfortunately, we depend on a few Google
 packages that are not available for Python 3.13+ yet.
@@ -17,7 +49,7 @@ sudo dnf install python3.12
 python3.12 --version  # Verify it's installed
 ```
 
-## 1. System packages
+### 1. System packages
 
 ```bash
 sudo dnf install \
@@ -40,7 +72,7 @@ sudo dnf install \
 window. They ship with any GNOME desktop, so they're usually already present;
 they're listed here for the sake of minimal or non-GNOME installs.
 
-## 2. Python packages
+### 2. Python packages
 
 ```bash
 python3.12 -m venv ~/easyspeak-venv
@@ -60,7 +92,7 @@ uv run easyspeak
 uv will transparently create and update a virtual environment, and run EasySpeak
 from in there.
 
-## 3. Piper TTS
+### 3. Piper TTS
 
 ```bash
 mkdir -p ~/.local/bin
@@ -80,14 +112,14 @@ wget -O en_US-amy-medium.onnx.json \
   "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx.json"
 ```
 
-## 4. Clone the repository
+### 4. Clone the repository
 
 ```bash
 git clone https://github.com/ctsdownloads/easyspeak.git ~/easyspeak
 cd ~/easyspeak
 ```
 
-## Head tracking (optional)
+### Head tracking (optional)
 
 Head tracking requires a webcam and additional dependencies:
 
