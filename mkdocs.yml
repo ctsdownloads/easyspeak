@@ -32,9 +32,11 @@ theme:
   - toc.follow
   - search.suggest
 
-# CHANGELOG.md and CONTRIBUTING.md stay authoritative at the repo root; the docs
-# pages pull them in via pymdownx.snippets (the --8<-- directive), so they are
-# never duplicated. snippets' base_path lets those root files resolve.
+# CHANGELOG.md and LICENSE stay authoritative at the repo root; the docs pages
+# pull them in via pymdownx.snippets (the --8<-- directive), so they are never
+# duplicated. snippets' base_path lets those root files resolve. The contributing
+# guide is authored natively in docs/contributing.md (so its cross-links validate);
+# the root CONTRIBUTING.md is a short stub pointing here for GitHub.
 docs_dir: docs
 
 nav:
