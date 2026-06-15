@@ -1,10 +1,5 @@
-// Contract test: every D-Bus method declared in extension.js's interface XML
-// must have a matching handler wired up in enable(), and vice versa. This
-// catches the easy "added the method to the XML but forgot to implement it"
-// (or the reverse) drift without needing a running gnome-shell.
-//
-// extension.js can't be imported here (its top-level `gi://` imports only
-// resolve inside the shell), so we read it as text and parse the two sides.
+// Contract test: every D-Bus method in extension.js's XML has a handler,
+// and vice versa.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

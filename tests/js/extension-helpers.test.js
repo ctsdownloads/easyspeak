@@ -1,6 +1,4 @@
-// Unit tests for the gi-free extension helpers, run with `node --test`.
-// These cover the pure computation extracted from extension.js; the
-// GNOME-Shell-bound code around them can only be exercised in a live shell.
+// Unit tests for the pure, gi-free helpers in extension-helpers.js.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

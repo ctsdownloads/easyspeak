@@ -121,12 +121,6 @@ plugins.md041.enabled = false  # first-line-heading
 plugins.md046.enabled = false  # code-block-style
 
 [tool.pytest.ini_options]
-# Folders excluded from default discovery are opt-in: they need preparation
-# the plain unit run doesn't (large model downloads, real external binaries,
-# an audio server). Each has its own `just` target.
-#   tests/acceptance  -> `just acceptance`  (Gherkin scenarios; needs pytest-bdd)
-#   tests/benchmarks  -> `just benchmark`   (downloads large Whisper models)
-#   tests/integration -> `just integration` (runs real piper/audio-player binaries)
 addopts = "--ignore=tests/acceptance --ignore=tests/benchmarks --ignore=tests/integration"
 
 [tool.ruff.lint]
