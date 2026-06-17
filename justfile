@@ -5,7 +5,7 @@
 @help:
     just --list --unsorted
 
-# Run codestyle and safety checks, tests, packaging checks and cleanup
+# Run codestyle and safety checks, tests, packaging, docs, and cleanup
 [group('lifecycle')]
 all: codestyle safety test gate check-docs clean
 
