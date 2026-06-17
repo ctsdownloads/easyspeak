@@ -1,0 +1,24 @@
+name: Release
+
+on:
+  release:
+    types:
+    - published
+
+jobs:
+  packages:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # upload assets to the release
+    steps:
+    - uses: actions/checkout@v6
+    - name: Build .deb and .rpm
+      # Reuses the same containerised build as `just package-native`, so local
+      # and CI builds are byte-for-byte the same path. Strips a leading "v".
+      run: |
+        tag='${{ github.event.release.tag_name }}'
+        bash packaging/build-in-docker.sh "${tag#v}"
+    - name: Attach packages to the release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: gh release upload '${{ github.event.release.tag_name }}' dist/*.deb dist/*.rpm --clobber

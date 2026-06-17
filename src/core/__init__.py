@@ -1,0 +1,1 @@
+"""EasySpeak core functionality."""

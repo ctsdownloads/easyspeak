@@ -1,0 +1,7 @@
+{
+  "name": "EasySpeak",
+  "description": "Voice control for Linux — EasySpeak's GNOME Shell integration (panel indicator and on-screen surfaces).",
+  "uuid": "easyspeak@local",
+  "shell-version": ["47", "48", "49", "50"],
+  "version": 3
+}

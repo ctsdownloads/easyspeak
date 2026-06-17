@@ -1,0 +1,71 @@
+name: Docs
+
+# Build the MkDocs site and publish versioned docs to GitHub Pages with mike.
+# mike commits the built site to the gh-pages branch; Pages serves from there.
+on:
+  push:
+    branches:
+    - dev
+    tags:
+    - '*'
+  pull_request:  # build-only check; the deploy steps below are guarded by ref
+  workflow_dispatch:
+
+permissions:
+  contents: write  # mike pushes the built site to the gh-pages branch
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0  # mike needs the full history of the gh-pages branch
+
+    - uses: astral-sh/setup-uv@v7
+      with:
+        python-version: '3.12'
+
+    - uses: taiki-e/install-action@just
+
+    # `uv run` installs the project, which depends on pyaudio; building that
+    # needs the PortAudio headers (mirrors the other workflows).
+    - run: |
+        sudo apt update
+        sudo apt install -y portaudio19-dev
+
+    # The same command developers run locally; a strict build fails on
+    # warnings, so this validates the docs on every push and pull request.
+    - name: Build docs
+      run: just docs
+
+    - name: Configure git for mike
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+    # Tags publish a named version and move the "latest" alias; pushes to the
+    # default branch publish the in-progress "dev" docs. Both deploy to the
+    # gh-pages branch via mike. --push lets GitHub Pages serve the result.
+    # Pull requests run the build above only — neither condition matches.
+    - name: Deploy release docs
+      if: startsWith(github.ref, 'refs/tags/')
+      run: just docs-publish deploy --push --update-aliases "${GITHUB_REF_NAME}" latest
+
+    - name: Set default version to latest
+      if: startsWith(github.ref, 'refs/tags/')
+      run: just docs-publish set-default --push latest
+
+    - name: Deploy development docs
+      if: github.ref == 'refs/heads/dev'
+      run: |
+        just docs-publish deploy --push dev
+        # Until the first release sets the default to "latest", point the
+        # site root at the dev docs so the Pages root resolves instead of 404.
+        if ! just docs-publish list | grep -q '\[latest\]'; then
+          just docs-publish set-default --push dev
+        fi

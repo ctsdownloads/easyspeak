@@ -1,0 +1,76 @@
+name: Pipeline
+
+on:
+  pull_request:
+    branches:
+    - main
+    - dev
+  push:
+    branches:
+    - main
+    - dev
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        task:
+        - format --diff
+        - lint --diff
+        - lint-docstrings
+        - lint-md
+        - lint-yaml
+        - types
+        - package
+        - gate
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v6
+    - uses: astral-sh/setup-uv@v7
+      with:
+        python-version: '3.12'
+    - uses: taiki-e/install-action@just
+    - run: |
+        sudo apt update
+        sudo apt install -y portaudio19-dev desktop-file-utils
+    - run: just ${{ matrix.task }}
+
+  js:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        task:
+        - lint-js
+        - test-js
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v6
+    - uses: actions/setup-node@v5
+      with:
+        node-version: '22'
+    - uses: taiki-e/install-action@just
+    - run: npm install --global eslint@10
+    - run: just ${{ matrix.task }}
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+        - '3.10'
+        - '3.11'
+        - '3.12'
+        - '3.13'
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v6
+    - uses: astral-sh/setup-uv@v7
+      with:
+        python-version: ${{ matrix.python-version }}
+    - uses: taiki-e/install-action@just
+    - run: |
+        sudo apt update
+        sudo apt install -y portaudio19-dev
+    - run: just pytest
+    - run: just coverage

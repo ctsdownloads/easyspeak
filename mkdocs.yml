@@ -1,0 +1,106 @@
+site_name: EasySpeak
+site_description: Voice control for Linux desktops. Fully local, no cloud, Wayland-native.
+# Docs are versioned with mike (see the `extra.version` block and the Docs
+# workflow); the live site only serves under a version path. Point site_url at
+# the stable `latest` alias so canonical URLs and the sitemap resolve instead
+# of 404ing on the unversioned root.
+site_url: https://ctsdownloads.github.io/easyspeak/latest/
+repo_url: https://github.com/ctsdownloads/easyspeak
+repo_name: ctsdownloads/easyspeak
+copyright: Copyright &copy; EasySpeak contributors — GPL-3.0
+
+theme:
+  name: material
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+  - media: "(prefers-color-scheme: light)"
+    scheme: default
+    primary: black
+    accent: indigo
+    toggle:
+      icon: material/weather-night
+      name: Switch to dark mode
+  - media: "(prefers-color-scheme: dark)"
+    scheme: slate
+    primary: black
+    accent: indigo
+    toggle:
+      icon: material/weather-sunny
+      name: Switch to light mode
+  features:
+  - navigation.sections
+  - navigation.top
+  - navigation.tracking
+  - content.code.copy
+  - toc.follow
+  - search.suggest
+
+# CHANGELOG.md and LICENSE stay authoritative at the repo root; the docs pages
+# pull them in via pymdownx.snippets (the --8<-- directive), so they are never
+# duplicated. snippets' base_path lets those root files resolve. The contributing
+# guide is authored natively in docs/contributing.md (so its cross-links validate);
+# the root CONTRIBUTING.md is a short stub pointing here for GitHub.
+docs_dir: docs
+
+nav:
+- Home: index.md
+- Installation: installation.md
+- Packaging: packaging.md
+- Usage: usage.md
+- Commands: commands.md
+- Writing Plugins: plugins.md
+- Troubleshooting: troubleshooting.md
+- How It Works: how-it-works.md
+- API Reference:
+  - Core: reference/core.md
+  - Plugins: reference/plugins.md
+- Contributing: contributing.md
+- Changelog: changelog.md
+- License: license.md
+
+plugins:
+- search
+- mkdocstrings:
+    handlers:
+      python:
+        # The package dir is `easyspeak = "src"` (see pyproject.toml), so the
+        # source lives under src/ and griffe analyses it statically from
+        # there: modules resolve as `core.*` / `plugins.*`.
+        paths: [src]
+        options:
+          docstring_style: google
+          show_source: true
+          show_root_heading: true
+          show_symbol_type_heading: true
+          show_symbol_type_toc: true
+          members_order: source
+          merge_init_into_class: true
+          separate_signature: true
+          # Render Mermaid class/inheritance diagrams from the type hierarchy.
+          show_inheritance_diagram: true
+
+markdown_extensions:
+- admonition
+- attr_list
+- md_in_html
+- tables
+- toc:
+    permalink: true
+- pymdownx.highlight:
+    anchor_linenums: true
+- pymdownx.inlinehilite
+- pymdownx.snippets:
+    base_path: [.]
+    check_paths: true
+- pymdownx.superfences:
+    custom_fences:
+    - name: mermaid
+      class: mermaid
+      format: !!python/name:pymdownx.superfences.fence_code_format
+- pymdownx.tabbed:
+    alternate_style: true
+
+extra:
+  version:
+    provider: mike

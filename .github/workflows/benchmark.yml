@@ -1,0 +1,49 @@
+name: Benchmark
+
+on:
+  pull_request:
+  push:
+    branches:
+    - main
+    - dev
+
+env:
+  BENCHER_PROJECT: ${{ vars.BENCHER_PROJECT }}
+  BENCHER_API_KEY: ${{ secrets.BENCHER_API_KEY }}
+  BENCHER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  benchmark_branch:
+    name: benchmark (baseline)
+    if: github.event_name == 'push'
+    permissions:
+      checks: write
+    runs-on: ubuntu-latest
+    env:
+      BENCHER_ARGS: >-
+        --branch ${{ github.ref_name }}
+        --threshold-measure latency
+        --threshold-test t_test
+        --threshold-max-sample-size 64
+        --threshold-upper-boundary 0.99
+        --thresholds-reset
+    steps:
+    - uses: actions/checkout@v6
+    - uses: ./.github/actions/benchmark
+
+  benchmark_pr:
+    name: benchmark (preview)
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    env:
+      BENCHER_ARGS: >-
+        --branch ${{ github.head_ref }}
+        --start-point ${{ github.base_ref }}
+        --start-point-hash ${{ github.event.pull_request.base.sha }}
+        --start-point-clone-thresholds
+        --start-point-reset
+    steps:
+    - uses: actions/checkout@v6
+    - uses: ./.github/actions/benchmark

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=EasySpeak
+GenericName=Voice Control
+Comment=Voice control for Linux desktops — fully local, Wayland-native
+Exec=easyspeak
+Icon=audio-input-microphone
+Terminal=false
+Categories=Utility;Accessibility;
+Keywords=voice;speech;dictation;accessibility;wayland;
+StartupNotify=false

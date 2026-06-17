@@ -1,0 +1,198 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=77", "setuptools_scm>=9"]
+
+[project]
+name = "easyspeak-linux"
+dynamic = ["version"]
+description = "Voice control for Linux desktops. Fully local, no cloud, Wayland-native."
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
+authors = [
+  {name = "Matt Hartley", email = "matt@matthartley.com"},
+]
+maintainers = [
+  {name = "Matt Hartley", email = "matt@matthartley.com"},
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: End Users/Desktop",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Desktop Environment :: Gnome",
+  "Topic :: Home Automation",
+  "Topic :: Scientific/Engineering :: Human Machine Interfaces",
+  "Topic :: Utilities",
+]
+keywords = [
+  "control",
+  "desktop",
+  "gnome",
+  "head",
+  "offline",
+  "tracking",
+  "voice",
+  "wayland",
+]
+readme = "README.md"
+requires-python = ">=3.10, <3.14"
+dependencies = [
+  # Prebuilt wheel (provides `import evdev`) for raw /dev/input hold-to-dictate;
+  # avoids the source build's kernel-header requirement. Linux-only by nature.
+  "evdev-binary>=1.7 ; sys_platform == 'linux'",
+  "faster-whisper>=1.2.1",
+  "jeepney>=0.9",
+  "numpy>=2.2.6",
+  # "openwakeword",  # requires Python <3.13 for speexdsp-ns (missing wheels)
+  "onnxruntime>=1.23.2",
+  "onnxruntime<1.24 ; python_full_version < '3.11'",
+  "pyaudio>=0.2.14",
+]
+# Not listed above: the "About" window (core.about) needs PyGObject + the GTK4
+# and libadwaita typelibs. On Linux those are system packages (PyGObject's own
+# recommended install path), not pip wheels, so they're a documented runtime
+# requirement rather than a dependency — the dialog simply no-ops without them.
+
+[project.optional-dependencies]
+acceptance = [
+  "pytest>=8",
+  "pytest-bdd>=7",
+]
+benchmark = [
+  "pytest>=8",
+  "pytest-benchmark>=5",
+]
+docs = [
+  "mike>=2.1",
+  # Cap MkDocs below 2.0: the 2.0 line may drop the plugin API that
+  # mkdocstrings/mike rely on, so stay on the plugin-supporting 1.x lineage.
+  "mkdocs<2",
+  "mkdocs-material>=9.5",
+  "mkdocstrings[python]>=0.27",
+]
+head-tracking = [
+  "opencv-python>=4.13.0.90",
+  "sixdrepnet>=0.1.6",
+]
+integration = [
+  "pytest>=8",
+]
+mypy = [
+  "mypy>=1.19.1",
+  "types-pyaudio>=0.2.16.20250801",
+]
+unittest = [
+  "coverage[toml]>=7.14",
+  "pytest>=8",
+]
+
+[project.scripts]
+easyspeak = "easyspeak.core.cli:run"
+
+[project.urls]
+"Source Code" = "https://github.com/ctsdownloads/easyspeak"
+
+[tool.coverage.report]
+exclude_also = ["if __name__ == .__main__.:"]
+fail_under = 99
+show_missing = true
+
+[tool.coverage.run]
+source = ["src"]
+
+[tool.mypy]
+ignore_missing_imports = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_unused_ignores = true
+
+[tool.pymarkdown]
+plugins.md013.enabled = false  # line-length
+plugins.md024.enabled = false  # no-duplicate-heading
+plugins.md032.enabled = false  # blanks-around-lists
+plugins.md036.enabled = false  # no-emphasis-as-heading
+plugins.md040.enabled = false  # fenced-code-language
+plugins.md041.enabled = false  # first-line-heading
+plugins.md046.enabled = false  # code-block-style
+
+[tool.pytest.ini_options]
+addopts = "--ignore=tests/acceptance --ignore=tests/benchmarks --ignore=tests/integration"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  # --- Conflicts with the Ruff formatter (per Ruff's own recommendation) ---
+  "COM812",  # missing-trailing-comma
+  "COM819",  # prohibited-trailing-comma
+  "ISC001",  # single-line-implicit-string-concatenation
+  "ISC002",  # multi-line-implicit-string-concatenation
+  "Q000", "Q001", "Q002", "Q003",  # quote style is the formatter's job
+  "W191",    # tab-indentation
+  "E111", "E114", "E117",  # indentation (formatter-owned)
+  "D206", "D300",  # docstring whitespace/quotes (formatter-owned)
+
+  # --- Intentional project policy ---
+  "ANN",     # type annotations not enforced project-wide; mypy covers used types
+  "S603",    # subprocess use is how a desktop voice controller works, by design
+  "S607",    # binaries (piper, wl-copy, ...) resolved via PATH for portability
+  "PLC0415", # imports inside functions lazily load optional deps (cv2, ...)
+  "PTH",     # os.path/open are kept; they're the seams the unit tests mock
+  "PLW0603", # module-level global state is part of the runtime/plugin design
+  "PLW0602", # ditto: globals declared for clarity even when only read
+  "C901",    # cyclomatic-complexity threshold not enforced
+  "PLR0911", "PLR0912", "PLR0913", "PLR0915",  # other complexity thresholds
+  "PLR2004", # magic-value comparisons read fine in audio/threshold code
+  "N806",    # local UPPER_CASE names are deliberate in-function constants
+  "BLE001",  # broad excepts keep the long-running voice daemon alive on purpose
+  "PERF203", # per-iteration try/except is preferred over micro-optimising loops
+  "PLW1510", # desktop commands are fire-and-forget; their exit code is non-fatal
+  "TRY003",  # inline exception messages are fine; no custom exception hierarchy
+  "TRY300",  # an explicit return inside try reads clearer than an else block here
+  "TRY301",  # raising inside try to trigger local cleanup is intentional
+  "FBT002",  # the host_run(background=...) plugin convenience flag stays positional
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = [
+  "S101",    # asserts are the whole point of a test
+  "D",       # docstrings enforced on src/, not on tests
+  "SLF001",  # tests legitimately reach into private members
+  "ARG",     # pytest fixtures are injected as (often unused) arguments
+  "INP001",  # test packages need no __init__.py
+  "PLC0415", # local imports inside tests are fine
+  "PLW1510", # subprocess.run in tests need not pass check=
+  "PT006", "PT007", "PT011", "PT018", "PT019",  # pytest style latitude in tests
+  "S108",    # hardcoded /tmp paths are fine in tests
+  "S310",    # url open in tests is controlled
+  "E501",    # long lines (param tables, fixtures) tolerated in tests
+  "ERA001",  # commented-out code tolerated in tests
+  "TC003",   # no need to guard stdlib imports behind TYPE_CHECKING in tests
+  "EM101", "TRY003",  # inline exception messages fine in tests
+]
+"src/plugins/00_*.py" = ["N999"]    # numeric prefix sets plugin load order
+"src/plugins/zz_base.py" = ["N999"] # zz_ prefix loads the base plugin last
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.setuptools.package-dir]
+easyspeak = "src"
+
+# The bundled GNOME Shell extension is package data: core.gnome_extension
+# copies it into the user's extensions directory at startup, so it must ship
+# inside the wheel (alongside the easyspeak package), not just the sdist.
+[tool.setuptools.package-data]
+easyspeak = ["extension.js", "extension-helpers.js", "metadata.json"]
+
+[tool.setuptools_scm]
+local_scheme = "no-local-version"
+
+# # TensorFlow Runtime from PyPI (tflite-runtime==2.14.0) only supports
+# # Python <3.12 (see dependencies above)
+# [tool.uv.sources]
+# openwakeword = { git = "https://github.com/dscripka/openWakeWord" }

@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing
+.coverage
+coverage.json
+coverage.xml
+htmlcov/
+junit-report.xml
+results.json
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+.tox/
+requirements.txt
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+/result
+
+# Documentation site build (MkDocs)
+/site/
+
+# Project specific
+*.wav
+*.log
+
+# locally installed agent skills
+.agents/
+skills-lock.json

@@ -1,0 +1,26 @@
+# nfpm config — English language data for EasySpeak (Whisper base.en recognition
+# model + Piper en_US-amy-medium voice). A noarch data package, built from the
+# tree staged by `packaging/stage-lang.sh en`.
+#   VERSION=1.2.3 nfpm package -f packaging/nfpm-lang-en.yaml -p deb
+#   VERSION=1.2.3 nfpm package -f packaging/nfpm-lang-en.yaml -p rpm
+name: easyspeak-lang-en
+arch: all                # architecture-independent: deb "all" / rpm "noarch"
+platform: linux
+version: ${VERSION}
+section: utils
+priority: optional
+maintainer: Matt Hartley <matt@matthartley.com>
+description: |
+  English speech models for EasySpeak: the Whisper base.en recognition model
+  (Systran/faster-whisper-base.en) and the Piper en_US-amy-medium voice
+  (rhasspy/piper-voices). Installed under /opt/easyspeak/models; see each source
+  for its model license.
+vendor: EasySpeak
+homepage: https://github.com/ctsdownloads/easyspeak
+
+provides:
+- easyspeak-language
+
+contents:
+- src: ./dist/stage-lang-en/opt/easyspeak/models
+  dst: /opt/easyspeak/models

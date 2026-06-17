@@ -1,0 +1,33 @@
+name: Safety
+
+on:
+  pull_request:
+    branches:
+    - main
+    - dev
+  push:
+    branches:
+    - main
+    - dev
+  schedule:
+  - cron: "0 0 * * 3,6"  # Wed+Sat at midnight UTC
+
+jobs:
+  safety:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        task:
+        - audit
+        - requirements
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v6
+    - uses: astral-sh/setup-uv@v7
+      with:
+        python-version: '3.12'
+    - uses: taiki-e/install-action@just
+    - run: |
+        sudo apt update
+        sudo apt install -y portaudio19-dev
+    - run: just ${{ matrix.task }}
