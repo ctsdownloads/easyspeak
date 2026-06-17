@@ -20,8 +20,8 @@ def setup(c):
 def handle(cmd, core):
     """Handle the help and exit commands; return None to pass others through.
 
-    Returns False to signal the daemon to exit, True if help was shown, or None
-    when the command is for another plugin.
+    Returns False to signal the daemon to exit, True if help was shown, or None when the
+    command is for another plugin.
     """
     cmd_lower = cmd.lower().strip()
 

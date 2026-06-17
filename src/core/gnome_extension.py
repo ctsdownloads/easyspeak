@@ -1,14 +1,15 @@
 """Install, refresh, and enable the bundled GNOME Shell extension.
 
-Core owns the extension's lifecycle because both the mousegrid plugin and
-``core.tray`` drive it over D-Bus; :func:`ensure_extension` runs once at startup.
-The extension ships as package data — ``extension.js``, the
-``extension-helpers.js`` it imports, and ``metadata.json`` — copied into the
-user's extensions dir as a set. On Wayland GNOME only loads extension code at
-login, so the startup copy is always one login behind; a ``oneshot`` systemd
-*user* unit ordered before the shell re-copies it at the start of every login to
-close that gap. The unit runs as the user, writes only to ``$HOME``, and needs
-no privileges.
+Core owns the extension's lifecycle because both the mousegrid plugin and `core.tray`
+drive it over D-Bus; [`ensure_extension`][core.gnome_extension.ensure_extension] runs
+once at startup. The extension ships as package data — `extension.js`, the
+`extension-helpers.js` it imports, and `metadata.json` — copied into the user's
+extensions dir as a set. On Wayland GNOME only loads extension code at login, so the
+startup copy is always one login behind; [a `oneshot` systemd user unit][systemd]
+ordered before the shell re-copies it at the start of every login to close that gap. The
+unit runs as the user, writes only to `$HOME`, and needs no privileges.
+
+[systemd]: https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html
 """
 
 import contextlib
@@ -38,7 +39,10 @@ EXTENSION_ASSETS = ("extension.js", "extension-helpers.js", "metadata.json")
 
 
 class RefreshResult(enum.Enum):
-    """Outcome of a single :func:`refresh_extension_files` attempt."""
+    """Outcome of a single refresh attempt.
+
+    See [`refresh_extension_files`][core.gnome_extension.refresh_extension_files].
+    """
 
     REFRESHED = "refreshed"
     UNCHANGED = "unchanged"
@@ -48,8 +52,8 @@ class RefreshResult(enum.Enum):
 def extension_source_dir():
     """Return the package dir holding the bundled assets.
 
-    Resolved relative to this module (``src/``) so it works in both editable
-    and wheel installs.
+    Resolved relative to this module (`src/`) so it works in both editable and wheel
+    installs.
     """
     return Path(__file__).resolve().parents[1]
 
@@ -69,17 +73,17 @@ def _staged_tmp(dest_dir, name):
 
 
 def _discard_staged(dest_dir):
-    """Remove any ``.<asset>.tmp`` files a previous refresh may have left."""
+    """Remove any `.<asset>.tmp` files a previous refresh may have left."""
     for name in EXTENSION_ASSETS:
         with contextlib.suppress(OSError):
             _staged_tmp(dest_dir, name).unlink()
 
 
 def refresh_extension_files(src_dir, dest_dir):
-    """Copy the bundled assets into ``dest_dir`` when they differ from it.
+    """Copy the bundled assets into `dest_dir` when they differ from it.
 
-    Best-effort: returns ``REFRESHED`` if written, ``UNCHANGED`` if already
-    current, or ``ERROR`` (noted on stderr) when a source is missing or a copy
+    Best-effort: returns `REFRESHED` if written, `UNCHANGED` if already
+    current, or `ERROR` (noted on stderr) when a source is missing or a copy
     fails. Assets are staged then moved into place (extension.js last), so a
     failure leaves any working install untouched and never installs extension.js
     without the helper it imports.
@@ -152,10 +156,10 @@ WantedBy={PRE_SHELL_TARGET}
 
 
 def _run_systemctl(*args):
-    """Run a ``systemctl --user`` command, or return None if it can't be run.
+    """Run a `systemctl --user` command, or return None if it can't be run.
 
-    An un-execable systemctl raises OSError despite ``check=False``, and the
-    refresh-unit install must stay non-fatal.
+    An un-execable systemctl raises OSError despite `check=False`, and the refresh-unit
+    install must stay non-fatal.
     """
     try:
         return subprocess.run(
@@ -181,8 +185,8 @@ def _is_enabled():
 def install_refresh_unit():
     """Install and enable the pre-shell refresh unit, idempotently.
 
-    Returns a short status string, or None when nothing changed or it isn't
-    applicable (no systemd, write/enable failure).
+    Returns a short status string, or None when nothing changed or it isn't applicable
+    (no systemd, write/enable failure).
     """
     if shutil.which("systemctl") is None:
         return None
@@ -216,15 +220,15 @@ def install_refresh_unit():
 def migrate_legacy_extension():
     """Remove the pre-rename extension install so it can't double-load.
 
-    The extension's UUID changed from ``easyspeak-grid@local`` to
-    ``easyspeak@local`` (it long outgrew being just a mouse grid). A leftover
+    The extension's UUID changed from `easyspeak-grid@local` to
+    `easyspeak@local` (it long outgrew being just a mouse grid). A leftover
     copy under the old UUID would stay enabled and add a second panel indicator
     and grid that the daemon no longer drives, so clean it up: disable it (so
     GNOME drops it from the enabled set) then delete its directory. Best-effort
     throughout — returns True if a legacy install was found and removed.
 
     One-off migration shim: once users have had a release or two to upgrade past
-    ``easyspeak-grid@local`` this can be removed (call site and tests included).
+    `easyspeak-grid@local` this can be removed (call site and tests included).
     """
     legacy_dir = extensions_root() / LEGACY_EXTENSION_UUID
     if not legacy_dir.is_dir():
@@ -250,9 +254,8 @@ def migrate_legacy_extension():
 def ensure_extension():
     """Install, refresh, and enable the bundled extension, reporting what it did.
 
-    Installs it if missing, keeps the installed copy current, and enables it.
-    Skipped on non-GNOME desktops; non-fatal on missing sources or write
-    failures.
+    Installs it if missing, keeps the installed copy current, and enables it. Skipped on
+    non-GNOME desktops; non-fatal on missing sources or write failures.
     """
     if shutil.which("gnome-extensions") is None:
         return

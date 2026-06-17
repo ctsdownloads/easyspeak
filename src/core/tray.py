@@ -1,12 +1,12 @@
 """GNOME panel-indicator bridge and asleep-state lifecycle for the daemon.
 
 The daemon is voice-first and otherwise headless; this module gives it a
-top-panel microphone icon (served by the bundled ``easyspeak@local`` GNOME
-Shell extension) and owns everything about it so the audio loop in ``core.main``
+top-panel microphone icon (served by the bundled `easyspeak@local` GNOME
+Shell extension) and owns everything about it so the audio loop in `core.main`
 stays about audio. It runs without a D-Bus server of its own via two
 one-directional channels:
 
-* daemon -> icon: state is pushed for display via a one-shot ``gdbus call``
+* daemon -> icon: state is pushed for display via a one-shot `gdbus call`
   (the same path the mouse-grid plugin uses to drive the extension).
 * icon -> daemon: the extension's menu writes a single command to a control
   file; the controller consumes it. The audio loop already wakes every ~80ms on
@@ -45,8 +45,8 @@ COMMAND_ABOUT = "about"  # open the libadwaita About window
 
 # The About window is its own process: the indicator lives in a GNOME Shell
 # extension that can't host GTK, so the daemon spawns this script instead. It's
-# run by file path (not ``-m``) because the PyGObject interpreter it runs in (see
-# _run_menu_action) doesn't have the ``easyspeak`` package installed; about.py is
+# run by file path (not `-m`) because the PyGObject interpreter it runs in (see
+# _run_menu_action) doesn't have the `easyspeak` package installed; about.py is
 # self-contained, so a plain path works there and in our own interpreter alike.
 ABOUT_HELPER = str(Path(__file__).with_name("about.py"))
 
@@ -78,7 +78,7 @@ HELPER_STARTUP_GRACE = 1.5
 
 
 class TrayAction(enum.Enum):
-    """What ``Tray.poll`` is telling the audio loop to do next."""
+    """What `Tray.poll` is telling the audio loop to do next."""
 
     CONTINUE = "continue"  # nothing happened; read audio as usual
     RESUME = "resume"  # woke from sleep; restart the listen iteration
@@ -88,25 +88,25 @@ class TrayAction(enum.Enum):
 class Tray:
     """Owns the EasySpeak panel indicator and the asleep (deactivated) lifecycle.
 
-    The audio loop calls :meth:`poll` once per iteration; the controller pushes
-    display state, consumes menu commands, and — when deactivated — runs the
-    idle loop itself, using caller-supplied callbacks to release and reacquire
+    The audio loop calls [`poll`][core.tray.Tray.poll] once per iteration; the
+    controller pushes display state, consumes menu commands, and — when deactivated —
+    runs the idle loop itself, using caller-supplied callbacks to release and reacquire
     the microphone. It never touches audio directly.
 
-    Best-effort throughout: on a non-GNOME desktop (no ``gdbus``/extension) the
-    state pushes simply fail and the daemon carries on, mirroring how the
-    mouse-grid plugin tolerates a missing extension.
+    Best-effort throughout: on a non-GNOME desktop (no `gdbus`/extension) the state
+    pushes simply fail and the daemon carries on, mirroring how the mouse-grid plugin
+    tolerates a missing extension.
     """
 
     def __init__(self, control_file=CONTROL_FILE, speak=None):
         """Set up the controller, optionally with a spoken-feedback callback.
 
-        ``speak`` defaults to a no-op so the tray works headless and in tests.
+        `speak` defaults to a no-op so the tray works headless and in tests.
 
-        For the spoken feedback callback (core.speak) the plugin only announces
-        the *attempt* ("Going to sleep."); the tray confirms or, when it can't
-        actually sleep, explains — since only it knows whether sleep engaged.
-        Defaults to a no-op so the tray works headless and in tests.
+        For the spoken feedback callback (core.speak) the plugin only announces the
+        *attempt* ("Going to sleep."); the tray confirms or, when it can't actually
+        sleep, explains — since only it knows whether sleep engaged. Defaults to a no-op
+        so the tray works headless and in tests.
         """
         self._control_file = Path(control_file)
         self._sleep_requested = False
@@ -117,11 +117,11 @@ class Tray:
     def started(self):
         """Daemon is up and listening; ensure the indicator is hidden.
 
-        Also drop any command left in the control file from before startup. It's
-        a one-shot channel for *live* menu clicks, so a stale 'about'/'help'/
-        'quit' written during a previous session (or before the daemon was
-        running to consume it) must not fire the moment we begin polling — which
-        otherwise pops the About window open on launch.
+        Also drop any command left in the control file from before startup. It's a
+        one-shot channel for *live* menu clicks, so a stale 'about'/'help'/ 'quit'
+        written during a previous session (or before the daemon was running to consume
+        it) must not fire the moment we begin polling — which otherwise pops the About
+        window open on launch.
         """
         self.take_command()
         self.set_state(STATE_LISTENING)
@@ -133,18 +133,18 @@ class Tray:
     def request_sleep(self):
         """Queue a deactivate (e.g. the "go to sleep" voice command).
 
-        The mic is released at the audio loop's next :meth:`poll`, after the
-        current command finishes.
+        The mic is released at the audio loop's next [`poll`][core.tray.Tray.poll],
+        after the current command finishes.
         """
         self._sleep_requested = True
 
     def poll(self, release_mic, acquire_mic):
         """Act on any pending menu command or queued sleep request.
 
-        ``release_mic`` / ``acquire_mic`` are zero-arg callbacks that close and
-        reopen the input stream; the controller calls them around the asleep
-        idle loop so this module stays out of the audio internals. Returns a
-        :class:`TrayAction` for the audio loop to dispatch on.
+        `release_mic` / `acquire_mic` are zero-arg callbacks that close and reopen the
+        input stream; the controller calls them around the asleep idle loop so this
+        module stays out of the audio internals. Returns a
+        [`TrayAction`][core.tray.TrayAction] for the audio loop to dispatch on.
         """
         command = self.take_command()
         if command == COMMAND_QUIT:
@@ -161,16 +161,15 @@ class Tray:
     def _run_menu_action(self, command):
         """Handle a fire-and-forget menu command (Help/About).
 
-        Returns True if it was one of those side-effect actions so callers can
-        carry on without touching the sleep/quit lifecycle. The indicator menu
-        is only shown while asleep, so in practice these fire from the idle loop
-        in :meth:`_sleep`; ``poll`` handles them too so the path isn't lifecycle-
-        dependent.
+        Returns True if it was one of those side-effect actions so callers can carry on
+        without touching the sleep/quit lifecycle. The indicator menu is only shown
+        while asleep, so in practice these fire from the idle loop in `_sleep`; `poll`
+        handles them too so the path isn't lifecycle- dependent.
 
-        The About dialog needs PyGObject + GTK4/libadwaita, which aren't in
-        the daemon's own (uv) venv. Reuse the PyGObject-equipped interpreter
-        the dictation AT-SPI helper already runs in, falling back to our own
-        interpreter when it isn't set (e.g. a plain pip install).
+        The About dialog needs PyGObject + GTK4/libadwaita, which aren't in the daemon's
+        own (uv) venv. Reuse the PyGObject-equipped interpreter the dictation AT-SPI
+        helper already runs in, falling back to our own interpreter when it isn't set
+        (e.g. a plain pip install).
         """
         if command == COMMAND_HELP:
             self._spawn(["xdg-open", DOCS_URL], "documentation page")
@@ -184,17 +183,17 @@ class Tray:
     def _spawn(self, cmd, what):
         """Launch a helper process, reporting it if it fails to start.
 
-        Fire-and-forget for the success case: a helper whose window opens keeps
-        running and is left detached (never waited on or reaped). But a helper
-        that *can't* start — a bad interpreter, missing GTK/libadwaita, no
-        display, no ``xdg-open`` handler — exits within
-        :data:`HELPER_STARTUP_GRACE`; that's caught here so the menu click isn't
-        silently lost, with the cause logged and an audible apology spoken.
+        Fire-and-forget for the success case: a helper whose window opens keeps running
+        and is left detached (never waited on or reaped). But a helper that *can't*
+        start — a bad interpreter, missing GTK/libadwaita, no display, no `xdg-open`
+        handler — exits within [`HELPER_STARTUP_GRACE`][core.tray.HELPER_STARTUP_GRACE];
+        that's caught here so the menu click isn't silently lost, with the cause logged
+        and an audible apology spoken.
 
-        stderr is captured to an anonymous temp file rather than a pipe: a
-        long-lived helper keeps writing to it (GTK logs to stderr) without ever
-        blocking on a full pipe buffer we've stopped draining, and the file is
-        reclaimed by the OS once the helper exits.
+        stderr is captured to an anonymous temp file rather than a pipe: a long-lived
+        helper keeps writing to it (GTK logs to stderr) without ever blocking on a full
+        pipe buffer we've stopped draining, and the file is reclaimed by the OS once the
+        helper exits.
         """
         with tempfile.TemporaryFile() as errlog:
             try:
@@ -218,9 +217,9 @@ class Tray:
     def _await_startup(self, proc):
         """Return the helper's exit code if it dies during startup, else None.
 
-        Waits up to :data:`HELPER_STARTUP_GRACE`; a helper still running past
-        that is taken to have opened its window, so this returns None ("started,
-        leave it") rather than reaping a GUI that may stay up for minutes.
+        Waits up to [`HELPER_STARTUP_GRACE`][core.tray.HELPER_STARTUP_GRACE]; a helper
+        still running past that is taken to have opened its window, so this returns None
+        ("started, leave it") rather than reaping a GUI that may stay up for minutes.
         """
         try:
             return proc.wait(timeout=HELPER_STARTUP_GRACE)
@@ -243,7 +242,7 @@ class Tray:
         reactivation only ever arrives via the extension's menu, so releasing
         the mic while the indicator is missing (no GNOME/extension) would strand
         the daemon with no way back. While asleep the muted state is re-asserted
-        every ``MUTED_REPUSH_INTERVAL`` seconds so the icon recovers if GNOME
+        every `MUTED_REPUSH_INTERVAL` seconds so the icon recovers if GNOME
         Shell or the extension reloads (it would otherwise come back hidden).
 
         Freeing the stream also clears GNOME's privacy microphone indicator, an

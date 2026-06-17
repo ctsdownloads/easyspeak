@@ -2,14 +2,14 @@
 
 The daemon is headless and the panel indicator lives in a GNOME Shell extension
 (Clutter/St), which can't host GTK widgets; so the About dialog runs as its own
-short-lived process that the tray launches via ``python -m easyspeak.core.about``
-on the menu's "About" command. It uses libadwaita's ``AboutDialog`` (the modern,
-GNOME-recommended widget), falling back to the older ``AboutWindow`` on
-pre-1.5 libadwaita.
+short-lived process that the tray launches via `python -m easyspeak.core.about` on the
+menu's "About" command. It uses libadwaita's `AboutDialog` (the modern,
+GNOME-recommended widget), falling back to the older `AboutWindow` on pre-1.5
+libadwaita.
 
-Everything GUI is imported lazily inside :func:`main` so this module stays
-importable (for its metadata constants and version lookup) without PyGObject or
-a display present — which is how the unit suite exercises it.
+Everything GUI is imported lazily inside [`main`][core.about.main] so this module stays
+importable (for its metadata constants and version lookup) without PyGObject or a
+display present — which is how the unit suite exercises it.
 """
 
 import importlib.metadata
@@ -39,9 +39,9 @@ CONTRIBUTORS = [
 def app_version():
     """Return the installed package version, or "" if it can't be determined.
 
-    Read at runtime (rather than hard-coded) so the dialog always shows the
-    version actually installed; an editable/source checkout without dist
-    metadata simply shows no version rather than failing.
+    Read at runtime (rather than hard-coded) so the dialog always shows the version
+    actually installed; an editable/source checkout without dist metadata simply shows
+    no version rather than failing.
     """
     try:
         return importlib.metadata.version("easyspeak-linux")
@@ -65,10 +65,9 @@ def main():  # pragma: no cover - needs libadwaita and a display; run live
 def _present(app):  # pragma: no cover - needs libadwaita and a display; run live
     """Build and present the About UI, quitting the app once it's dismissed.
 
-    We need to distinguish between the modern widget (libadwaita >= 1.5)
-    and the older self-contained About window (libadwaita < 1.5).
-    For the former, we must attach the dialog to a parent window, a minimal
-    host purely to own it, and quit on close.
+    We need to distinguish between the modern widget (libadwaita >= 1.5) and the older
+    self-contained About window (libadwaita < 1.5). For the former, we must attach the
+    dialog to a parent window, a minimal host purely to own it, and quit on close.
     """
     from gi.repository import Adw, Gtk
 

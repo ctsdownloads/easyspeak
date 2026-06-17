@@ -1,8 +1,8 @@
 """Tuning constants and model factory for EasySpeak.
 
-Override the EASYSPEAK_* environment variables to customise behaviour
-without editing source. Plugin-specific host-environment setup lives in
-each plugin's own setup() hook, not here.
+Override the EASYSPEAK_* environment variables to customise behaviour without editing
+source. Plugin-specific host-environment setup lives in each plugin's own setup() hook,
+not here.
 """
 
 import os
@@ -39,13 +39,13 @@ HOTKEY_ENABLED = os.environ.get("EASYSPEAK_HOTKEY", "1").lower() not in (
 
 # --- Models ---
 def _bundled_model(*parts, default):
-    """Return a model path bundled beside the venv, or ``default`` if absent."""
+    """Return a model path bundled beside the venv, or `default` if absent."""
     path = Path(sys.prefix).parent.joinpath(*parts)
     return str(path) if path.exists() else default
 
 
 def _bundled_bin(name, *, default):
-    """Return a binary path in this venv's ``bin/``, or ``default`` if absent."""
+    """Return a binary path in this venv's `bin/`, or `default` if absent."""
     exe = Path(sys.executable).with_name(name)
     return str(exe) if exe.exists() else default
 

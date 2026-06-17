@@ -33,9 +33,9 @@ DICTATION_PROMPT = (
 def ensure_gnome_accessibility():
     """Enable GNOME's toolkit-accessibility for the AT-SPI bridge.
 
-    Silently skipped if gsettings isn't on PATH or the schema isn't
-    installed (i.e. user isn't on GNOME). Warns if it's present but the
-    flip fails. Tells the user to re-login when newly enabled.
+    Silently skipped if gsettings isn't on PATH or the schema isn't installed (i.e. user
+    isn't on GNOME). Warns if it's present but the flip fails. Tells the user to
+    re-login when newly enabled.
     """
     if shutil.which("gsettings") is None:
         return
@@ -99,11 +99,10 @@ ATSPI_HELPER = str(Path(__file__).with_name("_atspi_insert.py"))
 def atspi_python():
     """Path to the interpreter that runs the AT-SPI helper.
 
-    The helper needs PyGObject and the AT-SPI typelib, which the app's own
-    venv usually lacks. ``EASYSPEAK_ATSPI_PYTHON`` lets the packaging point at
-    an interpreter that has them (the Nix flake sets it); otherwise we fall
-    back to the system ``python3``, where distro packages like ``python3-gi``
-    typically live.
+    The helper needs PyGObject and the AT-SPI typelib, which the app's own venv usually
+    lacks. `EASYSPEAK_ATSPI_PYTHON` lets the packaging point at an interpreter that has
+    them (the Nix flake sets it); otherwise we fall back to the system `python3`, where
+    distro packages like `python3-gi` typically live.
     """
     return os.environ.get("EASYSPEAK_ATSPI_PYTHON") or "python3"
 
@@ -111,8 +110,8 @@ def atspi_python():
 def insert_text(text):
     """Insert text via AT-SPI.
 
-    Returns one of INSERTED, NO_FOCUS or BACKEND_ERROR so the caller can give
-    feedback that matches the real cause instead of always blaming focus.
+    Returns one of INSERTED, NO_FOCUS or BACKEND_ERROR so the caller can give feedback
+    that matches the real cause instead of always blaming focus.
     """
     cmd = [atspi_python(), ATSPI_HELPER, text]
     try:
@@ -229,10 +228,10 @@ def format_text(text):
 def _dictate_utterance(core, text):
     """Format one transcribed utterance, insert it, and give error feedback.
 
-    Shared by the voice ``notes`` flow and the push-to-talk hotkey. Returns True
-    when dictation should stop because insertion failed and the user was told
-    why (no focused field, or the backend isn't set up); False to keep going.
-    Text that formats to nothing is a silent no-op.
+    Shared by the voice `notes` flow and the push-to-talk hotkey. Returns True when
+    dictation should stop because insertion failed and the user was told why (no focused
+    field, or the backend isn't set up); False to keep going. Text that formats to
+    nothing is a silent no-op.
     """
     formatted = format_text(text)
     if not formatted:
@@ -259,11 +258,11 @@ PTT_LISTEN_TIMEOUT = 2
 def run_push_to_talk(core, should_continue):
     """Dictate while the activation keys are held (the silent-activation path).
 
-    Mirrors the voice ``notes`` loop but is gated on ``should_continue`` — a
-    predicate that is True while the keys remain held — instead of a spoken
-    "stop notes": each utterance captured from ``core`` is formatted and
-    inserted until the keys are released. The capture waits re-check
-    ``should_continue`` so releasing stops dictation promptly.
+    Mirrors the voice `notes` loop but is gated on `should_continue` — a predicate that
+    is True while the keys remain held — instead of a spoken "stop notes": each
+    utterance captured from `core` is formatted and inserted until the keys are
+    released. The capture waits re-check `should_continue` so releasing stops dictation
+    promptly.
     """
     logger.info("🎙️ Push-to-talk dictation — release to end")
     while should_continue():
@@ -284,9 +283,9 @@ def run_push_to_talk(core, should_continue):
 def handle(cmd, core):
     """Enter dictation mode on a whole-word "note"/"notes"; return None otherwise.
 
-    Matching whole words (not substrings) keeps unrelated words like "notebook"
-    or "noted" from triggering it. While in dictation mode it loops, transcribing
-    speech and inserting it into the focused field until "stop notes" is heard.
+    Matching whole words (not substrings) keeps unrelated words like "notebook" or
+    "noted" from triggering it. While in dictation mode it loops, transcribing speech
+    and inserting it into the focused field until "stop notes" is heard.
     """
     words = cmd.split()
     if ("notes" in words or "note" in words) and "stop" not in words:
