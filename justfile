@@ -7,21 +7,16 @@
 
 # Run codestyle and safety checks, tests, packaging checks and cleanup
 [group('lifecycle')]
-all: codestyle safety test gate clean
+all: codestyle safety test gate check-docs clean
 
 # Remove build artifacts and reports (use -v for verbose, -n for dry-run)
 [group('lifecycle')]
 clean *args:
     uvx pyclean . {{ args }} --debris all --erase .benchmarks result results.json 'site/**/*' site --yes
 
-# Run all code style checks (format, lint, lint-js, lint-md, lint-yaml)
+# Run all code style checks (format, lint, js, yaml)
 [group('codestyle')]
-codestyle:
-    -just format
-    -just lint
-    -just lint-js
-    -just lint-md
-    -just lint-yaml
+codestyle: format lint lint-js lint-yaml
 
 # Check Python code style (use -- to apply, --diff to preview)
 [group('codestyle')]
@@ -38,11 +33,6 @@ lint *args=('--statistics'):
 lint-js *args:
     eslint src/extension.js src/extension-helpers.js {{ args }}
 
-# Check Markdown: structure only, lenient on style (config in pyproject.toml)
-[group('codestyle')]
-lint-md *args:
-    git ls-files '*.md' | xargs uvx --from pymarkdownlnt pymarkdown {{ args }} scan
-
 # Check YAML formatting: minimal indent, final newline (config in .yamllint.yaml)
 [group('codestyle')]
 lint-yaml *args:
@@ -55,10 +45,7 @@ types *args:
 
 # Run all safety checks (types, requirements, audit)
 [group('safety')]
-safety:
-    -just types
-    -just requirements
-    -just audit
+safety: types requirements audit
 
 # Check project dependencies for known vulnerabilities
 [group('safety')]
@@ -117,6 +104,32 @@ acceptance *args=('-v'):
 benchmark *args:
     uv run --extra=benchmark pytest tests/benchmarks/ \
         --benchmark-json=results.json {{ args }}
+
+# Run all QA checks for the generated documentation (docstrings, markdown, links)
+[group('docs')]
+check-docs: lint-docstrings lint-md check-links
+
+# Check built docs for dead external links (network; via the scheduled Links workflow, not the PR gate)
+[group('docs')]
+check-links *args: docs
+    # --ignore-url drops material's 404-page root-absolute links (only valid once served under the Pages path);
+    # --user-agent avoids linkchecker's "Mozilla" default, which freedesktop.org's WAF answers with 418.
+    uvx linkchecker --check-extern --no-warnings --ignore-url '^file:///easyspeak/' --user-agent LinkChecker {{ args }} site/index.html
+
+# Guard docstrings against reST markup (mkdocstrings renders Markdown, not reST)
+[group('docs')]
+lint-docstrings:
+    #!/usr/bin/env sh
+    bt=$(printf '\140')
+    if git ls-files 'src/**/*.py' | xargs grep -nE ":(func|meth|class|mod|data|attr|ref|exc|obj):$bt|$bt$bt"; then
+        echo "error: reST markup in docstrings — use Markdown: backtick-code and [text][full.path] links." >&2
+        exit 1
+    fi
+
+# Lint Markdown structure in all tracked *.md (lenient on style; config in pyproject.toml)
+[group('docs')]
+lint-md *args:
+    git ls-files '*.md' | xargs uvx --from pymarkdownlnt pymarkdown {{ args }} scan
 
 # Build the docs (use `serve` to serve at http://127.0.0.1:8000 with live-reload)
 [group('docs')]
