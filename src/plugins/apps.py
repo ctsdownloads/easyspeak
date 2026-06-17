@@ -87,13 +87,12 @@ def _has(binary, core):
 def _register_terminal(core):
     """Discover the default terminal and register it under the "terminal" key.
 
-    The freedesktop launcher xdg-terminal-exec knows the user's configured
-    default terminal but execs into it, so its own name never appears in the
-    process list (which would break closing via pkill); ask it which binary it
-    would actually run. If it is not installed, fall back to the first known
-    terminal in PATH. When nothing is found no entry is added, so "open
-    terminal" falls through to the normal unrecognized-command handling rather
-    than trying to launch a missing binary.
+    The freedesktop launcher xdg-terminal-exec knows the user's configured default
+    terminal but execs into it, so its own name never appears in the process list (which
+    would break closing via pkill); ask it which binary it would actually run. If it is
+    not installed, fall back to the first known terminal in PATH. When nothing is found
+    no entry is added, so "open terminal" falls through to the normal
+    unrecognized-command handling rather than trying to launch a missing binary.
     """
     if _has(TERMINAL_LAUNCHER, core):
         result = core.host_run([TERMINAL_LAUNCHER, "--print-cmd"])

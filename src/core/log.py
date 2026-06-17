@@ -1,9 +1,9 @@
 """Logging setup for EasySpeak's terminal output.
 
-Output is message-only (no level or timestamp prefixes) so the CLI reads
-nicely for humans; the level only gates which lines appear. Only the
-``easyspeak`` and ``plugins`` logger hierarchies are configured, so
-importing the package as a library leaves the root logger untouched.
+Output is message-only (no level or timestamp prefixes) so the CLI reads nicely for
+humans; the level only gates which lines appear. Only the `easyspeak` and `plugins`
+logger hierarchies are configured, so importing the package as a library leaves the root
+logger untouched.
 """
 
 import logging

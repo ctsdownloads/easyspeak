@@ -1,9 +1,9 @@
 """Text-to-speech playback pipeline and audio-device noise suppression.
 
-Extracted from core.main so the orchestration loop isn't tangled up with the
-subprocess plumbing that keeps a piper voice model warm. `SpeechPipeline` owns
-a persistent `piper -> player` pair; `suppressed_c_stderr` hides the unrelated
-ALSA/JACK probe spew PortAudio emits when the input side (PyAudio) starts up.
+Extracted from core.main so the orchestration loop isn't tangled up with the subprocess
+plumbing that keeps a piper voice model warm. `SpeechPipeline` owns a persistent `piper
+-> player` pair; `suppressed_c_stderr` hides the unrelated ALSA/JACK probe spew
+PortAudio emits when the input side (PyAudio) starts up.
 """
 
 import contextlib
@@ -71,11 +71,11 @@ def suppressed_c_stderr():
 
 
 class SpeechPipeline:
-    """A persistent ``piper -> audio player`` pipeline for low-latency speech.
+    """A persistent `piper -> audio player` pipeline for low-latency speech.
 
-    Keeping piper alive avoids reloading its voice model (~2s) on every phrase,
-    and streaming raw PCM straight to the player means playback starts as soon
-    as synthesis does instead of after a temp WAV is fully written.
+    Keeping piper alive avoids reloading its voice model (~2s) on every phrase, and
+    streaming raw PCM straight to the player means playback starts as soon as synthesis
+    does instead of after a temp WAV is fully written.
     """
 
     def __init__(self):
@@ -135,8 +135,8 @@ class SpeechPipeline:
     def ensure(self):
         """Spawn the persistent piper -> player pipeline if not already running.
 
-        Raises OSError if the pipeline can't be brought up (missing binary, bad
-        model), so callers can warn once rather than silently failing per phrase.
+        Raises OSError if the pipeline can't be brought up (missing binary, bad model),
+        so callers can warn once rather than silently failing per phrase.
         """
         if self._alive(self._piper) and self._alive(self._player):
             return
@@ -197,13 +197,12 @@ class SpeechPipeline:
     def _reap(proc):
         """Kill a process, close its parent-side pipes, and wait for it, best-effort.
 
-        Both pipeline processes are spawned with stdin=PIPE, so the parent holds
-        a pipe fd for each; without closing them here, a repeatedly rebuilt
-        pipeline would leak two fds per cycle until it hits the fd limit. kill()
-        polls first and suppresses the PID-reuse race internally on Python 3.10+,
-        but ProcessLookupError is named anyway to stay safe on other versions;
-        AttributeError covers a malformed process handle and TimeoutExpired a
-        process that refuses to die.
+        Both pipeline processes are spawned with stdin=PIPE, so the parent holds a pipe
+        fd for each; without closing them here, a repeatedly rebuilt pipeline would leak
+        two fds per cycle until it hits the fd limit. kill() polls first and suppresses
+        the PID-reuse race internally on Python 3.10+, but ProcessLookupError is named
+        anyway to stay safe on other versions; AttributeError covers a malformed process
+        handle and TimeoutExpired a process that refuses to die.
         """
         for name in ("stdin", "stdout", "stderr"):
             handle = getattr(proc, name, None)  # tolerate a handle missing these
@@ -235,8 +234,8 @@ class SpeechPipeline:
     def drain(self):
         """Flush pending speech, wait for playback, then stop the pipeline.
 
-        Used on shutdown so a final phrase (e.g. "Goodbye.") is heard in full
-        before the process exits.
+        Used on shutdown so a final phrase (e.g. "Goodbye.") is heard in full before the
+        process exits.
         """
         piper, player = self._piper, self._player
         self._piper = self._player = None

@@ -52,8 +52,10 @@ class EasySpeak:
 
     Owns the audio pipeline (wake word -> Whisper), the loaded plugins, the
     text-to-speech pipeline, and the panel indicator, and exposes the small
-    plugin-facing API (:meth:`speak`, :meth:`host_run`, :meth:`transcribe`, ...)
-    that plugins use to act on commands.
+    plugin-facing API ([`speak`][core.main.EasySpeak.speak],
+    [`host_run`][core.main.EasySpeak.host_run],
+    [`transcribe`][core.main.EasySpeak.transcribe], ...) that plugins use to act on
+    commands.
     """
 
     def __init__(self):
@@ -91,16 +93,19 @@ class EasySpeak:
         return subprocess.run(cmd, capture_output=True, text=True)
 
     def speak(self, text):
-        """Speak a phrase. Stable plugin-facing API; delegates to the pipeline."""
+        """Speak a phrase.
+
+        Stable plugin-facing API; delegates to the pipeline.
+        """
         self.spoke = True
         self.speech.speak(text)
 
     def tap_key(self, keycode):
         """Replay a multimedia key so the desktop renders its native feedback.
 
-        Returns True if the key was injected, False if unavailable (e.g. a
-        non-GNOME session) so the caller can fall back to a silent change.
-        jeepney is imported lazily so the dependency isn't needed to load.
+        Returns True if the key was injected, False if unavailable (e.g. a non-GNOME
+        session) so the caller can fall back to a silent change. jeepney is imported
+        lazily so the dependency isn't needed to load.
         """
         try:
             from . import mediakeys
@@ -113,10 +118,9 @@ class EasySpeak:
     def deactivate(self):
         """Request the assistant go to sleep (plugin-facing).
 
-        Releases the mic and stops wake detection until reactivated from the
-        tray. The actual release happens at the next main-loop iteration
-        (handled by the tray controller) so the triggering command can finish,
-        and speak, first.
+        Releases the mic and stops wake detection until reactivated from the tray. The
+        actual release happens at the next main-loop iteration (handled by the tray
+        controller) so the triggering command can finish, and speak, first.
         """
         self.tray.request_sleep()
 
@@ -125,7 +129,7 @@ class EasySpeak:
 
         Plugin-facing: the dictation plugin registers here in its setup() so core
         can drive keyboard (silent) activation without importing a plugin
-        directly. ``handler`` takes one ``should_continue`` predicate and runs
+        directly. `handler` takes one `should_continue` predicate and runs
         until it returns False (the keys are released).
         """
         self._push_to_talk = handler
@@ -133,12 +137,12 @@ class EasySpeak:
     # --- Plugin management ---
 
     def load_plugins(self):
-        """Discover and import every plugin module from the ``plugins/`` dir.
+        """Discover and import every plugin module from the `plugins/` dir.
 
-        Files are loaded in sorted order (numeric prefixes set load order);
-        names starting with ``_`` are skipped. A module is registered only if it
-        exposes ``NAME`` and ``handle``; its optional ``setup`` hook runs once.
-        Import or setup failures are logged and skipped, never fatal.
+        Files are loaded in sorted order (numeric prefixes set load order); names
+        starting with `_` are skipped. A module is registered only if it exposes `NAME`
+        and `handle`; its optional `setup` hook runs once. Import or setup failures are
+        logged and skipped, never fatal.
         """
         plugins_dir = Path(__file__).parent.parent / "plugins"
         if not plugins_dir.exists():
@@ -177,7 +181,10 @@ class EasySpeak:
         return commands
 
     def route_command(self, cmd):
-        """Route command to appropriate plugin. Returns False to exit."""
+        """Route command to appropriate plugin.
+
+        Returns False to exit.
+        """
         cmd = cmd.lower()
         for wake in [
             "hey jarvis",
@@ -242,8 +249,8 @@ class EasySpeak:
     def _show_help(self):
         """Display the command list via the plugin that owns it.
 
-        Delegates to the base plugin's ``show_help`` so the help text isn't
-        duplicated here.
+        Delegates to the base plugin's `show_help` so the help text isn't duplicated
+        here.
         """
         for plugin in self.plugins:
             if hasattr(plugin, "show_help"):
@@ -255,9 +262,9 @@ class EasySpeak:
     def _open_stream(self):
         """Open the microphone input stream.
 
-        PortAudio probes every ALSA/JACK device on open, spamming stderr about
-        hardware this machine lacks; hide that C-level noise while keeping our
-        own Python output intact.
+        PortAudio probes every ALSA/JACK device on open, spamming stderr about hardware
+        this machine lacks; hide that C-level noise while keeping our own Python output
+        intact.
         """
         with suppressed_c_stderr():
             self.stream = self.audio.open(
@@ -271,8 +278,8 @@ class EasySpeak:
     def _close_stream(self):
         """Release the microphone so other apps see it as free.
 
-        Also clears GNOME's privacy mic indicator. The PyAudio instance is kept
-        for reopening.
+        Also clears GNOME's privacy mic indicator. The PyAudio instance is kept for
+        reopening.
         """
         if self.stream is None:
             return
@@ -297,9 +304,9 @@ class EasySpeak:
     def record_until_silence(self, should_continue=None):
         """Record mic audio until a short silence, capped at five seconds.
 
-        Returns the captured PCM bytes. Plugin-facing. ``should_continue``
-        (used by push-to-talk) lets a key release cut the recording short
-        instead of waiting out the silence window.
+        Returns the captured PCM bytes. Plugin-facing. `should_continue` (used by
+        push-to-talk) lets a key release cut the recording short instead of waiting out
+        the silence window.
         """
         frames = []
         silent_chunks = 0
@@ -324,9 +331,9 @@ class EasySpeak:
     def wait_for_speech(self, timeout=5, should_continue=None):
         """Block until speech is heard, returning its first PCM chunk.
 
-        Returns None if nothing is heard within ``timeout`` seconds.
-        Plugin-facing. ``should_continue`` (used by push-to-talk) returns None
-        early once it goes False, so a key release ends the wait.
+        Returns None if nothing is heard within `timeout` seconds. Plugin-facing.
+        `should_continue` (used by push-to-talk) returns None early once it goes False,
+        so a key release ends the wait.
         """
         for _ in range(int(timeout * 16000 / 1600)):
             if should_continue is not None and not should_continue():
@@ -339,8 +346,7 @@ class EasySpeak:
     def transcribe(self, audio_data, prompt=None):
         """Transcribe raw PCM audio to text with Whisper.
 
-        ``prompt`` biases recognition (defaults to the command vocabulary).
-        Plugin-facing.
+        `prompt` biases recognition (defaults to the command vocabulary). Plugin-facing.
         """
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
             with wave.open(f.name, "wb") as wf:
@@ -370,8 +376,8 @@ class EasySpeak:
     def _play_wake_chime(self):
         """Play the wake acknowledgement sound, then flush the mic.
 
-        Flushing drops the chime audio that bled into the mic so it isn't
-        mistaken for the user speaking.
+        Flushing drops the chime audio that bled into the mic so it isn't mistaken for
+        the user speaking.
         """
         subprocess.run(
             ["paplay", "/usr/share/sounds/freedesktop/stereo/message.oga"],
@@ -382,9 +388,9 @@ class EasySpeak:
     def _drain_feedback(self):
         """Wait for the "didn't understand" feedback to finish, then flush the mic.
 
-        speak() is non-blocking, so flushing alone leaves the still-playing tail
-        for the open mic to transcribe into the next escalation (e.g. opening
-        help) with no one having spoken.
+        speak() is non-blocking, so flushing alone leaves the still-playing tail for the
+        open mic to transcribe into the next escalation (e.g. opening help) with no one
+        having spoken.
         """
         self.speech.drain()
         self.flush_stream()
@@ -393,11 +399,10 @@ class EasySpeak:
         """Run a hotkey-triggered dictation session for as long as the keys are held.
 
         Triggered from the main loop when the silent-activation combo fires.
-        Acknowledges with the wake chime — but speaks no prompt, this being the
-        *silent* path — then hands off to the registered dictation handler,
-        gating it on the still-held key state so releasing the keys ends it.
-        Warns and does nothing if no handler is registered (e.g. the dictation
-        plugin didn't load).
+        Acknowledges with the wake chime — but speaks no prompt, this being the *silent*
+        path — then hands off to the registered dictation handler, gating it on the
+        still-held key state so releasing the keys ends it. Warns and does nothing if no
+        handler is registered (e.g. the dictation plugin didn't load).
         """
         if self._push_to_talk is None:
             logger.warning("Hotkey pressed but no dictation handler is registered.")
@@ -410,14 +415,14 @@ class EasySpeak:
     def _capture_command_session(self):
         """Capture and route commands after a wake, staying open for follow-ups.
 
-        After a recognized command that gave no spoken reply (e.g. volume), the
-        mic stays open so the user can chain commands ("louder", "louder") at
-        their own pace without repeating the wake word; the session ends once a
-        couple of quiet listens (FOLLOWUP_IDLE_ROUNDS) pass, the wake-time
-        silence times out, or a command speaks (whose reply the open mic would
-        otherwise hear). A repeated misunderstanding still re-arms keep_listening
-        for the help retry, and its feedback is drained before listening again.
-        Returns True if a command asked the daemon to exit.
+        After a recognized command that gave no spoken reply (e.g. volume), the mic
+        stays open so the user can chain commands ("louder", "louder") at their own pace
+        without repeating the wake word; the session ends once a couple of quiet listens
+        (FOLLOWUP_IDLE_ROUNDS) pass, the wake-time silence times out, or a command
+        speaks (whose reply the open mic would otherwise hear). A repeated
+        misunderstanding still re-arms keep_listening for the help retry, and its
+        feedback is drained before listening again. Returns True if a command asked the
+        daemon to exit.
         """
         self.keep_listening = True
         awake = True
@@ -453,8 +458,8 @@ class EasySpeak:
     def run(self):
         """Load models and plugins, then run the wake-word listen loop forever.
 
-        Blocks until the user quits (voice command, tray, or Ctrl-C), always
-        releasing the microphone and draining speech on the way out.
+        Blocks until the user quits (voice command, tray, or Ctrl-C), always releasing
+        the microphone and draining speech on the way out.
         """
         logger.info("Loading OpenWakeWord...")
         self.wakeword = WakeWordModel()

@@ -180,7 +180,10 @@ atexit.register(cleanup)
 
 
 def parse_number_sequence(text):
-    """Extract ALL numbers from text as a sequence. '3 7 5' -> [3, 7, 5]."""
+    """Extract ALL numbers from text as a sequence.
+
+    '3 7 5' -> [3, 7, 5].
+    """
     # Replace word numbers with digits
     text_lower = text.lower()
     for word, num in WORD_TO_NUM.items():
@@ -191,7 +194,10 @@ def parse_number_sequence(text):
 
 
 def parse_count(text):
-    """Extract a repeat count (for nudge/scroll). Returns single number or 1."""
+    """Extract a repeat count (for nudge/scroll).
+
+    Returns single number or 1.
+    """
     text_lower = text.lower()
     for word, num in WORD_TO_NUM.items():
         text_lower = re.sub(rf"\b{word}\b", str(num), text_lower)
@@ -249,7 +255,10 @@ def close_grid():
 
 
 def update_grid(zone):
-    """Zoom to a single zone. Returns True if successful."""
+    """Zoom to a single zone.
+
+    Returns True if successful.
+    """
     global grid_bounds
 
     if not grid_active or not grid_bounds:
@@ -293,7 +302,10 @@ def update_grid(zone):
 
 
 def process_zones(zones):
-    """Process a sequence of zones. 'three seven five' zooms 3 times."""
+    """Process a sequence of zones.
+
+    'three seven five' zooms 3 times.
+    """
     for zone in zones:
         update_grid(zone)
 
@@ -325,7 +337,7 @@ def do_click(click_type="click"):
 
 
 def do_scroll(direction, count=1):
-    """Scroll ``count`` steps at the current cell center; False if no grid."""
+    """Scroll `count` steps at the current cell center; False if no grid."""
     global grid_bounds, grid_active, last_bounds
 
     center = get_center()
@@ -342,7 +354,7 @@ def do_scroll(direction, count=1):
 
 
 def nudge_grid(direction, count=1):
-    """Shift the current cell ``count`` steps in a direction; False if no grid."""
+    """Shift the current cell `count` steps in a direction; False if no grid."""
     global grid_bounds
 
     if not grid_bounds:
@@ -369,8 +381,8 @@ def nudge_grid(direction, count=1):
 def start_drag():
     """Press at the current cell center and reset the grid to full screen.
 
-    Leaves a drag in progress so a later :func:`end_drag` releases at the new
-    target. False if no grid is active.
+    Leaves a drag in progress so a later [`end_drag`][plugins.00_mousegrid.end_drag]
+    releases at the new target. False if no grid is active.
     """
     global drag_start, grid_bounds
     center = get_center()
@@ -388,8 +400,9 @@ def start_drag():
 
 
 def end_drag():
-    """Release a drag started by :func:`start_drag` and close the grid.
+    """Release a drag and close the grid.
 
+    Releases a drag started by [`start_drag`][plugins.00_mousegrid.start_drag].
     False if no drag is in progress or no grid is active.
     """
     global drag_start, grid_bounds, grid_active, last_bounds

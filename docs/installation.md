@@ -31,8 +31,8 @@ and install them together:
 This bundles the Python runtime, Piper, the GNOME Shell extension, and the speech
 models — no `pip`/`uv` step and no compiler. **Log out and back in once** after
 the first launch so GNOME loads the bundled extension. See the
-**[Packaging guide](packaging.md#install)** for offline notes, more languages,
-and hold-to-dictate setup.
+[Packaging guide](packaging.md#install) for offline notes, more languages, and
+hold-to-dictate setup.
 
 ## Install from source
 

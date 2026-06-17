@@ -59,7 +59,7 @@ class OneEuroFilter:
         return 1.0 / (1.0 + tau / te)
 
     def __call__(self, x):
-        """Filter the next sample ``x`` and return the smoothed value."""
+        """Filter the next sample `x` and return the smoothed value."""
         if self.x_prev is None:
             self.x_prev = x
             return x

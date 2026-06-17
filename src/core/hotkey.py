@@ -1,15 +1,14 @@
 """Hold-to-dictate keyboard activation via evdev (the silent-activation path).
 
-On Wayland an ordinary process can't grab global keys, and only raw evdev
-events from ``/dev/input`` expose key *release* — which "hold the keys to
-dictate, release to stop" needs. This listener reads every keyboard device in a
-background thread and tracks whether a configured modifier combo (default
-Ctrl+Shift) is fully held, so the audio loop can start dictation on press and
-end it the moment the keys come up.
+On Wayland an ordinary process can't grab global keys, and only raw evdev events from
+`/dev/input` expose key *release* — which "hold the keys to dictate, release to stop"
+needs. This listener reads every keyboard device in a background thread and tracks
+whether a configured modifier combo (default Ctrl+Shift) is fully held, so the audio
+loop can start dictation on press and end it the moment the keys come up.
 
-It is best-effort: if python-evdev isn't installed or ``/dev/input`` isn't
-readable (the user isn't in the ``input`` group), the listener logs how to
-enable it and stays inert, so the daemon runs normally without the hotkey.
+It is best-effort: if python-evdev isn't installed or `/dev/input` isn't readable (the
+user isn't in the `input` group), the listener logs how to enable it and stays inert, so
+the daemon runs normally without the hotkey.
 """
 
 import contextlib
@@ -35,16 +34,16 @@ _MODIFIER_ALIASES = {
 
 
 def parse_combo(spec: str) -> tuple[frozenset[str], ...]:
-    """Parse a ``'+'``-separated combo string into groups of accepted key names.
+    """Parse a `'+'`-separated combo string into groups of accepted key names.
 
     Each element becomes a group of evdev key names of which any one satisfies
-    that part of the combo, so ``"ctrl+shift"`` matches either Ctrl together
+    that part of the combo, so `"ctrl+shift"` matches either Ctrl together
     with either Shift. Names that aren't known aliases fall through as a single
-    literal evdev key name (``"rightctrl"`` -> ``"KEY_RIGHTCTRL"``) so less
+    literal evdev key name (`"rightctrl"` -> `"KEY_RIGHTCTRL"`) so less
     common combos still work.
 
     Args:
-        spec: A combo such as ``"ctrl+shift"`` or ``"super+space"``.
+        spec: A combo such as `"ctrl+shift"` or `"super+space"`.
 
     Returns:
         A tuple of frozensets, one per combo element; the combo is held when
@@ -68,19 +67,19 @@ def parse_combo(spec: str) -> tuple[frozenset[str], ...]:
 class HotkeyListener:
     """Track whether a key combo is held, off a background evdev reader.
 
-    The audio loop calls :meth:`take_activation` once per iteration to learn
-    when the combo was just pressed, then drives a dictation session gated on
-    :meth:`is_held` so releasing the keys ends it. All evdev/threading state is
-    kept behind a lock; the event-processing logic in :meth:`_process` is pure
-    and the I/O lives in :meth:`_grab_devices`/:meth:`_drain`, so the behaviour
-    is unit-testable without a real keyboard.
+    The audio loop calls [`take_activation`][core.hotkey.HotkeyListener.take_activation]
+    once per iteration to learn when the combo was just pressed, then drives a dictation
+    session gated on [`is_held`][core.hotkey.HotkeyListener.is_held] so releasing the
+    keys ends it. All evdev/threading state is kept behind a lock; the event-processing
+    logic in `_process` is pure and the I/O lives in `_grab_devices`/`_drain`, so the
+    behaviour is unit-testable without a real keyboard.
     """
 
     def __init__(self, combo="ctrl+shift", enabled=True):
-        """Set up the listener for ``combo`` (e.g. ``"ctrl+shift"``).
+        """Set up the listener for `combo` (e.g. `"ctrl+shift"`).
 
-        An unparseable or empty combo, or ``enabled=False``, leaves the
-        listener disabled so :meth:`start` is a no-op.
+        An unparseable or empty combo, or `enabled=False`, leaves the listener disabled
+        so [`start`][core.hotkey.HotkeyListener.start] is a no-op.
         """
         self._spec = combo
         self._groups = parse_combo(combo)
@@ -103,8 +102,8 @@ class HotkeyListener:
     def take_activation(self):
         """Return True once per press of the combo, clearing the edge.
 
-        The audio loop polls this each iteration; a True means "the user just
-        pressed the combo — start dictation now".
+        The audio loop polls this each iteration; a True means "the user just pressed
+        the combo — start dictation now".
         """
         with self._lock:
             fired = self._activation
@@ -116,9 +115,8 @@ class HotkeyListener:
     def start(self):
         """Begin watching the keyboard, unless disabled or no device is readable.
 
-        Logs and stays inert (no thread) when the feature is turned off, evdev
-        is missing, or ``/dev/input`` can't be read, so the daemon runs normally
-        either way.
+        Logs and stays inert (no thread) when the feature is turned off, evdev is
+        missing, or `/dev/input` can't be read, so the daemon runs normally either way.
         """
         if not self._enabled:
             logger.debug("Keyboard activation disabled.")
@@ -135,9 +133,9 @@ class HotkeyListener:
     def stop(self):
         """Stop the reader thread, then release the keyboard devices.
 
-        Joins the thread first so it leaves its ``select()`` loop before the fds
-        close under it — closing a fd mid-select can raise in the thread. The
-        loop wakes within one POLL_TIMEOUT, so the join returns promptly.
+        Joins the thread first so it leaves its `select()` loop before the fds close
+        under it — closing a fd mid-select can raise in the thread. The loop wakes
+        within one POLL_TIMEOUT, so the join returns promptly.
         """
         self._stop.set()
         thread, self._thread = self._thread, None
@@ -153,8 +151,8 @@ class HotkeyListener:
     def _grab_devices(self):
         """Open every readable keyboard device, or return [] if unavailable.
 
-        Missing python-evdev or an unreadable ``/dev/input`` (no ``input`` group
-        membership) is reported with how to fix it, then treated as "no hotkey".
+        Missing python-evdev or an unreadable `/dev/input` (no `input` group membership)
+        is reported with how to fix it, then treated as "no hotkey".
         """
         try:
             import evdev
@@ -206,8 +204,8 @@ class HotkeyListener:
     def _event_keyname(self, event):
         """Return the evdev key name for a key event, or None if not a key.
 
-        ``ecodes.KEY[code]`` is a list when a code has aliases; the first name
-        is the canonical one and the only form our combos use.
+        `ecodes.KEY[code]` is a list when a code has aliases; the first name is the
+        canonical one and the only form our combos use.
         """
         import evdev
 
@@ -221,9 +219,9 @@ class HotkeyListener:
     def _process(self, keyname, value):
         """Update held state from one key event (value: 0=up, 1=down, 2=repeat).
 
-        Only keys that belong to the combo move the state. The rising edge to
-        "fully held" arms :meth:`take_activation`; releasing any key clears the
-        held state so the dictation session ends.
+        Only keys that belong to the combo move the state. The rising edge to "fully
+        held" arms [`take_activation`][core.hotkey.HotkeyListener.take_activation];
+        releasing any key clears the held state so the dictation session ends.
         """
         if not any(keyname in group for group in self._groups):
             return
