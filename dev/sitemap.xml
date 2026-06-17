@@ -1,55 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://ctsdownloads.github.io/easyspeak/dev/</loc>
+         <loc>https://ctsdownloads.github.io/easyspeak/latest/dev/</loc>
          <lastmod>2026-06-17</lastmod>
     </url>
     <url>
-         <loc>https://ctsdownloads.github.io/easyspeak/dev/changelog/</loc>
+         <loc>https://ctsdownloads.github.io/easyspeak/latest/dev/changelog/</loc>
          <lastmod>2026-06-17</lastmod>
     </url>
     <url>
-         <loc>https://ctsdownloads.github.io/easyspeak/dev/commands/</loc>
+         <loc>https://ctsdownloads.github.io/easyspeak/latest/dev/commands/</loc>
          <lastmod>2026-06-17</lastmod>
     </url>
     <url>
-         <loc>https://ctsdownloads.github.io/easyspeak/dev/contributing/</loc>
+         <loc>https://ctsdownloads.github.io/easyspeak/latest/dev/contributing/</loc>
          <lastmod>2026-06-17</lastmod>
     </url>
     <url>
-         <loc>https://ctsdownloads.github.io/easyspeak/dev/how-it-works/</loc>
+         <loc>https://ctsdownloads.github.io/easyspeak/latest/dev/how-it-works/</loc>
          <lastmod>2026-06-17</lastmod>
     </url>
     <url>
-         <loc>https://ctsdownloads.github.io/easyspeak/dev/installation/</loc>
+         <loc>https://ctsdownloads.github.io/easyspeak/latest/dev/installation/</loc>
          <lastmod>2026-06-17</lastmod>
     </url>
     <url>
-         <loc>https://ctsdownloads.github.io/easyspeak/dev/license/</loc>
+         <loc>https://ctsdownloads.github.io/easyspeak/latest/dev/license/</loc>
          <lastmod>2026-06-17</lastmod>
     </url>
     <url>
-         <loc>https://ctsdownloads.github.io/easyspeak/dev/packaging/</loc>
+         <loc>https://ctsdownloads.github.io/easyspeak/latest/dev/packaging/</loc>
          <lastmod>2026-06-17</lastmod>
     </url>
     <url>
-         <loc>https://ctsdownloads.github.io/easyspeak/dev/plugins/</loc>
+         <loc>https://ctsdownloads.github.io/easyspeak/latest/dev/plugins/</loc>
          <lastmod>2026-06-17</lastmod>
     </url>
     <url>
-         <loc>https://ctsdownloads.github.io/easyspeak/dev/troubleshooting/</loc>
+         <loc>https://ctsdownloads.github.io/easyspeak/latest/dev/troubleshooting/</loc>
          <lastmod>2026-06-17</lastmod>
     </url>
     <url>
-         <loc>https://ctsdownloads.github.io/easyspeak/dev/usage/</loc>
+         <loc>https://ctsdownloads.github.io/easyspeak/latest/dev/usage/</loc>
          <lastmod>2026-06-17</lastmod>
     </url>
     <url>
-         <loc>https://ctsdownloads.github.io/easyspeak/dev/reference/core/</loc>
+         <loc>https://ctsdownloads.github.io/easyspeak/latest/dev/reference/core/</loc>
          <lastmod>2026-06-17</lastmod>
     </url>
     <url>
-         <loc>https://ctsdownloads.github.io/easyspeak/dev/reference/plugins/</loc>
+         <loc>https://ctsdownloads.github.io/easyspeak/latest/dev/reference/plugins/</loc>
          <lastmod>2026-06-17</lastmod>
     </url>
 </urlset>
