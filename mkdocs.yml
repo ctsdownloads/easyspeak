@@ -1,10 +1,11 @@
 site_name: EasySpeak
 site_description: Voice control for Linux desktops. Fully local, no cloud, Wayland-native.
 # Docs are versioned with mike (see the `extra.version` block and the Docs
-# workflow); the live site only serves under a version path. Point site_url at
-# the stable `latest` alias so canonical URLs and the sitemap resolve instead
-# of 404ing on the unversioned root.
-site_url: https://ctsdownloads.github.io/easyspeak/latest/
+# workflow): each release/dev build is archived under its own `/<version>/`
+# path, while the latest docs are published to the site root for clean,
+# version-less URLs. Point site_url (canonical links, sitemap) at that root, so
+# the archived snapshots' canonical URLs reference the latest version.
+site_url: https://ctsdownloads.github.io/easyspeak/
 repo_url: https://github.com/ctsdownloads/easyspeak
 repo_name: ctsdownloads/easyspeak
 copyright: Copyright &copy; EasySpeak contributors — GPL-3.0
