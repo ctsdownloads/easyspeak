@@ -158,6 +158,11 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
+"packaging/**" = [
+  "INP001",  # standalone build scripts, run directly — not an importable package
+]
+"src/plugins/00_*.py" = ["N999"]    # numeric prefix sets plugin load order
+"src/plugins/zz_base.py" = ["N999"] # zz_ prefix loads the base plugin last
 "tests/**" = [
   "S101",    # asserts are the whole point of a test
   "D",       # docstrings enforced on src/, not on tests
@@ -174,8 +179,6 @@ ignore = [
   "TC003",   # no need to guard stdlib imports behind TYPE_CHECKING in tests
   "EM101", "TRY003",  # inline exception messages fine in tests
 ]
-"src/plugins/00_*.py" = ["N999"]    # numeric prefix sets plugin load order
-"src/plugins/zz_base.py" = ["N999"] # zz_ prefix loads the base plugin last
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
