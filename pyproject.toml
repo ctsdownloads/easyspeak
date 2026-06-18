@@ -180,14 +180,25 @@ ignore = [
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[tool.setuptools.package-dir]
-easyspeak = "src"
+[tool.setuptools]
+packages = [
+  "easyspeak",
+  "easyspeak.core",
+  "easyspeak.plugins",
+  "easyspeak.data",
+]
 
-# The bundled GNOME Shell extension is package data: core.gnome_extension
-# copies it into the user's extensions directory at startup, so it must ship
-# inside the wheel (alongside the easyspeak package), not just the sdist.
+[tool.setuptools.package-dir]
+"easyspeak" = "src"
+"easyspeak.data" = "data"
+
 [tool.setuptools.package-data]
-easyspeak = ["extension.js", "extension-helpers.js", "metadata.json"]
+"easyspeak" = [
+  "extension.js",
+  "extension-helpers.js",
+  "metadata.json",
+]
+"easyspeak.data" = ["*"]
 
 [tool.setuptools_scm]
 local_scheme = "no-local-version"
