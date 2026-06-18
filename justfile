@@ -149,33 +149,42 @@ package *args:
 # Runs plausibility checks against freshly built packages
 [group('release')]
 gate: (clean '--quiet') (package '--quiet')
+    # Desktop launcher to be shipped in the .deb/.rpm must be valid.
+    desktop-file-validate data/easyspeak.desktop
     # Python package must not contain markdown, tests and dev tooling configuration
-    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep CONTRIBUTING.md
-    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep tests
-    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep eslint.config.mjs
-    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep flake.nix
-    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep flake.lock
+    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep C.*\.md
+    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep docs
     ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep package.json
-    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep CONTRIBUTING.md
-    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep tests
-    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep eslint.config.mjs
-    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep flake.nix
-    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep flake.lock
+    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep tests
+    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep .lock
+    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep .mjs
+    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep .nix
+    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep .yaml
+    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep .yml
+    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep C.*\.md
+    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep docs
     ! tar tfz dist/easyspeak_linux-*.tar.gz | grep package.json
-    # Python package should contain Core module
+    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep tests
+    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep .lock
+    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep .mjs
+    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep .nix
+    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep .yaml
+    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep .yml
+    # Python package should contain Core module and plugins
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q core
+    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q plugins
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q core
-    # Python package should bundle the GNOME Shell extension assets, which
-    # core.gnome_extension copies into the user's extensions dir at startup.
-    # extension.js imports extension-helpers.js, so the helper must ship too.
+    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q plugins
+    # Python package should bundle launcher and Shell extension assets.
+    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q easyspeak.desktop
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q extension.js
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q extension-helpers.js
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q metadata.json
+    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q easyspeak.desktop
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q extension.js
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q extension-helpers.js
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q metadata.json
-    # The desktop launcher shipped in the .deb/.rpm must be valid.
-    desktop-file-validate data/easyspeak.desktop
+    @echo "✔  Python packaging looks good."
 
 # Verify package version is same as Git tag
 [group('release')]
