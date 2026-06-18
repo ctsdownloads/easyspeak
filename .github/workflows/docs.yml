@@ -48,24 +48,48 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
 
-    # Tags publish a named version and move the "latest" alias; pushes to the
-    # default branch publish the in-progress "dev" docs. Both deploy to the
-    # gh-pages branch via mike. --push lets GitHub Pages serve the result.
-    # Pull requests run the build above only — neither condition matches.
-    - name: Deploy release docs
+    # mike archives each build under its own /<version>/ path on the gh-pages
+    # branch; --push lets GitHub Pages serve it. Tags archive a named release,
+    # pushes to the default branch refresh the in-progress "dev" docs. Pull
+    # requests run the build above only — neither condition matches, so nothing
+    # deploys. The latest docs are served at the site root (see below), not via a
+    # /latest/ alias, so no alias or default-version redirect is set here.
+    - name: Archive release snapshot
       if: startsWith(github.ref, 'refs/tags/')
-      run: just docs-publish deploy --push --update-aliases "${GITHUB_REF_NAME}" latest
+      run: just docs-publish deploy --push "${GITHUB_REF_NAME}"
 
-    - name: Set default version to latest
-      if: startsWith(github.ref, 'refs/tags/')
-      run: just docs-publish set-default --push latest
-
-    - name: Deploy development docs
+    - name: Archive development snapshot
       if: github.ref == 'refs/heads/dev'
+      run: just docs-publish deploy --push dev
+
+    # Remove the obsolete "latest" alias an earlier deploy may have created; the
+    # latest docs now live at the root. Best-effort: it no longer exists once dropped.
+    - name: Drop obsolete latest alias
+      if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/dev'
+      run: just docs-publish delete --push latest || echo "no latest alias to remove"
+
+    # Publish the freshly built docs to the gh-pages root for clean, version-less
+    # URLs. The root tracks the most recent release; until the first release
+    # exists it tracks dev, so the root is never empty. sync-docs-root.py swaps in
+    # the new root pages while leaving mike's version snapshots and metadata intact.
+    - name: Publish latest docs to site root
+      if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/dev'
+      env:
+        REF_TYPE: ${{ github.ref_type }}
+        REF_NAME: ${{ github.ref_name }}
       run: |
-        just docs-publish deploy --push dev
-        # Until the first release sets the default to "latest", point the
-        # site root at the dev docs so the Pages root resolves instead of 404.
-        if ! just docs-publish list | grep -q '\[latest\]'; then
-          just docs-publish set-default --push dev
+        git fetch origin gh-pages
+        if [ "$REF_TYPE" != "tag" ] && git show origin/gh-pages:versions.json \
+            | python -c 'import json,sys; sys.exit(0 if any(v["version"] != "dev" for v in json.load(sys.stdin)) else 1)'; then
+          echo "A release is published; leaving the root at the latest release."
+          exit 0
+        fi
+        git worktree add gh-pages-root origin/gh-pages
+        python packaging/sync-docs-root.py site gh-pages-root
+        git -C gh-pages-root add -A
+        if git -C gh-pages-root diff --cached --quiet; then
+          echo "Site root already up to date."
+        else
+          git -C gh-pages-root commit -m "Publish $REF_NAME docs to site root"
+          git -C gh-pages-root push origin HEAD:gh-pages
         fi
