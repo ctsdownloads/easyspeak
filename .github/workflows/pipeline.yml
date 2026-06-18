@@ -30,6 +30,7 @@ jobs:
     - uses: astral-sh/setup-uv@v7
       with:
         python-version: '3.12'
+        ignore-nothing-to-cache: true
     - uses: taiki-e/install-action@just
     - run: |
         sudo apt update
@@ -68,6 +69,7 @@ jobs:
     - uses: astral-sh/setup-uv@v7
       with:
         python-version: ${{ matrix.python-version }}
+        ignore-nothing-to-cache: true
     - uses: taiki-e/install-action@just
     - run: |
         sudo apt update
