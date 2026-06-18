@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Publish the latest MkDocs build to the gh-pages site root.
 
 mike archives every release/dev build under its own ``/<version>/`` path and
@@ -9,7 +8,7 @@ gh-pages root, replacing the previous canonical files but leaving mike's version
 directories and metadata untouched.
 
 Usage:
-    sync-docs-root.py <built-site-dir> <gh-pages-checkout>
+    python sync-docs-root.py <built-site-dir> <gh-pages-checkout>
 """
 
 import json
@@ -31,11 +30,15 @@ def preserved_names(gh_pages: Path) -> set[str]:
 
 
 def main(site: str, gh_pages: str) -> None:
+    """Replace the canonical root docs with a freshly built site.
+
+    Drops the previous canonical files (home page, per-page dirs, assets, the
+    old ``latest`` alias/redirect) while keeping mike's version snapshots in
+    place, then lays down the new build at the root.
+    """
     site_dir, root = Path(site), Path(gh_pages)
     keep = preserved_names(root)
 
-    # Drop the previous canonical files (home page, per-page dirs, assets, the
-    # old `latest` alias/redirect), keeping mike's version snapshots in place.
     for entry in root.iterdir():
         if entry.name in keep:
             continue
@@ -44,7 +47,6 @@ def main(site: str, gh_pages: str) -> None:
         else:
             entry.unlink()
 
-    # Lay down the new canonical build at the root.
     for entry in site_dir.iterdir():
         target = root / entry.name
         if entry.is_dir():
