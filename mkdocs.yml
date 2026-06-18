@@ -49,6 +49,7 @@ nav:
 - Installation: installation.md
 - Packaging: packaging.md
 - Usage: usage.md
+- Screenshots: screenshots.md
 - Commands: commands.md
 - Writing Plugins: plugins.md
 - Troubleshooting: troubleshooting.md
