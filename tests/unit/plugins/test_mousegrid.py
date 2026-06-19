@@ -50,6 +50,14 @@ def test_host_run(mock_subprocess_run):
     assert result.returncode == 0
 
 
+@patch("subprocess.run", side_effect=FileNotFoundError(2, "No such file or directory"))
+def test_host_run_missing_executable(_mock_subprocess_run):
+    """A missing executable (e.g. gdbus on headless WSL) returns a failed result."""
+    result = mousegrid_plugin.host_run(["gdbus", "call"])
+
+    assert result.returncode == 1
+
+
 @patch.object(mousegrid_plugin, "dbus_call", return_value=True)
 def test_cleanup(mock_dbus_call):
     """When cleanup is called then it hides the grid via dbus."""

@@ -1612,3 +1612,29 @@ class TestEasySpeakPushToTalk:
         chime.assert_called_once_with()
         handler.assert_called_once_with(easy.hotkey.is_held)
         easy.speak.assert_not_called()
+
+
+class TestOpenStream:
+    """Tests for opening the microphone input stream."""
+
+    def test_open_stream_success(self):
+        """A working capture device stores the opened stream."""
+        easy = EasySpeak()
+        easy.audio = Mock()
+        stream = easy.audio.open.return_value
+
+        easy._open_stream()
+
+        assert easy.stream is stream
+
+    def test_open_stream_no_device_exits_cleanly(self):
+        """A missing capture device exits with a message, not a raw traceback."""
+        easy = EasySpeak()
+        easy.audio = Mock()
+        easy.audio.open.side_effect = OSError(-9996, "Invalid input device")
+
+        with pytest.raises(SystemExit) as exc_info:
+            easy._open_stream()
+
+        assert exc_info.value.code == 1
+        assert easy.stream is None
