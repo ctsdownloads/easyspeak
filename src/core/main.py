@@ -264,16 +264,28 @@ class EasySpeak:
 
         PortAudio probes every ALSA/JACK device on open, spamming stderr about hardware
         this machine lacks; hide that C-level noise while keeping our own Python output
-        intact.
+        intact. When there is no capture device at all PortAudio raises a bare OSError
+        (e.g. errno -9996); surface that as an actionable message instead of a raw
+        traceback, since it commonly means a headless host such as WSL with no
+        microphone bridged in.
         """
-        with suppressed_c_stderr():
-            self.stream = self.audio.open(
-                format=pyaudio.paInt16,
-                channels=1,
-                rate=16000,
-                input=True,
-                frames_per_buffer=1280,
+        try:
+            with suppressed_c_stderr():
+                self.stream = self.audio.open(
+                    format=pyaudio.paInt16,
+                    channels=1,
+                    rate=16000,
+                    input=True,
+                    frames_per_buffer=1280,
+                )
+        except OSError as exc:
+            logger.error(  # noqa: TRY400
+                "No microphone input device found (%s). EasySpeak needs a working "
+                "PipeWire/PulseAudio or ALSA capture device; this is typically "
+                "missing under WSL, which bridges no microphone by default.",
+                exc,
             )
+            raise SystemExit(1) from exc
 
     def _close_stream(self):
         """Release the microphone so other apps see it as free.

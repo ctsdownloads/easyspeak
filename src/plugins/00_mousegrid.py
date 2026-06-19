@@ -109,8 +109,20 @@ def setup(c):
 
 
 def host_run(cmd):
-    """Run a command and capture its output (the plugin's own subprocess seam)."""
-    return subprocess.run(cmd, capture_output=True, text=True)
+    """Run a command and capture its output (the plugin's own subprocess seam).
+
+    A missing executable returns a failed result (returncode 1) rather than
+    raising, so callers treat an absent `gdbus`—e.g. on a headless host such as
+    WSL with no GNOME session—as a plain D-Bus failure. Without this the atexit
+    cleanup would raise FileNotFoundError on exit.
+    """
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True)
+    except FileNotFoundError as exc:
+        logger.debug("Command not found: %s", exc)
+        return subprocess.CompletedProcess(
+            cmd, returncode=1, stdout="", stderr=str(exc)
+        )
 
 
 def dbus_call(method, *args):
