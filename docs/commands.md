@@ -65,7 +65,7 @@ Requires a webcam and additional dependencies — see [Installation](installatio
 | Command | Action |
 |---------|--------|
 | browser | Enter browser mode |
-| numbers / hints | Show link hints |
+| numbers / hints | Show link hints[^hints] |
 | zero two | Click hint 02 |
 | new tab | Open new tab |
 | close tab | Close current tab |
@@ -81,11 +81,18 @@ Requires a webcam and additional dependencies — see [Installation](installatio
 | find next/previous | Navigate matches |
 | search [query] | Web search (DuckDuckGo) |
 | go to [url] | Navigate to URL |
-| open youtube | Open bookmark |
+| open youtube | Open bookmark[^bookmarks] |
 | exit browser | Leave browser mode |
 
-Built-in bookmarks: youtube, google, gmail, github, reddit, twitter, facebook,
-amazon, netflix, duckduckgo
+[^hints]:
+    On startup, EasySpeak ensures `~/.config/qutebrowser/config.py` has the setup
+    needed for link hints to appear as numbers. See
+    [Troubleshooting](troubleshooting.md#browser-plugin-link-numbers-dont-work)
+    if numbers don't show.
+
+[^bookmarks]:
+    Built-in bookmarks: youtube, google, gmail, github, reddit, twitter,
+    facebook, amazon, netflix, duckduckgo.
 
 ## Dictation
 
@@ -120,10 +127,13 @@ amazon, netflix, duckduckgo
 | open [app] | Launch application |
 | close [app] | Close application |
 
-Default apps live in `plugins/apps.py` (edit to match your system): firefox,
-steam, spotify, calculator, settings, files, terminal, browser, music player,
-and more. Some accept spoken aliases — e.g. "open music app" works the same as
-"open music player".
+Default apps live in [`plugins/apps.py`](https://github.com/ctsdownloads/easyspeak/blob/HEAD/src/plugins/apps.py)
+(edit to match your system): firefox, steam, spotify, calculator, settings,
+files, terminal, browser, music player, and more. Some accept spoken aliases —
+e.g. "open music app" works the same as "open music player".
+
+"Open terminal" and "close terminal" are special: they open and close your
+system's default terminal, whichever one that is, rather than a fixed app.
 
 ## Files
 

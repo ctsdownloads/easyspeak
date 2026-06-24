@@ -8,7 +8,7 @@
 - Python 3.12 — **source install only** (not 3.13/3.14, see notes below); the
   prebuilt packages bundle their own runtime
 
-Tested on Fedora 43.
+Tested on Fedora and NixOS.
 
 ## Quick install (prebuilt packages)
 
@@ -124,9 +124,9 @@ cd ~/easyspeak
 Head tracking requires a webcam and additional dependencies:
 
 ```bash
-pip install sixdrepnet opencv-python
-# or
-pip install .[head-tracking]
+pip install '.[head-tracking]'
 # or, with uv
 uv run --extra head-tracking easyspeak
 ```
+
+The `head-tracking` extra pulls in `sixdrepnet` and `opencv-python`.
