@@ -44,6 +44,12 @@ theme:
 # the root CONTRIBUTING.md is a short stub pointing here for GitHub.
 docs_dir: docs
 
+# These assets live under docs/media/ but are not referenced by any page, so
+# keep them out of the built site (the demo video is a 23 MB LFS object).
+exclude_docs: |
+  media/demo.mp4
+  media/log.txt
+
 nav:
 - Home: index.md
 - Installation: installation.md

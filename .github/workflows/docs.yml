@@ -26,6 +26,14 @@ jobs:
       with:
         fetch-depth: 0  # mike needs the full history of the gh-pages branch
 
+    # Docs embed PNG/JPG assets tracked by Git LFS; without this CI publishes
+    # the LFS pointer files and the screenshots render broken. Pull them
+    # explicitly rather than via checkout's `lfs: true` so we can skip the
+    # large demo video (excluded from the built site anyway) and avoid the
+    # bandwidth. Local clones still fetch everything normally.
+    - name: Fetch LFS assets (excluding the large demo video)
+      run: git lfs pull --exclude="docs/media/demo.mp4"
+
     - uses: astral-sh/setup-uv@v7
       with:
         python-version: '3.12'
