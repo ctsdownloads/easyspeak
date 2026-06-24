@@ -5,6 +5,47 @@ canonical, GitHub-independent record of releases. It is updated once per
 release. The format loosely follows [Keep a Changelog](https://keepachangelog.com/),
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.4.0 · Packaged and Polished · 2026-06-24
+
+**Native Packages & a Docs Site**
+
+EasySpeak now ships as native Debian (`.deb`) and Fedora (`.rpm`) packages, with
+the language data split into separate packages so you install only the voices
+you need. Dictation now actually works — backed by a proper AT-SPI backend that
+reports failures honestly instead of silently doing nothing — and gains a silent,
+keyboard hold-to-dictate activation for when you'd rather not speak the wake
+word. The GNOME tray grows an About dialog and a Help entry, and the extension
+is renamed simply "EasySpeak".
+
+Under the hood, terminal output moved from `print()` to structured logging, the
+codebase adopted Ruff's full "ALL" ruleset with curated exceptions, and a batch
+of post-0.3.0 review findings were cleaned up; EasySpeak also fails gracefully
+now when an audio device or gdbus is missing. Rounding it out is a hosted MkDocs
+and Material documentation site on GitHub Pages — complete with screenshots and
+Git-LFS-tracked media — while CI is streamlined onto `main` as the `dev` branch
+is phased out.
+
+### What's Changed
+
+- feat(packaging): native `.deb`/`.rpm` with split language data by @bittner in [#77](https://github.com/ctsdownloads/easyspeak/pull/77)
+- Make dictation work: provide the AT-SPI backend and report failures honestly by @bittner in [#69](https://github.com/ctsdownloads/easyspeak/pull/69)
+- feat(core): silent (keyboard) hold-to-dictate activation by @bittner in [#70](https://github.com/ctsdownloads/easyspeak/pull/70)
+- feat(tray): add About dialog and Help to the tray menu by @bittner in [#73](https://github.com/ctsdownloads/easyspeak/pull/73)
+- refactor(extension): rename "EasySpeak Grid" to "EasySpeak" by @bittner in [#74](https://github.com/ctsdownloads/easyspeak/pull/74)
+- Switch terminal output from `print()` to logging by @bittner in [#68](https://github.com/ctsdownloads/easyspeak/pull/68)
+- Adopt Ruff "ALL" ruleset with curated exceptions by @bittner in [#65](https://github.com/ctsdownloads/easyspeak/pull/65)
+- fix: address post-0.3.0 review findings (browser-launch trap, AT-SPI caret, hotkey shutdown) by @bittner in [#72](https://github.com/ctsdownloads/easyspeak/pull/72)
+- Fail gracefully when audio device or gdbus is missing by @bittner in [#86](https://github.com/ctsdownloads/easyspeak/pull/86)
+- docs: hosted MkDocs + Material + mkdocstrings site on GitHub Pages by @bittner in [#71](https://github.com/ctsdownloads/easyspeak/pull/71)
+- Integrate screenshots in documentation by @bittner in [#85](https://github.com/ctsdownloads/easyspeak/pull/85)
+- Serve latest docs at site root, check dead links in README by @bittner in [#84](https://github.com/ctsdownloads/easyspeak/pull/84)
+- Track media files with Git-LFS, move images to docs/media by @bittner in [#83](https://github.com/ctsdownloads/easyspeak/pull/83)
+- Fix docstring markup (reStructuredText ➜ MarkDown) by @bittner in [#81](https://github.com/ctsdownloads/easyspeak/pull/81)
+- Trigger CI workflows on main only, phasing out dev by @bittner in [#87](https://github.com/ctsdownloads/easyspeak/pull/87)
+- Fix broken docs screenshots, skip demo video in CI by @bittner in [#88](https://github.com/ctsdownloads/easyspeak/pull/88)
+
+**Full Changelog**: [`0.3.0...0.4.0`](https://github.com/ctsdownloads/easyspeak/compare/0.3.0...0.4.0)
+
 ## 0.3.0 · Smoother and More Conversational · 2026-06-13
 
 **Tray Icon & Instant Feedback**
