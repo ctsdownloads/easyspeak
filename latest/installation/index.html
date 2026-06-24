@@ -1012,7 +1012,7 @@
 <li>Python 3.12 — <strong>source install only</strong> (not 3.13/3.14, see notes below); the
   prebuilt packages bundle their own runtime</li>
 </ul>
-<p>Tested on Fedora 43.</p>
+<p>Tested on Fedora and NixOS.</p>
 <h2 id="quick-install-prebuilt-packages">Quick install (prebuilt packages)<a class="headerlink" href="#quick-install-prebuilt-packages" title="Permanent link">&para;</a></h2>
 <p>The easiest path. Download the latest <strong>app</strong> package and a <strong>language pack</strong>
 from the <a href="https://github.com/ctsdownloads/easyspeak/releases">Releases page</a>
@@ -1098,12 +1098,11 @@ from in there.</p>
 </code></pre></div>
 <h3 id="head-tracking-optional">Head tracking (optional)<a class="headerlink" href="#head-tracking-optional" title="Permanent link">&para;</a></h3>
 <p>Head tracking requires a webcam and additional dependencies:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>pip<span class="w"> </span>install<span class="w"> </span>sixdrepnet<span class="w"> </span>opencv-python
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="c1"># or</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>pip<span class="w"> </span>install<span class="w"> </span>.<span class="o">[</span>head-tracking<span class="o">]</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># or, with uv</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>uv<span class="w"> </span>run<span class="w"> </span>--extra<span class="w"> </span>head-tracking<span class="w"> </span>easyspeak
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;.[head-tracking]&#39;</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="c1"># or, with uv</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>uv<span class="w"> </span>run<span class="w"> </span>--extra<span class="w"> </span>head-tracking<span class="w"> </span>easyspeak
 </code></pre></div>
+<p>The <code>head-tracking</code> extra pulls in <code>sixdrepnet</code> and <code>opencv-python</code>.</p>
 
 
 

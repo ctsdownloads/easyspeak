@@ -1144,7 +1144,7 @@ until you're over your target, then <strong>"click"</strong>.</p>
 </tr>
 <tr>
 <td>numbers / hints</td>
-<td>Show link hints</td>
+<td>Show link hints<sup id="fnref:hints"><a class="footnote-ref" href="#fn:hints">1</a></sup></td>
 </tr>
 <tr>
 <td>zero two</td>
@@ -1208,7 +1208,7 @@ until you're over your target, then <strong>"click"</strong>.</p>
 </tr>
 <tr>
 <td>open youtube</td>
-<td>Open bookmark</td>
+<td>Open bookmark<sup id="fnref:bookmarks"><a class="footnote-ref" href="#fn:bookmarks">2</a></sup></td>
 </tr>
 <tr>
 <td>exit browser</td>
@@ -1216,8 +1216,6 @@ until you're over your target, then <strong>"click"</strong>.</p>
 </tr>
 </tbody>
 </table>
-<p>Built-in bookmarks: youtube, google, gmail, github, reddit, twitter, facebook,
-amazon, netflix, duckduckgo</p>
 <h2 id="dictation">Dictation<a class="headerlink" href="#dictation" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1332,10 +1330,12 @@ amazon, netflix, duckduckgo</p>
 </tr>
 </tbody>
 </table>
-<p>Default apps live in <code>plugins/apps.py</code> (edit to match your system): firefox,
-steam, spotify, calculator, settings, files, terminal, browser, music player,
-and more. Some accept spoken aliases — e.g. "open music app" works the same as
-"open music player".</p>
+<p>Default apps live in <a href="https://github.com/ctsdownloads/easyspeak/blob/HEAD/src/plugins/apps.py"><code>plugins/apps.py</code></a>
+(edit to match your system): firefox, steam, spotify, calculator, settings,
+files, terminal, browser, music player, and more. Some accept spoken aliases —
+e.g. "open music app" works the same as "open music player".</p>
+<p>"Open terminal" and "close terminal" are special: they open and close your
+system's default terminal, whichever one that is, rather than a fixed app.</p>
 <h2 id="files">Files<a class="headerlink" href="#files" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1462,6 +1462,21 @@ them.</p>
 </tr>
 </tbody>
 </table>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:hints">
+<p>On startup, EasySpeak ensures <code>~/.config/qutebrowser/config.py</code> has the setup
+needed for link hints to appear as numbers. See
+<a href="../troubleshooting/#browser-plugin-link-numbers-dont-work">Troubleshooting</a>
+if numbers don't show.&#160;<a class="footnote-backref" href="#fnref:hints" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:bookmarks">
+<p>Built-in bookmarks: youtube, google, gmail, github, reddit, twitter,
+facebook, amazon, netflix, duckduckgo.&#160;<a class="footnote-backref" href="#fnref:bookmarks" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
 
 
 
