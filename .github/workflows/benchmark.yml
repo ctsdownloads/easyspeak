@@ -5,7 +5,6 @@ on:
   push:
     branches:
     - main
-    - dev
 
 env:
   BENCHER_PROJECT: ${{ vars.BENCHER_PROJECT }}
