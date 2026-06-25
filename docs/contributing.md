@@ -46,7 +46,7 @@ parallel. We use this to test against all supported Python versions.
 
 ### Prerequisites
 
-First install the system build dependencies (PortAudio, GCC, Python 3.12, …)
+First install the system build dependencies (PortAudio, GCC, Python 3.10–3.14, …)
 as described under [Install from source](installation.md#install-from-source)
 in the Installation guide — without them the build and run steps below will
 fail.
