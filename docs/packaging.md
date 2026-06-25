@@ -61,7 +61,7 @@ sudo usermod -aG input "$USER"
 
 The default `easyspeak-lang-en` pack is **US English** — Whisper `base.en`
 (recognition) and Piper `en_US-amy-medium` (feedback). The `hey_jarvis` wake word is
-built into the app (it ships inside the OpenWakeWord wheel), so it stays English
+built into the app (it ships inside the pyopen-wakeword wheel), so it stays English
 regardless of language pack.
 
 When present, the English pack is wired up automatically. To use another language —
@@ -77,7 +77,7 @@ systemd user override or your shell profile):
 
 So adding a language needs no root and no package from us: download any
 faster-whisper model and Piper voice, then set the two variables. A different wake
-word, however, needs a custom-trained OpenWakeWord model.
+word, however, needs a custom-trained model that pyopen-wakeword can load.
 
 ## Build the packages yourself
 

@@ -5,8 +5,8 @@
 - Linux with GNOME Shell 47+ on Wayland
 - Working microphone
 - ~2 GB disk space for models
-- Python 3.12 — **source install only** (not 3.13/3.14, see notes below); the
-  prebuilt packages bundle their own runtime
+- Python 3.10–3.14 — **source install only**; the prebuilt packages bundle their
+  own runtime
 
 Tested on Fedora and NixOS.
 
@@ -37,17 +37,12 @@ hold-to-dictate setup.
 ## Install from source
 
 For development, or to run the latest unreleased code, install from the repository.
-This path needs system build dependencies and Python 3.12.
+This path needs system build dependencies and a supported Python.
 
-### Python 3.12
+### Python
 
-Fedora 43's default `python3` is 3.14. Unfortunately, we depend on a few Google
-packages that are not available for Python 3.13+ yet.
-
-```bash
-sudo dnf install python3.12
-python3.12 --version  # Verify it's installed
-```
+EasySpeak is tested against Python 3.10, 3.11, 3.12, 3.13, and 3.14. Fedora 43's
+default `python3` (3.14) works out of the box.
 
 ### 1. System packages
 
@@ -64,7 +59,7 @@ sudo dnf install \
   pulseaudio-utils \
   sound-theme-freedesktop \
   portaudio-devel \
-  python3.12-devel \
+  python3-devel \
   gcc
 ```
 
@@ -74,23 +69,24 @@ they're listed here for the sake of minimal or non-GNOME installs.
 
 ### 2. Python packages
 
-```bash
-python3.12 -m venv ~/easyspeak-venv
-source ~/easyspeak-venv/bin/activate
-pip install faster-whisper openwakeword numpy pyaudio
-cd ~/easyspeak
-pip install -e .
-```
-
-If you use `uv` you can ignore the steps that create a virtual environment and
-simply run:
+The simplest path is [uv](https://docs.astral.sh/uv/), which transparently
+creates and updates a virtual environment and runs EasySpeak from in there:
 
 ```bash
 uv run easyspeak
 ```
 
-uv will transparently create and update a virtual environment, and run EasySpeak
-from in there.
+Prefer plain `pip`? Create a virtual environment first — most distributions ship
+their system Python as [externally managed](https://peps.python.org/pep-0668/),
+so installing into it directly fails:
+
+```bash
+python3 -m venv ~/easyspeak-venv
+source ~/easyspeak-venv/bin/activate
+pip install faster-whisper pyopen-wakeword numpy pyaudio
+cd ~/easyspeak
+pip install -e .
+```
 
 ### 3. Piper TTS
 
