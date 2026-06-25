@@ -37,7 +37,12 @@ SUBPROCESS_TIMEOUT = 5.0
 
 # Bundled assets, installed as a set: extension.js imports extension-helpers.js,
 # so they must travel together or the extension fails to load.
-EXTENSION_ASSETS = ("extension.js", "extension-helpers.js", "metadata.json")
+EXTENSION_ASSETS = (
+    "extension.js",
+    "extension-helpers.js",
+    "prefs.js",
+    "metadata.json",
+)
 
 
 class RefreshResult(enum.Enum):

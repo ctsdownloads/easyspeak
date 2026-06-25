@@ -8,6 +8,7 @@ import Meta from 'gi://Meta';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 import {
     clampToWorkArea,
     scrollDirectionDelta,
@@ -533,9 +534,10 @@ const CONTROL_FILE = CACHE_DIR + '/control';
 // wake the assistant back up.
 const TrayIndicator = GObject.registerClass(
 class TrayIndicator extends PanelMenu.Button {
-    _init() {
+    _init(openPreferences) {
         super._init(0.0, 'EasySpeak');
         this.visible = false;  // hidden until the daemon reports "muted"
+        this._openPreferences = openPreferences;
 
         this._icon = new St.Icon({
             icon_name: 'microphone-disabled-symbolic',  // mic with a slash
@@ -544,21 +546,19 @@ class TrayIndicator extends PanelMenu.Button {
         });
         this.add_child(this._icon);
 
-        const statusItem = new PopupMenu.PopupMenuItem('EasySpeak: Deactivated', {
-            reactive: false,
-        });
-        this.menu.addMenuItem(statusItem);
-        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-
-        const reactivateItem = new PopupMenu.PopupMenuItem('Reactivate');
+        const reactivateItem = new PopupMenu.PopupMenuItem('Reactivate EasySpeak');
         reactivateItem.connect('activate', () => this._writeCommand('unmute'));
         this.menu.addMenuItem(reactivateItem);
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
-        // Help opens the docs and About shows the libadwaita window; both are
-        // handled by the daemon (which knows its own interpreter and the docs
-        // URL) via the same control-file channel as the other menu actions.
+        // Settings opens this extension's own prefs window (prefs.js) in-process.
+        // Help and About route through the daemon (which knows its interpreter
+        // and the docs URL) via the same control-file channel as the other items.
+        const settingsItem = new PopupMenu.PopupMenuItem('Settings…');
+        settingsItem.connect('activate', () => this._openPreferences());
+        this.menu.addMenuItem(settingsItem);
+
         const helpItem = new PopupMenu.PopupMenuItem('Help');
         helpItem.connect('activate', () => this._writeCommand('help'));
         this.menu.addMenuItem(helpItem);
@@ -596,20 +596,12 @@ class TrayIndicator extends PanelMenu.Button {
     }
 });
 
-export default class EasySpeakGridExtension {
-    constructor() {
-        this._dbus = null;
-        this._grid = null;
-        this._winMgr = null;
-        this._screenMgr = null;
-        this._tray = null;
-    }
-
+export default class EasySpeakGridExtension extends Extension {
     enable() {
         this._grid = new GridOverlay();
         this._winMgr = new WindowManager();
         this._screenMgr = new ScreenshotManager();
-        this._tray = new TrayIndicator();
+        this._tray = new TrayIndicator(() => this.openPreferences());
         Main.panel.addToStatusArea('easyspeak', this._tray);
         // addToStatusArea drops new indicators at the LEFT end of the status
         // area (the "application content" zone). Move ours to the RIGHT end of

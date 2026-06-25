@@ -58,3 +58,25 @@ export function gridGeometry(bx, by, bw, bh) {
 export function indicatorVisibleForState(state) {
     return state === 'muted';
 }
+
+// Build the per-user autostart entry (~/.config/autostart/easyspeak.desktop) for
+// the given enabled state. Written with the flag false, it overrides a packaged
+// /etc/xdg/autostart entry of the same name — the way gnome-tweaks disables one.
+export function autostartDesktopEntry(enabled) {
+    return [
+        '[Desktop Entry]',
+        'Type=Application',
+        'Name=EasySpeak',
+        'Exec=easyspeak',
+        `X-GNOME-Autostart-enabled=${enabled ? 'true' : 'false'}`,
+        '',
+    ].join('\n');
+}
+
+// Read the autostart-enabled flag from a .desktop file's text. A missing key
+// counts as enabled: the file's presence means autostart unless it's explicitly
+// turned off with X-GNOME-Autostart-enabled=false.
+export function autostartEnabledFromText(text) {
+    const match = text.match(/^X-GNOME-Autostart-enabled\s*=\s*(\S+)/m);
+    return match ? match[1].toLowerCase() !== 'false' : true;
+}
