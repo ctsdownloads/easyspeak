@@ -15,10 +15,10 @@ def parse_args(argv=None):
     )
     verbosity = parser.add_mutually_exclusive_group()
     verbosity.add_argument(
-        "-v", "--verbose", action="store_true", help="show debug output"
+        "-q", "--quiet", action="store_true", help="show only warnings and errors"
     )
     verbosity.add_argument(
-        "-q", "--quiet", action="store_true", help="show only warnings and errors"
+        "-v", "--verbose", action="store_true", help="show debug output"
     )
     parser.add_argument(
         "--configure",
