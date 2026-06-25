@@ -17,6 +17,17 @@ the daemon settles into **Listening for wake word…**.
 The `ALSA lib … unable to open slave` lines are harmless audio-device probing
 noise (surpressed in newer versions).
 
+## Tray menu
+
+![The EasySpeak tray menu open in the GNOME top bar, the panel icon showing a muted microphone; the menu lists "Reactivate EasySpeak" (hovered), "Settings…", "Help", "About EasySpeak", and "Quit EasySpeak"](media/tray-menu.png){ width="170" }
+
+Say, "stop listening", to make EasySpeak stop responding to your voice. The
+panel icon switches to a muted microphone to show it's asleep, and EasySpeak
+ignores everything until you wake it again from the tray. Click the icon and
+choose **Reactivate EasySpeak** to start listening once more. The same menu
+opens **Settings…**, **Help**, and the **About EasySpeak** dialog, or shuts the
+daemon down with **Quit EasySpeak**.
+
 ## Mouse grid
 
 ![A 3x3 numbered grid overlaying the GNOME Files window, with a red crosshair centred on cell 5](media/mouse-grid-files.png){ width="100%" }
