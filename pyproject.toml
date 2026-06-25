@@ -199,6 +199,7 @@ packages = [
 "easyspeak" = [
   "extension.js",
   "extension-helpers.js",
+  "prefs.js",
   "metadata.json",
 ]
 "easyspeak.data" = ["*"]

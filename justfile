@@ -31,7 +31,7 @@ lint *args=('--statistics'):
 # Lint the GNOME Shell extension JS (use --fix to autocorrect)
 [group('codestyle')]
 lint-js *args:
-    eslint src/extension.js src/extension-helpers.js {{ args }}
+    eslint src/extension.js src/extension-helpers.js src/prefs.js {{ args }}
 
 # Check YAML formatting: minimal indent, final newline (config in .yamllint.yaml)
 [group('codestyle')]
@@ -188,12 +188,14 @@ gate: (clean '--quiet') (package '--quiet')
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q easyspeak-extension-refresh.service.in
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q extension.js
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q extension-helpers.js
+    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q prefs.js
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q metadata.json
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q easyspeak.desktop
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q easyspeak-autostart.desktop
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q easyspeak-extension-refresh.service.in
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q extension.js
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q extension-helpers.js
+    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q prefs.js
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q metadata.json
     @echo "✔  Python packaging looks good."
 

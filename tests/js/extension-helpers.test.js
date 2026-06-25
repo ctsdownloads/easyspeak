@@ -8,6 +8,8 @@ import {
     scrollDirectionDelta,
     gridGeometry,
     indicatorVisibleForState,
+    autostartDesktopEntry,
+    autostartEnabledFromText,
 } from '../../src/extension-helpers.js';
 
 test('clampToWorkArea returns the rectangle unchanged without a work area', () => {
@@ -80,4 +82,27 @@ test('indicatorVisibleForState shows the tray icon only when muted', () => {
     for (const state of ['listening', 'active', 'thinking', '', undefined]) {
         assert.equal(indicatorVisibleForState(state), false);
     }
+});
+
+test('autostartDesktopEntry renders an enabled entry', () => {
+    const text = autostartDesktopEntry(true);
+    assert.match(text, /^\[Desktop Entry\]/);
+    assert.match(text, /^Exec=easyspeak$/m);
+    assert.match(text, /^X-GNOME-Autostart-enabled=true$/m);
+});
+
+test('autostartDesktopEntry renders a disabled entry', () => {
+    assert.match(autostartDesktopEntry(false), /^X-GNOME-Autostart-enabled=false$/m);
+});
+
+test('autostartEnabledFromText reads an explicit false as disabled', () => {
+    assert.equal(autostartEnabledFromText('X-GNOME-Autostart-enabled=false\n'), false);
+});
+
+test('autostartEnabledFromText reads true (or any non-false) as enabled', () => {
+    assert.equal(autostartEnabledFromText('X-GNOME-Autostart-enabled=true\n'), true);
+});
+
+test('autostartEnabledFromText treats a missing key as enabled', () => {
+    assert.equal(autostartEnabledFromText('[Desktop Entry]\nExec=easyspeak\n'), true);
 });
