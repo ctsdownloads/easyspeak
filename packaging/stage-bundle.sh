@@ -40,6 +40,14 @@ echo ">> installing app + runtime extras into the venv"
 # piper-tts: provides the `piper` binary inside the venv (no system piper packaged).
 uv pip install --python "$PREFIX/venv/bin/python" "$WHEEL" openwakeword piper-tts
 
+echo ">> rendering the GNOME-extension refresh unit for the bundled interpreter"
+# `--show service` prints the unit the bundled interpreter would install, so the
+# packaged file is byte-identical to the runtime-generated one — baked with the
+# bundle's stable interpreter and module paths (PREFIX is the final install path,
+# so they're valid on the target). nfpm ships this to /usr/lib/systemd/user.
+"$PREFIX/venv/bin/easyspeak" --show service \
+  > "$REPO_ROOT/dist/easyspeak-extension-refresh.service"
+
 # Where language packages drop their models; config.py discovers them here.
 mkdir -p "$PREFIX/models"
 

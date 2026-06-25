@@ -19,7 +19,7 @@ def test_entrypoint():
     assert shutil.which("easyspeak")
 
 
-@patch("easyspeak.core.cli.EasySpeak")
+@patch("easyspeak.core.main.EasySpeak")
 def test_run(mock_easyspeak):
     """cli.run parses args, configures logging, and runs the app."""
     cli.run([])
@@ -63,22 +63,80 @@ def _run_then_log(argv, capsys, level, message):
     return capsys.readouterr().err
 
 
-@patch("easyspeak.core.cli.EasySpeak")
+@patch("easyspeak.core.main.EasySpeak")
 def test_run_default_prints_info_without_prefix(mock_easyspeak, capsys):
     """No flag: INFO is shown as the bare message; DEBUG is suppressed."""
     assert _run_then_log([], capsys, logging.INFO, "hello") == "hello\n"
     assert _run_then_log([], capsys, logging.DEBUG, "noise") == ""
 
 
-@patch("easyspeak.core.cli.EasySpeak")
+@patch("easyspeak.core.main.EasySpeak")
 def test_run_verbose_enables_debug_with_level_prefix(mock_easyspeak, capsys):
     """-v: DEBUG is shown and every line is prefixed with its level name."""
     assert _run_then_log(["-v"], capsys, logging.INFO, "hello") == "INFO hello\n"
     assert _run_then_log(["-v"], capsys, logging.DEBUG, "x") == "DEBUG x\n"
 
 
-@patch("easyspeak.core.cli.EasySpeak")
+@patch("easyspeak.core.main.EasySpeak")
 def test_run_quiet_silences_info_but_keeps_warnings(mock_easyspeak, capsys):
     """-q: INFO is silent; warnings/errors still print (without a prefix)."""
     assert _run_then_log(["-q"], capsys, logging.INFO, "hidden") == ""
     assert _run_then_log(["-q"], capsys, logging.WARNING, "oops") == "oops\n"
+
+
+@patch("easyspeak.core.desktop_integration.configure")
+def test_run_configure_dispatches_items_and_skips_app(mock_configure):
+    """--configure runs setup with the parsed items and does not start the app."""
+    cli.run(["--configure", "autostart"])
+
+    mock_configure.assert_called_once_with({"autostart"})
+
+
+@patch("easyspeak.core.desktop_integration.configure")
+def test_run_configure_with_no_items_applies_default(mock_configure):
+    """--configure with no items is resolved to the default pair by parse_args."""
+    cli.run(["--configure"])
+
+    mock_configure.assert_called_once_with({"extension", "service"})
+
+
+@pytest.mark.parametrize(
+    ("argv", "expected"),
+    [
+        ([], None),  # no --configure: run the app
+        (["--configure"], {"extension", "service"}),  # empty → default pair
+        (["--configure", "autostart"], {"autostart"}),  # explicit items kept
+    ],
+)
+def test_parse_args_configure_default(argv, expected):
+    """parse_args fills the default pair only for a bare --configure."""
+    assert cli.parse_args(argv).configure == expected
+
+
+@patch("easyspeak.core.desktop_integration.show")
+def test_run_show_prints_items_and_skips_app(mock_show):
+    """--show prints the requested items and does not start the app."""
+    cli.run(["--show", "service"])
+
+    mock_show.assert_called_once_with({"service"})
+
+
+@patch("easyspeak.core.desktop_integration.show")
+def test_run_show_with_no_items_defaults_to_all(mock_show):
+    """--show with no items prints every item."""
+    cli.run(["--show"])
+
+    mock_show.assert_called_once_with({"extension", "service", "autostart", "desktop"})
+
+
+@pytest.mark.parametrize(
+    ("argv", "expected"),
+    [
+        ([], None),  # no --show
+        (["--show"], {"extension", "service", "autostart", "desktop"}),  # empty → all
+        (["--show", "desktop"], {"desktop"}),  # explicit item kept
+    ],
+)
+def test_parse_args_show_default(argv, expected):
+    """parse_args expands a bare --show to all items."""
+    assert cli.parse_args(argv).show == expected

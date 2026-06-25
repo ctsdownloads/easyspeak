@@ -221,8 +221,8 @@ def test_refresh_installed_extension_delegates():
 # --- unit rendering ----------------------------------------------------------
 
 
-def test_unit_text_contains_ordering_and_execstart():
-    text = gnome_extension._unit_text()
+def testunit_text_contains_ordering_and_execstart():
+    text = gnome_extension.unit_text()
     assert f"WantedBy={gnome_extension.PRE_SHELL_TARGET}" in text
     assert f"Before={gnome_extension.PRE_SHELL_TARGET}" in text
     assert "org.gnome.Shell@user.service" in text
@@ -358,7 +358,7 @@ def test_install_refresh_unit_heals_unit_left_on_vanished_interpreter(tmp_path):
         patch.object(gnome_extension.sys, "executable", gone),
         patch.object(gnome_extension.sys, "_base_executable", gone),
     ):
-        unit.write_text(gnome_extension._unit_text())
+        unit.write_text(gnome_extension.unit_text())
 
     ephemeral = "/home/u/.cache/easyspeak/uv/builds-v0/.tmpnew/bin/python"
     base = "/nix/store/abc-python3-3.12.13/bin/python3.12"
@@ -377,7 +377,7 @@ def test_install_refresh_unit_heals_unit_left_on_vanished_interpreter(tmp_path):
     ):
         first = gnome_extension.install_refresh_unit()
         healed = unit.read_text()
-        expected = gnome_extension._unit_text()
+        expected = gnome_extension.unit_text()
         # Second run sees its own output and changes nothing.
         second = gnome_extension.install_refresh_unit()
 
@@ -402,7 +402,7 @@ def test_install_refresh_unit_new_install(tmp_path):
 
     unit = tmp_path / ".config" / "systemd" / "user" / UNIT_NAME
     assert unit.is_file()
-    assert unit.read_text() == gnome_extension._unit_text()
+    assert unit.read_text() == gnome_extension.unit_text()
     assert status == f"installed systemd user unit {UNIT_NAME}"
     cmds = [call.args[0] for call in mock_run.call_args_list]
     assert ["systemctl", "--user", "daemon-reload"] in cmds
@@ -428,7 +428,7 @@ def test_install_refresh_unit_systemctl_unexecable_returns_none(tmp_path):
 def test_install_refresh_unit_noop_when_current_and_enabled(tmp_path):
     unit = tmp_path / ".config" / "systemd" / "user" / UNIT_NAME
     unit.parent.mkdir(parents=True)
-    unit.write_text(gnome_extension._unit_text())
+    unit.write_text(gnome_extension.unit_text())
 
     with (
         patch.object(
@@ -452,7 +452,7 @@ def test_install_refresh_unit_noop_when_current_and_enabled(tmp_path):
 def test_install_refresh_unit_current_but_disabled_enables(tmp_path):
     unit = tmp_path / ".config" / "systemd" / "user" / UNIT_NAME
     unit.parent.mkdir(parents=True)
-    unit.write_text(gnome_extension._unit_text())
+    unit.write_text(gnome_extension.unit_text())
 
     with (
         patch.object(
@@ -494,7 +494,7 @@ def test_install_refresh_unit_rewrites_when_changed(tmp_path):
     ):
         status = gnome_extension.install_refresh_unit()
 
-    assert unit.read_text() == gnome_extension._unit_text()
+    assert unit.read_text() == gnome_extension.unit_text()
     assert status == f"installed systemd user unit {UNIT_NAME}"
 
 
@@ -503,7 +503,7 @@ def test_install_refresh_unit_read_error_treated_as_changed(tmp_path):
     unit.parent.mkdir(parents=True)
     unit.write_text("whatever")
 
-    # Fail only on the existing unit's read, not on _unit_text reading its
+    # Fail only on the existing unit's read, not on unit_text reading its
     # template — autospec passes the instance so we can tell them apart.
     real_read_text = gnome_extension.Path.read_text
 
@@ -993,3 +993,52 @@ class TestEnsureExtension:
 
         captured = readlog()
         assert "log out and back in" in captured.err
+
+
+# --- packaged-unit coexistence + activate_extension -------------------------
+
+
+def test_install_refresh_unit_stands_down_for_packaged_unit(tmp_path):
+    """A packaged system unit present: drop the stale user unit and stand down."""
+    unit = tmp_path / ".config" / "systemd" / "user" / UNIT_NAME
+    unit.parent.mkdir(parents=True)
+    unit.write_text("stale user unit")
+
+    with (
+        patch.object(
+            gnome_extension.shutil, "which", return_value="/usr/bin/systemctl"
+        ),
+        patch.object(gnome_extension.Path, "home", return_value=tmp_path),
+        patch.object(gnome_extension, "_system_unit_exists", return_value=True),
+        patch.object(
+            gnome_extension.subprocess, "run", return_value=Mock(returncode=0)
+        ) as mock_run,
+    ):
+        status = gnome_extension.install_refresh_unit()
+
+    assert status is None
+    assert not unit.exists()  # the shadowing user unit was removed
+    cmds = [c.args[0] for c in mock_run.call_args_list]
+    assert ["systemctl", "--user", "disable", UNIT_NAME] in cmds
+
+
+def test_install_refresh_unit_packaged_unit_no_stale_user_copy(tmp_path):
+    """Packaged unit present, no user copy: stand down without touching systemctl."""
+    with (
+        patch.object(
+            gnome_extension.shutil, "which", return_value="/usr/bin/systemctl"
+        ),
+        patch.object(gnome_extension.Path, "home", return_value=tmp_path),
+        patch.object(gnome_extension, "_system_unit_exists", return_value=True),
+        patch.object(gnome_extension.subprocess, "run") as mock_run,
+    ):
+        status = gnome_extension.install_refresh_unit()
+
+    assert status is None
+    mock_run.assert_not_called()
+
+
+def test_activate_extension_skips_without_gnome_cli():
+    """activate_extension is a no-op when the gnome-extensions CLI is absent."""
+    with patch.object(gnome_extension.shutil, "which", return_value=None):
+        assert gnome_extension.activate_extension() is None

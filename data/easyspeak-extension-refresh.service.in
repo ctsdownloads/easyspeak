@@ -1,8 +1,5 @@
 [Unit]
 Description=Refresh the EasySpeak GNOME Shell extension before GNOME Shell loads it
-# Runs before the shell reads the extensions dir so a changed extension.js takes
-# effect on this login, not the next (on Wayland the shell only loads extensions
-# at login). Missing shell units are ignored.
 Before={target}
 Before=org.gnome.Shell@user.service
 Before=org.gnome.Shell@wayland.service
@@ -10,7 +7,6 @@ Before=org.gnome.Shell@x11.service
 
 [Service]
 Type=oneshot
-# Quoted: systemd splits ExecStart on whitespace.
 ExecStart="{python}" "{script}"
 
 [Install]
