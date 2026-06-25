@@ -25,7 +25,7 @@ jobs:
     - uses: actions/checkout@v6
     - uses: astral-sh/setup-uv@v7
       with:
-        python-version: '3.12'
+        python-version: '3.14'
         ignore-nothing-to-cache: true
     - uses: taiki-e/install-action@just
     - run: |
@@ -80,7 +80,7 @@ jobs:
     - uses: actions/checkout@v6
     - uses: astral-sh/setup-uv@v7
       with:
-        python-version: '3.12'
+        python-version: '3.14'
         ignore-nothing-to-cache: true
     - uses: taiki-e/install-action@just
     - run: |
@@ -94,7 +94,7 @@ jobs:
     - uses: actions/checkout@v6
     - uses: astral-sh/setup-uv@v7
       with:
-        python-version: '3.12'
+        python-version: '3.14'
         ignore-nothing-to-cache: true
     - uses: taiki-e/install-action@just
     - run: just check-python-packages

@@ -49,7 +49,7 @@ def run(argv=None):
     """Start the application, or run a one-shot subcommand and exit.
 
     `EasySpeak` is imported lazily so the one-shot subcommands work without the
-    audio stack (openwakeword, pyaudio, …) that `core.main` pulls in.
+    audio stack (pyopen-wakeword, pyaudio, …) that `core.main` pulls in.
     """
     args = parse_args(argv)
 
