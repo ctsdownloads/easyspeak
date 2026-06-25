@@ -10,8 +10,7 @@
 set -euo pipefail
 
 PREFIX="${PREFIX:-/opt/easyspeak}"
-# 3.12 is required: openwakeword pulls speexdsp-ns, which has no wheels for >=3.13.
-PY_VERSION="${PY_VERSION:-3.12}"
+PY_VERSION="${PY_VERSION:-3.14}"
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 command -v uv >/dev/null || { echo "error: uv is required (https://astral.sh/uv)" >&2; exit 1; }
@@ -34,11 +33,8 @@ echo ">> creating venv from the bundled interpreter"
 "$PREFIX/python/bin/python3" -m venv "$PREFIX/venv"
 
 echo ">> installing app + runtime extras into the venv"
-# openwakeword: imported at runtime but intentionally left out of pyproject deps.
-#   (its English wake-word models ship inside the wheel, so the wake word is part
-#    of the app — only recognition/feedback models are split into lang packages.)
 # piper-tts: provides the `piper` binary inside the venv (no system piper packaged).
-uv pip install --python "$PREFIX/venv/bin/python" "$WHEEL" openwakeword piper-tts
+uv pip install --python "$PREFIX/venv/bin/python" "$WHEEL" piper-tts
 
 echo ">> rendering the GNOME-extension refresh unit for the bundled interpreter"
 # `--show service` prints the unit the bundled interpreter would install, so the

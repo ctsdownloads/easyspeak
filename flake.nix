@@ -17,7 +17,7 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        python = pkgs.python312;
+        python = pkgs.python314;
 
         # The dictation plugin shells out to an AT-SPI helper that needs
         # PyGObject + the AT-SPI typelib — which uv can't put in the app's
@@ -188,10 +188,10 @@
           ++ buildTools;
           shellHook = ''
             # mkShell's setup-hooks pile every Python app's (qutebrowser,
-            # piper-tts, onnxruntime, ...) Python 3.13 site-packages onto
-            # PYTHONPATH. uv inherits that into PEP 517 build subprocesses,
-            # which then mix 3.13 setuptools into a 3.12 build and produce
-            # wheels tagged with the wrong ABI. Strip both to keep uv pure.
+            # piper-tts, onnxruntime, ...) site-packages onto PYTHONPATH. uv
+            # inherits that into PEP 517 build subprocesses, which then mix a
+            # different Python's setuptools into our build and produce wheels
+            # tagged with the wrong ABI. Strip both to keep uv pure.
             unset PYTHONPATH PYTHONHOME
 
             export LD_LIBRARY_PATH='${pkgs.lib.makeLibraryPath runtimeLibs}'":''${LD_LIBRARY_PATH:-}"
