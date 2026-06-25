@@ -19,6 +19,7 @@ import logging
 import shutil
 import subprocess
 import sys
+from importlib import resources
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -28,6 +29,7 @@ EXTENSION_UUID = "easyspeak@local"
 # mouse grid). A leftover copy is cleaned up at startup; see migrate_legacy_extension.
 LEGACY_EXTENSION_UUID = "easyspeak-grid@local"
 REFRESH_UNIT_NAME = "easyspeak-extension-refresh.service"
+REFRESH_UNIT_TEMPLATE = REFRESH_UNIT_NAME + ".in"  # packaged template file
 PRE_SHELL_TARGET = "gnome-session-pre.target"  # reached before org.gnome.Shell@*
 
 # Cap each helper subprocess so a wedged session/user bus can't hang startup.
@@ -131,7 +133,7 @@ def _unit_path():
 
 
 def _is_ephemeral_interpreter(executable):
-    """True when ``executable`` lives in a uv ephemeral build env.
+    """True when `executable` lives in a uv ephemeral build env.
 
     uv builds an ephemeral interpreter under its build cache (…/uv/builds-*/…)
     for each `uv run` / `nix run`, then garbage-collects it, so a unit pointing
@@ -163,28 +165,18 @@ def _stable_interpreter():
 
 
 def _unit_text():
-    """Render the systemd user unit, baking in the interpreter and module path."""
-    python = _stable_interpreter()
-    script = Path(__file__).resolve()
-    return f"""\
-[Unit]
-Description=Refresh the EasySpeak GNOME Shell extension before GNOME Shell loads it
-# Runs before the shell reads the extensions dir so a changed extension.js takes
-# effect on this login, not the next (on Wayland the shell only loads extensions
-# at login). Missing shell units are ignored.
-Before={PRE_SHELL_TARGET}
-Before=org.gnome.Shell@user.service
-Before=org.gnome.Shell@wayland.service
-Before=org.gnome.Shell@x11.service
+    """Render the systemd user unit, baking in the interpreter and module path.
 
-[Service]
-Type=oneshot
-# Quoted: systemd splits ExecStart on whitespace.
-ExecStart="{python}" "{script}"
-
-[Install]
-WantedBy={PRE_SHELL_TARGET}
-"""
+    The unit body lives in a template shipped as package data (`easyspeak.data`)
+    so it reads as a service file, not a Python string. A missing template is a
+    broken install, so let the read error surface rather than masking it.
+    """
+    template = (resources.files("easyspeak.data") / REFRESH_UNIT_TEMPLATE).read_text()
+    return template.format(
+        target=PRE_SHELL_TARGET,
+        python=_stable_interpreter(),
+        script=Path(__file__).resolve(),
+    )
 
 
 def _run_systemctl(*args):
