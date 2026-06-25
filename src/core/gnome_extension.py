@@ -130,9 +130,41 @@ def _unit_path():
     return Path.home() / ".config" / "systemd" / "user" / REFRESH_UNIT_NAME
 
 
+def _is_ephemeral_interpreter(executable):
+    """True when ``executable`` lives in a uv ephemeral build env.
+
+    uv builds an ephemeral interpreter under its build cache (…/uv/builds-*/…)
+    for each `uv run` / `nix run`, then garbage-collects it, so a unit pointing
+    at it fails `203/EXEC` at every login; see `_stable_interpreter`. Packaged
+    installs (Debian/RPM system python, a real venv) never live here, so this
+    marker only ever matches the dev/`nix run` path.
+    """
+    return "/uv/builds-" in str(executable)
+
+
+def _stable_interpreter():
+    """Return a persistent interpreter path to bake into the login unit.
+
+    `sys.executable` is fine for packaged installs but can point into a uv
+    ephemeral build env under `uv run` / `nix run`. When it does, fall back to
+    the base interpreter that env was built from (`sys._base_executable`, else
+    the symlink target) — it persists, and the refresh entry point imports only
+    the stdlib so a bare base interpreter runs it. Resolving deterministically
+    keeps the rendered unit byte-stable, so re-running converges instead of
+    flapping (and a unit left pointing at a vanished interpreter self-heals on
+    the next start).
+    """
+    if not _is_ephemeral_interpreter(sys.executable):
+        return sys.executable
+    base = getattr(sys, "_base_executable", None)
+    if base and not _is_ephemeral_interpreter(base):
+        return base
+    return str(Path(sys.executable).resolve())
+
+
 def _unit_text():
     """Render the systemd user unit, baking in the interpreter and module path."""
-    python = sys.executable
+    python = _stable_interpreter()
     script = Path(__file__).resolve()
     return f"""\
 [Unit]
