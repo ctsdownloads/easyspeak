@@ -8,7 +8,7 @@ import pytest
 # Stub the heavy native/model deps once for the whole core suite. conftest is
 # imported before any test module, so importing easyspeak.core.* below needs no
 # model or GPU. Assign directly (not setdefault) to override a real install too.
-for _name in ("pyaudio", "openwakeword", "openwakeword.model", "faster_whisper"):
+for _name in ("pyaudio", "pyopen_wakeword", "faster_whisper"):
     sys.modules[_name] = MagicMock()
 
 
