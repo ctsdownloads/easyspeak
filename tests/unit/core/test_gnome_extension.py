@@ -1,7 +1,6 @@
 """Tests for the easyspeak.core.gnome_extension module."""
 
 import subprocess
-import sys
 from unittest.mock import Mock, patch
 
 import pytest
@@ -230,7 +229,7 @@ def test_unit_text_contains_ordering_and_execstart():
     assert "Type=oneshot" in text
     # Both ExecStart arguments are quoted so a space in the interpreter or
     # module path can't make systemd mis-split the command.
-    assert f'ExecStart="{sys.executable}" "' in text
+    assert f'ExecStart="{gnome_extension._stable_interpreter()}" "' in text
     assert "gnome_extension.py" in text
 
 
@@ -281,12 +280,106 @@ def test_is_enabled_false_when_systemctl_times_out():
         assert gnome_extension._is_enabled() is False
 
 
+# --- interpreter resolution --------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "executable, expected",
+    [
+        ("/usr/bin/python3", False),
+        ("/opt/easyspeak/venv/bin/python", False),
+        ("/home/u/.local/state/easyspeak/venv/bin/python", False),
+        # uv build-env interpreters (EASYSPEAK-scoped cache and uv's default).
+        ("/home/u/.cache/easyspeak/uv/builds-v0/.tmp7q/bin/python", True),
+        ("/home/u/.cache/uv/builds-v0/.tmpAB/bin/python3.12", True),
+    ],
+)
+def test_is_ephemeral_interpreter(executable, expected):
+    assert gnome_extension._is_ephemeral_interpreter(executable) is expected
+
+
+def test_stable_interpreter_keeps_stable_executable():
+    """A packaged install's interpreter is baked as-is."""
+    with patch.object(gnome_extension.sys, "executable", "/usr/bin/python3"):
+        assert gnome_extension._stable_interpreter() == "/usr/bin/python3"
+
+
+def test_stable_interpreter_falls_back_to_base_when_ephemeral():
+    """Under `nix run`, the ephemeral build-env interpreter is replaced by the
+    persistent base interpreter it was built from."""
+    ephemeral = "/home/u/.cache/uv/builds-v0/.tmpZZ/bin/python"
+    base = "/nix/store/abc-python3-3.12.13/bin/python3.12"
+    with (
+        patch.object(gnome_extension.sys, "executable", ephemeral),
+        patch.object(gnome_extension.sys, "_base_executable", base),
+    ):
+        assert gnome_extension._stable_interpreter() == base
+
+
+def test_stable_interpreter_resolves_symlink_when_base_unusable(tmp_path):
+    """With no usable `_base_executable`, the ephemeral interpreter is resolved
+    through its symlink to the persistent target."""
+    real = tmp_path / "store" / "python3.12"
+    real.parent.mkdir(parents=True)
+    real.write_text("")
+    ephemeral_dir = tmp_path / ".cache" / "uv" / "builds-v0" / ".tmpZZ" / "bin"
+    ephemeral_dir.mkdir(parents=True)
+    ephemeral = ephemeral_dir / "python"
+    ephemeral.symlink_to(real)
+
+    with (
+        patch.object(gnome_extension.sys, "executable", str(ephemeral)),
+        patch.object(gnome_extension.sys, "_base_executable", None),
+    ):
+        assert gnome_extension._stable_interpreter() == str(real)
+
+
 # --- install_refresh_unit ----------------------------------------------------
 
 
 def test_install_refresh_unit_no_systemd():
     with patch.object(gnome_extension.shutil, "which", return_value=None):
         assert gnome_extension.install_refresh_unit() is None
+
+
+def test_install_refresh_unit_heals_unit_left_on_vanished_interpreter(tmp_path):
+    """A unit poisoned by an earlier `nix run` (ExecStart on a since-deleted uv
+    build-env interpreter) converges to a stable one on the next start, and a
+    second call is then a no-op — i.e. the install is idempotent."""
+    unit = tmp_path / ".config" / "systemd" / "user" / UNIT_NAME
+    unit.parent.mkdir(parents=True)
+    stale = (
+        '[Service]\nExecStart="/home/u/.cache/easyspeak/uv/builds-v0/'
+        '.tmpgone/bin/python" "/x/gnome_extension.py"\n'
+    )
+    unit.write_text(stale)
+
+    ephemeral = "/home/u/.cache/easyspeak/uv/builds-v0/.tmpnew/bin/python"
+    base = "/nix/store/abc-python3-3.12.13/bin/python3.12"
+    with (
+        patch.object(
+            gnome_extension.shutil, "which", return_value="/usr/bin/systemctl"
+        ),
+        patch.object(gnome_extension.Path, "home", return_value=tmp_path),
+        patch.object(gnome_extension.sys, "executable", ephemeral),
+        patch.object(gnome_extension.sys, "_base_executable", base),
+        patch.object(
+            gnome_extension.subprocess,
+            "run",
+            return_value=Mock(returncode=0, stdout="enabled\n"),
+        ),
+    ):
+        first = gnome_extension.install_refresh_unit()
+        healed = unit.read_text()
+        expected = gnome_extension._unit_text()
+        # Second run sees its own output and changes nothing.
+        second = gnome_extension.install_refresh_unit()
+
+    assert first == f"installed systemd user unit {UNIT_NAME}"
+    assert "/uv/builds-" not in healed
+    assert f'ExecStart="{base}"' in healed
+    assert healed == expected
+    assert second is None  # already current and enabled → no rewrite
 
 
 def test_install_refresh_unit_new_install(tmp_path):
