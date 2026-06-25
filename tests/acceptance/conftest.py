@@ -12,9 +12,8 @@ rather than audio leaving a speaker.
 import sys
 from unittest.mock import MagicMock
 
-# easyspeak.core imports pyaudio/openwakeword/faster_whisper at load time; stub
+# easyspeak.core imports pyaudio/pyopen_wakeword/faster_whisper at load time; stub
 # them so importing EasySpeak doesn't require the ML/audio stack.
 sys.modules["pyaudio"] = MagicMock()
-sys.modules["openwakeword"] = MagicMock()
-sys.modules["openwakeword.model"] = MagicMock()
+sys.modules["pyopen_wakeword"] = MagicMock()
 sys.modules["faster_whisper"] = MagicMock()

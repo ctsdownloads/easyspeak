@@ -1,7 +1,7 @@
 """EasySpeak Core - Voice Control for Linux.
 
 Loads plugins from plugins/ folder automatically.
-Uses OpenWakeWord for fast wake detection.
+Uses pyopen-wakeword for fast wake detection.
 """
 
 import contextlib
@@ -17,7 +17,6 @@ from pathlib import Path
 
 import numpy as np
 import pyaudio
-from openwakeword.model import Model as WakeWordModel
 
 from .config import (
     COMMAND_PROMPT,
@@ -29,7 +28,6 @@ from .config import (
     SILENCE_THRESHOLD,
     WAKE_COOLDOWN,
     WAKE_THRESHOLD,
-    WAKE_WORD,
     WHISPER_COMPUTE_TYPE,
     WHISPER_CPU_THREADS,
     WHISPER_MODEL,
@@ -39,6 +37,7 @@ from .gnome_extension import ensure_extension
 from .hotkey import HotkeyListener
 from .speech import SpeechPipeline, suppressed_c_stderr
 from .tray import Tray, TrayAction
+from .wakeword import WakeWordModel
 
 logger = logging.getLogger(__name__)
 
@@ -567,14 +566,12 @@ class EasySpeak:
                     continue
 
                 pcm = self.stream.read(1280, exception_on_overflow=False)
-                audio_data = np.frombuffer(pcm, dtype=np.int16)
 
                 audio_buffer.append(pcm)
                 if len(audio_buffer) > 50:
                     audio_buffer.pop(0)
 
-                prediction = self.wakeword.predict(audio_data)
-                score = prediction.get(WAKE_WORD, 0)
+                score = self.wakeword.predict(pcm)
 
                 if score > WAKE_THRESHOLD:
                     now = time.time()

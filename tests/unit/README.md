@@ -13,7 +13,7 @@ not whether external binaries actually accept those calls (that's
 ## How they run
 
 Always-on, no models or hardware required: `core/conftest.py` stubs
-`pyaudio`, `openwakeword` and `faster_whisper` before any module imports, so
+`pyaudio`, `pyopen_wakeword` and `faster_whisper` before any module imports, so
 the suite loads on a bare machine — including headless CI.
 
 ```sh

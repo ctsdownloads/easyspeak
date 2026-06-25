@@ -24,6 +24,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Desktop Environment :: Gnome",
   "Topic :: Home Automation",
   "Topic :: Scientific/Engineering :: Human Machine Interfaces",
@@ -40,7 +41,7 @@ keywords = [
   "wayland",
 ]
 readme = "README.md"
-requires-python = ">=3.10, <3.14"
+requires-python = ">=3.10, <3.15"
 dependencies = [
   # Prebuilt wheel (provides `import evdev`) for raw /dev/input hold-to-dictate;
   # avoids the source build's kernel-header requirement. Linux-only by nature.
@@ -48,10 +49,10 @@ dependencies = [
   "faster-whisper>=1.2.1",
   "jeepney>=0.9",
   "numpy>=2.2.6",
-  # "openwakeword",  # requires Python <3.13 for speexdsp-ns (missing wheels)
   "onnxruntime>=1.23.2",
   "onnxruntime<1.24 ; python_full_version < '3.11'",
   "pyaudio>=0.2.14",
+  "pyopen-wakeword>=1.1",
 ]
 # Not listed above: the "About" window (core.about) needs PyGObject + the GTK4
 # and libadwaita typelibs. On Linux those are system packages (PyGObject's own
@@ -209,8 +210,3 @@ packages = [
 
 [tool.setuptools_scm]
 local_scheme = "no-local-version"
-
-# # TensorFlow Runtime from PyPI (tflite-runtime==2.14.0) only supports
-# # Python <3.12 (see dependencies above)
-# [tool.uv.sources]
-# openwakeword = { git = "https://github.com/dscripka/openWakeWord" }
