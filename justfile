@@ -86,7 +86,7 @@ pytest *args:
 # Display test coverage report
 [group('tests')]
 coverage:
-    uvx coverage[toml] xml
+    -uvx coverage[toml] xml
     uvx coverage[toml] report
 
 # Run integration tests (exercise external commands for real)
@@ -184,11 +184,13 @@ gate: (clean '--quiet') (package '--quiet')
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q plugins
     # Python package should bundle launcher and Shell extension assets.
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q easyspeak.desktop
+    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q easyspeak-autostart.desktop
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q easyspeak-extension-refresh.service.in
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q extension.js
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q extension-helpers.js
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q metadata.json
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q easyspeak.desktop
+    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q easyspeak-autostart.desktop
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q easyspeak-extension-refresh.service.in
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q extension.js
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q extension-helpers.js

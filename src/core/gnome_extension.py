@@ -164,12 +164,18 @@ def _stable_interpreter():
     return str(Path(sys.executable).resolve())
 
 
-def _unit_text():
+def unit_text():
     """Render the systemd user unit, baking in the interpreter and module path.
 
     The unit body lives in a template shipped as package data (`easyspeak.data`)
     so it reads as a service file, not a Python string. A missing template is a
     broken install, so let the read error surface rather than masking it.
+
+    Two non-obvious choices in the rendered unit: it's ordered before
+    `gnome-session-pre.target` and the `org.gnome.Shell@*` services (missing ones
+    are ignored) so a changed extension takes effect on this login, not the next
+    — on Wayland the shell only loads extensions at login. And both ExecStart
+    arguments are quoted, since systemd splits ExecStart on whitespace.
     """
     template = (resources.files("easyspeak.data") / REFRESH_UNIT_TEMPLATE).read_text()
     return template.format(
@@ -206,17 +212,45 @@ def _is_enabled():
     )
 
 
+def _system_unit_exists():
+    """True when a packaged install provides the refresh unit system-wide.
+
+    A packaged (Debian/RPM) install drops the unit in one of systemd's system
+    directories and owns its lifecycle (enabling it via a
+    gnome-session-pre.target.wants symlink), so the per-user generator stands
+    down when one is present.
+    """
+    system_dirs = (
+        "/usr/lib/systemd/user",
+        "/usr/local/lib/systemd/user",
+        "/etc/systemd/user",
+    )
+    return any((Path(d) / REFRESH_UNIT_NAME).is_file() for d in system_dirs)
+
+
 def install_refresh_unit():
     """Install and enable the pre-shell refresh unit, idempotently.
 
     Returns a short status string, or None when nothing changed or it isn't applicable
-    (no systemd, write/enable failure).
+    (no systemd, a packaged system unit already present, write/enable failure).
     """
     if shutil.which("systemctl") is None:
         return None
 
     unit_path = _unit_path()
-    desired = _unit_text()
+
+    if _system_unit_exists():
+        # The package owns the unit; don't shadow it with a user copy. Clear out a
+        # stale one a prior pip/dev install left — `~/.config/systemd/user` takes
+        # precedence over the packaged path and would point at a vanished
+        # interpreter, so it must go for the packaged unit to take effect.
+        if unit_path.is_file():
+            _run_systemctl("disable", REFRESH_UNIT_NAME)
+            with contextlib.suppress(OSError):
+                unit_path.unlink()
+        return None
+
+    desired = unit_text()
     try:
         current = unit_path.read_text() if unit_path.is_file() else None
     except OSError:
@@ -276,6 +310,20 @@ def migrate_legacy_extension():
 
 
 def ensure_extension():
+    """Startup hook: install the refresh service and activate the extension.
+
+    Composes the two independently-runnable activities `core.desktop_integration`
+    also exposes. Skipped on non-GNOME desktops.
+    """
+    if shutil.which("gnome-extensions") is None:
+        return
+    unit_status = install_refresh_unit()
+    if unit_status:
+        logger.info("%s", unit_status)
+    activate_extension()
+
+
+def activate_extension():
     """Install, refresh, and enable the bundled extension, reporting what it did.
 
     Installs it if missing, keeps the installed copy current, and enables it. Skipped on
@@ -285,10 +333,6 @@ def ensure_extension():
         return
 
     migrate_legacy_extension()
-
-    unit_status = install_refresh_unit()
-    if unit_status:
-        logger.info("%s", unit_status)
 
     try:
         listed = subprocess.run(
