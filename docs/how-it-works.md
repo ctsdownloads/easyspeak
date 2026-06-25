@@ -1,6 +1,6 @@
 # How it works
 
-- **Wake word** — OpenWakeWord detects "Hey Jarvis" instantly
+- **Wake word** — pyopen-wakeword detects "Hey Jarvis" instantly
 - **Speech-to-text** — faster-whisper transcribes commands locally
 - **Text-to-speech** — Piper provides voice feedback
 - **Mouse control** — GNOME Shell extension with Clutter virtual input

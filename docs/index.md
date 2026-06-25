@@ -37,7 +37,7 @@ Current and in active development:
 - **App launcher** — Open and close applications by name
 - **Media control** — Play, pause, skip via MPRIS
 - **System controls** — Volume, brightness, do not disturb
-- **Fully local** — OpenWakeWord + Whisper + Piper, no cloud services
+- **Fully local** — pyopen-wakeword + Whisper + Piper, no cloud services
 - **Plugin architecture** — Easy to extend
 
 ## Demo
@@ -57,7 +57,7 @@ Current and in active development:
 
 ## Acknowledgments
 
-- [OpenWakeWord](https://github.com/dscripka/openWakeWord) — Wake word detection
+- [pyopen-wakeword](https://github.com/rhasspy/pyopen-wakeword) — Wake word detection
 - [faster-whisper](https://github.com/guillaumekln/faster-whisper) — Speech recognition
 - [Piper](https://github.com/OHF-Voice/piper1-gpl) — Text-to-speech (we use the last standalone binary from the original [rhasspy/piper](https://github.com/rhasspy/piper) repo)
 - [Talon](https://talonvoice.com/) — Inspiration for voice control concepts
