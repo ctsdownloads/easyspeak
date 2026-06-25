@@ -30,7 +30,7 @@ jobs:
     - uses: actions/checkout@v6
     - uses: astral-sh/setup-uv@v7
       with:
-        python-version: '3.12'
+        python-version: '3.14'
         ignore-nothing-to-cache: true
     - uses: taiki-e/install-action@just
     - name: Install PortAudio headers
@@ -51,7 +51,7 @@ jobs:
       run: git lfs pull --exclude="docs/media/demo.mp4"
     - uses: astral-sh/setup-uv@v7
       with:
-        python-version: '3.12'
+        python-version: '3.14'
     - uses: taiki-e/install-action@just
     - name: Install PortAudio headers
       run: |

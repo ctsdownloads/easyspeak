@@ -12,7 +12,7 @@ all: codestyle safety test check-docs check-desktop-integration compile-schemas 
 # Remove build artifacts and reports (use -v for verbose, -n for dry-run)
 [group('lifecycle')]
 clean *args:
-    uvx pyclean . {{ args }} --debris all --erase .benchmarks result results.json 'site/**/*' site --yes
+    uvx pyclean . {{ args }} --debris all --erase .benchmarks 'build/**/*' build result results.json 'site/**/*' site --yes
 
 # Run all code style checks (format, lint, js, yaml)
 [group('codestyle')]

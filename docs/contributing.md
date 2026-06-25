@@ -32,7 +32,7 @@ just all
 ```
 
 ```console
-UV_PYTHON=3.12 just pytest -q -x
+UV_PYTHON=3.14 just pytest -q -x
 ```
 
 ```console
