@@ -345,14 +345,20 @@ def test_install_refresh_unit_no_systemd():
 def test_install_refresh_unit_heals_unit_left_on_vanished_interpreter(tmp_path):
     """A unit poisoned by an earlier `nix run` (ExecStart on a since-deleted uv
     build-env interpreter) converges to a stable one on the next start, and a
-    second call is then a no-op — i.e. the install is idempotent."""
+    second call is then a no-op — i.e. the install is idempotent.
+
+    The poisoned unit is the real template rendered with an interpreter that has
+    since been garbage-collected, which also checks the packaged template reads.
+    """
     unit = tmp_path / ".config" / "systemd" / "user" / UNIT_NAME
     unit.parent.mkdir(parents=True)
-    stale = (
-        '[Service]\nExecStart="/home/u/.cache/easyspeak/uv/builds-v0/'
-        '.tmpgone/bin/python" "/x/gnome_extension.py"\n'
-    )
-    unit.write_text(stale)
+
+    gone = "/home/u/.cache/easyspeak/uv/builds-v0/.tmpgone/bin/python"
+    with (
+        patch.object(gnome_extension.sys, "executable", gone),
+        patch.object(gnome_extension.sys, "_base_executable", gone),
+    ):
+        unit.write_text(gnome_extension._unit_text())
 
     ephemeral = "/home/u/.cache/easyspeak/uv/builds-v0/.tmpnew/bin/python"
     base = "/nix/store/abc-python3-3.12.13/bin/python3.12"
@@ -497,12 +503,23 @@ def test_install_refresh_unit_read_error_treated_as_changed(tmp_path):
     unit.parent.mkdir(parents=True)
     unit.write_text("whatever")
 
+    # Fail only on the existing unit's read, not on _unit_text reading its
+    # template — autospec passes the instance so we can tell them apart.
+    real_read_text = gnome_extension.Path.read_text
+
+    def read_text(self, *args, **kwargs):
+        if self == unit:
+            raise OSError("boom")
+        return real_read_text(self, *args, **kwargs)
+
     with (
         patch.object(
             gnome_extension.shutil, "which", return_value="/usr/bin/systemctl"
         ),
         patch.object(gnome_extension.Path, "home", return_value=tmp_path),
-        patch.object(gnome_extension.Path, "read_text", side_effect=OSError("boom")),
+        patch.object(
+            gnome_extension.Path, "read_text", autospec=True, side_effect=read_text
+        ),
         patch.object(
             gnome_extension.subprocess, "run", return_value=Mock(returncode=0)
         ),
