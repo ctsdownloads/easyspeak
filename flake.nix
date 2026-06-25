@@ -17,8 +17,6 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        # openwakeword pulls speexdsp-ns which has no wheels for >=3.13,
-        # so the project is currently pinned to 3.12.
         python = pkgs.python312;
 
         # The dictation plugin shells out to an AT-SPI helper that needs
@@ -156,10 +154,7 @@
             export GI_TYPELIB_PATH='${giTypelibPath}'":''${GI_TYPELIB_PATH:-}"
 
             cd "$src_dir"
-            # --with openwakeword: pyproject.toml leaves it commented out
-            # (see the note there about speexdsp-ns wheels), but main.py
-            # imports it, so it must be present at runtime.
-            exec uv run --with openwakeword easyspeak "$@"
+            exec uv run easyspeak "$@"
           '';
         };
       in
@@ -212,7 +207,7 @@
             # git tree lets setuptools_scm derive the proper version.
             export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX="''${SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX:-${pretendVersion}}"
             echo "EasySpeak dev shell — Python $(python --version 2>&1 | awk '{print $2}'), uv $(uv --version | awk '{print $2}')"
-            echo "Run:  uv run [--extra head-tracking] --with openwakeword easyspeak"
+            echo "Run:  uv run [--extra head-tracking] easyspeak"
             echo "      just --list"
           '';
         };

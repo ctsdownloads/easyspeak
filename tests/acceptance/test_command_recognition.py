@@ -127,7 +127,7 @@ def run_one_unrecognised_command(ctx):
     pyaudio = stack.enter_context(patch("easyspeak.core.main.pyaudio"))
     pyaudio.PyAudio.return_value.open.return_value = stream
     wake = stack.enter_context(patch("easyspeak.core.main.WakeWordModel"))
-    wake.return_value.predict.return_value = {"hey_jarvis": 0.9}  # above threshold
+    wake.return_value.predict.return_value = 0.9  # above threshold
 
     easy.run()
 

@@ -981,7 +981,7 @@ class TestEasySpeakRun:
 
         # Mock wake word model to detect wake word on first call
         mock_wakeword_instance = Mock()
-        mock_wakeword_instance.predict.return_value = {"hey_jarvis": 0.8}
+        mock_wakeword_instance.predict.return_value = 0.8
         mock_wakeword_model.return_value = mock_wakeword_instance
 
         # Speech once (handled), then silence ends the follow-up window.
@@ -1053,7 +1053,7 @@ class TestEasySpeakRun:
         mock_pyaudio.PyAudio.return_value = mock_audio
 
         mock_wakeword_instance = Mock()
-        mock_wakeword_instance.predict.return_value = {"hey_jarvis": 0.8}
+        mock_wakeword_instance.predict.return_value = 0.8
         mock_wakeword_model.return_value = mock_wakeword_instance
 
         mock_wait.return_value = b"audio_data"
@@ -1121,7 +1121,7 @@ class TestEasySpeakRun:
         mock_pyaudio.PyAudio.return_value = mock_audio
 
         mock_wakeword_instance = Mock()
-        mock_wakeword_instance.predict.return_value = {"hey_jarvis": 0.8}
+        mock_wakeword_instance.predict.return_value = 0.8
         mock_wakeword_model.return_value = mock_wakeword_instance
 
         mock_wait.return_value = b"audio_data"
@@ -1182,7 +1182,7 @@ class TestEasySpeakRun:
         mock_pyaudio.PyAudio.return_value = mock_audio
 
         mock_wakeword_instance = Mock()
-        mock_wakeword_instance.predict.return_value = {"hey_jarvis": 0.8}
+        mock_wakeword_instance.predict.return_value = 0.8
         mock_wakeword_model.return_value = mock_wakeword_instance
 
         # "louder" (handled) then two empty rounds (chime / quiet) end it.
@@ -1243,7 +1243,7 @@ class TestEasySpeakRun:
 
         # Mock wake word model to detect wake word
         mock_wakeword_instance = Mock()
-        mock_wakeword_instance.predict.return_value = {"hey_jarvis": 0.8}
+        mock_wakeword_instance.predict.return_value = 0.8
         mock_wakeword_model.return_value = mock_wakeword_instance
 
         # Mock no speech detected
@@ -1320,7 +1320,7 @@ class TestEasySpeakRun:
 
         # Mock wake word model to detect wake word on both calls
         mock_wakeword_instance = Mock()
-        mock_wakeword_instance.predict.return_value = {"hey_jarvis": 0.8}
+        mock_wakeword_instance.predict.return_value = 0.8
         mock_wakeword_model.return_value = mock_wakeword_instance
 
         # Speech once (handled), then silence ends the follow-up window.
@@ -1383,7 +1383,7 @@ class TestEasySpeakRun:
 
         # Mock wake word model to detect wake word
         mock_wakeword_instance = Mock()
-        mock_wakeword_instance.predict.return_value = {"hey_jarvis": 0.8}
+        mock_wakeword_instance.predict.return_value = 0.8
         mock_wakeword_model.return_value = mock_wakeword_instance
 
         # Mock speech detection and transcription
@@ -1441,9 +1441,7 @@ class TestEasySpeakRun:
 
         # Mock wake word model to never detect (score below threshold)
         mock_wakeword_instance = Mock()
-        mock_wakeword_instance.predict.return_value = {
-            "hey_jarvis": 0.3
-        }  # Below threshold
+        mock_wakeword_instance.predict.return_value = 0.3
         mock_wakeword_model.return_value = mock_wakeword_instance
 
         easy.run()
