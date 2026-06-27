@@ -4280,13 +4280,13 @@ pairs with that panel icon, which only appears while the assistant is asleep
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/files.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-27">27</a></span>
-<span class="normal"><a href="#__codelineno-0-28">28</a></span>
-<span class="normal"><a href="#__codelineno-0-29">29</a></span>
-<span class="normal"><a href="#__codelineno-0-30">30</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Store the core reference for use by the plugin&#39;s handlers.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-29" name="__codelineno-0-29"></a>    <span class="k">global</span> <span class="n">core</span>
-<a id="__codelineno-0-30" name="__codelineno-0-30"></a>    <span class="n">core</span> <span class="o">=</span> <span class="n">c</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-31">31</a></span>
+<span class="normal"><a href="#__codelineno-0-32">32</a></span>
+<span class="normal"><a href="#__codelineno-0-33">33</a></span>
+<span class="normal"><a href="#__codelineno-0-34">34</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Store the core reference for use by the plugin&#39;s handlers.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33"></a>    <span class="k">global</span> <span class="n">core</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34"></a>    <span class="n">core</span> <span class="o">=</span> <span class="n">c</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4306,16 +4306,16 @@ pairs with that panel icon, which only appears while the assistant is asleep
 
     <div class="doc doc-contents ">
 
-        <p>Open a folder in the first available file manager; False if none found.</p>
+        <p>Open a folder in the user's default file manager; False if unavailable.</p>
+<p>Delegates to xdg-open so whichever file manager the desktop is configured
+for is honoured, rather than hardcoding one. Launched with a clean
+environment (see core.host_run) so it doesn't inherit EasySpeak's library
+paths.</p>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/files.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-33">33</a></span>
-<span class="normal"><a href="#__codelineno-0-34">34</a></span>
-<span class="normal"><a href="#__codelineno-0-35">35</a></span>
-<span class="normal"><a href="#__codelineno-0-36">36</a></span>
-<span class="normal"><a href="#__codelineno-0-37">37</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-37">37</a></span>
 <span class="normal"><a href="#__codelineno-0-38">38</a></span>
 <span class="normal"><a href="#__codelineno-0-39">39</a></span>
 <span class="normal"><a href="#__codelineno-0-40">40</a></span>
@@ -4327,25 +4327,19 @@ pairs with that panel icon, which only appears while the assistant is asleep
 <span class="normal"><a href="#__codelineno-0-46">46</a></span>
 <span class="normal"><a href="#__codelineno-0-47">47</a></span>
 <span class="normal"><a href="#__codelineno-0-48">48</a></span>
-<span class="normal"><a href="#__codelineno-0-49">49</a></span>
-<span class="normal"><a href="#__codelineno-0-50">50</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="k">def</span><span class="w"> </span><span class="nf">open_folder</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
-<a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Open a folder in the first available file manager; False if none found.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-35" name="__codelineno-0-35"></a>    <span class="n">expanded</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-<a id="__codelineno-0-36" name="__codelineno-0-36"></a>
-<a id="__codelineno-0-37" name="__codelineno-0-37"></a>    <span class="n">file_managers</span> <span class="o">=</span> <span class="p">[</span>
-<a id="__codelineno-0-38" name="__codelineno-0-38"></a>        <span class="p">(</span><span class="s2">&quot;nautilus&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">expanded</span><span class="p">]),</span>
-<a id="__codelineno-0-39" name="__codelineno-0-39"></a>        <span class="p">(</span><span class="s2">&quot;dolphin&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">expanded</span><span class="p">]),</span>
-<a id="__codelineno-0-40" name="__codelineno-0-40"></a>        <span class="p">(</span><span class="s2">&quot;thunar&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">expanded</span><span class="p">]),</span>
-<a id="__codelineno-0-41" name="__codelineno-0-41"></a>        <span class="p">(</span><span class="s2">&quot;nemo&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">expanded</span><span class="p">]),</span>
-<a id="__codelineno-0-42" name="__codelineno-0-42"></a>        <span class="p">(</span><span class="s2">&quot;xdg-open&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">expanded</span><span class="p">]),</span>
-<a id="__codelineno-0-43" name="__codelineno-0-43"></a>    <span class="p">]</span>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a>
-<a id="__codelineno-0-45" name="__codelineno-0-45"></a>    <span class="k">for</span> <span class="n">fm</span><span class="p">,</span> <span class="n">args</span> <span class="ow">in</span> <span class="n">file_managers</span><span class="p">:</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">&quot;which&quot;</span><span class="p">,</span> <span class="n">fm</span><span class="p">])</span>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a>        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a>            <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="n">fm</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">],</span> <span class="n">background</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a>            <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-50" name="__codelineno-0-50"></a>    <span class="k">return</span> <span class="kc">False</span>
+<span class="normal"><a href="#__codelineno-0-49">49</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="k">def</span><span class="w"> </span><span class="nf">open_folder</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Open a folder in the user&#39;s default file manager; False if unavailable.</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39"></a>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">    Delegates to xdg-open so whichever file manager the desktop is configured</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="sd">    for is honoured, rather than hardcoding one. Launched with a clean</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="sd">    environment (see core.host_run) so it doesn&#39;t inherit EasySpeak&#39;s library</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="sd">    paths.</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a>    <span class="n">expanded</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a>    <span class="k">if</span> <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">&quot;which&quot;</span><span class="p">,</span> <span class="s2">&quot;xdg-open&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a>        <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a>    <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">&quot;xdg-open&quot;</span><span class="p">,</span> <span class="n">expanded</span><span class="p">],</span> <span class="n">background</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">clean_env</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a>    <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4365,12 +4359,13 @@ pairs with that panel icon, which only appears while the assistant is asleep
 
     <div class="doc doc-contents ">
 
-        <p>Open a known folder when the command names one; return None otherwise.</p>
+        <p>Open a named folder, or the file manager itself; None if neither matched.</p>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/files.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-53">53</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-52">52</a></span>
+<span class="normal"><a href="#__codelineno-0-53">53</a></span>
 <span class="normal"><a href="#__codelineno-0-54">54</a></span>
 <span class="normal"><a href="#__codelineno-0-55">55</a></span>
 <span class="normal"><a href="#__codelineno-0-56">56</a></span>
@@ -4382,19 +4377,22 @@ pairs with that panel icon, which only appears while the assistant is asleep
 <span class="normal"><a href="#__codelineno-0-62">62</a></span>
 <span class="normal"><a href="#__codelineno-0-63">63</a></span>
 <span class="normal"><a href="#__codelineno-0-64">64</a></span>
-<span class="normal"><a href="#__codelineno-0-65">65</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
-<a id="__codelineno-0-54" name="__codelineno-0-54"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Open a known folder when the command names one; return None otherwise.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-55" name="__codelineno-0-55"></a>    <span class="k">for</span> <span class="n">folder</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">FOLDERS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<a id="__codelineno-0-56" name="__codelineno-0-56"></a>        <span class="k">if</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">cmd</span> <span class="ow">and</span> <span class="p">(</span>
-<a id="__codelineno-0-57" name="__codelineno-0-57"></a>            <span class="s2">&quot;open&quot;</span> <span class="ow">in</span> <span class="n">cmd</span> <span class="ow">or</span> <span class="s2">&quot;go to&quot;</span> <span class="ow">in</span> <span class="n">cmd</span> <span class="ow">or</span> <span class="s2">&quot;show&quot;</span> <span class="ow">in</span> <span class="n">cmd</span> <span class="ow">or</span> <span class="s2">&quot;browse&quot;</span> <span class="ow">in</span> <span class="n">cmd</span>
-<a id="__codelineno-0-58" name="__codelineno-0-58"></a>        <span class="p">):</span>
-<a id="__codelineno-0-59" name="__codelineno-0-59"></a>            <span class="k">if</span> <span class="n">open_folder</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
-<a id="__codelineno-0-60" name="__codelineno-0-60"></a>                <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Opening </span><span class="si">{</span><span class="n">folder</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-61" name="__codelineno-0-61"></a>            <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-62" name="__codelineno-0-62"></a>                <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s2">&quot;No file manager found.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-63" name="__codelineno-0-63"></a>            <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-64" name="__codelineno-0-64"></a>
-<a id="__codelineno-0-65" name="__codelineno-0-65"></a>    <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Not handled</span>
+<span class="normal"><a href="#__codelineno-0-65">65</a></span>
+<span class="normal"><a href="#__codelineno-0-66">66</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-52" name="__codelineno-0-52"></a><span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Open a named folder, or the file manager itself; None if neither matched.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">verb</span> <span class="ow">in</span> <span class="n">cmd</span> <span class="k">for</span> <span class="n">verb</span> <span class="ow">in</span> <span class="n">OPEN_VERBS</span><span class="p">):</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55"></a>        <span class="k">return</span> <span class="kc">None</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56"></a>
+<a id="__codelineno-0-57" name="__codelineno-0-57"></a>    <span class="k">for</span> <span class="n">folder</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">FOLDERS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58"></a>        <span class="k">if</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">cmd</span><span class="p">:</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a>            <span class="n">_open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a>            <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61"></a>
+<a id="__codelineno-0-62" name="__codelineno-0-62"></a>    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">phrase</span> <span class="ow">in</span> <span class="n">cmd</span> <span class="k">for</span> <span class="n">phrase</span> <span class="ow">in</span> <span class="n">FILE_MANAGER_PHRASES</span><span class="p">):</span>
+<a id="__codelineno-0-63" name="__codelineno-0-63"></a>        <span class="n">_open</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">,</span> <span class="s2">&quot;files&quot;</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-64" name="__codelineno-0-64"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-65" name="__codelineno-0-65"></a>
+<a id="__codelineno-0-66" name="__codelineno-0-66"></a>    <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Not handled</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4462,15 +4460,15 @@ pairs with that panel icon, which only appears while the assistant is asleep
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/apps.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-75">75</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-74">74</a></span>
+<span class="normal"><a href="#__codelineno-0-75">75</a></span>
 <span class="normal"><a href="#__codelineno-0-76">76</a></span>
 <span class="normal"><a href="#__codelineno-0-77">77</a></span>
-<span class="normal"><a href="#__codelineno-0-78">78</a></span>
-<span class="normal"><a href="#__codelineno-0-79">79</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
-<a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Store the core reference and resolve the user&#39;s default terminal.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-77" name="__codelineno-0-77"></a>    <span class="k">global</span> <span class="n">core</span>
-<a id="__codelineno-0-78" name="__codelineno-0-78"></a>    <span class="n">core</span> <span class="o">=</span> <span class="n">c</span>
-<a id="__codelineno-0-79" name="__codelineno-0-79"></a>    <span class="n">_register_terminal</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-78">78</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+<a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Store the core reference and resolve the user&#39;s default terminal.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-76" name="__codelineno-0-76"></a>    <span class="k">global</span> <span class="n">core</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77"></a>    <span class="n">core</span> <span class="o">=</span> <span class="n">c</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78"></a>    <span class="n">_register_terminal</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4495,7 +4493,8 @@ pairs with that panel icon, which only appears while the assistant is asleep
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/apps.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-146">146</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-145">145</a></span>
+<span class="normal"><a href="#__codelineno-0-146">146</a></span>
 <span class="normal"><a href="#__codelineno-0-147">147</a></span>
 <span class="normal"><a href="#__codelineno-0-148">148</a></span>
 <span class="normal"><a href="#__codelineno-0-149">149</a></span>
@@ -4508,22 +4507,21 @@ pairs with that panel icon, which only appears while the assistant is asleep
 <span class="normal"><a href="#__codelineno-0-156">156</a></span>
 <span class="normal"><a href="#__codelineno-0-157">157</a></span>
 <span class="normal"><a href="#__codelineno-0-158">158</a></span>
-<span class="normal"><a href="#__codelineno-0-159">159</a></span>
-<span class="normal"><a href="#__codelineno-0-160">160</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-146" name="__codelineno-0-146"></a><span class="k">def</span><span class="w"> </span><span class="nf">find_app</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
-<a id="__codelineno-0-147" name="__codelineno-0-147"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Find app - returns (type, id).&quot;&quot;&quot;</span>
-<a id="__codelineno-0-148" name="__codelineno-0-148"></a>    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">FLATPAK_APPS</span><span class="p">:</span>
-<a id="__codelineno-0-149" name="__codelineno-0-149"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">&quot;flatpak&quot;</span><span class="p">,</span> <span class="s2">&quot;info&quot;</span><span class="p">,</span> <span class="n">FLATPAK_APPS</span><span class="p">[</span><span class="n">name</span><span class="p">]])</span>
-<a id="__codelineno-0-150" name="__codelineno-0-150"></a>        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-<a id="__codelineno-0-151" name="__codelineno-0-151"></a>            <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;flatpak&quot;</span><span class="p">,</span> <span class="n">FLATPAK_APPS</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
-<a id="__codelineno-0-152" name="__codelineno-0-152"></a>
-<a id="__codelineno-0-153" name="__codelineno-0-153"></a>    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">LOCAL_APPS</span><span class="p">:</span>
-<a id="__codelineno-0-154" name="__codelineno-0-154"></a>        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">,</span> <span class="n">LOCAL_APPS</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
-<a id="__codelineno-0-155" name="__codelineno-0-155"></a>
-<a id="__codelineno-0-156" name="__codelineno-0-156"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">&quot;which&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">])</span>
-<a id="__codelineno-0-157" name="__codelineno-0-157"></a>    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-<a id="__codelineno-0-158" name="__codelineno-0-158"></a>        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-159" name="__codelineno-0-159"></a>
-<a id="__codelineno-0-160" name="__codelineno-0-160"></a>    <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-159">159</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-145" name="__codelineno-0-145"></a><span class="k">def</span><span class="w"> </span><span class="nf">find_app</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
+<a id="__codelineno-0-146" name="__codelineno-0-146"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Find app - returns (type, id).&quot;&quot;&quot;</span>
+<a id="__codelineno-0-147" name="__codelineno-0-147"></a>    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">FLATPAK_APPS</span><span class="p">:</span>
+<a id="__codelineno-0-148" name="__codelineno-0-148"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">&quot;flatpak&quot;</span><span class="p">,</span> <span class="s2">&quot;info&quot;</span><span class="p">,</span> <span class="n">FLATPAK_APPS</span><span class="p">[</span><span class="n">name</span><span class="p">]])</span>
+<a id="__codelineno-0-149" name="__codelineno-0-149"></a>        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-150" name="__codelineno-0-150"></a>            <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;flatpak&quot;</span><span class="p">,</span> <span class="n">FLATPAK_APPS</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+<a id="__codelineno-0-151" name="__codelineno-0-151"></a>
+<a id="__codelineno-0-152" name="__codelineno-0-152"></a>    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">LOCAL_APPS</span><span class="p">:</span>
+<a id="__codelineno-0-153" name="__codelineno-0-153"></a>        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">,</span> <span class="n">LOCAL_APPS</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+<a id="__codelineno-0-154" name="__codelineno-0-154"></a>
+<a id="__codelineno-0-155" name="__codelineno-0-155"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">&quot;which&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">])</span>
+<a id="__codelineno-0-156" name="__codelineno-0-156"></a>    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-157" name="__codelineno-0-157"></a>        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-158" name="__codelineno-0-158"></a>
+<a id="__codelineno-0-159" name="__codelineno-0-159"></a>    <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4548,7 +4546,8 @@ pairs with that panel icon, which only appears while the assistant is asleep
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/apps.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-163">163</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-162">162</a></span>
+<span class="normal"><a href="#__codelineno-0-163">163</a></span>
 <span class="normal"><a href="#__codelineno-0-164">164</a></span>
 <span class="normal"><a href="#__codelineno-0-165">165</a></span>
 <span class="normal"><a href="#__codelineno-0-166">166</a></span>
@@ -4556,17 +4555,16 @@ pairs with that panel icon, which only appears while the assistant is asleep
 <span class="normal"><a href="#__codelineno-0-168">168</a></span>
 <span class="normal"><a href="#__codelineno-0-169">169</a></span>
 <span class="normal"><a href="#__codelineno-0-170">170</a></span>
-<span class="normal"><a href="#__codelineno-0-171">171</a></span>
-<span class="normal"><a href="#__codelineno-0-172">172</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-163" name="__codelineno-0-163"></a><span class="k">def</span><span class="w"> </span><span class="nf">launch_app</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
-<a id="__codelineno-0-164" name="__codelineno-0-164"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Launch the named app (flatpak or local binary); False if not found.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-165" name="__codelineno-0-165"></a>    <span class="n">app_type</span><span class="p">,</span> <span class="n">app_id</span> <span class="o">=</span> <span class="n">find_app</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-166" name="__codelineno-0-166"></a>    <span class="k">if</span> <span class="n">app_type</span> <span class="o">==</span> <span class="s2">&quot;flatpak&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-167" name="__codelineno-0-167"></a>        <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">&quot;flatpak&quot;</span><span class="p">,</span> <span class="s2">&quot;run&quot;</span><span class="p">,</span> <span class="n">app_id</span><span class="p">],</span> <span class="n">background</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-0-168" name="__codelineno-0-168"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-169" name="__codelineno-0-169"></a>    <span class="k">if</span> <span class="n">app_type</span> <span class="o">==</span> <span class="s2">&quot;local&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-170" name="__codelineno-0-170"></a>        <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="n">app_id</span><span class="p">],</span> <span class="n">background</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-0-171" name="__codelineno-0-171"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-172" name="__codelineno-0-172"></a>    <span class="k">return</span> <span class="kc">False</span>
+<span class="normal"><a href="#__codelineno-0-171">171</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-162" name="__codelineno-0-162"></a><span class="k">def</span><span class="w"> </span><span class="nf">launch_app</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
+<a id="__codelineno-0-163" name="__codelineno-0-163"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Launch the named app (flatpak or local binary); False if not found.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-164" name="__codelineno-0-164"></a>    <span class="n">app_type</span><span class="p">,</span> <span class="n">app_id</span> <span class="o">=</span> <span class="n">find_app</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-165" name="__codelineno-0-165"></a>    <span class="k">if</span> <span class="n">app_type</span> <span class="o">==</span> <span class="s2">&quot;flatpak&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-166" name="__codelineno-0-166"></a>        <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">&quot;flatpak&quot;</span><span class="p">,</span> <span class="s2">&quot;run&quot;</span><span class="p">,</span> <span class="n">app_id</span><span class="p">],</span> <span class="n">background</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">clean_env</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-167" name="__codelineno-0-167"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-168" name="__codelineno-0-168"></a>    <span class="k">if</span> <span class="n">app_type</span> <span class="o">==</span> <span class="s2">&quot;local&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-169" name="__codelineno-0-169"></a>        <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="n">app_id</span><span class="p">],</span> <span class="n">background</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">clean_env</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-170" name="__codelineno-0-170"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-171" name="__codelineno-0-171"></a>    <span class="k">return</span> <span class="kc">False</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4591,7 +4589,8 @@ pairs with that panel icon, which only appears while the assistant is asleep
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/apps.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-175">175</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-174">174</a></span>
+<span class="normal"><a href="#__codelineno-0-175">175</a></span>
 <span class="normal"><a href="#__codelineno-0-176">176</a></span>
 <span class="normal"><a href="#__codelineno-0-177">177</a></span>
 <span class="normal"><a href="#__codelineno-0-178">178</a></span>
@@ -4599,17 +4598,16 @@ pairs with that panel icon, which only appears while the assistant is asleep
 <span class="normal"><a href="#__codelineno-0-180">180</a></span>
 <span class="normal"><a href="#__codelineno-0-181">181</a></span>
 <span class="normal"><a href="#__codelineno-0-182">182</a></span>
-<span class="normal"><a href="#__codelineno-0-183">183</a></span>
-<span class="normal"><a href="#__codelineno-0-184">184</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-175" name="__codelineno-0-175"></a><span class="k">def</span><span class="w"> </span><span class="nf">close_app</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
-<a id="__codelineno-0-176" name="__codelineno-0-176"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Close the named app (flatpak kill or pkill); False if not found.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-177" name="__codelineno-0-177"></a>    <span class="n">app_type</span><span class="p">,</span> <span class="n">app_id</span> <span class="o">=</span> <span class="n">find_app</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-178" name="__codelineno-0-178"></a>    <span class="k">if</span> <span class="n">app_type</span> <span class="o">==</span> <span class="s2">&quot;flatpak&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-179" name="__codelineno-0-179"></a>        <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">&quot;flatpak&quot;</span><span class="p">,</span> <span class="s2">&quot;kill&quot;</span><span class="p">,</span> <span class="n">app_id</span><span class="p">])</span>
-<a id="__codelineno-0-180" name="__codelineno-0-180"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-181" name="__codelineno-0-181"></a>    <span class="k">if</span> <span class="n">app_type</span> <span class="o">==</span> <span class="s2">&quot;local&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-182" name="__codelineno-0-182"></a>        <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">&quot;pkill&quot;</span><span class="p">,</span> <span class="s2">&quot;-f&quot;</span><span class="p">,</span> <span class="n">app_id</span><span class="p">])</span>
-<a id="__codelineno-0-183" name="__codelineno-0-183"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-184" name="__codelineno-0-184"></a>    <span class="k">return</span> <span class="kc">False</span>
+<span class="normal"><a href="#__codelineno-0-183">183</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-174" name="__codelineno-0-174"></a><span class="k">def</span><span class="w"> </span><span class="nf">close_app</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
+<a id="__codelineno-0-175" name="__codelineno-0-175"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Close the named app (flatpak kill or pkill); False if not found.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-176" name="__codelineno-0-176"></a>    <span class="n">app_type</span><span class="p">,</span> <span class="n">app_id</span> <span class="o">=</span> <span class="n">find_app</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-177" name="__codelineno-0-177"></a>    <span class="k">if</span> <span class="n">app_type</span> <span class="o">==</span> <span class="s2">&quot;flatpak&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-178" name="__codelineno-0-178"></a>        <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">&quot;flatpak&quot;</span><span class="p">,</span> <span class="s2">&quot;kill&quot;</span><span class="p">,</span> <span class="n">app_id</span><span class="p">])</span>
+<a id="__codelineno-0-179" name="__codelineno-0-179"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-180" name="__codelineno-0-180"></a>    <span class="k">if</span> <span class="n">app_type</span> <span class="o">==</span> <span class="s2">&quot;local&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-181" name="__codelineno-0-181"></a>        <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">&quot;pkill&quot;</span><span class="p">,</span> <span class="s2">&quot;-f&quot;</span><span class="p">,</span> <span class="n">app_id</span><span class="p">])</span>
+<a id="__codelineno-0-182" name="__codelineno-0-182"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-183" name="__codelineno-0-183"></a>    <span class="k">return</span> <span class="kc">False</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4634,7 +4632,8 @@ pairs with that panel icon, which only appears while the assistant is asleep
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/apps.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-187">187</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-186">186</a></span>
+<span class="normal"><a href="#__codelineno-0-187">187</a></span>
 <span class="normal"><a href="#__codelineno-0-188">188</a></span>
 <span class="normal"><a href="#__codelineno-0-189">189</a></span>
 <span class="normal"><a href="#__codelineno-0-190">190</a></span>
@@ -4650,25 +4649,24 @@ pairs with that panel icon, which only appears while the assistant is asleep
 <span class="normal"><a href="#__codelineno-0-200">200</a></span>
 <span class="normal"><a href="#__codelineno-0-201">201</a></span>
 <span class="normal"><a href="#__codelineno-0-202">202</a></span>
-<span class="normal"><a href="#__codelineno-0-203">203</a></span>
-<span class="normal"><a href="#__codelineno-0-204">204</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-187" name="__codelineno-0-187"></a><span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
-<a id="__codelineno-0-188" name="__codelineno-0-188"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Open or close an app named in the command; return None if none matched.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-189" name="__codelineno-0-189"></a>    <span class="n">all_apps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">FLATPAK_APPS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">LOCAL_APPS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-<a id="__codelineno-0-190" name="__codelineno-0-190"></a>
-<a id="__codelineno-0-191" name="__codelineno-0-191"></a>    <span class="k">for</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">all_apps</span><span class="p">:</span>
-<a id="__codelineno-0-192" name="__codelineno-0-192"></a>        <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;open&quot;</span> <span class="ow">in</span> <span class="n">cmd</span> <span class="ow">or</span> <span class="s2">&quot;launch&quot;</span> <span class="ow">in</span> <span class="n">cmd</span><span class="p">)</span> <span class="ow">and</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">cmd</span><span class="p">:</span>
-<a id="__codelineno-0-193" name="__codelineno-0-193"></a>            <span class="k">if</span> <span class="n">launch_app</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
-<a id="__codelineno-0-194" name="__codelineno-0-194"></a>                <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Opening </span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-195" name="__codelineno-0-195"></a>            <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-196" name="__codelineno-0-196"></a>                <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2"> not installed.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-197" name="__codelineno-0-197"></a>            <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-198" name="__codelineno-0-198"></a>
-<a id="__codelineno-0-199" name="__codelineno-0-199"></a>        <span class="k">if</span> <span class="s2">&quot;close&quot;</span> <span class="ow">in</span> <span class="n">cmd</span> <span class="ow">and</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">cmd</span><span class="p">:</span>
-<a id="__codelineno-0-200" name="__codelineno-0-200"></a>            <span class="n">close_app</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-201" name="__codelineno-0-201"></a>            <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Closing </span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-202" name="__codelineno-0-202"></a>            <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-203" name="__codelineno-0-203"></a>
-<a id="__codelineno-0-204" name="__codelineno-0-204"></a>    <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Not handled</span>
+<span class="normal"><a href="#__codelineno-0-203">203</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-186" name="__codelineno-0-186"></a><span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
+<a id="__codelineno-0-187" name="__codelineno-0-187"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Open or close an app named in the command; return None if none matched.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-188" name="__codelineno-0-188"></a>    <span class="n">all_apps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">FLATPAK_APPS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">LOCAL_APPS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<a id="__codelineno-0-189" name="__codelineno-0-189"></a>
+<a id="__codelineno-0-190" name="__codelineno-0-190"></a>    <span class="k">for</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">all_apps</span><span class="p">:</span>
+<a id="__codelineno-0-191" name="__codelineno-0-191"></a>        <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;open&quot;</span> <span class="ow">in</span> <span class="n">cmd</span> <span class="ow">or</span> <span class="s2">&quot;launch&quot;</span> <span class="ow">in</span> <span class="n">cmd</span><span class="p">)</span> <span class="ow">and</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">cmd</span><span class="p">:</span>
+<a id="__codelineno-0-192" name="__codelineno-0-192"></a>            <span class="k">if</span> <span class="n">launch_app</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
+<a id="__codelineno-0-193" name="__codelineno-0-193"></a>                <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Opening </span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-194" name="__codelineno-0-194"></a>            <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-195" name="__codelineno-0-195"></a>                <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2"> not installed.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-196" name="__codelineno-0-196"></a>            <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-197" name="__codelineno-0-197"></a>
+<a id="__codelineno-0-198" name="__codelineno-0-198"></a>        <span class="k">if</span> <span class="s2">&quot;close&quot;</span> <span class="ow">in</span> <span class="n">cmd</span> <span class="ow">and</span> <span class="n">app</span> <span class="ow">in</span> <span class="n">cmd</span><span class="p">:</span>
+<a id="__codelineno-0-199" name="__codelineno-0-199"></a>            <span class="n">close_app</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-200" name="__codelineno-0-200"></a>            <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Closing </span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-201" name="__codelineno-0-201"></a>            <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-202" name="__codelineno-0-202"></a>
+<a id="__codelineno-0-203" name="__codelineno-0-203"></a>    <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Not handled</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
