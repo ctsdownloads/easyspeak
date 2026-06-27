@@ -164,10 +164,10 @@ def launch_app(name, core):
     """Launch the named app (flatpak or local binary); False if not found."""
     app_type, app_id = find_app(name, core)
     if app_type == "flatpak":
-        core.host_run(["flatpak", "run", app_id], background=True)
+        core.host_run(["flatpak", "run", app_id], background=True, clean_env=True)
         return True
     if app_type == "local":
-        core.host_run([app_id], background=True)
+        core.host_run([app_id], background=True, clean_env=True)
         return True
     return False
 

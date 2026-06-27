@@ -53,6 +53,7 @@ def test_open_folder_tries_file_managers(
             found_call = True
             assert cmd_args == [file_manager, *expected_args]
             assert call.kwargs["background"] is True
+            assert call.kwargs["clean_env"] is True
             break
     assert found_call
 
