@@ -24,38 +24,20 @@ def test_open_folder_expands_path(mock_expanduser, mock_core):
     assert mock_expanduser.call_args.args == ("~/Documents",)
 
 
-@pytest.mark.parametrize(
-    ["file_manager", "expected_args"],
-    [
-        ("nautilus", ["/home/user/Documents"]),
-        ("dolphin", ["/home/user/Documents"]),
-        ("thunar", ["/home/user/Documents"]),
-        ("nemo", ["/home/user/Documents"]),
-        ("xdg-open", ["/home/user/Documents"]),
-    ],
-)
 @patch(
     "easyspeak.plugins.files.os.path.expanduser", return_value="/home/user/Documents"
 )
-def test_open_folder_tries_file_managers(
-    mock_expanduser, file_manager, expected_args, mock_core_which_finds_file_manager
-):
-    """When a file manager is available then open_folder uses it to open the folder."""
-    core = mock_core_which_finds_file_manager(file_manager)
+def test_open_folder_uses_xdg_open(mock_expanduser, mock_core_which_finds_file_manager):
+    """When xdg-open is available then open_folder launches it with a clean env."""
+    core = mock_core_which_finds_file_manager("xdg-open")
 
     result = files.open_folder("~/Documents", core)
 
     assert result is True
-    found_call = False
-    for call in core.host_run.call_args_list:
-        cmd_args = call.args[0]
-        if cmd_args[0] == file_manager:
-            found_call = True
-            assert cmd_args == [file_manager, *expected_args]
-            assert call.kwargs["background"] is True
-            assert call.kwargs["clean_env"] is True
-            break
-    assert found_call
+    launch = core.host_run.call_args_list[-1]
+    assert launch.args[0] == ["xdg-open", "/home/user/Documents"]
+    assert launch.kwargs["background"] is True
+    assert launch.kwargs["clean_env"] is True
 
 
 @patch(
@@ -95,6 +77,24 @@ def test_handle_open_command_with_folders(
     assert mock_open_folder.call_args.args == (files.FOLDERS[folder_name], mock_core)
     assert mock_core.speak.call_count == 1
     assert mock_core.speak.call_args.args == (expected_message,)
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "open files",
+        "open file manager",
+        "show file browser",
+    ],
+)
+@patch("easyspeak.plugins.files.open_folder", return_value=True)
+def test_handle_opens_default_file_manager(mock_open_folder, command, mock_core):
+    """When asked for the file manager then handle opens it at home and speaks."""
+    result = files.handle(command, mock_core)
+
+    assert result is True
+    assert mock_open_folder.call_args.args == ("~", mock_core)
+    assert mock_core.speak.call_args.args == ("Opening files.",)
 
 
 @pytest.mark.parametrize(

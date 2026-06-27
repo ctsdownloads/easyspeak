@@ -6,9 +6,13 @@ NAME = "files"
 DESCRIPTION = "Folder navigation"
 
 COMMANDS = [
-    "open [folder] - open folder in file manager",
+    "open [folder] - open a folder in your default file manager",
+    "open files / file manager - open your default file manager",
     "Folders: documents, downloads, pictures, music, videos, projects, home, desktop",
 ]
+
+OPEN_VERBS = ("open", "go to", "show", "browse")
+FILE_MANAGER_PHRASES = ("file manager", "file browser", "files")
 
 FOLDERS = {
     "documents": "~/Documents",
@@ -31,35 +35,40 @@ def setup(c):
 
 
 def open_folder(path, core):
-    """Open a folder in the first available file manager; False if none found."""
+    """Open a folder in the user's default file manager; False if unavailable.
+
+    Delegates to xdg-open so whichever file manager the desktop is configured
+    for is honoured, rather than hardcoding one. Launched with a clean
+    environment (see core.host_run) so it doesn't inherit EasySpeak's library
+    paths.
+    """
     expanded = os.path.expanduser(path)
-
-    file_managers = [
-        ("nautilus", [expanded]),
-        ("dolphin", [expanded]),
-        ("thunar", [expanded]),
-        ("nemo", [expanded]),
-        ("xdg-open", [expanded]),
-    ]
-
-    for fm, args in file_managers:
-        result = core.host_run(["which", fm])
-        if result.returncode == 0:
-            core.host_run([fm, *args], background=True, clean_env=True)
-            return True
-    return False
+    if core.host_run(["which", "xdg-open"]).returncode != 0:
+        return False
+    core.host_run(["xdg-open", expanded], background=True, clean_env=True)
+    return True
 
 
 def handle(cmd, core):
-    """Open a known folder when the command names one; return None otherwise."""
+    """Open a named folder, or the file manager itself; None if neither matched."""
+    if not any(verb in cmd for verb in OPEN_VERBS):
+        return None
+
     for folder, path in FOLDERS.items():
-        if folder in cmd and (
-            "open" in cmd or "go to" in cmd or "show" in cmd or "browse" in cmd
-        ):
-            if open_folder(path, core):
-                core.speak(f"Opening {folder}.")
-            else:
-                core.speak("No file manager found.")
+        if folder in cmd:
+            _open(path, folder, core)
             return True
 
+    if any(phrase in cmd for phrase in FILE_MANAGER_PHRASES):
+        _open("~", "files", core)
+        return True
+
     return None  # Not handled
+
+
+def _open(path, label, core):
+    """Open path in the file manager and announce it, or report none is found."""
+    if open_folder(path, core):
+        core.speak(f"Opening {label}.")
+    else:
+        core.speak("No file manager found.")
