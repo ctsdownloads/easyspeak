@@ -19,9 +19,9 @@ def test_handle_sleep_commands(mock_core, command):
 
     assert result is True
     mock_core.deactivate.assert_called_once()
-    # Announce only the attempt; the tray controller confirms or explains once
-    # it knows whether sleep actually engaged, so don't promise the tray here.
-    mock_core.speak.assert_called_once_with("Going to sleep.")
+    # Speaking the deactivation here also ends the command session promptly; the
+    # tray stays silent on this voice path so the phrase isn't repeated.
+    mock_core.speak.assert_called_once_with("Voice control turned off.")
 
 
 @pytest.mark.parametrize(

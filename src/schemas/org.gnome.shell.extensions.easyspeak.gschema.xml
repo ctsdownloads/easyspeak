@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.easyspeak"
+          path="/org/gnome/shell/extensions/easyspeak/">
+    <key name="show-in-quick-settings" type="b">
+      <default>false</default>
+      <summary>Show EasySpeak in the Quick Settings menu</summary>
+      <description>
+        When on, EasySpeak appears as a Quick Settings toggle instead of the
+        panel tray icon. The toggle is on while EasySpeak is listening and off
+        while it is asleep, and expands to a Help and an EasySpeak Settings
+        entry. When off, the struck-through microphone tray icon shows instead
+        while EasySpeak is asleep.
+      </description>
+    </key>
+  </schema>
+</schemalist>

@@ -17,7 +17,9 @@ easyspeak/
 ├── src
 │   ├── extension.js           # GNOME Shell extension (bundled as package data)
 │   ├── extension-helpers.js   # Pure JS helpers imported by extension.js
+│   ├── prefs.js               # Extension Settings dialog (autostart, Quick Settings)
 │   ├── metadata.json          # Extension metadata
+│   ├── schemas                # GSettings schema (+ compiled) for the settings
 │   ├── core
 │   │   ├── __init__.py
 │   │   ├── __main__.py
@@ -59,11 +61,19 @@ Files copied:
 ~/.local/share/gnome-shell/extensions/easyspeak@local/
 ├── extension.js
 ├── extension-helpers.js
-└── metadata.json
+├── prefs.js
+├── metadata.json
+└── schemas
+    ├── org.gnome.shell.extensions.easyspeak.gschema.xml
+    └── gschemas.compiled
 ```
 
-The extension powers both the panel indicator and the mouse grid. On Wayland,
-GNOME Shell only scans for extensions at login, so a `oneshot` systemd *user*
-unit (installed by EasySpeak) re-copies the bundled files before the shell loads
+The extension powers both the panel indicator and the mouse grid. Its
+Settings dialog (`prefs.js`) offers "Show EasySpeak in Quick Settings Menu",
+persisted in dconf via the bundled GSettings schema: when on, the asleep
+state is surfaced as a Quick Settings toggle — on while listening, off
+while asleep — instead of the panel tray icon. On Wayland, GNOME Shell
+only scans for extensions at login, so a `oneshot` systemd *user* unit
+(installed by EasySpeak) re-copies the bundled files before the shell loads
 them at each login. See [`core.gnome_extension`][core.gnome_extension]
 for the full lifecycle.

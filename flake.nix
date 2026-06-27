@@ -184,6 +184,7 @@
             pkgs.eslint # JS linter for the GNOME Shell extension (see `just lint-js`)
             pkgs.nodejs # `node --test` for the extension's JS helpers (see `just test-js`)
             pkgs.desktop-file-utils # desktop-file-validate for the launcher (see `just gate`)
+            pkgs.glib.dev # glib-compile-schemas for the extension's GSettings schema (see `just compile-schemas`)
           ]
           ++ runtimeTools
           ++ buildTools;

@@ -14,12 +14,15 @@ UNIT_NAME = "easyspeak-extension-refresh.service"
 
 def _write_assets(directory, **overrides):
     """Create every bundled asset under ``directory``, with per-file contents
-    overridable by name (dots and hyphens in filenames map to underscores, e.g.
-    ``extension_helpers_js`` for ``extension-helpers.js``)."""
+    overridable by name (dots, hyphens and slashes in paths map to underscores,
+    e.g. ``extension_helpers_js`` for ``extension-helpers.js``). Subdirectory
+    assets (e.g. ``schemas/…``) have their parent created."""
     directory.mkdir(parents=True, exist_ok=True)
     for name in gnome_extension.EXTENSION_ASSETS:
-        key = name.replace(".", "_").replace("-", "_")
-        directory.joinpath(name).write_text(overrides.get(key, "x"))
+        key = name.replace("/", "_").replace(".", "_").replace("-", "_")
+        path = directory / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(overrides.get(key, "x"))
 
 
 def test_refresh_extension_files_installs_when_dest_missing(tmp_path):
@@ -74,6 +77,54 @@ def test_refresh_extension_files_installs_helper_missing_from_old_dest(tmp_path)
 
     assert refreshed is gnome_extension.RefreshResult.REFRESHED
     assert (dest / "extension-helpers.js").is_file()
+
+
+def test_refresh_extension_files_installs_compiled_schema(tmp_path):
+    """The compiled GSettings schema is installed under schemas/, staged in that
+    subdirectory rather than as a dotfile beside dest_dir."""
+    src = tmp_path / "src"
+    _write_assets(src)
+    dest = tmp_path / "dest"
+
+    refreshed = gnome_extension.refresh_extension_files(src, dest)
+
+    assert refreshed is gnome_extension.RefreshResult.REFRESHED
+    assert (dest / "schemas" / "gschemas.compiled").is_file()
+    assert (
+        dest / "schemas" / "org.gnome.shell.extensions.easyspeak.gschema.xml"
+    ).is_file()
+    # No staging temp left behind, in dest or its schemas/ subdir.
+    assert not list(dest.glob(".*.tmp"))
+    assert not list((dest / "schemas").glob(".*.tmp"))
+
+
+def test_refresh_extension_files_refreshes_when_schema_changed(tmp_path):
+    """A changed schema alone triggers a re-copy, like any other asset."""
+    schema = "schemas/gschemas.compiled"
+    src = tmp_path / "src"
+    _write_assets(src)
+    (src / schema).write_text("new-compiled")
+    dest = tmp_path / "dest"
+    _write_assets(dest)
+    (dest / schema).write_text("old-compiled")
+
+    refreshed = gnome_extension.refresh_extension_files(src, dest)
+
+    assert refreshed is gnome_extension.RefreshResult.REFRESHED
+    assert (dest / schema).read_text() == "new-compiled"
+
+
+def test_refresh_extension_files_missing_schema_is_error(tmp_path):
+    """A bundle missing the schema installs nothing, like a missing helper."""
+    src = tmp_path / "src"
+    _write_assets(src)
+    (src / "schemas" / "gschemas.compiled").unlink()
+    dest = tmp_path / "dest"
+
+    refreshed = gnome_extension.refresh_extension_files(src, dest)
+
+    assert refreshed is gnome_extension.RefreshResult.ERROR
+    assert not dest.exists()
 
 
 def test_refresh_extension_files_noop_when_identical(tmp_path):

@@ -730,6 +730,13 @@ class TestEasySpeakRun:
             yield mock_ensure
 
     @pytest.fixture(autouse=True)
+    def _stub_speech_speak(self):
+        """Silence the startup greeting (tray.started speaks); the warmup stub
+        leaves the pipeline with no process for it to write to."""
+        with patch("easyspeak.core.speech.SpeechPipeline.speak") as mock_speak:
+            yield mock_speak
+
+    @pytest.fixture(autouse=True)
     def _stub_ensure_extension(self):
         """Keep run() from touching gnome-extensions / systemctl at startup."""
         with patch("easyspeak.core.main.ensure_extension") as mock_ensure_ext:
@@ -1244,8 +1251,11 @@ class TestEasySpeakRun:
 
         easy.run()
 
-        # Check that "I didn't hear anything" was spoken
-        mock_speak.assert_called_once_with("I didn't hear anything.")
+        # The startup greeting precedes the loop's "didn't hear anything".
+        assert mock_speak.call_args_list == [
+            (("Welcome! I'm ready.",),),
+            (("I didn't hear anything.",),),
+        ]
 
         # Check that flush_stream was called (2 times: after wake, after beep)
         assert mock_flush_stream.call_count == 2

@@ -36,12 +36,16 @@ PRE_SHELL_TARGET = "gnome-session-pre.target"  # reached before org.gnome.Shell@
 SUBPROCESS_TIMEOUT = 5.0
 
 # Bundled assets, installed as a set: extension.js imports extension-helpers.js,
-# so they must travel together or the extension fails to load.
+# so they must travel together or the extension fails to load. The schema ships
+# pre-compiled (glib-compile-schemas isn't guaranteed present at install time);
+# subdirectory paths are staged in place by the copy below.
 EXTENSION_ASSETS = (
     "extension.js",
     "extension-helpers.js",
     "prefs.js",
     "metadata.json",
+    "schemas/org.gnome.shell.extensions.easyspeak.gschema.xml",
+    "schemas/gschemas.compiled",
 )
 
 
@@ -76,7 +80,13 @@ def extension_dest_dir():
 
 
 def _staged_tmp(dest_dir, name):
-    return dest_dir / f".{name}.tmp"
+    """Return the hidden staging temp for an asset, beside its final path.
+
+    A subdir asset (`schemas/…`) thus stages inside that subdir, not under a
+    literal `.schemas/…` sibling of dest_dir.
+    """
+    dest = dest_dir / name
+    return dest.with_name(f".{dest.name}.tmp")
 
 
 def _discard_staged(dest_dir):
@@ -114,6 +124,7 @@ def refresh_extension_files(src_dir, dest_dir):
         staged = []
         for name, src in srcs.items():
             tmp = _staged_tmp(dest_dir, name)
+            tmp.parent.mkdir(parents=True, exist_ok=True)  # subdir assets (schemas/)
             shutil.copy2(src, tmp)
             staged.append((tmp, dest_dir / name))
         for tmp, dest in reversed(staged):  # extension.js leads EXTENSION_ASSETS

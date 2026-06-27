@@ -59,6 +59,14 @@ export function indicatorVisibleForState(state) {
     return state === 'muted';
 }
 
+// Whether the Quick Settings toggle should read as "on" for a given daemon
+// state: on while EasySpeak is listening, off while it's asleep ("muted") or in
+// any other non-listening state. The inverse of the tray's visibility rule — the
+// tray surfaces the asleep state, the toggle surfaces the listening one.
+export function quickSettingsCheckedForState(state) {
+    return state === 'listening';
+}
+
 // Build the per-user autostart entry (~/.config/autostart/easyspeak.desktop) for
 // the given enabled state. Written with the flag false, it overrides a packaged
 // /etc/xdg/autostart entry of the same name — the way gnome-tweaks disables one.

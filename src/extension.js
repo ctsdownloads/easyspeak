@@ -8,12 +8,14 @@ import Meta from 'gi://Meta';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import * as QuickSettings from 'resource:///org/gnome/shell/ui/quickSettings.js';
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 import {
     clampToWorkArea,
     scrollDirectionDelta,
     gridGeometry,
     indicatorVisibleForState,
+    quickSettingsCheckedForState,
 } from './extension-helpers.js';
 
 const DBUS_INTERFACE = `
@@ -526,6 +528,18 @@ class ScreenshotManager {
 const CACHE_DIR = GLib.get_home_dir() + '/.cache/easyspeak';
 const CONTROL_FILE = CACHE_DIR + '/control';
 
+// Menu actions (tray and Quick Settings alike) reach the daemon via a one-shot
+// control file it polls each audio loop; it can't serve D-Bus while reading audio.
+function writeControlCommand(command) {
+    try {
+        const dir = Gio.File.new_for_path(CACHE_DIR);
+        if (!dir.query_exists(null)) dir.make_directory_with_parents(null);
+        GLib.file_set_contents(CONTROL_FILE, command);
+    } catch (e) {
+        log('EasySpeak: failed to write control command: ' + e.message);
+    }
+}
+
 // The indicator is shown ONLY while EasySpeak is deactivated. While it's running
 // it listens continuously, so GNOME's own red microphone privacy icon already
 // signals the open mic and the assistant is driven by voice — a second icon would
@@ -547,7 +561,7 @@ class TrayIndicator extends PanelMenu.Button {
         this.add_child(this._icon);
 
         const reactivateItem = new PopupMenu.PopupMenuItem('Reactivate EasySpeak');
-        reactivateItem.connect('activate', () => this._writeCommand('unmute'));
+        reactivateItem.connect('activate', () => writeControlCommand('unmute'));
         this.menu.addMenuItem(reactivateItem);
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
@@ -560,39 +574,80 @@ class TrayIndicator extends PanelMenu.Button {
         this.menu.addMenuItem(settingsItem);
 
         const helpItem = new PopupMenu.PopupMenuItem('Help');
-        helpItem.connect('activate', () => this._writeCommand('help'));
+        helpItem.connect('activate', () => writeControlCommand('help'));
         this.menu.addMenuItem(helpItem);
 
         const aboutItem = new PopupMenu.PopupMenuItem('About EasySpeak');
-        aboutItem.connect('activate', () => this._writeCommand('about'));
+        aboutItem.connect('activate', () => writeControlCommand('about'));
         this.menu.addMenuItem(aboutItem);
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         const quitItem = new PopupMenu.PopupMenuItem('Quit EasySpeak');
         quitItem.connect('activate', () => {
-            this._writeCommand('quit');
+            writeControlCommand('quit');
             this.visible = false;  // the daemon is exiting; don't leave a stale icon
         });
         this.menu.addMenuItem(quitItem);
     }
 
-    // Pushed over D-Bus by the daemon. Only the deactivated state is visible;
-    // every running state (listening/active/thinking) hides the indicator.
-    setState(state) {
-        this.visible = indicatorVisibleForState(state);
+    // Visible only while asleep, and only when the Quick Settings toggle (the
+    // user's chosen alternative) isn't taking the tray's place.
+    setState(state, hiddenForQuickSettings) {
+        this.visible =
+            indicatorVisibleForState(state) && !hiddenForQuickSettings;
+    }
+});
+
+// Quick Settings alternative to the tray icon: on while listening, off while
+// asleep; clicking sleeps/wakes the daemon. The expander holds Help and
+// EasySpeak Settings, mirroring two of the tray menu's items.
+const EasySpeakToggle = GObject.registerClass(
+class EasySpeakToggle extends QuickSettings.QuickMenuToggle {
+    _init(openPreferences) {
+        super._init({
+            title: 'EasySpeak',
+            iconName: 'audio-input-microphone-symbolic',
+            toggleMode: true,
+        });
+
+        // toggleMode flips `checked` before this fires, so it's the user's intent.
+        this.connect('clicked', () =>
+            writeControlCommand(this.checked ? 'unmute' : 'mute'));
+
+        this.menu.setHeader('audio-input-microphone-symbolic', 'EasySpeak');
+        this.menu.addAction('Help', () => writeControlCommand('help'));
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this.menu.addAction('EasySpeak Settings', () => {
+            // Dismiss the whole Quick Settings popup first (as AZWallpaper does);
+            // otherwise it keeps its modal grab and the prefs window opens behind
+            // it, so the first click only closes the popup instead of reaching
+            // the dialog.
+            Main.panel.closeQuickSettings();
+            openPreferences();
+        });
     }
 
-    // Menu actions reach the daemon via a one-shot control file it polls each
-    // audio-loop iteration (the daemon can't serve D-Bus while blocked reading).
-    _writeCommand(command) {
-        try {
-            const dir = Gio.File.new_for_path(CACHE_DIR);
-            if (!dir.query_exists(null)) dir.make_directory_with_parents(null);
-            GLib.file_set_contents(CONTROL_FILE, command);
-        } catch (e) {
-            log('EasySpeak: failed to write tray command: ' + e.message);
-        }
+    // Setting `checked` directly doesn't emit 'clicked', so this won't loop back.
+    setState(state) {
+        this.checked = quickSettingsCheckedForState(state);
+    }
+});
+
+const EasySpeakQuickSettings = GObject.registerClass(
+class EasySpeakQuickSettings extends QuickSettings.SystemIndicator {
+    _init(openPreferences) {
+        super._init();
+        this.toggle = new EasySpeakToggle(openPreferences);
+        this.quickSettingsItems.push(this.toggle);
+    }
+
+    setState(state) {
+        this.toggle.setState(state);
+    }
+
+    setVisible(visible) {
+        this.toggle.visible = visible;
     }
 });
 
@@ -617,6 +672,31 @@ export default class EasySpeakGridExtension extends Extension {
         } else {
             rightBox.set_child_above_sibling(this._tray.container, null);
         }
+
+        // Last state the daemon pushed, so the tray's visibility can be recomputed
+        // when the setting changes. Null until it first reports in.
+        this._lastState = null;
+
+        // getSettings() throws if the compiled schema isn't in place yet (e.g. an
+        // update not yet picked up at login); fall back to "off" (tray-only)
+        // rather than breaking the whole extension.
+        try {
+            this._settings = this.getSettings();
+        } catch (e) {
+            log('EasySpeak: settings schema unavailable, defaulting to tray: ' + e.message);
+            this._settings = null;
+        }
+
+        // Always added to the panel; the setting only governs whether the toggle
+        // shows, so flipping it takes effect live.
+        this._quickSettings = new EasySpeakQuickSettings(() => this.openPreferences());
+        Main.panel.statusArea.quickSettings.addExternalIndicator(this._quickSettings);
+        if (this._settings) {
+            this._settingsChangedId = this._settings.connect(
+                'changed::show-in-quick-settings',
+                () => this._applyQuickSettingsSetting());
+        }
+        this._applyQuickSettingsSetting();
 
         this._dbus = Gio.DBusExportedObject.wrapJSObject(DBUS_INTERFACE, {
             // Grid
@@ -662,10 +742,26 @@ export default class EasySpeakGridExtension extends Extension {
             GetScreenSize: () => this._grid.getScreenSize(),
 
             // Panel indicator
-            SetState: (state) => this._tray.setState(state),
+            SetState: (state) => this._setState(state),
         });
 
         this._dbus.export(Gio.DBus.session, '/org/easyspeak/Desktop');
+    }
+
+    // Fan a daemon-pushed state out to both surfaces.
+    _setState(state) {
+        this._lastState = state;
+        this._tray.setState(state, this._showInQuickSettings);
+        this._quickSettings.setState(state);
+    }
+
+    // Show/hide the toggle and recompute the tray's visibility so the two never
+    // show at once.
+    _applyQuickSettingsSetting() {
+        this._showInQuickSettings =
+            this._settings?.get_boolean('show-in-quick-settings') ?? false;
+        this._quickSettings.setVisible(this._showInQuickSettings);
+        this._tray.setState(this._lastState, this._showInQuickSettings);
     }
 
     disable() {
@@ -676,6 +772,17 @@ export default class EasySpeakGridExtension extends Extension {
         if (this._dbus) {
             this._dbus.unexport();
             this._dbus = null;
+        }
+        if (this._settings) {
+            if (this._settingsChangedId)
+                this._settings.disconnect(this._settingsChangedId);
+            this._settings = null;
+            this._settingsChangedId = null;
+        }
+        if (this._quickSettings) {
+            this._quickSettings.quickSettingsItems.forEach((item) => item.destroy());
+            this._quickSettings.destroy();
+            this._quickSettings = null;
         }
         if (this._tray) {
             this._tray.destroy();
