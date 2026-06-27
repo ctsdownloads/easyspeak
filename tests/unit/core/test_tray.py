@@ -179,7 +179,7 @@ class TestPoll:
     def test_request_sleep_triggers_sleep_without_a_command(self):
         """A queued deactivate (request_sleep) sleeps even with no menu command,
         and stays silent: the sleep plugin already announced this voice path."""
-        tray = self._tray([None, COMMAND_QUIT])  # poll reads None, then _sleep
+        tray = self._tray([None, COMMAND_QUIT])  # poll reads None, then sleep
         tray.request_sleep()
         release, acquire = Mock(), Mock()
 

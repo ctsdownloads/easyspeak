@@ -102,10 +102,11 @@ class Tray:
         """Set up the controller, optionally with a spoken-feedback callback.
 
         `speak` (core.speak) voices the asleep/awake lifecycle: the deactivation
-        confirmation for a button mute (a voice "go to sleep" is already spoken
-        by the sleep plugin, which is why `_sleep` takes an `announce` flag), the
-        reactivation and startup greetings, and the explanation when sleep can't
-        engage. Defaults to a no-op so the tray works headless and in tests.
+        confirmation for a button mute, the reactivation and startup greetings,
+        and the explanation when sleep can't engage. A voice "go to sleep" is
+        already spoken by the sleep plugin, hence the `announce` flag on
+        [`sleep`][core.tray.Tray.sleep]. Defaults to a no-op so the tray works
+        headless and in tests.
         """
         self._control_file = Path(control_file)
         self._sleep_requested = False
@@ -160,7 +161,7 @@ class Tray:
             # not, so only then does the tray announce the deactivation itself.
             announce = command == COMMAND_MUTE
             self._sleep_requested = False
-            return self._sleep(release_mic, acquire_mic, announce=announce)
+            return self.sleep(release_mic, acquire_mic, announce=announce)
         return TrayAction.CONTINUE
 
     # --- internals ---
@@ -170,7 +171,7 @@ class Tray:
 
         Returns True if it was one of those side-effect actions so callers can carry on
         without touching the sleep/quit lifecycle. The indicator menu is only shown
-        while asleep, so in practice these fire from the idle loop in `_sleep`; `poll`
+        while asleep, so in practice these fire from the idle loop in `sleep`; `poll`
         handles them too so the path isn't lifecycle- dependent.
 
         The About dialog needs PyGObject + GTK4/libadwaita, which aren't in the daemon's
@@ -242,7 +243,7 @@ class Tray:
             subprocess.run(["paplay", ERROR_SOUND], capture_output=True)
         self._speak(f"Sorry, I couldn't open the {what}.")
 
-    def _sleep(self, release_mic, acquire_mic, announce=True):
+    def sleep(self, release_mic, acquire_mic, announce=True):
         """Release the mic and idle until reactivated, then greet and resume.
 
         Pushes the muted state first and refuses to sleep unless it lands:
