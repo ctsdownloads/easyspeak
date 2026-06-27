@@ -7,7 +7,7 @@
 
 # Run codestyle and safety checks, tests, packaging, docs, and cleanup
 [group('lifecycle')]
-all: codestyle safety test gate check-docs clean
+all: codestyle safety test check-docs check-desktop-integration compile-schemas check-python-packages check-deb-package check-rpm-package clean
 
 # Remove build artifacts and reports (use -v for verbose, -n for dry-run)
 [group('lifecycle')]
@@ -151,60 +151,27 @@ docs *args=('build --strict'):
 docs-publish *args:
     uv run --extra=docs mike {{ args }}
 
-# Build package and check metadata
+# Build the Debian package and verify its contents
+[group('release')]
+check-deb-package: (package-native)
+    bash tests/packaging/test_deb.sh
+
+# Build the RedHat package and verify its contents
+[group('release')]
+check-rpm-package: (package-native)
+    bash tests/packaging/test_rpm.sh
+
+# Build the wheel and sdist, then verify their contents
+[group('release')]
+check-python-packages: (package '--quiet')
+    bash tests/packaging/test_python_wheel.sh
+    bash tests/packaging/test_python_sdist.sh
+
+# Build Python package and check its metadata renders for PyPI
 [group('release')]
 package *args:
     uv build {{ args }}
-
-# Runs plausibility checks against freshly built packages
-[group('release')]
-gate: (clean '--quiet') (package '--quiet')
-    # Desktop launcher to be shipped in the .deb/.rpm must be valid.
-    desktop-file-validate data/easyspeak.desktop
-    # Python package must not contain markdown, tests and dev tooling configuration
-    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep C.*\.md
-    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep docs
-    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep package.json
-    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep tests
-    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep .lock
-    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep .mjs
-    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep .nix
-    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep .yaml
-    ! unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep .yml
-    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep C.*\.md
-    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep docs
-    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep package.json
-    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep tests
-    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep .lock
-    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep .mjs
-    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep .nix
-    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep .yaml
-    ! tar tfz dist/easyspeak_linux-*.tar.gz | grep .yml
-    # Python package should contain Core module and plugins
-    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q core
-    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q plugins
-    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q core
-    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q plugins
-    # Python package should bundle launcher and Shell extension assets.
-    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q easyspeak.desktop
-    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q easyspeak-autostart.desktop
-    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q easyspeak-extension-refresh.service.in
-    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q extension.js
-    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q extension-helpers.js
-    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q prefs.js
-    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q metadata.json
-    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q schemas/org.gnome.shell.extensions.easyspeak.gschema.xml
-    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q schemas/gschemas.compiled
-    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q easyspeak.desktop
-    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q easyspeak-autostart.desktop
-    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q easyspeak-extension-refresh.service.in
-    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q extension.js
-    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q extension-helpers.js
-    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q prefs.js
-    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q metadata.json
-    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q schemas/org.gnome.shell.extensions.easyspeak.gschema.xml
-    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q schemas/gschemas.compiled
-    @echo "✔  Python packaging looks good."
+    uvx twine check dist/*.whl dist/*.tar.gz
 
 # Verify package version is same as Git tag
 [group('release')]
@@ -222,6 +189,12 @@ ensure_version_matches tag:
 publish: package
     just ensure_version_matches ${GIT_TAG}
     uv publish
+
+# Check GNOME desktop integration files
+[group('packaging')]
+check-desktop-integration:
+    desktop-file-validate data/easyspeak.desktop
+    desktop-file-validate data/easyspeak-autostart.desktop
 
 # Recompile the bundled GSettings schema after editing the .gschema.xml
 [group('packaging')]
