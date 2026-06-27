@@ -22,7 +22,7 @@ jobs:
         - lint-yaml
         - types
         - package
-        - gate
+        - check-desktop-integration
       fail-fast: false
     steps:
     - uses: actions/checkout@v6
@@ -53,7 +53,7 @@ jobs:
     - run: npm install --global eslint@10
     - run: just ${{ matrix.task }}
 
-  test:
+  unit:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -75,3 +75,28 @@ jobs:
         sudo apt install -y portaudio19-dev
     - run: just pytest
     - run: just coverage
+
+  acceptance:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - uses: astral-sh/setup-uv@v7
+      with:
+        python-version: '3.12'
+        ignore-nothing-to-cache: true
+    - uses: taiki-e/install-action@just
+    - run: |
+        sudo apt update
+        sudo apt install -y portaudio19-dev
+    - run: just acceptance
+
+  packaging:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - uses: astral-sh/setup-uv@v7
+      with:
+        python-version: '3.12'
+        ignore-nothing-to-cache: true
+    - uses: taiki-e/install-action@just
+    - run: just check-python-packages
