@@ -60,7 +60,7 @@ def test_find_app_flatpak_not_installed(mock_core_failure, app_name):
 @pytest.mark.parametrize(
     ["app_name", "binary_name"],
     [
-        ["files", "nautilus"],
+        ["nautilus", "nautilus"],
         ["browser", "qutebrowser"],
     ],
 )
@@ -117,7 +117,7 @@ def test_launch_app_flatpak(mock_find_app, mock_core):
 @patch("easyspeak.plugins.apps.find_app", return_value=("local", "nautilus"))
 def test_launch_app_local(mock_find_app, mock_core):
     """When local app is launched, then it runs directly."""
-    app_name = "files"
+    app_name = "nautilus"
 
     result = apps.launch_app(app_name, mock_core)
 
@@ -446,7 +446,6 @@ def test_close_registered_terminal(mock_core):
         ["open firefox", "firefox"],
         ["launch steam", "steam"],
         ["open spotify", "spotify"],
-        ["launch files", "files"],
         ["open calculator", "calculator"],
         ["open music player", "music player"],
         ["open music app", "music app"],
@@ -485,7 +484,6 @@ def test_handle_open_not_installed_app(mock_launch_app, mock_core, command, app_
         ["close firefox", "firefox"],
         ["close steam", "steam"],
         ["close spotify", "spotify"],
-        ["close files", "files"],
     ],
 )
 def test_handle_close_app(mock_close_app, mock_core, command, app_name):

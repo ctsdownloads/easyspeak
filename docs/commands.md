@@ -129,7 +129,7 @@ Requires a webcam and additional dependencies — see [Installation](installatio
 
 Default apps live in [`plugins/apps.py`](https://github.com/ctsdownloads/easyspeak/blob/HEAD/src/plugins/apps.py)
 (edit to match your system): firefox, steam, spotify, calculator, settings,
-files, terminal, browser, music player, and more. Some accept spoken aliases —
+terminal, browser, music player, and more. Some accept spoken aliases —
 e.g. "open music app" works the same as "open music player".
 
 "Open terminal" and "close terminal" are special: they open and close your
@@ -137,8 +137,12 @@ system's default terminal, whichever one that is, rather than a fixed app.
 
 ## Files
 
+Folders open in whatever file manager your desktop is configured for (via
+`xdg-open`).
+
 | Command | Action |
 |---------|--------|
+| open files / file manager | Open your default file manager (at `$HOME`) |
 | open documents | Open Documents folder |
 | open downloads | Open Downloads folder |
 | open pictures | Open Pictures folder |
