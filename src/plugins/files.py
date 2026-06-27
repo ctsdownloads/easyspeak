@@ -45,7 +45,7 @@ def open_folder(path, core):
     for fm, args in file_managers:
         result = core.host_run(["which", fm])
         if result.returncode == 0:
-            core.host_run([fm, *args], background=True)
+            core.host_run([fm, *args], background=True, clean_env=True)
             return True
     return False
 

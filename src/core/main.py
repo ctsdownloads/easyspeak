@@ -84,13 +84,30 @@ class EasySpeak:
 
     # --- Utilities for plugins ---
 
-    def host_run(self, cmd, background=False):
-        """Run a shell command."""
+    def host_run(self, cmd, background=False, clean_env=False):
+        """Run a shell command.
+
+        With clean_env, EasySpeak's injected LD_LIBRARY_PATH and GI_TYPELIB_PATH
+        are stripped from the child's environment. The dev flake prepends its own
+        libraries (glib among them) to those paths for EasySpeak's own
+        dependencies; left in place they leak into spawned desktop apps, which
+        then load EasySpeak's flake-pinned libraries instead of their own rpath
+        ones. A glib/GIO build mismatch there wedges GTK apps such as the file
+        manager. Pass clean_env=True when launching external GUI programs so they
+        run in the plain host environment.
+        """
+        env = None
+        if clean_env:
+            env = {
+                k: v
+                for k, v in os.environ.items()
+                if k not in ("LD_LIBRARY_PATH", "GI_TYPELIB_PATH")
+            }
         if background:
             return subprocess.Popen(
-                cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env
             )
-        return subprocess.run(cmd, capture_output=True, text=True)
+        return subprocess.run(cmd, capture_output=True, text=True, env=env)
 
     def speak(self, text):
         """Speak a phrase.

@@ -38,9 +38,30 @@ class TestEasySpeakUtilities:
         result = easy.host_run(["echo", "test"], background=False)
 
         mock_run.assert_called_once_with(
-            ["echo", "test"], capture_output=True, text=True
+            ["echo", "test"], capture_output=True, text=True, env=None
         )
         assert result == mock_result
+
+    @patch.dict(
+        "os.environ",
+        {
+            "LD_LIBRARY_PATH": "/flake/lib",
+            "GI_TYPELIB_PATH": "/flake/gi",
+            "PATH": "/bin",
+        },
+        clear=True,
+    )
+    @patch("subprocess.Popen")
+    def test_host_run_clean_env_strips_injected_paths(self, mock_popen):
+        """clean_env drops EasySpeak's library paths so child apps use their own."""
+        easy = EasySpeak()
+
+        easy.host_run(["nautilus"], background=True, clean_env=True)
+
+        env = mock_popen.call_args[1]["env"]
+        assert "LD_LIBRARY_PATH" not in env
+        assert "GI_TYPELIB_PATH" not in env
+        assert env["PATH"] == "/bin"
 
     @patch("subprocess.Popen")
     def test_host_run_background(self, mock_popen):

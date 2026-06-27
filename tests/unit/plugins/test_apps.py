@@ -108,7 +108,10 @@ def test_launch_app_flatpak(mock_find_app, mock_core):
     assert mock_core.host_run.call_args.args == (
         ["flatpak", "run", "org.mozilla.firefox"],
     )
-    assert mock_core.host_run.call_args.kwargs == {"background": True}
+    assert mock_core.host_run.call_args.kwargs == {
+        "background": True,
+        "clean_env": True,
+    }
 
 
 @patch("easyspeak.plugins.apps.find_app", return_value=("local", "nautilus"))
@@ -121,7 +124,10 @@ def test_launch_app_local(mock_find_app, mock_core):
     assert result is True
     assert mock_find_app.call_args.args == (app_name, mock_core)
     assert mock_core.host_run.call_args.args == (["nautilus"],)
-    assert mock_core.host_run.call_args.kwargs == {"background": True}
+    assert mock_core.host_run.call_args.kwargs == {
+        "background": True,
+        "clean_env": True,
+    }
 
 
 @patch("easyspeak.plugins.apps.find_app", return_value=(None, None))
@@ -417,7 +423,10 @@ def test_launch_registered_terminal(mock_core):
 
     assert result is True
     assert mock_core.host_run.call_args.args == (["ghostty"],)
-    assert mock_core.host_run.call_args.kwargs == {"background": True}
+    assert mock_core.host_run.call_args.kwargs == {
+        "background": True,
+        "clean_env": True,
+    }
 
 
 def test_close_registered_terminal(mock_core):
