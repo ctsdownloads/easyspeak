@@ -143,7 +143,7 @@ class GridOverlay {
         return clampToWorkArea(x, y, w, h, this.workArea);
     }
 
-    show(width, height) {
+    show() {
         if (this.container) this.hide();
 
         const monitor = Main.layoutManager.primaryMonitor;
@@ -485,7 +485,7 @@ class ScreenshotManager {
         // Delete old file first
         try {
             Gio.File.new_for_path(this._path).delete(null);
-        } catch (e) {}
+        } catch {}
         
         GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
             this._captureViaScreenshotClass();
@@ -513,7 +513,7 @@ class ScreenshotManager {
             const stream = file.replace(null, false, Gio.FileCreateFlags.NONE, null);
             
             // GNOME 48: screenshot_area(x, y, width, height, stream, flash)
-            const [content, scale] = await screenshot.screenshot_area(x, y, width, height, stream, false);
+            await screenshot.screenshot_area(x, y, width, height, stream, false);
             
             stream.close(null);
             log('EasySpeak: screenshot saved to ' + this._path);
@@ -700,7 +700,7 @@ export default class EasySpeakGridExtension extends Extension {
 
         this._dbus = Gio.DBusExportedObject.wrapJSObject(DBUS_INTERFACE, {
             // Grid
-            Show: (width, height) => this._grid.show(width, height),
+            Show: () => this._grid.show(),
             Hide: () => this._grid.hide(),
             Update: (x, y, width, height) => this._grid.update(x, y, width, height),
             
