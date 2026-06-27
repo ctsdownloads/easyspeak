@@ -118,9 +118,12 @@ check-links *args: docs
     mkdir -p build/linkcheck
     uvx --from markdown markdown_py README.md > build/linkcheck/readme.html
     uvx --from markdown markdown_py CONTRIBUTING.md > build/linkcheck/contributing.html
-    # --ignore-url drops material's 404-page root-absolute links (only valid once served under the Pages path);
-    # --user-agent avoids linkchecker's "Mozilla" default, which freedesktop.org's WAF answers with 418.
-    uvx linkchecker --check-extern --no-warnings --ignore-url '^file:///easyspeak/' --user-agent LinkChecker {{ args }} \
+    # Ignore material's Pages-only 404-page links and bencher.dev (403s every bot);
+    # the non-default user-agent dodges freedesktop's WAF (418 to "Mozilla").
+    uvx linkchecker --check-extern --no-warnings \
+        --ignore-url '^file:///easyspeak/' \
+        --ignore-url 'bencher\.dev' \
+        --user-agent LinkChecker {{ args }} \
         site/index.html build/linkcheck/readme.html build/linkcheck/contributing.html
 
 # Guard docstrings against reST markup (mkdocstrings renders Markdown, not reST)
