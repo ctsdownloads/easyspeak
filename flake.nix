@@ -185,6 +185,9 @@
             pkgs.nodejs # `node --test` for the extension's JS helpers (see `just test-js`)
             pkgs.desktop-file-utils # desktop-file-validate for the launcher (see `just gate`)
             pkgs.glib.dev # glib-compile-schemas for the extension's GSettings schema (see `just compile-schemas`)
+            pkgs.dpkg # dpkg-deb to read .deb contents (see tests/packaging/test_deb.sh)
+            pkgs.rpm # rpm to read .rpm contents (see tests/packaging/test_rpm.sh)
+            pkgs.unzip # read .whl contents (see tests/packaging/test_python_wheel.sh)
           ]
           ++ runtimeTools
           ++ buildTools;
