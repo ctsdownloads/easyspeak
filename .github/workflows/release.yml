@@ -6,6 +6,27 @@ on:
     - published
 
 jobs:
+  pypi:
+    environment: pypi
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # PyPI trusted publishing (OIDC)
+    steps:
+    - uses: actions/checkout@v6
+    - uses: astral-sh/setup-uv@v7
+      with:
+        python-version: '3.12'
+    - uses: taiki-e/install-action@just
+    - run: |
+        sudo apt update
+        sudo apt install -y portaudio19-dev
+    - name: Build the Python package
+      run: just package
+    - name: Verify that package version matches Git tag
+      run: just ensure_version_matches ${{ github.ref_name }}
+    - name: Publish package to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+
   packages:
     runs-on: ubuntu-latest
     permissions:
