@@ -190,6 +190,8 @@ gate: (clean '--quiet') (package '--quiet')
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q extension-helpers.js
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q prefs.js
     tar tfz dist/easyspeak_linux-*.tar.gz | grep -q metadata.json
+    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q schemas/org.gnome.shell.extensions.easyspeak.gschema.xml
+    tar tfz dist/easyspeak_linux-*.tar.gz | grep -q schemas/gschemas.compiled
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q easyspeak.desktop
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q easyspeak-autostart.desktop
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q easyspeak-extension-refresh.service.in
@@ -197,6 +199,8 @@ gate: (clean '--quiet') (package '--quiet')
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q extension-helpers.js
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q prefs.js
     unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q metadata.json
+    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q schemas/org.gnome.shell.extensions.easyspeak.gschema.xml
+    unzip -l dist/easyspeak_linux-*-py3-none-any.whl | grep -q schemas/gschemas.compiled
     @echo "✔  Python packaging looks good."
 
 # Verify package version is same as Git tag
@@ -215,6 +219,11 @@ ensure_version_matches tag:
 publish: package
     just ensure_version_matches ${GIT_TAG}
     uv publish
+
+# Recompile the bundled GSettings schema after editing the .gschema.xml
+[group('packaging')]
+compile-schemas:
+    glib-compile-schemas --strict src/schemas
 
 # Build the /opt/easyspeak app bundle (CI/container only, not the host)
 [group('packaging')]

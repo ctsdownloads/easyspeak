@@ -201,6 +201,8 @@ packages = [
   "extension-helpers.js",
   "prefs.js",
   "metadata.json",
+  "schemas/*.gschema.xml",
+  "schemas/gschemas.compiled",
 ]
 "easyspeak.data" = ["*"]
 

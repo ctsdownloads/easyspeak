@@ -34,7 +34,7 @@ const ABOUT = {
 export default class EasySpeakPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const page = new Adw.PreferencesPage();
-        const group = new Adw.PreferencesGroup({ title: 'EasySpeak' });
+        const group = new Adw.PreferencesGroup({ title: 'Configure EasySpeak' });
         page.add(group);
 
         const autostart = new Adw.SwitchRow({
@@ -46,13 +46,30 @@ export default class EasySpeakPreferences extends ExtensionPreferences {
             this._setAutostartEnabled(row.active));
         group.add(autostart);
 
+        // Persisted in dconf via the extension's GSettings schema, and read by
+        // extension.js to decide between the tray icon and the Quick Settings
+        // toggle. Bound both ways so a change here takes effect live in the shell.
+        const quickSettings = new Adw.SwitchRow({
+            title: 'Show EasySpeak in Quick Settings Menu',
+            subtitle:
+                'Use a Quick Settings toggle instead of the panel tray icon',
+            active: false,
+        });
+        this.getSettings().bind(
+            'show-in-quick-settings', quickSettings, 'active',
+            Gio.SettingsBindFlags.DEFAULT);
+        group.add(quickSettings);
+
+        const aboutGroup = new Adw.PreferencesGroup();
+        page.add(aboutGroup);
+
         const about = new Adw.ActionRow({
             title: 'About EasySpeak',
             activatable: true,
         });
         about.add_suffix(new Gtk.Image({ icon_name: 'go-next-symbolic' }));
         about.connect('activated', () => this._presentAbout(window));
-        group.add(about);
+        aboutGroup.add(about);
 
         window.add(page);
     }

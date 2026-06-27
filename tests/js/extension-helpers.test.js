@@ -8,6 +8,7 @@ import {
     scrollDirectionDelta,
     gridGeometry,
     indicatorVisibleForState,
+    quickSettingsCheckedForState,
     autostartDesktopEntry,
     autostartEnabledFromText,
 } from '../../src/extension-helpers.js';
@@ -81,6 +82,24 @@ test('indicatorVisibleForState shows the tray icon only when muted', () => {
     assert.equal(indicatorVisibleForState('muted'), true);
     for (const state of ['listening', 'active', 'thinking', '', undefined]) {
         assert.equal(indicatorVisibleForState(state), false);
+    }
+});
+
+test('quickSettingsCheckedForState is on only while listening', () => {
+    assert.equal(quickSettingsCheckedForState('listening'), true);
+    for (const state of ['muted', 'active', 'thinking', '', undefined]) {
+        assert.equal(quickSettingsCheckedForState(state), false);
+    }
+});
+
+test('quickSettingsCheckedForState and indicatorVisibleForState never agree', () => {
+    // The tray surfaces "asleep", the toggle surfaces "listening": for any state
+    // at most one of the two is true, so they never both show at once.
+    for (const state of ['listening', 'muted', 'active', 'thinking', '', undefined]) {
+        assert.equal(
+            quickSettingsCheckedForState(state) && indicatorVisibleForState(state),
+            false,
+        );
     }
 });
 

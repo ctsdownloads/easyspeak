@@ -4,7 +4,7 @@ import itertools
 import subprocess
 import sys
 import tempfile
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 
 from easyspeak.core.about import DOCS_URL
 from easyspeak.core.tray import (
@@ -147,8 +147,9 @@ class TestPoll:
         acquire.assert_called_once()
         tray.set_state.assert_any_call(STATE_MUTED)
         tray.set_state.assert_any_call(STATE_LISTENING)
-        # Sleep engaged: the tray confirms it with the reactivation hint.
-        tray._speak.assert_any_call("Reactivate me from the tray when you need me.")
+        # A button mute confirms the deactivation; reactivation greets.
+        tray._speak.assert_any_call("Voice control turned off.")
+        tray._speak.assert_any_call("Welcome! I'm ready.")
 
     def test_idle_loop_sleeps_until_a_command_arrives(self):
         """While asleep, empty polls sleep and loop; a later 'unmute' wakes it."""
@@ -176,7 +177,8 @@ class TestPoll:
         acquire.assert_not_called()
 
     def test_request_sleep_triggers_sleep_without_a_command(self):
-        """A queued deactivate (request_sleep) sleeps even with no menu command."""
+        """A queued deactivate (request_sleep) sleeps even with no menu command,
+        and stays silent: the sleep plugin already announced this voice path."""
         tray = self._tray([None, COMMAND_QUIT])  # poll reads None, then _sleep
         tray.request_sleep()
         release, acquire = Mock(), Mock()
@@ -186,6 +188,8 @@ class TestPoll:
 
         assert action is TrayAction.QUIT
         release.assert_called_once()
+        # Voice path: no spoken confirmation (the plugin already spoke).
+        assert call("Voice control turned off.") not in tray._speak.call_args_list
 
     def test_sleep_request_is_consumed_once(self):
         """After waking, a single request_sleep doesn't re-trigger on next poll."""
@@ -212,10 +216,9 @@ class TestPoll:
         assert action is TrayAction.CONTINUE
         release.assert_not_called()
         acquire.assert_not_called()
-        # The user was told "Going to sleep." by the plugin, so explain why it
-        # didn't, instead of leaving them with a false promise.
+        # Sleep couldn't engage, so explain rather than leave the user guessing.
         tray._speak.assert_any_call(
-            "I couldn't reach the tray, so I'll stay awake and keep listening."
+            "I couldn't turn voice control off, so I'll keep listening."
         )
 
     def test_repushes_muted_state_while_asleep(self):
@@ -378,6 +381,16 @@ class TestLifecycleHooks:
         Tray().started()
 
         assert mock_run.call_args.args[0][-1] == STATE_LISTENING
+
+    @patch("easyspeak.core.tray.subprocess.run")
+    def test_started_greets(self, mock_run):
+        """Startup speaks the ready greeting, same as reactivation."""
+        mock_run.return_value = Mock(returncode=0)
+        tray = Tray(speak=Mock())
+
+        tray.started()
+
+        tray._speak.assert_called_once_with("Welcome! I'm ready.")
 
     @patch("easyspeak.core.tray.subprocess.run")
     def test_started_discards_a_stale_command(self, mock_run):

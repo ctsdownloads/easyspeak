@@ -4,5 +4,6 @@
   "url": "https://ctsdownloads.github.io/easyspeak/",
   "uuid": "easyspeak@local",
   "shell-version": ["47", "48", "49", "50"],
-  "version": 4
+  "settings-schema": "org.gnome.shell.extensions.easyspeak",
+  "version": 5
 }

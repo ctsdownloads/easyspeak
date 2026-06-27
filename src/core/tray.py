@@ -101,12 +101,11 @@ class Tray:
     def __init__(self, control_file=CONTROL_FILE, speak=None):
         """Set up the controller, optionally with a spoken-feedback callback.
 
-        `speak` defaults to a no-op so the tray works headless and in tests.
-
-        For the spoken feedback callback (core.speak) the plugin only announces the
-        *attempt* ("Going to sleep."); the tray confirms or, when it can't actually
-        sleep, explains — since only it knows whether sleep engaged. Defaults to a no-op
-        so the tray works headless and in tests.
+        `speak` (core.speak) voices the asleep/awake lifecycle: the deactivation
+        confirmation for a button mute (a voice "go to sleep" is already spoken
+        by the sleep plugin, which is why `_sleep` takes an `announce` flag), the
+        reactivation and startup greetings, and the explanation when sleep can't
+        engage. Defaults to a no-op so the tray works headless and in tests.
         """
         self._control_file = Path(control_file)
         self._sleep_requested = False
@@ -122,9 +121,13 @@ class Tray:
         written during a previous session (or before the daemon was running to consume
         it) must not fire the moment we begin polling — which otherwise pops the About
         window open on launch.
+
+        Greets the user once startup reaches a listening state, the spoken
+        counterpart of the wake chime — and the same greeting reactivation gives.
         """
         self.take_command()
         self.set_state(STATE_LISTENING)
+        self._speak("Welcome! I'm ready.")
 
     def stopped(self):
         """Daemon is exiting; hide the indicator so no stale icon is left."""
@@ -152,8 +155,12 @@ class Tray:
         if self._run_menu_action(command):
             return TrayAction.CONTINUE
         if command == COMMAND_MUTE or self._sleep_requested:
+            # A voice "go to sleep" reaches here via _sleep_requested, and the
+            # sleep plugin has already spoken; a button mute (COMMAND_MUTE) has
+            # not, so only then does the tray announce the deactivation itself.
+            announce = command == COMMAND_MUTE
             self._sleep_requested = False
-            return self._sleep(release_mic, acquire_mic)
+            return self._sleep(release_mic, acquire_mic, announce=announce)
         return TrayAction.CONTINUE
 
     # --- internals ---
@@ -235,15 +242,21 @@ class Tray:
             subprocess.run(["paplay", ERROR_SOUND], capture_output=True)
         self._speak(f"Sorry, I couldn't open the {what}.")
 
-    def _sleep(self, release_mic, acquire_mic):
-        """Release the mic and idle until the tray asks to resume or quit.
+    def _sleep(self, release_mic, acquire_mic, announce=True):
+        """Release the mic and idle until reactivated, then greet and resume.
 
         Pushes the muted state first and refuses to sleep unless it lands:
-        reactivation only ever arrives via the extension's menu, so releasing
-        the mic while the indicator is missing (no GNOME/extension) would strand
-        the daemon with no way back. While asleep the muted state is re-asserted
-        every `MUTED_REPUSH_INTERVAL` seconds so the icon recovers if GNOME
-        Shell or the extension reloads (it would otherwise come back hidden).
+        reactivation arrives via the extension (tray menu or Quick Settings
+        toggle), so releasing the mic while the indicator is missing (no
+        GNOME/extension) would strand the daemon with no way back. While asleep
+        the muted state is re-asserted every `MUTED_REPUSH_INTERVAL` seconds so
+        the icon recovers if GNOME Shell or the extension reloads (it would
+        otherwise come back hidden).
+
+        `announce` says whether to speak the deactivation confirmation: True for
+        a button mute, False for a voice "go to sleep" (the sleep plugin already
+        spoke, so speaking again would just repeat it). Reactivation always
+        greets, matching the startup greeting.
 
         Freeing the stream also clears GNOME's privacy microphone indicator, an
         OS-level 'not listening' cue alongside our own muted glyph.
@@ -253,13 +266,12 @@ class Tray:
                 "Tray indicator unavailable; staying awake so you keep a way to "
                 "reactivate."
             )
-            self._speak(
-                "I couldn't reach the tray, so I'll stay awake and keep listening."
-            )
+            self._speak("I couldn't turn voice control off, so I'll keep listening.")
             return TrayAction.CONTINUE
         release_mic()
         logger.info("Muted; microphone released. Waiting for reactivation...")
-        self._speak("Reactivate me from the tray when you need me.")
+        if announce:
+            self._speak("Voice control turned off.")
         next_repush = time.monotonic() + MUTED_REPUSH_INTERVAL
         while True:
             command = self.take_command()
@@ -268,6 +280,7 @@ class Tray:
             if command == COMMAND_UNMUTE:
                 acquire_mic()
                 self.set_state(STATE_LISTENING)
+                self._speak("Welcome! I'm ready.")
                 return TrayAction.RESUME
             self._run_menu_action(command)
             if time.monotonic() >= next_repush:

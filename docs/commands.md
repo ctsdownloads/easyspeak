@@ -179,5 +179,5 @@ them.
 | Command | Action |
 |---------|--------|
 | help | List all commands |
-| go to sleep / stop listening | Release the mic (reactivate from the tray icon) |
+| go to sleep / stop listening | Release the mic (reactivate from the tray icon or the Quick Settings toggle) |
 | quit / exit / goodbye | Exit EasySpeak |
