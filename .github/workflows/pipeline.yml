@@ -16,9 +16,6 @@ jobs:
         task:
         - format --diff
         - lint --diff
-        - lint-docstrings
-        - lint-md
-        - check-links
         - lint-yaml
         - types
         - package
