@@ -1,12 +1,17 @@
 # Usage
 
 ```bash
-source ~/easyspeak-venv/bin/activate   # Now python = venv's python3.12
-easyspeak                              # the project execution script
+uv run easyspeak
 ```
 
-Activate the venv each time you open a new terminal. With `uv`, just run
-`uv run easyspeak` and it manages the environment for you.
+uv manages the environment for you. If you installed into a plain virtual
+environment instead, activate it each time you open a new terminal and run the
+script directly:
+
+```bash
+source ~/easyspeak-venv/bin/activate
+easyspeak
+```
 
 Say "Hey Jarvis" followed by a command. After a command that gives no spoken
 reply (such as volume changes), EasySpeak keeps listening for a few seconds so

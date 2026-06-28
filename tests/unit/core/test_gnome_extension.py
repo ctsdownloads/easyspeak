@@ -342,7 +342,7 @@ def test_is_enabled_false_when_systemctl_times_out():
         ("/home/u/.local/state/easyspeak/venv/bin/python", False),
         # uv build-env interpreters (EASYSPEAK-scoped cache and uv's default).
         ("/home/u/.cache/easyspeak/uv/builds-v0/.tmp7q/bin/python", True),
-        ("/home/u/.cache/uv/builds-v0/.tmpAB/bin/python3.12", True),
+        ("/home/u/.cache/uv/builds-v0/.tmpAB/bin/python3.14", True),
     ],
 )
 def test_is_ephemeral_interpreter(executable, expected):
@@ -359,7 +359,7 @@ def test_stable_interpreter_falls_back_to_base_when_ephemeral():
     """Under `nix run`, the ephemeral build-env interpreter is replaced by the
     persistent base interpreter it was built from."""
     ephemeral = "/home/u/.cache/uv/builds-v0/.tmpZZ/bin/python"
-    base = "/nix/store/abc-python3-3.12.13/bin/python3.12"
+    base = "/nix/store/abc-python3-3.14.6/bin/python3.14"
     with (
         patch.object(gnome_extension.sys, "executable", ephemeral),
         patch.object(gnome_extension.sys, "_base_executable", base),
@@ -370,7 +370,7 @@ def test_stable_interpreter_falls_back_to_base_when_ephemeral():
 def test_stable_interpreter_resolves_symlink_when_base_unusable(tmp_path):
     """With no usable `_base_executable`, the ephemeral interpreter is resolved
     through its symlink to the persistent target."""
-    real = tmp_path / "store" / "python3.12"
+    real = tmp_path / "store" / "python3.14"
     real.parent.mkdir(parents=True)
     real.write_text("")
     ephemeral_dir = tmp_path / ".cache" / "uv" / "builds-v0" / ".tmpZZ" / "bin"
@@ -412,7 +412,7 @@ def test_install_refresh_unit_heals_unit_left_on_vanished_interpreter(tmp_path):
         unit.write_text(gnome_extension.unit_text())
 
     ephemeral = "/home/u/.cache/easyspeak/uv/builds-v0/.tmpnew/bin/python"
-    base = "/nix/store/abc-python3-3.12.13/bin/python3.12"
+    base = "/nix/store/abc-python3-3.14.6/bin/python3.14"
     with (
         patch.object(
             gnome_extension.shutil, "which", return_value="/usr/bin/systemctl"

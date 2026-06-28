@@ -17,9 +17,7 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        # openwakeword pulls speexdsp-ns which has no wheels for >=3.13,
-        # so the project is currently pinned to 3.12.
-        python = pkgs.python312;
+        python = pkgs.python314;
 
         # The dictation plugin shells out to an AT-SPI helper that needs
         # PyGObject + the AT-SPI typelib — which uv can't put in the app's
@@ -156,10 +154,7 @@
             export GI_TYPELIB_PATH='${giTypelibPath}'":''${GI_TYPELIB_PATH:-}"
 
             cd "$src_dir"
-            # --with openwakeword: pyproject.toml leaves it commented out
-            # (see the note there about speexdsp-ns wheels), but main.py
-            # imports it, so it must be present at runtime.
-            exec uv run --with openwakeword easyspeak "$@"
+            exec uv run easyspeak "$@"
           '';
         };
       in
@@ -193,10 +188,10 @@
           ++ buildTools;
           shellHook = ''
             # mkShell's setup-hooks pile every Python app's (qutebrowser,
-            # piper-tts, onnxruntime, ...) Python 3.13 site-packages onto
-            # PYTHONPATH. uv inherits that into PEP 517 build subprocesses,
-            # which then mix 3.13 setuptools into a 3.12 build and produce
-            # wheels tagged with the wrong ABI. Strip both to keep uv pure.
+            # piper-tts, onnxruntime, ...) site-packages onto PYTHONPATH. uv
+            # inherits that into PEP 517 build subprocesses, which then mix a
+            # different Python's setuptools into our build and produce wheels
+            # tagged with the wrong ABI. Strip both to keep uv pure.
             unset PYTHONPATH PYTHONHOME
 
             export LD_LIBRARY_PATH='${pkgs.lib.makeLibraryPath runtimeLibs}'":''${LD_LIBRARY_PATH:-}"
@@ -212,7 +207,7 @@
             # git tree lets setuptools_scm derive the proper version.
             export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX="''${SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX:-${pretendVersion}}"
             echo "EasySpeak dev shell — Python $(python --version 2>&1 | awk '{print $2}'), uv $(uv --version | awk '{print $2}')"
-            echo "Run:  uv run [--extra head-tracking] --with openwakeword easyspeak"
+            echo "Run:  uv run [--extra head-tracking] easyspeak"
             echo "      just --list"
           '';
         };

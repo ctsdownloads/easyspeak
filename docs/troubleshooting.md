@@ -80,13 +80,6 @@ chmod +x ~/.local/bin/piper/espeak-ng
 
 ## pip install fails with PyAV/Cython errors
 
-You're on Python 3.14 or 3.13. Use `python3.12` with a venv instead:
-
-```bash
-sudo dnf install python3.12 python3.12-devel
-python3.12 -m venv ~/easyspeak-venv
-source ~/easyspeak-venv/bin/activate
-pip install faster-whisper openwakeword numpy pyaudio
-cd ~/easyspeak
-pip install -e .
-```
+You're on an unsupported Python version. EasySpeak is tested against Python 3.10,
+3.11, 3.12, 3.13, and 3.14 — use one of those. The simplest fix is `uv run
+easyspeak`, which picks a compatible interpreter for you.

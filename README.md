@@ -25,7 +25,7 @@ EasySpeak is **free and open source** (GPL-3.0), **fully local** (no cloud, no a
 - Wake word activation ("Hey Jarvis")
 - Mouse grid and experimental head tracking
 - Browser control, dictation, app launcher, media and system controls
-- OpenWakeWord + Whisper + Piper, all on-device
+- pyopen-wakeword + Whisper + Piper, all on-device
 
 ## Demo
 
@@ -33,11 +33,11 @@ EasySpeak is **free and open source** (GPL-3.0), **fully local** (no cloud, no a
 
 ## Quickstart
 
-Requirements: Linux with GNOME Shell 47+ on Wayland, Python 3.12, a microphone, and ~2 GB disk for models. Tested on Fedora 43.
+Requirements: Linux with GNOME Shell 47+ on Wayland, Python 3.10–3.14 (tested against 3.10, 3.11, 3.12, 3.13, and 3.14), a microphone, and ~2 GB disk for models. Tested on Fedora 43.
 
 ```bash
 # 1. System packages (Fedora; see the docs for the full list)
-sudo dnf install python3.12 python3.12-devel gcc portaudio-devel \
+sudo dnf install python3 python3-devel gcc portaudio-devel \
   pipewire-utils wireplumber at-spi2-core python3-gobject libadwaita qutebrowser \
   glib2 ffmpeg-free pulseaudio-utils sound-theme-freedesktop
 
@@ -47,7 +47,7 @@ cd ~/easyspeak
 uv run easyspeak
 ```
 
-You also need [Piper TTS](https://ctsdownloads.github.io/easyspeak/installation/#3-piper-tts) installed for voice feedback. See the **[Installation guide](https://ctsdownloads.github.io/easyspeak/installation/)** for the venv-based path, head tracking, and full details.
+You also need [Piper TTS](https://ctsdownloads.github.io/easyspeak/installation/#3-piper-tts) installed for voice feedback. See the **[Installation guide](https://ctsdownloads.github.io/easyspeak/installation/)** for the plain-pip alternative, head tracking, and full details.
 
 Prefer prebuilt packages? Grab the `easyspeak` app `.deb`/`.rpm` **plus a language
 pack** (e.g. `easyspeak-lang-en`) from the
@@ -72,7 +72,7 @@ Then say "Hey Jarvis" followed by a command. Say "help" to list all commands.
 
 ## Acknowledgments
 
-- [OpenWakeWord](https://github.com/dscripka/openWakeWord) — Wake word detection
+- [pyopen-wakeword](https://github.com/rhasspy/pyopen-wakeword) — Wake word detection
 - [faster-whisper](https://github.com/guillaumekln/faster-whisper) — Speech recognition
 - [Piper](https://github.com/OHF-Voice/piper1-gpl) — Text-to-speech (we use the last standalone binary from the original [rhasspy/piper](https://github.com/rhasspy/piper) repo)
 - [Talon](https://talonvoice.com/) — Inspiration for voice control concepts

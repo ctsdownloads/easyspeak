@@ -12,7 +12,7 @@ all: codestyle safety test check-docs check-desktop-integration compile-schemas 
 # Remove build artifacts and reports (use -v for verbose, -n for dry-run)
 [group('lifecycle')]
 clean *args:
-    uvx pyclean . {{ args }} --debris all --erase .benchmarks result results.json 'site/**/*' site --yes
+    uvx pyclean . {{ args }} --debris all --erase .benchmarks 'build/**/*' build result results.json 'site/**/*' site --yes
 
 # Run all code style checks (format, lint, js, yaml)
 [group('codestyle')]
@@ -69,13 +69,10 @@ test-js *args:
         --test-coverage-lines=99 --test-coverage-branches=99 --test-coverage-functions=99 \
         --test tests/js/*.test.js {{ args }}
 
-# Run test suite against all supported Python versions, show coverage
+# Run test suite against the given Python versions (default: all supported), show coverage
 [group('tests')]
-test-pythons *args:
-    -UV_PYTHON=3.10 just pytest {{ args }}
-    -UV_PYTHON=3.11 just pytest {{ args }}
-    -UV_PYTHON=3.12 just pytest {{ args }}
-    -UV_PYTHON=3.13 just pytest {{ args }}
+test-pythons *v='3.10 3.11 3.12 3.13 3.14':
+    set -e; for py in {{ v }}; do UV_PYTHON=$py just pytest; done
     just coverage
 
 # Run pytest (use -q for silent, -v for verbose, -s for debug, -x to stop on error)

@@ -15,11 +15,10 @@ from unittest.mock import MagicMock
 import pytest
 
 # easyspeak.core.config imports faster_whisper at module load, and main imports
-# pyaudio/openwakeword. We only need the command-building helpers here, so stub
+# pyaudio/pyopen_wakeword. We only need the command-building helpers here, so stub
 # the heavy deps rather than require a GPU/model just to read an argv list.
 sys.modules["pyaudio"] = MagicMock()
-sys.modules["openwakeword"] = MagicMock()
-sys.modules["openwakeword.model"] = MagicMock()
+sys.modules["pyopen_wakeword"] = MagicMock()
 sys.modules["faster_whisper"] = MagicMock()
 
 
