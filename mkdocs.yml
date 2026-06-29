@@ -5,7 +5,7 @@ site_description: Voice control for Linux desktops. Fully local, no cloud, Wayla
 # path, while the latest docs are published to the site root for clean,
 # version-less URLs. Point site_url (canonical links, sitemap) at that root, so
 # the archived snapshots' canonical URLs reference the latest version.
-site_url: https://ctsdownloads.github.io/easyspeak/
+site_url: https://easyspeak.dev/
 repo_url: https://github.com/ctsdownloads/easyspeak
 repo_name: ctsdownloads/easyspeak
 copyright: Copyright &copy; EasySpeak contributors — GPL-3.0
