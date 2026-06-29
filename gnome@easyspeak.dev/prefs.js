@@ -13,12 +13,20 @@ import Gtk from 'gi://Gtk';
 import { ExtensionPreferences } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {
-    autostartDesktopEntry,
+    setAutostartEnabledInText,
     autostartEnabledFromText,
 } from './extension-helpers.js';
 
 // ~/.config/autostart/easyspeak.desktop, matching core.desktop_integration.
 const AUTOSTART_SUBPATH = ['autostart', 'easyspeak.desktop'];
+
+// Last-resort content, used only when no autostart entry is installed anywhere
+// — e.g. a pip install that never ran `easyspeak --configure autostart` and
+// isn't a deb/rpm with the /etc/xdg copy. The enabled flag is added by
+// setAutostartEnabledInText; the canonical richer entry lives in
+// data/easyspeak-autostart.desktop, which this never duplicates.
+const MINIMAL_AUTOSTART =
+    '[Desktop Entry]\nType=Application\nName=EasySpeak\nExec=easyspeak\n';
 
 const ABOUT = {
     application_name: 'EasySpeak',
@@ -87,12 +95,34 @@ export default class EasySpeakPreferences extends ExtensionPreferences {
         return ok ? autostartEnabledFromText(new TextDecoder().decode(contents)) : true;
     }
 
+    // The content the per-user override is built from: the user's own entry if
+    // it already exists, else the packaged system entry (so its Comment/Icon/…
+    // carry over), else a minimal last resort. Only the enabled flag is then
+    // changed, so the canonical entry stays the single source of truth.
+    _autostartSourceText() {
+        const userFile = this._autostartFile();
+        if (userFile.query_exists(null)) {
+            const [ok, contents] = userFile.load_contents(null);
+            if (ok) return new TextDecoder().decode(contents);
+        }
+        for (const dir of GLib.get_system_config_dirs()) {
+            const sys = Gio.File.new_for_path(
+                GLib.build_filenamev([dir, ...AUTOSTART_SUBPATH]));
+            if (sys.query_exists(null)) {
+                const [ok, contents] = sys.load_contents(null);
+                if (ok) return new TextDecoder().decode(contents);
+            }
+        }
+        return MINIMAL_AUTOSTART;
+    }
+
     _setAutostartEnabled(enabled) {
         const file = this._autostartFile();
         const dir = file.get_parent();
         if (!dir.query_exists(null))
             dir.make_directory_with_parents(null);
-        const data = new TextEncoder().encode(autostartDesktopEntry(enabled));
+        const text = setAutostartEnabledInText(this._autostartSourceText(), enabled);
+        const data = new TextEncoder().encode(text);
         file.replace_contents(
             data, null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null);
     }

@@ -67,18 +67,20 @@ export function quickSettingsCheckedForState(state) {
     return state === 'listening';
 }
 
-// Build the per-user autostart entry (~/.config/autostart/easyspeak.desktop) for
-// the given enabled state. Written with the flag false, it overrides a packaged
-// /etc/xdg/autostart entry of the same name — the way gnome-tweaks disables one.
-export function autostartDesktopEntry(enabled) {
-    return [
-        '[Desktop Entry]',
-        'Type=Application',
-        'Name=EasySpeak',
-        'Exec=easyspeak',
-        `X-GNOME-Autostart-enabled=${enabled ? 'true' : 'false'}`,
-        '',
-    ].join('\n');
+// Set the X-GNOME-Autostart-enabled flag in a .desktop file's text to the given
+// state, returning the new text and leaving every other line untouched. The
+// per-user ~/.config/autostart/easyspeak.desktop is derived this way from the
+// canonical entry (data/easyspeak-autostart.desktop, installed to the user dir
+// or /etc/xdg/autostart), so the content lives in one place; written with the
+// flag false it overrides a packaged entry — the way gnome-tweaks disables one.
+export function setAutostartEnabledInText(text, enabled) {
+    const line = `X-GNOME-Autostart-enabled=${enabled ? 'true' : 'false'}`;
+    const flag = /^X-GNOME-Autostart-enabled\s*=.*$/m;
+    if (flag.test(text)) {
+        return text.replace(flag, line);
+    }
+    // No flag yet: append it as the last key of the (single) [Desktop Entry].
+    return (text.endsWith('\n') ? text : text + '\n') + line + '\n';
 }
 
 // Read the autostart-enabled flag from a .desktop file's text. A missing key
