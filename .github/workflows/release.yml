@@ -13,6 +13,8 @@ jobs:
       id-token: write   # PyPI trusted publishing (OIDC)
     steps:
     - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
     - uses: astral-sh/setup-uv@v7
       with:
         python-version: '3.14'
@@ -23,7 +25,7 @@ jobs:
     - name: Build the Python package
       run: just package
     - name: Verify that package version matches Git tag
-      run: just ensure_version_matches ${{ github.ref_name }}
+      run: just ensure_version_matches ${{ github.event.release.tag_name }}
     - name: Publish package to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
 

@@ -117,10 +117,13 @@ check-links *args: docs
     uvx --from markdown markdown_py CONTRIBUTING.md > build/linkcheck/contributing.html
     # Skip the 404 page (material renders its links absolute from site_url, so they
     # 404 on the filesystem) and bencher.dev (403s every bot); the non-default
-    # user-agent dodges freedesktop's WAF (418 to "Mozilla").
+    # user-agent dodges freedesktop's WAF (418 to "Mozilla"). Skip GitHub compare
+    # links too: the changelog builds one to the tag being released, and GitHub's
+    # /compare endpoint 404s until the freshly pushed tag has propagated.
     uvx linkchecker --check-extern --no-warnings \
         --ignore-url '/404\.html' \
         --ignore-url 'bencher\.dev' \
+        --ignore-url 'github\.com/.*/compare/' \
         --user-agent LinkChecker {{ args }} \
         site/index.html build/linkcheck/readme.html build/linkcheck/contributing.html
 

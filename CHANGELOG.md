@@ -5,6 +5,43 @@ canonical, GitHub-independent record of releases. It is updated once per
 release. The format loosely follows [Keep a Changelog](https://keepachangelog.com/),
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.5.0 · New Domain, Modular Extension · 2026-06-30
+
+**Quick Settings, the easyspeak.dev Domain, and a Modular Extension**
+
+EasySpeak gains a GNOME **Quick Settings toggle** as an alternative to the panel
+tray icon, and the extension's **Settings dialog** grows desktop-integration
+controls and a Website link. Under the hood the wake-word engine is swapped to
+**pyopen-wakeword** and the default Python moves to **3.14**, while spawned
+desktop apps no longer inherit the dev shell's libraries — so the file manager
+and friends launch against their own.
+
+The project also settles into its own **easyspeak.dev** domain everywhere, and
+the GNOME extension moves into a UUID folder (`gnome@easyspeak.dev`), splits from
+a monolith into compositor-only **ES modules** behind a thin entrypoint, and now
+derives its per-user autostart entry from the canonical desktop file instead of a
+drifting copy. Rounding it out: CI is hardened with lint, link-checking, and
+packaging verification; the distro-package checks are grouped behind a single
+build; and the extension-refresh unit no longer fails when its `uv` interpreter
+has vanished.
+
+### What's Changed
+
+- Swap wake-word backend to pyopen-wakeword and bump default Python to 3.14 by @bittner in [#93](https://github.com/ctsdownloads/easyspeak/pull/93)
+- Add a Quick Settings toggle as an alternative to the tray icon by @bittner in [#96](https://github.com/ctsdownloads/easyspeak/pull/96)
+- Add extension Settings dialog, desktop integration, and Website link by @bittner in [#91](https://github.com/ctsdownloads/easyspeak/pull/91)
+- Stop leaking dev-shell libraries into spawned desktop apps by @bittner in [#95](https://github.com/ctsdownloads/easyspeak/pull/95)
+- Use the newly acquired easyspeak.dev domain everywhere by @bittner in [#98](https://github.com/ctsdownloads/easyspeak/pull/98)
+- Move GNOME extension to a UUID folder, rename to gnome@easyspeak.dev by @bittner in [#100](https://github.com/ctsdownloads/easyspeak/pull/100)
+- Split GNOME extension into ES modules; consolidate autostart entry by @bittner in [#101](https://github.com/ctsdownloads/easyspeak/pull/101)
+- Fix extension-refresh unit failing on a vanished uv interpreter by @bittner in [#89](https://github.com/ctsdownloads/easyspeak/pull/89)
+- Harden CI: lint, link check, packaging verification, and release fold by @bittner in [#97](https://github.com/ctsdownloads/easyspeak/pull/97)
+- Group the distro package checks; rename "native" → "distro" by @bittner in [#102](https://github.com/ctsdownloads/easyspeak/pull/102)
+- Add a tray icon and menu screenshot, reduce file sizes by @bittner in [#94](https://github.com/ctsdownloads/easyspeak/pull/94)
+- docs: Show the tray menu and Quick Settings side by side by @bittner in [#99](https://github.com/ctsdownloads/easyspeak/pull/99)
+
+**Full Changelog**: [`0.4.0...0.5.0`](https://github.com/ctsdownloads/easyspeak/compare/0.4.0...0.5.0)
+
 ## 0.4.0 · Packaged and Polished · 2026-06-24
 
 **Native Packages & a Docs Site**
