@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://ctsdownloads.github.io/easyspeak/0.4.0/troubleshooting/">
+        <link rel="canonical" href="https://easyspeak.dev/0.5.0/troubleshooting/">
       
       
         <link rel="prev" href="../plugins/">
@@ -973,17 +973,17 @@
 <h2 id="mouse-grid-failed-to-show-grid-is-extension-enabled">Mouse grid: "Failed to show grid — is extension enabled?"<a class="headerlink" href="#mouse-grid-failed-to-show-grid-is-extension-enabled" title="Permanent link">&para;</a></h2>
 <p>You don't install the extension yourself — EasySpeak does it automatically on
 startup, copying it to
-<code>~/.local/share/gnome-shell/extensions/easyspeak@local/</code> and keeping it up
+<code>~/.local/share/gnome-shell/extensions/gnome@easyspeak.dev/</code> and keeping it up
 to date (look for an <code>easyspeak: installed ...</code> or <code>easyspeak: updated ...</code>
 message). On Wayland, GNOME Shell only scans for new extensions at login, so you
 typically have to <strong>log out and back in</strong> before it becomes loadable.</p>
 <p>After re-login, enable it from the command line:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>gnome-extensions<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>easyspeak@local
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>gnome-extensions<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>gnome@easyspeak.dev
 </code></pre></div>
 <p>…or open the <strong>Extensions</strong> GNOME app and toggle <em>EasySpeak</em> on.</p>
 <p>To remove it later:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>gnome-extensions<span class="w"> </span>disable<span class="w"> </span>easyspeak@local
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>rm<span class="w"> </span>-rf<span class="w"> </span>~/.local/share/gnome-shell/extensions/easyspeak@local
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>gnome-extensions<span class="w"> </span>disable<span class="w"> </span>gnome@easyspeak.dev
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>rm<span class="w"> </span>-rf<span class="w"> </span>~/.local/share/gnome-shell/extensions/gnome@easyspeak.dev
 </code></pre></div>
 <p>…or click the trash icon next to <em>EasySpeak</em> in the Extensions app.</p>
 <h2 id="dictation-not-working">Dictation not working<a class="headerlink" href="#dictation-not-working" title="Permanent link">&para;</a></h2>
@@ -1024,14 +1024,9 @@ these lines to the config module yourself:</p>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>chmod<span class="w"> </span>+x<span class="w"> </span>~/.local/bin/piper/espeak-ng
 </code></pre></div>
 <h2 id="pip-install-fails-with-pyavcython-errors">pip install fails with PyAV/Cython errors<a class="headerlink" href="#pip-install-fails-with-pyavcython-errors" title="Permanent link">&para;</a></h2>
-<p>You're on Python 3.14 or 3.13. Use <code>python3.12</code> with a venv instead:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>python3.12<span class="w"> </span>python3.12-devel
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>python3.12<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>~/easyspeak-venv
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nb">source</span><span class="w"> </span>~/easyspeak-venv/bin/activate
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>pip<span class="w"> </span>install<span class="w"> </span>faster-whisper<span class="w"> </span>openwakeword<span class="w"> </span>numpy<span class="w"> </span>pyaudio
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="nb">cd</span><span class="w"> </span>~/easyspeak
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
-</code></pre></div>
+<p>You're on an unsupported Python version. EasySpeak is tested against Python 3.10,
+3.11, 3.12, 3.13, and 3.14 — use one of those. The simplest fix is <code>uv run
+easyspeak</code>, which picks a compatible interpreter for you.</p>
 
 
 

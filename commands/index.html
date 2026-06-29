@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://ctsdownloads.github.io/easyspeak/0.4.0/commands/">
+        <link rel="canonical" href="https://easyspeak.dev/0.5.0/commands/">
       
       
         <link rel="prev" href="../screenshots/">
@@ -1332,11 +1332,13 @@ until you're over your target, then <strong>"click"</strong>.</p>
 </table>
 <p>Default apps live in <a href="https://github.com/ctsdownloads/easyspeak/blob/HEAD/src/plugins/apps.py"><code>plugins/apps.py</code></a>
 (edit to match your system): firefox, steam, spotify, calculator, settings,
-files, terminal, browser, music player, and more. Some accept spoken aliases —
+terminal, browser, music player, and more. Some accept spoken aliases —
 e.g. "open music app" works the same as "open music player".</p>
 <p>"Open terminal" and "close terminal" are special: they open and close your
 system's default terminal, whichever one that is, rather than a fixed app.</p>
 <h2 id="files">Files<a class="headerlink" href="#files" title="Permanent link">&para;</a></h2>
+<p>Folders open in whatever file manager your desktop is configured for (via
+<code>xdg-open</code>).</p>
 <table>
 <thead>
 <tr>
@@ -1345,6 +1347,10 @@ system's default terminal, whichever one that is, rather than a fixed app.</p>
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>open files / file manager</td>
+<td>Open your default file manager (at <code>$HOME</code>)</td>
+</tr>
 <tr>
 <td>open documents</td>
 <td>Open Documents folder</td>
@@ -1454,7 +1460,7 @@ them.</p>
 </tr>
 <tr>
 <td>go to sleep / stop listening</td>
-<td>Release the mic (reactivate from the tray icon)</td>
+<td>Release the mic (reactivate from the tray icon or the Quick Settings toggle)</td>
 </tr>
 <tr>
 <td>quit / exit / goodbye</td>

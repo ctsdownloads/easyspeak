@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://ctsdownloads.github.io/easyspeak/0.4.0/changelog/">
+        <link rel="canonical" href="https://easyspeak.dev/0.5.0/changelog/">
       
       
         <link rel="prev" href="../contributing/">
@@ -713,6 +713,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#050-new-domain-modular-extension-2026-06-30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.5.0 · New Domain, Modular Extension · 2026-06-30
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.5.0 · New Domain, Modular Extension · 2026-06-30">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#040-packaged-and-polished-2026-06-24" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -725,7 +753,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#whats-changed" class="md-nav__link">
+  <a href="#whats-changed_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         What's Changed
@@ -753,7 +781,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#whats-changed_1" class="md-nav__link">
+  <a href="#whats-changed_2" class="md-nav__link">
     <span class="md-ellipsis">
       
         What's Changed
@@ -781,7 +809,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#whats-changed_2" class="md-nav__link">
+  <a href="#whats-changed_3" class="md-nav__link">
     <span class="md-ellipsis">
       
         What's Changed
@@ -820,7 +848,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#whats-changed_3" class="md-nav__link">
+  <a href="#whats-changed_4" class="md-nav__link">
     <span class="md-ellipsis">
       
         What's Changed
@@ -908,6 +936,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#050-new-domain-modular-extension-2026-06-30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.5.0 · New Domain, Modular Extension · 2026-06-30
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.5.0 · New Domain, Modular Extension · 2026-06-30">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#040-packaged-and-polished-2026-06-24" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -920,7 +976,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#whats-changed" class="md-nav__link">
+  <a href="#whats-changed_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         What's Changed
@@ -948,7 +1004,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#whats-changed_1" class="md-nav__link">
+  <a href="#whats-changed_2" class="md-nav__link">
     <span class="md-ellipsis">
       
         What's Changed
@@ -976,7 +1032,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#whats-changed_2" class="md-nav__link">
+  <a href="#whats-changed_3" class="md-nav__link">
     <span class="md-ellipsis">
       
         What's Changed
@@ -1015,7 +1071,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#whats-changed_3" class="md-nav__link">
+  <a href="#whats-changed_4" class="md-nav__link">
     <span class="md-ellipsis">
       
         What's Changed
@@ -1070,6 +1126,38 @@ pymdownx.snippets, so the root file stays the single source of truth.
 canonical, GitHub-independent record of releases. It is updated once per
 release. The format loosely follows <a href="https://keepachangelog.com/">Keep a Changelog</a>,
 and the project adheres to <a href="https://semver.org/">Semantic Versioning</a>.</p>
+<h2 id="050-new-domain-modular-extension-2026-06-30">0.5.0 · New Domain, Modular Extension · 2026-06-30<a class="headerlink" href="#050-new-domain-modular-extension-2026-06-30" title="Permanent link">&para;</a></h2>
+<p><strong>Quick Settings, the easyspeak.dev Domain, and a Modular Extension</strong></p>
+<p>EasySpeak gains a GNOME <strong>Quick Settings toggle</strong> as an alternative to the panel
+tray icon, and the extension's <strong>Settings dialog</strong> grows desktop-integration
+controls and a Website link. Under the hood the wake-word engine is swapped to
+<strong>pyopen-wakeword</strong> and the default Python moves to <strong>3.14</strong>, while spawned
+desktop apps no longer inherit the dev shell's libraries — so the file manager
+and friends launch against their own.</p>
+<p>The project also settles into its own <strong>easyspeak.dev</strong> domain everywhere, and
+the GNOME extension moves into a UUID folder (<code>gnome@easyspeak.dev</code>), splits from
+a monolith into compositor-only <strong>ES modules</strong> behind a thin entrypoint, and now
+derives its per-user autostart entry from the canonical desktop file instead of a
+drifting copy. Rounding it out: CI is hardened with lint, link-checking, and
+packaging verification; the distro-package checks are grouped behind a single
+build; and the extension-refresh unit no longer fails when its <code>uv</code> interpreter
+has vanished.</p>
+<h3 id="whats-changed">What's Changed<a class="headerlink" href="#whats-changed" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Swap wake-word backend to pyopen-wakeword and bump default Python to 3.14 by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/93">#93</a></li>
+<li>Add a Quick Settings toggle as an alternative to the tray icon by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/96">#96</a></li>
+<li>Add extension Settings dialog, desktop integration, and Website link by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/91">#91</a></li>
+<li>Stop leaking dev-shell libraries into spawned desktop apps by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/95">#95</a></li>
+<li>Use the newly acquired easyspeak.dev domain everywhere by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/98">#98</a></li>
+<li>Move GNOME extension to a UUID folder, rename to gnome@easyspeak.dev by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/100">#100</a></li>
+<li>Split GNOME extension into ES modules; consolidate autostart entry by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/101">#101</a></li>
+<li>Fix extension-refresh unit failing on a vanished uv interpreter by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/89">#89</a></li>
+<li>Harden CI: lint, link check, packaging verification, and release fold by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/97">#97</a></li>
+<li>Group the distro package checks; rename "native" → "distro" by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/102">#102</a></li>
+<li>Add a tray icon and menu screenshot, reduce file sizes by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/94">#94</a></li>
+<li>docs: Show the tray menu and Quick Settings side by side by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/99">#99</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/ctsdownloads/easyspeak/compare/0.4.0...0.5.0"><code>0.4.0...0.5.0</code></a></p>
 <h2 id="040-packaged-and-polished-2026-06-24">0.4.0 · Packaged and Polished · 2026-06-24<a class="headerlink" href="#040-packaged-and-polished-2026-06-24" title="Permanent link">&para;</a></h2>
 <p><strong>Native Packages &amp; a Docs Site</strong></p>
 <p>EasySpeak now ships as native Debian (<code>.deb</code>) and Fedora (<code>.rpm</code>) packages, with
@@ -1086,7 +1174,7 @@ now when an audio device or gdbus is missing. Rounding it out is a hosted MkDocs
 and Material documentation site on GitHub Pages — complete with screenshots and
 Git-LFS-tracked media — while CI is streamlined onto <code>main</code> as the <code>dev</code> branch
 is phased out.</p>
-<h3 id="whats-changed">What's Changed<a class="headerlink" href="#whats-changed" title="Permanent link">&para;</a></h3>
+<h3 id="whats-changed_1">What's Changed<a class="headerlink" href="#whats-changed_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li>feat(packaging): native <code>.deb</code>/<code>.rpm</code> with split language data by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/77">#77</a></li>
 <li>Make dictation work: provide the AT-SPI backend and report failures honestly by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/69">#69</a></li>
@@ -1120,7 +1208,7 @@ system calls. The interaction model grew more conversational too: it keeps
 listening between commands without repeating the wake word, handles "stop"
 gracefully instead of quitting, and gives friendlier misunderstanding feedback
 — backed by new integration/acceptance test tiers and a 99% coverage floor.</p>
-<h3 id="whats-changed_1">What's Changed<a class="headerlink" href="#whats-changed_1" title="Permanent link">&para;</a></h3>
+<h3 id="whats-changed_2">What's Changed<a class="headerlink" href="#whats-changed_2" title="Permanent link">&para;</a></h3>
 <ul>
 <li>feat(apps): add more GNOME apps, handle default terminal by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/57">#57</a></li>
 <li>perf(tts): load the voice model once via a persistent piper process by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/56">#56</a></li>
@@ -1140,7 +1228,7 @@ Piper TTS model path configurable, auto-installs the MouseGrid GNOME extension o
 first run, and adds Whisper transcription-latency benchmarks. Config handling was
 extracted into its own module and host-environment setup moved into the plugins,
 tidying the codebase alongside steady dependency and security-workflow upkeep.</p>
-<h3 id="whats-changed_2">What's Changed<a class="headerlink" href="#whats-changed_2" title="Permanent link">&para;</a></h3>
+<h3 id="whats-changed_3">What's Changed<a class="headerlink" href="#whats-changed_3" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Allow installing on Python 3.13, pin deps for 3.10 by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/33">#33</a></li>
 <li>Add Python package version badge to README by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/34">#34</a></li>
@@ -1175,7 +1263,7 @@ dictation, and an app launcher — no cloud and no accounts. This release also l
 the project's engineering foundation: a clean <code>src</code> layout, a GHA CI pipeline for
 linting, typing, tests, and an automated PyPI publish, and a first suite of unit
 tests covering the core engine, CLI, and browser plugin.</p>
-<h3 id="whats-changed_3">What's Changed<a class="headerlink" href="#whats-changed_3" title="Permanent link">&para;</a></h3>
+<h3 id="whats-changed_4">What's Changed<a class="headerlink" href="#whats-changed_4" title="Permanent link">&para;</a></h3>
 <ul>
 <li>chore(gitignore): change gitignore file to <code>.gitignore</code> and remove pre-compiled python assets by @tulilirockz in <a href="https://github.com/ctsdownloads/easyspeak/pull/11">#11</a></li>
 <li>Add a Justfile, draft packaging setup, contributing docs by @bittner in <a href="https://github.com/ctsdownloads/easyspeak/pull/14">#14</a></li>

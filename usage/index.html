@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://ctsdownloads.github.io/easyspeak/0.4.0/usage/">
+        <link rel="canonical" href="https://easyspeak.dev/0.5.0/usage/">
       
       
         <link rel="prev" href="../packaging/">
@@ -838,11 +838,14 @@
 
 
 <h1 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h1>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">source</span><span class="w"> </span>~/easyspeak-venv/bin/activate<span class="w">   </span><span class="c1"># Now python = venv&#39;s python3.12</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>easyspeak<span class="w">                              </span><span class="c1"># the project execution script</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>uv<span class="w"> </span>run<span class="w"> </span>easyspeak
 </code></pre></div>
-<p>Activate the venv each time you open a new terminal. With <code>uv</code>, just run
-<code>uv run easyspeak</code> and it manages the environment for you.</p>
+<p>uv manages the environment for you. If you installed into a plain virtual
+environment instead, activate it each time you open a new terminal and run the
+script directly:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">source</span><span class="w"> </span>~/easyspeak-venv/bin/activate
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>easyspeak
+</code></pre></div>
 <p>Say "Hey Jarvis" followed by a command. After a command that gives no spoken
 reply (such as volume changes), EasySpeak keeps listening for a few seconds so
 you can chain commands — say "louder", "louder", "louder" without repeating the
