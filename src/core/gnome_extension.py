@@ -43,6 +43,10 @@ SUBPROCESS_TIMEOUT = 5.0
 EXTENSION_ASSETS = (
     "extension.js",
     "extension-helpers.js",
+    "grid.js",
+    "windows.js",
+    "screenshot.js",
+    "indicator.js",
     "prefs.js",
     "metadata.json",
     "schemas/org.gnome.shell.extensions.easyspeak.gschema.xml",
