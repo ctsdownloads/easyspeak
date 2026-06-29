@@ -31,7 +31,7 @@ lint *args=('--statistics'):
 # Lint the GNOME Shell extension JS (use --fix to autocorrect)
 [group('codestyle')]
 lint-js *args:
-    eslint 'gnome@easyspeak.dev/extension.js' 'gnome@easyspeak.dev/extension-helpers.js' 'gnome@easyspeak.dev/prefs.js' {{ args }}
+    eslint 'gnome@easyspeak.dev/*.js' {{ args }}
 
 # Check YAML formatting: minimal indent, final newline (config in .yamllint.yaml)
 [group('codestyle')]

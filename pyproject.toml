@@ -206,6 +206,10 @@ packages = [
 "easyspeak.gnome" = [
   "extension.js",
   "extension-helpers.js",
+  "grid.js",
+  "windows.js",
+  "screenshot.js",
+  "indicator.js",
   "prefs.js",
   "metadata.json",
   "schemas/*.gschema.xml",
