@@ -1,10 +1,8 @@
-"""Marks the GNOME Shell extension folder as the `easyspeak.gnome` package.
+"""GNOME Shell extension, packaged as `easyspeak.gnome` (via pyproject.toml).
 
-The extension's own sources (`extension.js`, `prefs.js`, `metadata.json`, the
-`schemas/`) live here, in a top-level folder named after the extension's UUID so
-newcomers find them without digging through the Python `src/` tree. Packaging maps
-this folder to the `easyspeak.gnome` package (see `pyproject.toml`) so the files
-ship in the wheel as package data; `core.gnome_extension.extension_source_dir`
-resolves them by package name. This file is never copied into the installed
-extension — only the assets in `EXTENSION_ASSETS` are.
+Top-level folder named after the extension's UUID for easy spotting,
+contains extension source files (JavaScript, JSON, and XML-based schemas).
+Shipped as package data by the Python wheel;
+`core.gnome_extension.extension_source_dir` resolves them by package name.
+Only assets in `EXTENSION_ASSETS` are copied into the installed extension.
 """

@@ -96,6 +96,7 @@ unittest = [
 easyspeak = "easyspeak.core.cli:run"
 
 [project.urls]
+"Homepage" = "https://easyspeak.dev"
 "Source Code" = "https://github.com/ctsdownloads/easyspeak"
 
 [tool.coverage.report]
@@ -198,9 +199,6 @@ packages = [
 [tool.setuptools.package-dir]
 "easyspeak" = "src"
 "easyspeak.data" = "data"
-# The GNOME extension lives in a top-level folder named after its UUID (so it's
-# easy to find), mapped here to the easyspeak.gnome package so its assets ship in
-# the wheel; core.gnome_extension resolves them by that package name.
 "easyspeak.gnome" = "gnome@easyspeak.dev"
 
 [tool.setuptools.package-data]
