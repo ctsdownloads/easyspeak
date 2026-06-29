@@ -7,7 +7,7 @@
 
 # Run codestyle and safety checks, tests, packaging, docs, and cleanup
 [group('lifecycle')]
-all: codestyle safety test check-docs check-desktop-integration compile-schemas check-python-packages check-native-packages clean
+all: codestyle safety test check-docs check-desktop-integration compile-schemas check-python-packages check-distro-packages clean
 
 # Remove build artifacts and reports (use -v for verbose, -n for dry-run)
 [group('lifecycle')]
@@ -151,17 +151,17 @@ docs-publish *args:
 
 # Build the Debian package and verify its contents
 [group('release')]
-check-deb-package: (package-native)
+check-deb-package: (package-distro)
     bash tests/packaging/test_deb.sh
 
 # Build the RedHat package and verify its contents
 [group('release')]
-check-rpm-package: (package-native)
+check-rpm-package: (package-distro)
     bash tests/packaging/test_rpm.sh
 
-# Build the native packages once (just dedupes package-native), check deb and rpm
+# Build the distro packages once (just dedupes package-distro), check deb and rpm
 [group('release')]
-check-native-packages: check-deb-package check-rpm-package
+check-distro-packages: check-deb-package check-rpm-package
 
 # Build the wheel and sdist, then verify their contents
 [group('release')]
@@ -215,5 +215,5 @@ stage-lang code:
 
 # Build .deb and .rpm locally in a clean ubuntu container -> ./dist
 [group('packaging')]
-package-native version='0.0.0':
+package-distro version='0.0.0':
     bash packaging/build-in-docker.sh {{ version }}

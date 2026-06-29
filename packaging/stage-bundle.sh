@@ -4,7 +4,7 @@
 # `easyspeak-lang-*` packages (see packaging/stage-lang.sh).
 #
 # Runs in a clean glibc build environment (CI ubuntu-latest, or a container — see
-# `just package-native`), NOT on the host directly. It materialises a standalone
+# `just package-distro`), NOT on the host directly. It materialises a standalone
 # CPython + venv at PREFIX; PREFIX must equal the final install path so the venv's
 # absolute paths (shebangs, interpreter symlinks) stay valid on the target machine.
 set -euo pipefail

@@ -34,7 +34,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Build .deb and .rpm
-      # Reuses the same containerised build as `just package-native`, so local
+      # Reuses the same containerised build as `just package-distro`, so local
       # and CI builds are byte-for-byte the same path. Strips a leading "v".
       run: |
         tag='${{ github.event.release.tag_name }}'
