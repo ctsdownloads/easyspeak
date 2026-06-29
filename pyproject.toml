@@ -165,6 +165,7 @@ ignore = [
 ]
 "src/plugins/00_*.py" = ["N999"]    # numeric prefix sets plugin load order
 "src/plugins/zz_base.py" = ["N999"] # zz_ prefix loads the base plugin last
+"gnome@easyspeak.dev/__init__.py" = ["N999"] # folder is the extension UUID, not a module name
 "tests/**" = [
   "S101",    # asserts are the whole point of a test
   "D",       # docstrings enforced on src/, not on tests
@@ -191,14 +192,20 @@ packages = [
   "easyspeak.core",
   "easyspeak.plugins",
   "easyspeak.data",
+  "easyspeak.gnome",
 ]
 
 [tool.setuptools.package-dir]
 "easyspeak" = "src"
 "easyspeak.data" = "data"
+# The GNOME extension lives in a top-level folder named after its UUID (so it's
+# easy to find), mapped here to the easyspeak.gnome package so its assets ship in
+# the wheel; core.gnome_extension resolves them by that package name.
+"easyspeak.gnome" = "gnome@easyspeak.dev"
 
 [tool.setuptools.package-data]
-"easyspeak" = [
+"easyspeak.data" = ["*"]
+"easyspeak.gnome" = [
   "extension.js",
   "extension-helpers.js",
   "prefs.js",
@@ -206,7 +213,6 @@ packages = [
   "schemas/*.gschema.xml",
   "schemas/gschemas.compiled",
 ]
-"easyspeak.data" = ["*"]
 
 [tool.setuptools_scm]
 local_scheme = "no-local-version"

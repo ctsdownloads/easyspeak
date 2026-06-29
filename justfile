@@ -31,7 +31,7 @@ lint *args=('--statistics'):
 # Lint the GNOME Shell extension JS (use --fix to autocorrect)
 [group('codestyle')]
 lint-js *args:
-    eslint src/extension.js src/extension-helpers.js src/prefs.js {{ args }}
+    eslint 'gnome@easyspeak.dev/extension.js' 'gnome@easyspeak.dev/extension-helpers.js' 'gnome@easyspeak.dev/prefs.js' {{ args }}
 
 # Check YAML formatting: minimal indent, final newline (config in .yamllint.yaml)
 [group('codestyle')]
@@ -65,7 +65,7 @@ test: test-js pytest coverage integration acceptance
 # Unit-test the GNOME Shell extension's pure JS helpers (needs node >= 22.5)
 [group('tests')]
 test-js *args:
-    node --experimental-test-coverage --test-coverage-include='src/**' \
+    node --experimental-test-coverage --test-coverage-include='gnome@easyspeak.dev/**' \
         --test-coverage-lines=99 --test-coverage-branches=99 --test-coverage-functions=99 \
         --test tests/js/*.test.js {{ args }}
 
@@ -197,7 +197,7 @@ check-desktop-integration:
 # Recompile the bundled GSettings schema after editing the .gschema.xml
 [group('packaging')]
 compile-schemas:
-    glib-compile-schemas --strict src/schemas
+    glib-compile-schemas --strict 'gnome@easyspeak.dev/schemas'
 
 # Build the /opt/easyspeak app bundle (CI/container only, not the host)
 [group('packaging')]

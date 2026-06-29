@@ -14,12 +14,13 @@ All processing happens locally. No data leaves your machine.
 ```
 easyspeak/
 ├── pyproject.toml
-├── src
-│   ├── extension.js           # GNOME Shell extension (bundled as package data)
+├── gnome@easyspeak.dev        # GNOME Shell extension (UUID-named, shipped as package data)
+│   ├── extension.js           # The extension itself
 │   ├── extension-helpers.js   # Pure JS helpers imported by extension.js
 │   ├── prefs.js               # Extension Settings dialog (autostart, Quick Settings)
 │   ├── metadata.json          # Extension metadata
-│   ├── schemas                # GSettings schema (+ compiled) for the settings
+│   └── schemas                # GSettings schema (+ compiled) for the settings
+├── src
 │   ├── core
 │   │   ├── __init__.py
 │   │   ├── __main__.py
@@ -58,7 +59,7 @@ extensions directory (unless GNOME already sees it via a system-wide install).
 Files copied:
 
 ```
-~/.local/share/gnome-shell/extensions/easyspeak@local/
+~/.local/share/gnome-shell/extensions/gnome@easyspeak.dev/
 ├── extension.js
 ├── extension-helpers.js
 ├── prefs.js

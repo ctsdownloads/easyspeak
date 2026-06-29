@@ -11,7 +11,7 @@ import {
     quickSettingsCheckedForState,
     autostartDesktopEntry,
     autostartEnabledFromText,
-} from '../../src/extension-helpers.js';
+} from '../../gnome@easyspeak.dev/extension-helpers.js';
 
 test('clampToWorkArea returns the rectangle unchanged without a work area', () => {
     assert.deepEqual(clampToWorkArea(10, 20, 30, 40, null), [10, 20, 30, 40]);

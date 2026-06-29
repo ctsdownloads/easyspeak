@@ -24,10 +24,11 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-EXTENSION_UUID = "easyspeak@local"
-# Pre-rename UUID (the extension was "easyspeak-grid@local" when it was just a
-# mouse grid). A leftover copy is cleaned up at startup; see migrate_legacy_extension.
-LEGACY_EXTENSION_UUID = "easyspeak-grid@local"
+EXTENSION_UUID = "gnome@easyspeak.dev"
+# UUIDs the extension shipped under before the rename to gnome@easyspeak.dev:
+# easyspeak-grid@local when it was just a mouse grid, then easyspeak@local. A
+# leftover copy under either is cleaned up at startup; see migrate_legacy_extensions.
+LEGACY_EXTENSION_UUIDS = ("easyspeak-grid@local", "easyspeak@local")
 REFRESH_UNIT_NAME = "easyspeak-extension-refresh.service"
 REFRESH_UNIT_TEMPLATE = REFRESH_UNIT_NAME + ".in"  # packaged template file
 PRE_SHELL_TARGET = "gnome-session-pre.target"  # reached before org.gnome.Shell@*
@@ -61,12 +62,14 @@ class RefreshResult(enum.Enum):
 
 
 def extension_source_dir():
-    """Return the package dir holding the bundled assets.
+    """Return the directory holding the bundled extension assets.
 
-    Resolved relative to this module (`src/`) so it works in both editable and wheel
-    installs.
+    The extension's sources live in the top-level `gnome@easyspeak.dev/` folder,
+    shipped in the wheel as the `easyspeak.gnome` package. Resolving by package
+    name works in both editable and wheel installs, where that folder sits in
+    different places relative to this module.
     """
-    return Path(__file__).resolve().parents[1]
+    return Path(resources.files("easyspeak.gnome"))
 
 
 def extensions_root():
@@ -291,38 +294,42 @@ def install_refresh_unit():
     )
 
 
-def migrate_legacy_extension():
-    """Remove the pre-rename extension install so it can't double-load.
+def migrate_legacy_extensions():
+    """Remove any pre-rename extension install so it can't double-load.
 
-    The extension's UUID changed from `easyspeak-grid@local` to
-    `easyspeak@local` (it long outgrew being just a mouse grid). A leftover
-    copy under the old UUID would stay enabled and add a second panel indicator
-    and grid that the daemon no longer drives, so clean it up: disable it (so
-    GNOME drops it from the enabled set) then delete its directory. Best-effort
-    throughout — returns True if a legacy install was found and removed.
+    The extension's UUID changed over time — `easyspeak-grid@local` (when it was
+    just a mouse grid), then `easyspeak@local`, now `gnome@easyspeak.dev`. A
+    leftover copy under an old UUID would stay enabled and add a second panel
+    indicator and grid that the daemon no longer drives, so clean each up:
+    disable it (so GNOME drops it from the enabled set) then delete its
+    directory. Best-effort throughout — returns True if any legacy install was
+    found and removed.
 
     One-off migration shim: once users have had a release or two to upgrade past
-    `easyspeak-grid@local` this can be removed (call site and tests included).
+    the old UUIDs this can be removed (call site and tests included).
     """
-    legacy_dir = extensions_root() / LEGACY_EXTENSION_UUID
-    if not legacy_dir.is_dir():
-        return False
-    with contextlib.suppress(OSError, subprocess.TimeoutExpired):
-        subprocess.run(
-            ["gnome-extensions", "disable", LEGACY_EXTENSION_UUID],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=SUBPROCESS_TIMEOUT,
+    removed = False
+    for uuid in LEGACY_EXTENSION_UUIDS:
+        legacy_dir = extensions_root() / uuid
+        if not legacy_dir.is_dir():
+            continue
+        with contextlib.suppress(OSError, subprocess.TimeoutExpired):
+            subprocess.run(
+                ["gnome-extensions", "disable", uuid],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=SUBPROCESS_TIMEOUT,
+            )
+        shutil.rmtree(legacy_dir, ignore_errors=True)
+        logger.info(
+            "removed the legacy %s extension (renamed to %s) — log out and back "
+            "in to load the new one",
+            uuid,
+            EXTENSION_UUID,
         )
-    shutil.rmtree(legacy_dir, ignore_errors=True)
-    logger.info(
-        "removed the legacy %s extension (renamed to %s) — log out and back in "
-        "to load the new one",
-        LEGACY_EXTENSION_UUID,
-        EXTENSION_UUID,
-    )
-    return True
+        removed = True
+    return removed
 
 
 def ensure_extension():
@@ -348,7 +355,7 @@ def activate_extension():
     if shutil.which("gnome-extensions") is None:
         return
 
-    migrate_legacy_extension()
+    migrate_legacy_extensions()
 
     try:
         listed = subprocess.run(
