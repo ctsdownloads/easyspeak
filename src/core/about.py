@@ -21,7 +21,7 @@ COMMENTS = "Voice control for Linux desktops. Fully local, no cloud, Wayland-nat
 COPYRIGHT = "© Matt Hartley and the EasySpeak contributors"
 
 REPO_URL = "https://github.com/ctsdownloads/easyspeak"
-DOCS_URL = "https://ctsdownloads.github.io/easyspeak/"
+DOCS_URL = "https://easyspeak.dev/"
 ISSUES_URL = "https://github.com/ctsdownloads/easyspeak/issues"
 DISCUSSIONS_URL = "https://github.com/ctsdownloads/easyspeak/discussions"
 

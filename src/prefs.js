@@ -26,7 +26,7 @@ const ABOUT = {
     developer_name: 'Matt Hartley',
     comments:
         'Voice control for Linux desktops. Fully local, no cloud, Wayland-native.',
-    website: 'https://ctsdownloads.github.io/easyspeak/',
+    website: 'https://easyspeak.dev/',
     issue_url: 'https://github.com/ctsdownloads/easyspeak/issues',
     copyright: '© Matt Hartley and the EasySpeak contributors',
 };

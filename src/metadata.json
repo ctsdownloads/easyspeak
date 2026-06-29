@@ -1,7 +1,7 @@
 {
   "name": "EasySpeak",
   "description": "Voice control for Linux — panel indicator and on-screen surfaces.",
-  "url": "https://ctsdownloads.github.io/easyspeak/",
+  "url": "https://easyspeak.dev/",
   "uuid": "easyspeak@local",
   "shell-version": ["47", "48", "49", "50"],
   "settings-schema": "org.gnome.shell.extensions.easyspeak",
