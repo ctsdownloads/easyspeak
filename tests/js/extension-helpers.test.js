@@ -9,7 +9,7 @@ import {
     gridGeometry,
     indicatorVisibleForState,
     quickSettingsCheckedForState,
-    autostartDesktopEntry,
+    setAutostartEnabledInText,
     autostartEnabledFromText,
 } from '../../gnome@easyspeak.dev/extension-helpers.js';
 
@@ -103,15 +103,39 @@ test('quickSettingsCheckedForState and indicatorVisibleForState never agree', ()
     }
 });
 
-test('autostartDesktopEntry renders an enabled entry', () => {
-    const text = autostartDesktopEntry(true);
-    assert.match(text, /^\[Desktop Entry\]/);
-    assert.match(text, /^Exec=easyspeak$/m);
-    assert.match(text, /^X-GNOME-Autostart-enabled=true$/m);
+test('setAutostartEnabledInText flips an existing flag, preserving other lines', () => {
+    const src = '[Desktop Entry]\nName=EasySpeak\nIcon=audio-input-microphone\n' +
+        'X-GNOME-Autostart-enabled=true\n';
+    const out = setAutostartEnabledInText(src, false);
+    assert.match(out, /^X-GNOME-Autostart-enabled=false$/m);
+    assert.doesNotMatch(out, /enabled=true/);
+    // Canonical fields carry over untouched, not re-authored.
+    assert.match(out, /^Icon=audio-input-microphone$/m);
 });
 
-test('autostartDesktopEntry renders a disabled entry', () => {
-    assert.match(autostartDesktopEntry(false), /^X-GNOME-Autostart-enabled=false$/m);
+test('setAutostartEnabledInText flips a disabled flag back to enabled', () => {
+    assert.match(
+        setAutostartEnabledInText('X-GNOME-Autostart-enabled=false\n', true),
+        /^X-GNOME-Autostart-enabled=true$/m);
+});
+
+test('setAutostartEnabledInText appends the flag when none is present', () => {
+    const out = setAutostartEnabledInText('[Desktop Entry]\nExec=easyspeak\n', false);
+    assert.match(out, /^Exec=easyspeak$/m);
+    assert.match(out, /^X-GNOME-Autostart-enabled=false$/m);
+});
+
+test('setAutostartEnabledInText adds a newline before an appended flag', () => {
+    // Source without a trailing newline must not run the flag onto the last line.
+    const out = setAutostartEnabledInText('[Desktop Entry]', true);
+    assert.match(out, /^\[Desktop Entry\]$/m);
+    assert.match(out, /^X-GNOME-Autostart-enabled=true$/m);
+});
+
+test('setAutostartEnabledInText round-trips through autostartEnabledFromText', () => {
+    const src = '[Desktop Entry]\nExec=easyspeak\n';
+    assert.equal(autostartEnabledFromText(setAutostartEnabledInText(src, true)), true);
+    assert.equal(autostartEnabledFromText(setAutostartEnabledInText(src, false)), false);
 });
 
 test('autostartEnabledFromText reads an explicit false as disabled', () => {
