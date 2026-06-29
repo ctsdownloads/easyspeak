@@ -15,6 +15,7 @@ import { ExtensionPreferences } from 'resource:///org/gnome/Shell/Extensions/js/
 import {
     setAutostartEnabledInText,
     autostartEnabledFromText,
+    pickAutostartSource,
 } from './extension-helpers.js';
 
 // ~/.config/autostart/easyspeak.desktop, matching core.desktop_integration.
@@ -95,25 +96,23 @@ export default class EasySpeakPreferences extends ExtensionPreferences {
         return ok ? autostartEnabledFromText(new TextDecoder().decode(contents)) : true;
     }
 
-    // The content the per-user override is built from: the user's own entry if
-    // it already exists, else the packaged system entry (so its Comment/Icon/…
-    // carry over), else a minimal last resort. Only the enabled flag is then
-    // changed, so the canonical entry stays the single source of truth.
+    // Text of a .desktop file, or null when it's absent or unreadable.
+    _readText(file) {
+        if (!file.query_exists(null))
+            return null;
+        const [ok, contents] = file.load_contents(null);
+        return ok ? new TextDecoder().decode(contents) : null;
+    }
+
+    // The content the per-user override is built from: the user's own entry, the
+    // packaged system entries, or a minimal last resort — pickAutostartSource
+    // decides; here we only read the candidate files.
     _autostartSourceText() {
-        const userFile = this._autostartFile();
-        if (userFile.query_exists(null)) {
-            const [ok, contents] = userFile.load_contents(null);
-            if (ok) return new TextDecoder().decode(contents);
-        }
-        for (const dir of GLib.get_system_config_dirs()) {
-            const sys = Gio.File.new_for_path(
-                GLib.build_filenamev([dir, ...AUTOSTART_SUBPATH]));
-            if (sys.query_exists(null)) {
-                const [ok, contents] = sys.load_contents(null);
-                if (ok) return new TextDecoder().decode(contents);
-            }
-        }
-        return MINIMAL_AUTOSTART;
+        const userText = this._readText(this._autostartFile());
+        const systemTexts = GLib.get_system_config_dirs().map((dir) =>
+            this._readText(Gio.File.new_for_path(
+                GLib.build_filenamev([dir, ...AUTOSTART_SUBPATH]))));
+        return pickAutostartSource(userText, systemTexts, MINIMAL_AUTOSTART);
     }
 
     _setAutostartEnabled(enabled) {
