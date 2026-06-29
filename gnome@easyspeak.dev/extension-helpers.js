@@ -90,3 +90,12 @@ export function autostartEnabledFromText(text) {
     const match = text.match(/^X-GNOME-Autostart-enabled\s*=\s*(\S+)/m);
     return match ? match[1].toLowerCase() !== 'false' : true;
 }
+
+// Choose the text the per-user autostart override is built from. The user's own
+// entry wins, so a hand-edited file is preserved; otherwise the first packaged
+// system entry found (whose Comment/Icon/… then carry over); otherwise the
+// minimal fallback. `userText` and each `systemTexts` entry are a file's text,
+// or null when it is absent or unreadable.
+export function pickAutostartSource(userText, systemTexts, fallback) {
+    return userText ?? systemTexts.find((text) => text != null) ?? fallback;
+}

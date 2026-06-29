@@ -11,6 +11,7 @@ import {
     quickSettingsCheckedForState,
     setAutostartEnabledInText,
     autostartEnabledFromText,
+    pickAutostartSource,
 } from '../../gnome@easyspeak.dev/extension-helpers.js';
 
 test('clampToWorkArea returns the rectangle unchanged without a work area', () => {
@@ -148,4 +149,17 @@ test('autostartEnabledFromText reads true (or any non-false) as enabled', () => 
 
 test('autostartEnabledFromText treats a missing key as enabled', () => {
     assert.equal(autostartEnabledFromText('[Desktop Entry]\nExec=easyspeak\n'), true);
+});
+
+test('pickAutostartSource prefers the user entry over system and fallback', () => {
+    assert.equal(pickAutostartSource('USER', ['SYS'], 'MIN'), 'USER');
+});
+
+test('pickAutostartSource falls back to the first present system entry', () => {
+    assert.equal(pickAutostartSource(null, [null, 'SYS', 'OTHER'], 'MIN'), 'SYS');
+});
+
+test('pickAutostartSource uses the fallback when nothing is installed', () => {
+    assert.equal(pickAutostartSource(null, [null, null], 'MIN'), 'MIN');
+    assert.equal(pickAutostartSource(null, [], 'MIN'), 'MIN');
 });
