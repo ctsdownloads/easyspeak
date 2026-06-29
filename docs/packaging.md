@@ -1,6 +1,6 @@
 # Packaging
 
-EasySpeak ships **native `.deb` and `.rpm` packages**, split into two:
+EasySpeak ships **distro `.deb` and `.rpm` packages**, split into two:
 
 - **`easyspeak`** (amd64) — the application: a self-contained Python runtime
   (standalone CPython + all wheels, including the `piper` engine and the
@@ -17,7 +17,7 @@ without re-downloading the runtime. See [Language](#language).
 
 > EasySpeak integrates deeply with the host (raw input devices, the AT-SPI bus,
 > session D-Bus, a GNOME Shell extension, and spawning host binaries). That is why
-> the supported formats are **unconfined native packages** — sandboxed formats
+> the supported formats are **unconfined distro packages** — sandboxed formats
 > (Flatpak/Snap) fight every one of those integration points.
 
 ## Install
@@ -86,8 +86,8 @@ whether produced locally or in CI — handy on NixOS, where the bundle's standal
 CPython and manylinux wheels can't run on the host:
 
 ```bash
-just package-native            # -> ./dist/ : app + language .deb and .rpm
-just package-native 1.2.3      # set an explicit version
+just package-distro            # -> ./dist/ : app + language .deb and .rpm
+just package-distro 1.2.3      # set an explicit version
 ```
 
 This produces the `easyspeak` app packages and every `easyspeak-lang-*` data
