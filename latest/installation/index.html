@@ -389,10 +389,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#python-312" class="md-nav__link">
+  <a href="#python" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Python 3.12
+        Python
       
     </span>
   </a>
@@ -913,10 +913,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#python-312" class="md-nav__link">
+  <a href="#python" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Python 3.12
+        Python
       
     </span>
   </a>
@@ -1009,8 +1009,8 @@
 <li>Linux with GNOME Shell 47+ on Wayland</li>
 <li>Working microphone</li>
 <li>~2 GB disk space for models</li>
-<li>Python 3.12 — <strong>source install only</strong> (not 3.13/3.14, see notes below); the
-  prebuilt packages bundle their own runtime</li>
+<li>Python 3.10–3.14 — <strong>source install only</strong>; the prebuilt packages bundle their
+  own runtime</li>
 </ul>
 <p>Tested on Fedora and NixOS.</p>
 <h2 id="quick-install-prebuilt-packages">Quick install (prebuilt packages)<a class="headerlink" href="#quick-install-prebuilt-packages" title="Permanent link">&para;</a></h2>
@@ -1036,71 +1036,69 @@ the first launch so GNOME loads the bundled extension. See the
 hold-to-dictate setup.</p>
 <h2 id="install-from-source">Install from source<a class="headerlink" href="#install-from-source" title="Permanent link">&para;</a></h2>
 <p>For development, or to run the latest unreleased code, install from the repository.
-This path needs system build dependencies and Python 3.12.</p>
-<h3 id="python-312">Python 3.12<a class="headerlink" href="#python-312" title="Permanent link">&para;</a></h3>
-<p>Fedora 43's default <code>python3</code> is 3.14. Unfortunately, we depend on a few Google
-packages that are not available for Python 3.13+ yet.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>python3.12
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>python3.12<span class="w"> </span>--version<span class="w">  </span><span class="c1"># Verify it&#39;s installed</span>
-</code></pre></div>
+This path needs system build dependencies and a supported Python.</p>
+<h3 id="python">Python<a class="headerlink" href="#python" title="Permanent link">&para;</a></h3>
+<p>EasySpeak is tested against Python 3.10, 3.11, 3.12, 3.13, and 3.14. Fedora 43's
+default <code>python3</code> (3.14) works out of the box.</p>
 <h3 id="1-system-packages">1. System packages<a class="headerlink" href="#1-system-packages" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>pipewire-utils<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>wireplumber<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span>at-spi2-core<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span>python3-gobject<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span>libadwaita<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span>qutebrowser<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span>glib2<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">  </span>ffmpeg-free<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">  </span>pulseaudio-utils<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">  </span>sound-theme-freedesktop<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">  </span>portaudio-devel<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">  </span>python3.12-devel<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">  </span>gcc
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span>pipewire-utils<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span>wireplumber<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span>at-spi2-core<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span>python3-gobject<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span>libadwaita<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span>qutebrowser<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span>glib2<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span>ffmpeg-free<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">  </span>pulseaudio-utils<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">  </span>sound-theme-freedesktop<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">  </span>portaudio-devel<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">  </span>python3-devel<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">  </span>gcc
 </code></pre></div>
 <p><code>python3-gobject</code> and <code>libadwaita</code> power the tray menu's <strong>About EasySpeak</strong>
 window. They ship with any GNOME desktop, so they're usually already present;
 they're listed here for the sake of minimal or non-GNOME installs.</p>
 <h3 id="2-python-packages">2. Python packages<a class="headerlink" href="#2-python-packages" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3.12<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>~/easyspeak-venv
+<p>The simplest path is <a href="https://docs.astral.sh/uv/">uv</a>, which transparently
+creates and updates a virtual environment and runs EasySpeak from in there:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>uv<span class="w"> </span>run<span class="w"> </span>easyspeak
+</code></pre></div>
+<p>Prefer plain <code>pip</code>? Create a virtual environment first — most distributions ship
+their system Python as <a href="https://peps.python.org/pep-0668/">externally managed</a>,
+so installing into it directly fails:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>~/easyspeak-venv
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nb">source</span><span class="w"> </span>~/easyspeak-venv/bin/activate
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>pip<span class="w"> </span>install<span class="w"> </span>faster-whisper<span class="w"> </span>openwakeword<span class="w"> </span>numpy<span class="w"> </span>pyaudio
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>pip<span class="w"> </span>install<span class="w"> </span>faster-whisper<span class="w"> </span>pyopen-wakeword<span class="w"> </span>numpy<span class="w"> </span>pyaudio
 <a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="nb">cd</span><span class="w"> </span>~/easyspeak
 <a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </code></pre></div>
-<p>If you use <code>uv</code> you can ignore the steps that create a virtual environment and
-simply run:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>uv<span class="w"> </span>run<span class="w"> </span>easyspeak
-</code></pre></div>
-<p>uv will transparently create and update a virtual environment, and run EasySpeak
-from in there.</p>
 <h3 id="3-piper-tts">3. Piper TTS<a class="headerlink" href="#3-piper-tts" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.local/bin
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nb">cd</span><span class="w"> </span>~/.local/bin
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>wget<span class="w"> </span>https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>tar<span class="w"> </span>xzf<span class="w"> </span>piper_linux_x86_64.tar.gz
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>rm<span class="w"> </span>piper_linux_x86_64.tar.gz
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export PATH=&quot;$HOME/.local/bin/piper:$PATH&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="nb">source</span><span class="w"> </span>~/.bashrc
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.local/share/piper
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="nb">cd</span><span class="w"> </span>~/.local/share/piper
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>wget<span class="w"> </span>-O<span class="w"> </span>en_US-amy-medium.onnx<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">  </span><span class="s2">&quot;https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx&quot;</span>
-<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>wget<span class="w"> </span>-O<span class="w"> </span>en_US-amy-medium.onnx.json<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">  </span><span class="s2">&quot;https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx.json&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.local/bin
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nb">cd</span><span class="w"> </span>~/.local/bin
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>wget<span class="w"> </span>https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>tar<span class="w"> </span>xzf<span class="w"> </span>piper_linux_x86_64.tar.gz
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>rm<span class="w"> </span>piper_linux_x86_64.tar.gz
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export PATH=&quot;$HOME/.local/bin/piper:$PATH&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="nb">source</span><span class="w"> </span>~/.bashrc
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.local/share/piper
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="nb">cd</span><span class="w"> </span>~/.local/share/piper
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>wget<span class="w"> </span>-O<span class="w"> </span>en_US-amy-medium.onnx<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">  </span><span class="s2">&quot;https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx&quot;</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>wget<span class="w"> </span>-O<span class="w"> </span>en_US-amy-medium.onnx.json<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">  </span><span class="s2">&quot;https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx.json&quot;</span>
 </code></pre></div>
 <h3 id="4-clone-the-repository">4. Clone the repository<a class="headerlink" href="#4-clone-the-repository" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ctsdownloads/easyspeak.git<span class="w"> </span>~/easyspeak
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nb">cd</span><span class="w"> </span>~/easyspeak
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ctsdownloads/easyspeak.git<span class="w"> </span>~/easyspeak
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nb">cd</span><span class="w"> </span>~/easyspeak
 </code></pre></div>
 <h3 id="head-tracking-optional">Head tracking (optional)<a class="headerlink" href="#head-tracking-optional" title="Permanent link">&para;</a></h3>
 <p>Head tracking requires a webcam and additional dependencies:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;.[head-tracking]&#39;</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="c1"># or, with uv</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>uv<span class="w"> </span>run<span class="w"> </span>--extra<span class="w"> </span>head-tracking<span class="w"> </span>easyspeak
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;.[head-tracking]&#39;</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="c1"># or, with uv</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>uv<span class="w"> </span>run<span class="w"> </span>--extra<span class="w"> </span>head-tracking<span class="w"> </span>easyspeak
 </code></pre></div>
 <p>The <code>head-tracking</code> extra pulls in <code>sixdrepnet</code> and <code>opencv-python</code>.</p>
 

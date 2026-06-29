@@ -1056,7 +1056,7 @@ access) and log back in:</p>
 <h2 id="language">Language<a class="headerlink" href="#language" title="Permanent link">&para;</a></h2>
 <p>The default <code>easyspeak-lang-en</code> pack is <strong>US English</strong> — Whisper <code>base.en</code>
 (recognition) and Piper <code>en_US-amy-medium</code> (feedback). The <code>hey_jarvis</code> wake word is
-built into the app (it ships inside the OpenWakeWord wheel), so it stays English
+built into the app (it ships inside the pyopen-wakeword wheel), so it stays English
 regardless of language pack.</p>
 <p>When present, the English pack is wired up automatically. To use another language —
 <strong>whether or not we provide a package for it</strong> — install/drop its models and point
@@ -1071,7 +1071,7 @@ systemd user override or your shell profile):</p>
 </ul>
 <p>So adding a language needs no root and no package from us: download any
 faster-whisper model and Piper voice, then set the two variables. A different wake
-word, however, needs a custom-trained OpenWakeWord model.</p>
+word, however, needs a custom-trained model that pyopen-wakeword can load.</p>
 <h2 id="build-the-packages-yourself">Build the packages yourself<a class="headerlink" href="#build-the-packages-yourself" title="Permanent link">&para;</a></h2>
 <p>The packages are built in a clean Ubuntu container, so the result is identical
 whether produced locally or in CI — handy on NixOS, where the bundle's standalone
