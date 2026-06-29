@@ -4,7 +4,7 @@
 
 You don't install the extension yourself — EasySpeak does it automatically on
 startup, copying it to
-`~/.local/share/gnome-shell/extensions/easyspeak@local/` and keeping it up
+`~/.local/share/gnome-shell/extensions/gnome@easyspeak.dev/` and keeping it up
 to date (look for an `easyspeak: installed ...` or `easyspeak: updated ...`
 message). On Wayland, GNOME Shell only scans for new extensions at login, so you
 typically have to **log out and back in** before it becomes loadable.
@@ -12,7 +12,7 @@ typically have to **log out and back in** before it becomes loadable.
 After re-login, enable it from the command line:
 
 ```bash
-gnome-extensions enable easyspeak@local
+gnome-extensions enable gnome@easyspeak.dev
 ```
 
 …or open the **Extensions** GNOME app and toggle *EasySpeak* on.
@@ -20,8 +20,8 @@ gnome-extensions enable easyspeak@local
 To remove it later:
 
 ```bash
-gnome-extensions disable easyspeak@local
-rm -rf ~/.local/share/gnome-shell/extensions/easyspeak@local
+gnome-extensions disable gnome@easyspeak.dev
+rm -rf ~/.local/share/gnome-shell/extensions/gnome@easyspeak.dev
 ```
 
 …or click the trash icon next to *EasySpeak* in the Extensions app.

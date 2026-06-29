@@ -228,10 +228,11 @@ def test_refresh_extension_files_partial_source_missing_helper(tmp_path):
 
 def test_extension_source_dir_holds_bundled_assets():
     src = gnome_extension.extension_source_dir()
-    # Assets are package data in src/ (the easyspeak package), next to core/.
+    # Assets are package data shipped as the easyspeak.gnome package (the
+    # top-level gnome@easyspeak.dev/ folder), self-contained with no Python beside.
     for name in gnome_extension.EXTENSION_ASSETS:
         assert (src / name).is_file()
-    assert (src / "core" / "gnome_extension.py").is_file()
+    assert not (src / "core").exists()
 
 
 def test_extension_dest_dir(tmp_path):
@@ -629,18 +630,12 @@ def test_main_refreshes_and_returns_zero():
 # --- ensure_extension --------------------------------------------------------
 
 
-class TestMigrateLegacyExtension:
-    """Tests for cleaning up the pre-rename (easyspeak-grid@local) install."""
+class TestMigrateLegacyExtensions:
+    """Tests for cleaning up pre-rename (easyspeak-grid@local, easyspeak@local)
+    installs."""
 
-    def _legacy_dir(self, tmp_path):
-        return (
-            tmp_path
-            / ".local"
-            / "share"
-            / "gnome-shell"
-            / "extensions"
-            / gnome_extension.LEGACY_EXTENSION_UUID
-        )
+    def _legacy_dir(self, tmp_path, uuid):
+        return tmp_path / ".local" / "share" / "gnome-shell" / "extensions" / uuid
 
     def test_noop_when_no_legacy_install(self, tmp_path, readlog):
         """Nothing to migrate: no subprocess, no deletion, no log, returns False."""
@@ -648,16 +643,20 @@ class TestMigrateLegacyExtension:
             patch.object(gnome_extension.Path, "home", return_value=tmp_path),
             patch.object(gnome_extension.subprocess, "run") as mock_run,
         ):
-            assert gnome_extension.migrate_legacy_extension() is False
+            assert gnome_extension.migrate_legacy_extensions() is False
 
         mock_run.assert_not_called()
         assert readlog().err == ""
 
-    def test_disables_and_removes_legacy_install(self, tmp_path, readlog):
-        """A leftover old install is disabled and its directory deleted."""
-        legacy = self._legacy_dir(tmp_path)
-        legacy.mkdir(parents=True)
-        (legacy / "extension.js").write_text("old")
+    def test_disables_and_removes_every_legacy_install(self, tmp_path, readlog):
+        """Each leftover old install is disabled and its directory deleted."""
+        legacy_dirs = [
+            self._legacy_dir(tmp_path, uuid)
+            for uuid in gnome_extension.LEGACY_EXTENSION_UUIDS
+        ]
+        for legacy in legacy_dirs:
+            legacy.mkdir(parents=True)
+            (legacy / "extension.js").write_text("old")
 
         with (
             patch.object(gnome_extension.Path, "home", return_value=tmp_path),
@@ -665,21 +664,41 @@ class TestMigrateLegacyExtension:
                 gnome_extension.subprocess, "run", return_value=Mock(returncode=0)
             ) as mock_run,
         ):
-            assert gnome_extension.migrate_legacy_extension() is True
+            assert gnome_extension.migrate_legacy_extensions() is True
 
-        assert mock_run.call_args.args[0] == [
-            "gnome-extensions",
-            "disable",
-            gnome_extension.LEGACY_EXTENSION_UUID,
+        disabled = [call.args[0] for call in mock_run.call_args_list]
+        assert disabled == [
+            ["gnome-extensions", "disable", uuid]
+            for uuid in gnome_extension.LEGACY_EXTENSION_UUIDS
         ]
-        assert not legacy.exists()
+        assert all(not legacy.exists() for legacy in legacy_dirs)
         captured = readlog()
         assert "removed the legacy" in captured.err
         assert "log out and back in" in captured.err
 
+    def test_skips_absent_uuids_and_removes_present_one(self, tmp_path, readlog):
+        """A UUID with no install is skipped; a present one is still cleaned up."""
+        present = self._legacy_dir(tmp_path, gnome_extension.LEGACY_EXTENSION_UUIDS[-1])
+        present.mkdir(parents=True)
+
+        with (
+            patch.object(gnome_extension.Path, "home", return_value=tmp_path),
+            patch.object(
+                gnome_extension.subprocess, "run", return_value=Mock(returncode=0)
+            ) as mock_run,
+        ):
+            assert gnome_extension.migrate_legacy_extensions() is True
+
+        assert mock_run.call_args.args[0] == [
+            "gnome-extensions",
+            "disable",
+            gnome_extension.LEGACY_EXTENSION_UUIDS[-1],
+        ]
+        assert not present.exists()
+
     def test_removes_dir_even_if_disable_fails(self, tmp_path):
         """A missing/erroring `gnome-extensions disable` still deletes the dir."""
-        legacy = self._legacy_dir(tmp_path)
+        legacy = self._legacy_dir(tmp_path, gnome_extension.LEGACY_EXTENSION_UUIDS[0])
         legacy.mkdir(parents=True)
 
         with (
@@ -688,7 +707,7 @@ class TestMigrateLegacyExtension:
                 gnome_extension.subprocess, "run", side_effect=OSError("no binary")
             ),
         ):
-            assert gnome_extension.migrate_legacy_extension() is True
+            assert gnome_extension.migrate_legacy_extensions() is True
 
         assert not legacy.exists()
 
@@ -709,7 +728,7 @@ class TestEnsureExtension:
 
     @pytest.fixture(autouse=True)
     def _stub_migrate(self):
-        with patch.object(gnome_extension, "migrate_legacy_extension"):
+        with patch.object(gnome_extension, "migrate_legacy_extensions"):
             yield
 
     @patch.object(gnome_extension.shutil, "which", return_value=None)
@@ -761,10 +780,10 @@ class TestEnsureExtension:
     def test_already_installed_and_enabled(self, mock_which, readlog):
         """UUID in both `list` and `list --enabled`, bundle unchanged: announce."""
         listed = Mock(
-            returncode=0, stdout="other@one.com\neasyspeak@local\nthird@two.org\n"
+            returncode=0, stdout="other@one.com\ngnome@easyspeak.dev\nthird@two.org\n"
         )
         listed_enabled = Mock(
-            returncode=0, stdout="easyspeak@local\nother-on@two.org\n"
+            returncode=0, stdout="gnome@easyspeak.dev\nother-on@two.org\n"
         )
         with (
             patch.object(
@@ -782,7 +801,7 @@ class TestEnsureExtension:
 
         captured = readlog()
         assert "already installed and enabled" in captured.err
-        assert "easyspeak@local" in captured.err
+        assert "gnome@easyspeak.dev" in captured.err
         # No `enable` call needed — only the two probe calls.
         assert mock_run.call_count == 2
 
@@ -792,8 +811,8 @@ class TestEnsureExtension:
     def test_already_installed_refreshes_changed_bundle(self, mock_which, readlog):
         """Installed+enabled but the bundled extension changed: refresh and tell
         the user to re-login so GNOME loads the new code."""
-        listed = Mock(returncode=0, stdout="easyspeak@local\n")
-        listed_enabled = Mock(returncode=0, stdout="easyspeak@local\n")
+        listed = Mock(returncode=0, stdout="gnome@easyspeak.dev\n")
+        listed_enabled = Mock(returncode=0, stdout="gnome@easyspeak.dev\n")
         with (
             patch.object(
                 gnome_extension.subprocess,
@@ -809,7 +828,7 @@ class TestEnsureExtension:
             gnome_extension.ensure_extension()
 
         captured = readlog()
-        assert "updated GNOME extension easyspeak@local" in captured.err
+        assert "updated GNOME extension gnome@easyspeak.dev" in captured.err
         assert "log out and back in" in captured.err
         # Still only the two probe calls — refresh is file I/O, not a subprocess.
         assert mock_run.call_count == 2
@@ -819,8 +838,8 @@ class TestEnsureExtension:
     )
     def test_reports_unit_install(self, mock_which, readlog):
         """ensure_extension surfaces whatever install_refresh_unit reports."""
-        listed = Mock(returncode=0, stdout="easyspeak@local\n")
-        listed_enabled = Mock(returncode=0, stdout="easyspeak@local\n")
+        listed = Mock(returncode=0, stdout="gnome@easyspeak.dev\n")
+        listed_enabled = Mock(returncode=0, stdout="gnome@easyspeak.dev\n")
         with (
             patch.object(
                 gnome_extension.subprocess,
@@ -848,7 +867,7 @@ class TestEnsureExtension:
     )
     def test_installed_but_disabled_enable_succeeds(self, mock_which, readlog):
         """UUID in `list` but not in `list --enabled`: flip it on and announce."""
-        listed = Mock(returncode=0, stdout="other@one.com\neasyspeak@local\n")
+        listed = Mock(returncode=0, stdout="other@one.com\ngnome@easyspeak.dev\n")
         listed_enabled = Mock(returncode=0, stdout="other-on@two.org\n")
         enabled = Mock(returncode=0, stdout="")
         with patch.object(
@@ -859,13 +878,13 @@ class TestEnsureExtension:
             gnome_extension.ensure_extension()
 
         captured = readlog()
-        assert "enabled GNOME extension easyspeak@local" in captured.err
+        assert "enabled GNOME extension gnome@easyspeak.dev" in captured.err
         assert "was installed but disabled" in captured.err
         assert mock_run.call_count == 3
         assert mock_run.call_args_list[2].args[0] == [
             "gnome-extensions",
             "enable",
-            "easyspeak@local",
+            "gnome@easyspeak.dev",
         ]
 
     @patch.object(
@@ -873,7 +892,7 @@ class TestEnsureExtension:
     )
     def test_installed_but_disabled_enable_fails(self, mock_which, readlog):
         """Installed-but-disabled and `enable` fails: hint, no log-out wording."""
-        listed = Mock(returncode=0, stdout="easyspeak@local\n")
+        listed = Mock(returncode=0, stdout="gnome@easyspeak.dev\n")
         listed_enabled = Mock(returncode=0, stdout="")
         enabled = Mock(returncode=1, stdout="")
         with patch.object(
@@ -885,7 +904,7 @@ class TestEnsureExtension:
 
         captured = readlog()
         assert "installed but disabled, and could not be enabled" in captured.err
-        assert "gnome-extensions enable easyspeak@local" in captured.err
+        assert "gnome-extensions enable gnome@easyspeak.dev" in captured.err
         # The "log out and back in" hint is only for fresh installs.
         assert "log out" not in captured.err
 
@@ -959,7 +978,7 @@ class TestEnsureExtension:
             / "share"
             / "gnome-shell"
             / "extensions"
-            / "easyspeak@local"
+            / "gnome@easyspeak.dev"
         )
         for name in gnome_extension.EXTENSION_ASSETS:
             assert not (dest / name).is_file()
@@ -991,7 +1010,7 @@ class TestEnsureExtension:
             / "share"
             / "gnome-shell"
             / "extensions"
-            / "easyspeak@local"
+            / "gnome@easyspeak.dev"
         )
         assert (dest / "extension.js").is_file()
         assert (dest / "metadata.json").is_file()
