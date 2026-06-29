@@ -20,6 +20,10 @@ has easyspeak-autostart.desktop
 has easyspeak-extension-refresh.service.in
 has extension.js
 has extension-helpers.js
+has grid.js
+has windows.js
+has screenshot.js
+has indicator.js
 has prefs.js
 has metadata.json
 has schemas/org.gnome.shell.extensions.easyspeak.gschema.xml
