@@ -118,10 +118,11 @@ check-links *args: docs
     mkdir -p build/linkcheck
     uvx --from markdown markdown_py README.md > build/linkcheck/readme.html
     uvx --from markdown markdown_py CONTRIBUTING.md > build/linkcheck/contributing.html
-    # Ignore material's Pages-only 404-page links and bencher.dev (403s every bot);
-    # the non-default user-agent dodges freedesktop's WAF (418 to "Mozilla").
+    # Skip the 404 page (material renders its links absolute from site_url, so they
+    # 404 on the filesystem) and bencher.dev (403s every bot); the non-default
+    # user-agent dodges freedesktop's WAF (418 to "Mozilla").
     uvx linkchecker --check-extern --no-warnings \
-        --ignore-url '^file:///easyspeak/' \
+        --ignore-url '/404\.html' \
         --ignore-url 'bencher\.dev' \
         --user-agent LinkChecker {{ args }} \
         site/index.html build/linkcheck/readme.html build/linkcheck/contributing.html
