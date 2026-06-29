@@ -1004,7 +1004,7 @@
 
 
 <h1 id="packaging">Packaging<a class="headerlink" href="#packaging" title="Permanent link">&para;</a></h1>
-<p>EasySpeak ships <strong>native <code>.deb</code> and <code>.rpm</code> packages</strong>, split into two:</p>
+<p>EasySpeak ships <strong>distro <code>.deb</code> and <code>.rpm</code> packages</strong>, split into two:</p>
 <ul>
 <li><strong><code>easyspeak</code></strong> (amd64) — the application: a self-contained Python runtime
   (standalone CPython + all wheels, including the <code>piper</code> engine and the
@@ -1021,7 +1021,7 @@ without re-downloading the runtime. See <a href="#language">Language</a>.</p>
 <blockquote>
 <p>EasySpeak integrates deeply with the host (raw input devices, the AT-SPI bus,
 session D-Bus, a GNOME Shell extension, and spawning host binaries). That is why
-the supported formats are <strong>unconfined native packages</strong> — sandboxed formats
+the supported formats are <strong>unconfined distro packages</strong> — sandboxed formats
 (Flatpak/Snap) fight every one of those integration points.</p>
 </blockquote>
 <h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
@@ -1076,8 +1076,8 @@ word, however, needs a custom-trained model that pyopen-wakeword can load.</p>
 <p>The packages are built in a clean Ubuntu container, so the result is identical
 whether produced locally or in CI — handy on NixOS, where the bundle's standalone
 CPython and manylinux wheels can't run on the host:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>just<span class="w"> </span>package-native<span class="w">            </span><span class="c1"># -&gt; ./dist/ : app + language .deb and .rpm</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>just<span class="w"> </span>package-native<span class="w"> </span><span class="m">1</span>.2.3<span class="w">      </span><span class="c1"># set an explicit version</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>just<span class="w"> </span>package-distro<span class="w">            </span><span class="c1"># -&gt; ./dist/ : app + language .deb and .rpm</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>just<span class="w"> </span>package-distro<span class="w"> </span><span class="m">1</span>.2.3<span class="w">      </span><span class="c1"># set an explicit version</span>
 </code></pre></div>
 <p>This produces the <code>easyspeak</code> app packages and every <code>easyspeak-lang-*</code> data
 package. CI builds them automatically: <code>.github/workflows/release.yml</code> runs the same
