@@ -7,7 +7,7 @@
 
 # Run codestyle and safety checks, tests, packaging, docs, and cleanup
 [group('lifecycle')]
-all: codestyle safety test check-docs check-desktop-integration compile-schemas check-python-packages check-deb-package check-rpm-package clean
+all: codestyle safety test check-docs check-desktop-integration compile-schemas check-python-packages check-native-packages clean
 
 # Remove build artifacts and reports (use -v for verbose, -n for dry-run)
 [group('lifecycle')]
@@ -55,7 +55,7 @@ audit *args:
 # Check project dependencies are up-to-date (uv.lock)
 [group('safety')]
 requirements:
-    uv lock --upgrade
+    uvx uv lock --upgrade
     git diff --color --exit-code uv.lock
 
 # Run test suite and show coverage (unit tests, integration, acceptance)
@@ -158,6 +158,10 @@ check-deb-package: (package-native)
 [group('release')]
 check-rpm-package: (package-native)
     bash tests/packaging/test_rpm.sh
+
+# Build the native packages once (just dedupes package-native), check deb and rpm
+[group('release')]
+check-native-packages: check-deb-package check-rpm-package
 
 # Build the wheel and sdist, then verify their contents
 [group('release')]
