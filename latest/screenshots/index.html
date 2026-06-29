@@ -447,10 +447,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tray-menu" class="md-nav__link">
+  <a href="#tray-menu-and-quick-settings" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Tray menu
+        Tray menu and Quick Settings
       
     </span>
   </a>
@@ -829,10 +829,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tray-menu" class="md-nav__link">
+  <a href="#tray-menu-and-quick-settings" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Tray menu
+        Tray menu and Quick Settings
       
     </span>
   </a>
@@ -888,22 +888,37 @@ browser entirely by voice.</p>
 <h2 id="starting-the-daemon">Starting the daemon<a class="headerlink" href="#starting-the-daemon" title="Permanent link">&para;</a></h2>
 <p><img alt="EasySpeak starting in a terminal: OpenWakeWord and Whisper load, each plugin reports &quot;Loaded&quot;, and the daemon begins listening for the wake word" src="../media/daemon-startup.png" width="100%" /></p>
 <p>An earlier version of EasySpeak running from a terminal. On start it loads the
-wake-word model (OpenWakeWord) and the speech recogniser (Whisper), then brings
+wake-word model (OpenWakeWord) and the speech recognizer (Whisper), then brings
 up each plugin in turn — head tracking, mouse grid, apps, browser, dictation,
 files, media, and system. The banner confirms the wake word ("Hey Jarvis") and
 the daemon settles into <strong>Listening for wake word…</strong>.</p>
 <p>The <code>ALSA lib … unable to open slave</code> lines are harmless audio-device probing
-noise (surpressed in newer versions).</p>
-<h2 id="tray-menu">Tray menu<a class="headerlink" href="#tray-menu" title="Permanent link">&para;</a></h2>
-<p><img alt="The EasySpeak tray menu open in the GNOME top bar, the panel icon showing a muted microphone; the menu lists &quot;Reactivate EasySpeak&quot; (hovered), &quot;Settings…&quot;, &quot;Help&quot;, &quot;About EasySpeak&quot;, and &quot;Quit EasySpeak&quot;" src="../media/tray-menu.png" width="170" /></p>
+noise (suppressed in newer versions).</p>
+<h2 id="tray-menu-and-quick-settings">Tray menu and Quick Settings<a class="headerlink" href="#tray-menu-and-quick-settings" title="Permanent link">&para;</a></h2>
+<p>EasySpeak lives in the GNOME top bar, ready whenever you want to mute it, wake
+it, or reach its settings. It shows up either as a panel tray icon or as a
+<a href="https://help.gnome.org/gnome-help/quick-settings.html">Quick Settings</a> toggle —
+a single switch in its extension settings decides which.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start; justify-content: center;">
+<p><img alt="The EasySpeak tray menu open in the GNOME top bar, the panel icon showing a muted microphone; the menu lists &quot;Reactivate EasySpeak&quot; (hovered), &quot;Settings…&quot;, &quot;Help&quot;, &quot;About EasySpeak&quot;, and &quot;Quit EasySpeak&quot;" src="../media/tray-menu.png" width="124" /></p>
+<p><img alt="The GNOME Quick Settings menu with an active-microphone EasySpeak toggle expanded into its sub-menu: an &quot;EasySpeak&quot; heading, a &quot;Help&quot; entry, and &quot;EasySpeak Settings&quot; (hovered)" src="../media/quick-settings.png" width="206" /></p>
+<p><img alt="EasySpeak's extension settings — a &quot;Configure EasySpeak&quot; panel with two toggles, &quot;Start EasySpeak on login&quot; and &quot;Show EasySpeak in Quick Settings Menu&quot;, both on, above an &quot;About EasySpeak&quot; row" src="../media/extension-settings.png" width="344" /></p>
+</div>
 <p>Say, "stop listening", to make EasySpeak stop responding to your voice. The
-panel icon switches to a muted microphone to show it's asleep, and EasySpeak
-ignores everything until you wake it again from the tray. Click the icon and
-choose <strong>Reactivate EasySpeak</strong> to start listening once more. The same menu
-opens <strong>Settings…</strong>, <strong>Help</strong>, and the <strong>About EasySpeak</strong> dialog, or shuts the
-daemon down with <strong>Quit EasySpeak</strong>.</p>
+panel icon (left) switches to a muted microphone to show it's asleep, and
+EasySpeak ignores everything until you wake it again. Click the icon and choose
+<strong>Reactivate EasySpeak</strong> to start listening once more; the same menu opens
+<strong>Settings…</strong>, <strong>Help</strong>, and the <strong>About EasySpeak</strong> dialog, or shuts the daemon
+down with <strong>Quit EasySpeak</strong>.</p>
+<p>Prefer to keep the top bar tidy? Turn on <strong>Show EasySpeak in Quick Settings
+Menu</strong> in the extension settings (right) and EasySpeak moves into GNOME's Quick
+Settings as a toggle (center) instead of the panel icon. Expanding the toggle
+reveals the same <strong>Help</strong> and <strong>EasySpeak Settings</strong> actions, so either entry
+point reaches the very same extension settings — the panel GNOME's Extensions
+app exposes for EasySpeak, which also makes it <strong>start on login</strong> and opens
+<strong>About EasySpeak</strong>.</p>
 <h2 id="mouse-grid">Mouse grid<a class="headerlink" href="#mouse-grid" title="Permanent link">&para;</a></h2>
-<p><img alt="A 3x3 numbered grid overlaying the GNOME Files window, with a red crosshair centred on cell 5" src="../media/mouse-grid-files.png" width="100%" /></p>
+<p><img alt="A 3x3 numbered grid overlaying the GNOME Files window, with a red crosshair centered on cell 5" src="../media/mouse-grid-files.png" width="100%" /></p>
 <p>The <strong>mouse grid</strong> (<a href="../commands/#mouse-grid">"grid" command</a>) overlays a
 numbered 3×3 grid on the whole screen. Saying a digit zooms the grid into
 that cell; repeat until the crosshair sits over your target, then say
