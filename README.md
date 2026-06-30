@@ -11,8 +11,8 @@ Say "Hey Jarvis" and control your desktop with your voice.
 [![Pipeline](https://github.com/ctsdownloads/easyspeak/actions/workflows/pipeline.yml/badge.svg)](https://github.com/ctsdownloads/easyspeak/actions/workflows/pipeline.yml)
 [![Safety](https://github.com/ctsdownloads/easyspeak/actions/workflows/safety.yml/badge.svg)](https://github.com/ctsdownloads/easyspeak/actions/workflows/safety.yml)
 [![Release](https://github.com/ctsdownloads/easyspeak/actions/workflows/release.yml/badge.svg)](https://github.com/ctsdownloads/easyspeak/actions/workflows/release.yml)
+[![Docs](https://github.com/ctsdownloads/easyspeak/actions/workflows/docs.yml/badge.svg)](https://github.com/ctsdownloads/easyspeak/actions/workflows/docs.yml)
 [![Benchmarks](https://img.shields.io/badge/%F0%9F%90%B0%20Bencher-performance-FD7E14.svg)](https://bencher.dev/perf/easyspeak)
-[![Docs](https://github.com/ctsdownloads/easyspeak/actions/workflows/docs.yml/badge.svg)](https://easyspeak.dev/)
 
 > ⚠️ **Early development.** This project works but is not polished. Expect bugs, incomplete docs, and changes without notice.
 
