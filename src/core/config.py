@@ -6,7 +6,6 @@ builds the faster-whisper model from them. Most are plain constants; these
 honor an `EASYSPEAK_*` environment variable:
 
 - `EASYSPEAK_HOTKEY`
-- `EASYSPEAK_HOTKEY_COMBO`
 - `EASYSPEAK_PIPER_BIN`
 - `EASYSPEAK_PIPER_MODEL`
 - `EASYSPEAK_SOUNDS_DIR`
@@ -40,13 +39,10 @@ MISUNDERSTAND_GRACE = 4.0  # Seconds to ignore repeat misses after feedback
 FOLLOWUP_IDLE_ROUNDS = 2  # Quiet listens tolerated before a command session ends
 
 # --- Keyboard (silent) activation ---
-HOTKEY_COMBO = os.environ.get("EASYSPEAK_HOTKEY_COMBO", "ctrl+shift")
-HOTKEY_ENABLED = os.environ.get("EASYSPEAK_HOTKEY", "1").lower() not in (
-    "0",
-    "false",
-    "no",
-    "off",
-)
+# Hold EASYSPEAK_HOTKEY to dictate; an empty value or `off`/`none` disables it
+# (an empty combo leaves the listener inert). core.hotkey validates the keys.
+_hotkey = os.environ.get("EASYSPEAK_HOTKEY", "ctrl+shift").strip()
+HOTKEY_COMBO = "" if _hotkey.lower() in ("", "off", "none") else _hotkey
 
 
 # --- Models ---

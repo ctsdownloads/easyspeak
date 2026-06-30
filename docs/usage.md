@@ -42,20 +42,20 @@ the module that reads each (linked to its API reference).
 
 ### [`core.config`][core.config]
 
-| Variable                         | Default                                | Effect                                               |
-| -------------------------------- | -------------------------------------- | ---------------------------------------------------- |
-| `EASYSPEAK_HOTKEY`               | `1`                                    | Set `0` to disable hold-to-dictate silent activation |
-| `EASYSPEAK_HOTKEY_COMBO`         | `ctrl+shift`                           | Keys held to dictate without the wake word           |
-| `EASYSPEAK_PIPER_BIN`            | `piper`                                | Piper TTS binary                                     |
-| `EASYSPEAK_PIPER_MODEL`          | bundled Amy voice                      | Piper voice `.onnx` for speech output                |
-| `EASYSPEAK_SOUNDS_DIR`           | `/usr/share/sounds/freedesktop/stereo` | Directory of the wake chime and error bell           |
-| `EASYSPEAK_WHISPER_COMPUTE_TYPE` | `int8`                                 | CTranslate2 compute type                             |
-| `EASYSPEAK_WHISPER_CPU_THREADS`  | `0`                                    | CPU threads for transcription (`0` = auto)           |
-| `EASYSPEAK_WHISPER_MODEL`        | `base.en`                              | faster-whisper model for transcription               |
+| Variable                         | Default                                | Effect                                     |
+| -------------------------------- | -------------------------------------- | ------------------------------------------ |
+| `EASYSPEAK_HOTKEY`               | `ctrl+shift`                           | Keys held to dictate without the wake word |
+| `EASYSPEAK_PIPER_BIN`            | `piper`                                | Piper TTS binary                           |
+| `EASYSPEAK_PIPER_MODEL`          | bundled Amy voice                      | Piper voice `.onnx` for speech output      |
+| `EASYSPEAK_SOUNDS_DIR`           | `/usr/share/sounds/freedesktop/stereo` | Directory of the wake chime and error bell |
+| `EASYSPEAK_WHISPER_COMPUTE_TYPE` | `int8`                                 | CTranslate2 compute type                   |
+| `EASYSPEAK_WHISPER_CPU_THREADS`  | `0`                                    | CPU threads for transcription (`0` = auto) |
+| `EASYSPEAK_WHISPER_MODEL`        | `base.en`                              | faster-whisper model for transcription     |
 
-`EASYSPEAK_HOTKEY_COMBO` takes the `ctrl`/`shift`/`alt`/`super` aliases or raw
-evdev key names joined with `+`, and needs read access to `/dev/input` (be in
-the `input` group).
+`EASYSPEAK_HOTKEY` takes the `ctrl`/`shift`/`alt`/`super` aliases or raw evdev
+key names joined with `+` (e.g. `ctrl+space`); set it to empty, `off`, or `none`
+to turn it off, and an unrecognized key disables it too. See
+[Packaging](packaging.md) for the device access it needs.
 
 ### [`core.log`][core.log]
 

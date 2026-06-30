@@ -22,6 +22,7 @@ def _restore_config(monkeypatch):
         "EASYSPEAK_WHISPER_COMPUTE_TYPE",
         "EASYSPEAK_PIPER_MODEL",
         "EASYSPEAK_PIPER_BIN",
+        "EASYSPEAK_HOTKEY",
     ]:
         monkeypatch.delenv(var, raising=False)
     importlib.reload(config)
@@ -137,3 +138,25 @@ def test_piper_bin_env_override(monkeypatch):
     monkeypatch.setenv("EASYSPEAK_PIPER_BIN", "/opt/voices/piper")
     importlib.reload(config)
     assert config.PIPER_BIN == "/opt/voices/piper"
+
+
+def test_hotkey_default(monkeypatch):
+    """EASYSPEAK_HOTKEY defaults to the ctrl+shift combo."""
+    monkeypatch.delenv("EASYSPEAK_HOTKEY", raising=False)
+    importlib.reload(config)
+    assert config.HOTKEY_COMBO == "ctrl+shift"
+
+
+def test_hotkey_custom_combo(monkeypatch):
+    """EASYSPEAK_HOTKEY sets the combo directly."""
+    monkeypatch.setenv("EASYSPEAK_HOTKEY", "ctrl+space")
+    importlib.reload(config)
+    assert config.HOTKEY_COMBO == "ctrl+space"
+
+
+@pytest.mark.parametrize("value", ["", "off", "none", "OFF", "  none  "])
+def test_hotkey_disable_values(monkeypatch, value):
+    """An empty value or off/none (any case, trimmed) disables the hotkey."""
+    monkeypatch.setenv("EASYSPEAK_HOTKEY", value)
+    importlib.reload(config)
+    assert config.HOTKEY_COMBO == ""
