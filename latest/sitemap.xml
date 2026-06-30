@@ -1,59 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://easyspeak.dev/latest/</loc>
-         <lastmod>1980-01-01</lastmod>
+         <loc>https://easyspeak.dev/latest/latest/</loc>
+         <lastmod>2026-06-30</lastmod>
     </url>
     <url>
-         <loc>https://easyspeak.dev/latest/changelog/</loc>
-         <lastmod>1980-01-01</lastmod>
+         <loc>https://easyspeak.dev/latest/latest/changelog/</loc>
+         <lastmod>2026-06-30</lastmod>
     </url>
     <url>
-         <loc>https://easyspeak.dev/latest/commands/</loc>
-         <lastmod>1980-01-01</lastmod>
+         <loc>https://easyspeak.dev/latest/latest/commands/</loc>
+         <lastmod>2026-06-30</lastmod>
     </url>
     <url>
-         <loc>https://easyspeak.dev/latest/contributing/</loc>
-         <lastmod>1980-01-01</lastmod>
+         <loc>https://easyspeak.dev/latest/latest/contributing/</loc>
+         <lastmod>2026-06-30</lastmod>
     </url>
     <url>
-         <loc>https://easyspeak.dev/latest/how-it-works/</loc>
-         <lastmod>1980-01-01</lastmod>
+         <loc>https://easyspeak.dev/latest/latest/how-it-works/</loc>
+         <lastmod>2026-06-30</lastmod>
     </url>
     <url>
-         <loc>https://easyspeak.dev/latest/installation/</loc>
-         <lastmod>1980-01-01</lastmod>
+         <loc>https://easyspeak.dev/latest/latest/installation/</loc>
+         <lastmod>2026-06-30</lastmod>
     </url>
     <url>
-         <loc>https://easyspeak.dev/latest/license/</loc>
-         <lastmod>1980-01-01</lastmod>
+         <loc>https://easyspeak.dev/latest/latest/license/</loc>
+         <lastmod>2026-06-30</lastmod>
     </url>
     <url>
-         <loc>https://easyspeak.dev/latest/packaging/</loc>
-         <lastmod>1980-01-01</lastmod>
+         <loc>https://easyspeak.dev/latest/latest/packaging/</loc>
+         <lastmod>2026-06-30</lastmod>
     </url>
     <url>
-         <loc>https://easyspeak.dev/latest/plugins/</loc>
-         <lastmod>1980-01-01</lastmod>
+         <loc>https://easyspeak.dev/latest/latest/plugins/</loc>
+         <lastmod>2026-06-30</lastmod>
     </url>
     <url>
-         <loc>https://easyspeak.dev/latest/screenshots/</loc>
-         <lastmod>1980-01-01</lastmod>
+         <loc>https://easyspeak.dev/latest/latest/screenshots/</loc>
+         <lastmod>2026-06-30</lastmod>
     </url>
     <url>
-         <loc>https://easyspeak.dev/latest/troubleshooting/</loc>
-         <lastmod>1980-01-01</lastmod>
+         <loc>https://easyspeak.dev/latest/latest/troubleshooting/</loc>
+         <lastmod>2026-06-30</lastmod>
     </url>
     <url>
-         <loc>https://easyspeak.dev/latest/usage/</loc>
-         <lastmod>1980-01-01</lastmod>
+         <loc>https://easyspeak.dev/latest/latest/usage/</loc>
+         <lastmod>2026-06-30</lastmod>
     </url>
     <url>
-         <loc>https://easyspeak.dev/latest/reference/core/</loc>
-         <lastmod>1980-01-01</lastmod>
+         <loc>https://easyspeak.dev/latest/latest/reference/core/</loc>
+         <lastmod>2026-06-30</lastmod>
     </url>
     <url>
-         <loc>https://easyspeak.dev/latest/reference/plugins/</loc>
-         <lastmod>1980-01-01</lastmod>
+         <loc>https://easyspeak.dev/latest/latest/reference/plugins/</loc>
+         <lastmod>2026-06-30</lastmod>
     </url>
 </urlset>
