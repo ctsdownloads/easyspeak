@@ -13,15 +13,19 @@ All processing happens locally. No data leaves your machine.
 
 ```
 easyspeak/
-├── pyproject.toml
-├── gnome@easyspeak.dev        # GNOME Shell extension (UUID-named, shipped as package data)
-│   ├── extension.js           # The extension itself
+├── gnome@easyspeak.dev/       # GNOME Shell extension (UUID-named, shipped as package data)
+│   ├── schemas/               # GSettings schema (+ compiled) for the settings
+│   ├── __init__.py            # Marks the folder as package data (easyspeak.gnome)
 │   ├── extension-helpers.js   # Pure JS helpers imported by extension.js
-│   ├── prefs.js               # Extension Settings dialog (autostart, Quick Settings)
+│   ├── extension.js           # The extension itself
+│   ├── grid.js                # Numbered grid overlay + pointer injection primitive
+│   ├── indicator.js           # Panel indicator + Quick Settings toggle widgets
 │   ├── metadata.json          # Extension metadata
-│   └── schemas                # GSettings schema (+ compiled) for the settings
-├── src
-│   ├── core
+│   ├── prefs.js               # Extension Settings dialog (autostart, Quick Settings)
+│   ├── screenshot.js          # Screen capture primitive (Wayland framebuffer grab)
+│   └── windows.js             # Window/workspace operations on the focused window
+├── src/
+│   ├── core/
 │   │   ├── __init__.py
 │   │   ├── __main__.py
 │   │   ├── about.py           # Standalone libadwaita "About" window
@@ -33,7 +37,7 @@ easyspeak/
 │   │   ├── mediakeys.py       # Replays multimedia keys via Mutter
 │   │   ├── speech.py          # Persistent piper -> player pipeline
 │   │   └── tray.py            # Panel indicator + asleep lifecycle
-│   └── plugins
+│   └── plugins/
 │       ├── __init__.py
 │       ├── 00_eyetrack.py     # Head tracking (experimental)
 │       ├── 00_mousegrid.py    # Grid overlay mouse control
@@ -45,11 +49,12 @@ easyspeak/
 │       ├── sleep.py           # Voice deactivate
 │       ├── system.py          # Volume, brightness, DND
 │       └── zz_base.py         # Help and exit
-└── tests
-    ├── acceptance             # Gherkin scenarios (pytest-bdd)
-    ├── benchmarks             # pytest-benchmark suites for bencher.dev
-    ├── integration            # tests against real binaries
-    └── unit                   # tests for src/core/ and src/plugins/
+├── tests/
+│   ├── acceptance/            # Gherkin scenarios (pytest-bdd)
+│   ├── benchmarks/            # pytest-benchmark suites for bencher.dev
+│   ├── integration/           # tests against real binaries
+│   └── unit/                  # tests for src/core/ and src/plugins/
+└── pyproject.toml
 ```
 
 ## GNOME Shell extension
@@ -60,16 +65,22 @@ Files copied:
 
 ```
 ~/.local/share/gnome-shell/extensions/gnome@easyspeak.dev/
-├── extension.js
+├── schemas/
+│   ├── gschemas.compiled
+│   └── org.gnome.shell.extensions.easyspeak.gschema.xml
 ├── extension-helpers.js
-├── prefs.js
+├── extension.js
+├── grid.js
+├── indicator.js
 ├── metadata.json
-└── schemas
-    ├── org.gnome.shell.extensions.easyspeak.gschema.xml
-    └── gschemas.compiled
+├── prefs.js
+├── screenshot.js
+└── windows.js
 ```
 
-The extension powers both the panel indicator and the mouse grid. Its
+The extension exposes the compositor-only primitives — panel indicator,
+mouse grid, window operations, and screen capture — that the Python plugins
+drive. Its
 Settings dialog (`prefs.js`) offers "Show EasySpeak in Quick Settings Menu",
 persisted in dconf via the bundled GSettings schema: when on, the asleep
 state is surfaced as a Quick Settings toggle — on while listening, off
