@@ -61,9 +61,6 @@ jobs:
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-    # mike serves each version at /<version>/. `main` is "latest" and is the
-    # default, so the site root redirects there; releases archive at their
-    # version, with the "stable" alias tracking the newest one.
     - name: Publish "latest" docs from main
       if: github.ref == 'refs/heads/main'
       run: |
