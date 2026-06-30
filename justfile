@@ -1,6 +1,8 @@
 # Project development tasks
 # Run 'just' or 'just --list' to see all available commands.
 
+set ignore-comments := true
+
 # Show this usage screen (default)
 @help:
     just --list --unsorted
@@ -109,21 +111,21 @@ check-docs: lint-docstrings lint-md check-links
 # Check built docs and README/CONTRIBUTING for dead external links (network)
 [group('docs')]
 check-links *args: docs
-    # The README and CONTRIBUTING are GitHub-facing and link out to the live docs
-    # site; render them to HTML so linkchecker validates those links too (it can't
-    # parse Markdown). They live outside site/ so a docs deploy never picks them up.
+    # README/CONTRIBUTING are GitHub-facing; render to HTML (linkchecker can't parse
+    # Markdown) so their links are checked too. Outside site/ so a deploy ignores them.
     mkdir -p build/linkcheck
     uvx --from markdown markdown_py README.md > build/linkcheck/readme.html
     uvx --from markdown markdown_py CONTRIBUTING.md > build/linkcheck/contributing.html
-    # Skip the 404 page (material renders its links absolute from site_url, so they
-    # 404 on the filesystem) and bencher.dev (403s every bot); the non-default
-    # user-agent dodges freedesktop's WAF (418 to "Mozilla"). Skip GitHub compare
-    # links too: the changelog builds one to the tag being released, and GitHub's
-    # /compare endpoint 404s until the freshly pushed tag has propagated.
-    uvx linkchecker --check-extern --no-warnings \
+    # No flag drops linkchecker's copyright banner; omit the 'intro' output part instead.
+    printf '[text]\nparts=url,parenturl,realurl,result,warning,info,stats,outro\n' > build/.linkcheckrc
+    # Skips: 404 page (absolute site_url links 404 on disk), bencher.dev (bot 403s),
+    # GitHub /compare (404s until the just-pushed tag propagates) and /pull links
+    # (permanent, never outdate); custom UA dodges freedesktop's WAF (418 to "Mozilla").
+    uvx linkchecker --config build/.linkcheckrc --check-extern --no-warnings \
         --ignore-url '/404\.html' \
         --ignore-url 'bencher\.dev' \
         --ignore-url 'github\.com/.*/compare/' \
+        --ignore-url 'github\.com/.*/pull/' \
         --user-agent LinkChecker {{ args }} \
         site/index.html build/linkcheck/readme.html build/linkcheck/contributing.html
 
