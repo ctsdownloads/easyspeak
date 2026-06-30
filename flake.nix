@@ -19,24 +19,20 @@
 
         python = pkgs.python314;
 
-        # The dictation plugin shells out to an AT-SPI helper that needs
-        # PyGObject + the AT-SPI typelib — which uv can't put in the app's
-        # venv (PyGObject isn't a wheel). So ship a dedicated interpreter that
-        # has it and point EASYSPEAK_ATSPI_PYTHON at it.
+        # Dedicated interpreter for dictation's AT-SPI helper: it needs PyGObject
+        # + the AT-SPI typelib, which uv can't put in a wheel venv (EASYSPEAK_ATSPI_PYTHON).
         atspiPython = python.withPackages (ps: [ ps.pygobject3 ]);
 
-        # Typelibs the helper's `gi` imports resolve at runtime: GLib/GObject/
-        # Gio from glib, GIRepository from gobject-introspection, Atspi from
-        # at-spi2-core.
-        giTypelibPath = pkgs.lib.makeSearchPath "lib/girepository-1.0" [
-          pkgs.glib
-          pkgs.gobject-introspection
-          pkgs.at-spi2-core
+        # Typelibs the helper's `gi` imports resolve at runtime (GLib/GObject/Gio,
+        # GIRepository, Atspi).
+        giTypelibPath = with pkgs; lib.makeSearchPath "lib/girepository-1.0" [
+          glib
+          gobject-introspection
+          at-spi2-core
         ];
 
-        # .git is stripped from the flake source, so setuptools_scm can't
-        # infer a version. Derive a PEP 440 "local version" from whatever
-        # the flake knows (clean rev > dirty rev > nothing).
+        # .git is stripped from the flake source, so derive a PEP 440 "local
+        # version" for setuptools_scm (clean rev > dirty rev > nothing).
         pretendVersion =
           if self ? rev then
             "0.0.0+g${builtins.substring 0 8 self.rev}"
@@ -45,11 +41,9 @@
           else
             "0.0.0+nix";
 
-        # Shared libraries that Python wheels dlopen at runtime.
-        # NOTE: nix-ld (programs.nix-ld) does NOT cover these — it only injects
-        # NIX_LD_LIBRARY_PATH for foreign executables that run through its loader
-        # stub. These wheels are dlopen'd by a Nix-store Python, which uses the
-        # normal glibc loader and only searches LD_LIBRARY_PATH/rpath.
+        # Shared libraries that Python wheels dlopen at runtime. nix-ld does NOT
+        # cover these: the wheels are dlopen'd by a Nix-store Python, whose glibc
+        # loader only searches LD_LIBRARY_PATH/rpath, not NIX_LD_LIBRARY_PATH.
         runtimeLibs = with pkgs; [
           portaudio # libportaudio.so for pyaudio
           stdenv.cc.cc.lib # libstdc++ for onnxruntime / faster-whisper
@@ -82,10 +76,9 @@
         # EASYSPEAK_SOUNDS_DIR (commonEnv) redirects to the Nix store one.
         soundsNixDir = "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo";
 
-        # Piper voice model (Amy, US English) — fetched at build time so the
-        # README's manual wget step isn't needed on NixOS. Piper expects the
-        # .onnx and .onnx.json to live in the same directory, so we linkFarm
-        # them together and point EASYSPEAK_PIPER_MODEL at the .onnx.
+        # Piper voice (Amy, US English), fetched at build time. Piper wants the
+        # .onnx and .onnx.json side by side, so linkFarm them and point
+        # EASYSPEAK_PIPER_MODEL at the .onnx.
         piperVoice = pkgs.linkFarm "piper-voice-en-US-amy-medium" [
           {
             name = "en_US-amy-medium.onnx";
@@ -110,35 +103,35 @@
         # .git is missing (e.g. a tarball checkout); the pyaudio build flags
         # compile it against the Nix-store portaudio (CPPFLAGS/LDFLAGS feed
         # distutils, C_INCLUDE_PATH/LIBRARY_PATH feed gcc).
-        commonEnv = ''
+        commonEnv = with pkgs; ''
           export UV_PYTHON='${python}/bin/python'
           export EASYSPEAK_PIPER_MODEL="''${EASYSPEAK_PIPER_MODEL:-${piperModelPath}}"
           export EASYSPEAK_SOUNDS_DIR="''${EASYSPEAK_SOUNDS_DIR:-${soundsNixDir}}"
           export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX="''${SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX:-${pretendVersion}}"
-          export CPPFLAGS="-I${pkgs.portaudio}/include ''${CPPFLAGS:-}"
-          export LDFLAGS="-L${pkgs.portaudio}/lib -Wl,-rpath,${pkgs.portaudio}/lib ''${LDFLAGS:-}"
-          export C_INCLUDE_PATH="${pkgs.portaudio}/include''${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}"
-          export LIBRARY_PATH="${pkgs.portaudio}/lib''${LIBRARY_PATH:+:$LIBRARY_PATH}"
-          export LD_LIBRARY_PATH='${pkgs.lib.makeLibraryPath runtimeLibs}'":''${LD_LIBRARY_PATH:-}"
+          export CPPFLAGS="-I${portaudio}/include ''${CPPFLAGS:-}"
+          export LDFLAGS="-L${portaudio}/lib -Wl,-rpath,${portaudio}/lib ''${LDFLAGS:-}"
+          export C_INCLUDE_PATH="${portaudio}/include''${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}"
+          export LIBRARY_PATH="${portaudio}/lib''${LIBRARY_PATH:+:$LIBRARY_PATH}"
+          export LD_LIBRARY_PATH='${lib.makeLibraryPath runtimeLibs}'":''${LD_LIBRARY_PATH:-}"
           export EASYSPEAK_ATSPI_PYTHON='${atspiPython}/bin/python3'
           export GI_TYPELIB_PATH='${giTypelibPath}'":''${GI_TYPELIB_PATH:-}"
         '';
 
         easyspeak = pkgs.writeShellApplication {
           name = "easyspeak";
-          runtimeInputs = [
+          runtimeInputs = with pkgs; [
             python
-            pkgs.uv
-            pkgs.coreutils
-            pkgs.gnused
+            uv
+            coreutils
+            gnused
           ]
           ++ runtimeTools
           ++ buildTools;
           text = ''
             set -euo pipefail
 
-            # uv needs a writable project directory; the flake source in
-            # /nix/store is read-only, so mirror it under XDG_STATE_HOME.
+            # uv needs a writable project dir, but /nix/store is read-only, so
+            # mirror the source under XDG_STATE_HOME.
             state_dir="''${XDG_STATE_HOME:-$HOME/.local/state}/easyspeak"
             src_dir="$state_dir/src"
             stamp="$src_dir/.nix-store-path"
@@ -172,26 +165,24 @@
         };
 
         devShells.default = pkgs.mkShell {
-          packages = [
+          packages = with pkgs; [
             python
-            pkgs.uv
-            pkgs.just
-            pkgs.eslint # JS linter for the GNOME Shell extension (see `just lint-js`)
-            pkgs.nodejs # `node --test` for the extension's JS helpers (see `just test-js`)
-            pkgs.desktop-file-utils # desktop-file-validate for the launcher (see `just gate`)
-            pkgs.glib.dev # glib-compile-schemas for the extension's GSettings schema (see `just compile-schemas`)
-            pkgs.dpkg # dpkg-deb to read .deb contents (see tests/packaging/test_deb.sh)
-            pkgs.rpm # rpm to read .rpm contents (see tests/packaging/test_rpm.sh)
-            pkgs.unzip # read .whl contents (see tests/packaging/test_python_wheel.sh)
+            uv
+            just
+            eslint # JS linter for the GNOME Shell extension (see `just lint-js`)
+            nodejs # `node --test` for the extension's JS helpers (see `just test-js`)
+            desktop-file-utils # desktop-file-validate for the launcher (see `just gate`)
+            glib.dev # glib-compile-schemas for the extension's GSettings schema (see `just compile-schemas`)
+            dpkg # dpkg-deb to read .deb contents (see tests/packaging/test_deb.sh)
+            rpm # rpm to read .rpm contents (see tests/packaging/test_rpm.sh)
+            unzip # read .whl contents (see tests/packaging/test_python_wheel.sh)
           ]
           ++ runtimeTools
           ++ buildTools;
           shellHook = ''
-            # mkShell's setup-hooks pile every Python app's (qutebrowser,
-            # piper-tts, onnxruntime, ...) site-packages onto PYTHONPATH. uv
-            # inherits that into PEP 517 build subprocesses, which then mix a
-            # different Python's setuptools into our build and produce wheels
-            # tagged with the wrong ABI. Strip both to keep uv pure.
+            # mkShell's setup-hooks pile other apps' site-packages onto
+            # PYTHONPATH; uv would inherit them into PEP 517 builds and produce
+            # wheels with the wrong ABI. Strip both to keep uv pure.
             unset PYTHONPATH PYTHONHOME
 
             ${commonEnv}
