@@ -9,7 +9,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 
 **Configurable Chimes, a Single Hotkey Variable, and Versioned Docs**
 
-`EASYSPEAK_*` environment variables now drive **cross-platform configurability**:
+`EASYSPEAK_*` environment variables now drive **cross-platform/distro configurability**:
 rather than carrying platform-specific patches, EasySpeak exposes whatever
 differs between systems as a variable you set — and documents every one of
 them in the generated reference. The wake and sleep chimes, for one, stayed
