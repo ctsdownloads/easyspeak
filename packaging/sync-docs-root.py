@@ -1,7 +1,7 @@
-"""Publish the latest MkDocs build to the gh-pages site root.
+"""Mirror the in-development ``main`` MkDocs build to the gh-pages site root.
 
-mike archives every release/dev build under its own ``/<version>/`` path and
-maintains ``versions.json`` plus ``.nojekyll`` at the root. To serve the latest
+mike archives every release under its own ``/<version>/`` path and maintains
+``versions.json`` plus ``.nojekyll`` at the root. To serve the current ``main``
 docs at clean, version-less URLs (``/easyspeak/installation/`` rather than
 ``/easyspeak/latest/installation/``), this copies a freshly built site into the
 gh-pages root, replacing the previous canonical files but leaving mike's version
