@@ -24,6 +24,7 @@ jobs:
     - uses: astral-sh/setup-uv@v7
       with:
         python-version: '3.14'
+        enable-cache: false
     - uses: taiki-e/install-action@just
     - run: |
         sudo apt update
