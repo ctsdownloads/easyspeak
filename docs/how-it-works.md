@@ -13,17 +13,6 @@ All processing happens locally. No data leaves your machine.
 
 ```
 easyspeak/
-├── gnome@easyspeak.dev/       # GNOME Shell extension (UUID-named, shipped as package data)
-│   ├── schemas/               # GSettings schema (+ compiled) for the settings
-│   ├── __init__.py            # Marks the folder as package data (easyspeak.gnome)
-│   ├── extension-helpers.js   # Pure JS helpers imported by extension.js
-│   ├── extension.js           # The extension itself
-│   ├── grid.js                # Numbered grid overlay + pointer injection primitive
-│   ├── indicator.js           # Panel indicator + Quick Settings toggle widgets
-│   ├── metadata.json          # Extension metadata
-│   ├── prefs.js               # Extension Settings dialog (autostart, Quick Settings)
-│   ├── screenshot.js          # Screen capture primitive (Wayland framebuffer grab)
-│   └── windows.js             # Window/workspace operations on the focused window
 ├── src/
 │   ├── core/
 │   │   ├── __init__.py
@@ -37,6 +26,21 @@ easyspeak/
 │   │   ├── mediakeys.py       # Replays multimedia keys via Mutter
 │   │   ├── speech.py          # Persistent piper -> player pipeline
 │   │   └── tray.py            # Panel indicator + asleep lifecycle
+│   ├── data/                  # Bundled data files (easyspeak.data), shipped as package data
+│   │   ├── __init__.py        # Marks the folder as package data
+│   │   ├── easyspeak.desktop  # Desktop entry
+│   │   └── easyspeak-autostart.desktop
+│   ├── gnome@easyspeak.dev/   # GNOME Shell extension (UUID-named, shipped as package data)
+│   │   ├── schemas/           # GSettings schema (+ compiled) for the settings
+│   │   ├── __init__.py        # Marks the folder as package data (easyspeak.gnome)
+│   │   ├── extension-helpers.js  # Pure JS helpers imported by extension.js
+│   │   ├── extension.js       # The extension itself
+│   │   ├── grid.js            # Numbered grid overlay + pointer injection primitive
+│   │   ├── indicator.js       # Panel indicator + Quick Settings toggle widgets
+│   │   ├── metadata.json      # Extension metadata
+│   │   ├── prefs.js           # Extension Settings dialog (autostart, Quick Settings)
+│   │   ├── screenshot.js      # Screen capture primitive (Wayland framebuffer grab)
+│   │   └── windows.js         # Window/workspace operations on the focused window
 │   └── plugins/
 │       ├── __init__.py
 │       ├── 00_eyetrack.py     # Head tracking (experimental)

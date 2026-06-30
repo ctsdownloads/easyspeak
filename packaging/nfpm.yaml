@@ -27,11 +27,11 @@ contents:
   dst: /usr/bin/easyspeak
   type: symlink
 # Desktop entry (uses the stock audio-input-microphone icon from adwaita-icon-theme).
-- src: ./data/easyspeak.desktop
+- src: ./src/data/easyspeak.desktop
   dst: /usr/share/applications/easyspeak.desktop
 # Start at login by default; users can turn this off in the extension's Settings
 # (which writes an overriding ~/.config/autostart/easyspeak.desktop).
-- src: ./data/easyspeak-autostart.desktop
+- src: ./src/data/easyspeak-autostart.desktop
   dst: /etc/xdg/autostart/easyspeak.desktop
 # Pre-shell GNOME-extension refresh unit, rendered for the bundled interpreter by
 # stage-bundle.sh and enabled for every user via the .wants symlink below — so the

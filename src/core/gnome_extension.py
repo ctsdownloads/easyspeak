@@ -68,7 +68,7 @@ class RefreshResult(enum.Enum):
 def extension_source_dir():
     """Return the directory holding the bundled extension assets.
 
-    The extension's sources live in the top-level `gnome@easyspeak.dev/` folder,
+    The extension's sources live in the `src/gnome@easyspeak.dev/` folder,
     shipped in the wheel as the `easyspeak.gnome` package. Resolving by package
     name works in both editable and wheel installs, where that folder sits in
     different places relative to this module.
