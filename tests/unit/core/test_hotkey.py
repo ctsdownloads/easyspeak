@@ -164,6 +164,17 @@ class TestStart:
 
         grab.assert_not_called()
 
+    def test_unknown_key_disables_and_warns(self, caplog):
+        """An unrecognized key name disables the listener, with a warning."""
+        with caplog.at_level(logging.WARNING):
+            h = HotkeyListener("ctrl+banana")
+
+        with patch.object(h, "_grab_devices") as grab:
+            h.start()
+
+        grab.assert_not_called()
+        assert "banana" in caplog.text
+
     def test_no_devices_starts_no_thread(self):
         h = HotkeyListener("ctrl+shift")
 

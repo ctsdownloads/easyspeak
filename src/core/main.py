@@ -22,7 +22,6 @@ from .config import (
     COMMAND_PROMPT,
     FOLLOWUP_IDLE_ROUNDS,
     HOTKEY_COMBO,
-    HOTKEY_ENABLED,
     MISUNDERSTAND_GRACE,
     SILENCE_DURATION,
     SILENCE_THRESHOLD,
@@ -79,7 +78,7 @@ class EasySpeak:
         self.tray = Tray(speak=self.speak)
         # Hold-to-dictate keyboard activation; the dictation plugin registers
         # the session to run while the combo is held (see register_push_to_talk).
-        self.hotkey = HotkeyListener(HOTKEY_COMBO, HOTKEY_ENABLED)
+        self.hotkey = HotkeyListener(HOTKEY_COMBO)
         self._push_to_talk = None
 
     # --- Utilities for plugins ---

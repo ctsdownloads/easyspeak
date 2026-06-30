@@ -64,6 +64,28 @@ def parse_combo(spec: str) -> tuple[frozenset[str], ...]:
     return tuple(groups)
 
 
+def unknown_keys(spec: str) -> list[str]:
+    """Return combo tokens that are neither a modifier alias nor a real evdev key.
+
+    Validates against `evdev.ecodes`, so a typo (`ctrl+spcae`) is caught instead of
+    silently becoming a dead key. Returns `[]` when python-evdev can't be imported,
+    since the listener is inert without it anyway. Only evdev key names are checked;
+    the portal-based activation in issue #92 would use a different trigger grammar.
+    """
+    try:
+        from evdev import ecodes
+    except ImportError:
+        return []
+    unknown = []
+    for part in spec.split("+"):
+        name = part.strip().lower()
+        if not name or name in _MODIFIER_ALIASES:
+            continue
+        if f"KEY_{name.upper()}" not in ecodes.ecodes:
+            unknown.append(part.strip())
+    return unknown
+
+
 class HotkeyListener:
     """Track whether a key combo is held, off a background evdev reader.
 
@@ -78,12 +100,19 @@ class HotkeyListener:
     def __init__(self, combo="ctrl+shift", enabled=True):
         """Set up the listener for `combo` (e.g. `"ctrl+shift"`).
 
-        An unparseable or empty combo, or `enabled=False`, leaves the listener disabled
-        so [`start`][core.hotkey.HotkeyListener.start] is a no-op.
+        An empty, unparseable, or unknown-key combo, or `enabled=False`, leaves the
+        listener disabled so [`start`][core.hotkey.HotkeyListener.start] is a no-op.
         """
         self._spec = combo
         self._groups = parse_combo(combo)
-        self._enabled = enabled and bool(self._groups)
+        unknown = unknown_keys(combo)
+        if unknown:
+            logger.warning(
+                "Ignoring hotkey combo %r: unknown key(s) %s.",
+                combo,
+                ", ".join(unknown),
+            )
+        self._enabled = enabled and bool(self._groups) and not unknown
         self._pressed = set()  # combo keys currently held
         self._held = False  # whole combo satisfied
         self._activation = False  # rising edge, consumed by take_activation()
