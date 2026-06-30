@@ -1,8 +1,25 @@
 """Tuning constants and model factory for EasySpeak.
 
-Override the EASYSPEAK_* environment variables to customise behaviour without editing
-source. Plugin-specific host-environment setup lives in each plugin's own setup() hook,
-not here.
+Override the `EASYSPEAK_*` environment variables to customise behaviour without
+editing source. Plugin-specific host-environment setup lives in each plugin's own
+`setup()` hook, not here.
+
+Every variable EasySpeak reads and what it affects — the defaults are the constant
+values rendered below, except `EASYSPEAK_LOG_LEVEL` (handled in `core.log`) and
+`EASYSPEAK_ATSPI_PYTHON` (in `core.tray`/`plugins.dictation`):
+
+| Variable                         | Effect                                           |
+| -------------------------------- | ------------------------------------------------ |
+| `EASYSPEAK_LOG_LEVEL`            | Logging level when no `-v`/`-q` flag is given.   |
+| `EASYSPEAK_HOTKEY`               | Disable hold-to-dictate silent activation.       |
+| `EASYSPEAK_HOTKEY_COMBO`         | Keys held to dictate without the wake word.      |
+| `EASYSPEAK_PIPER_MODEL`          | Piper voice `.onnx` used for speech output.      |
+| `EASYSPEAK_PIPER_BIN`            | Piper TTS binary.                                |
+| `EASYSPEAK_WHISPER_MODEL`        | faster-whisper model used for transcription.     |
+| `EASYSPEAK_WHISPER_COMPUTE_TYPE` | CTranslate2 compute type.                        |
+| `EASYSPEAK_WHISPER_CPU_THREADS`  | CPU threads for transcription.                   |
+| `EASYSPEAK_SOUNDS_DIR`           | Directory of the wake chime and error bell.      |
+| `EASYSPEAK_ATSPI_PYTHON`         | Interpreter running the dictation AT-SPI helper. |
 """
 
 import os
