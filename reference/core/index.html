@@ -3920,63 +3920,25 @@ audio stack (pyopen-wakeword, pyaudio, …) that <code>core.main</code> pulls in
 
     <div class="doc doc-contents first">
 
-        <p>Tuning constants and model factory for EasySpeak.</p>
-<p>Override the <code>EASYSPEAK_*</code> environment variables to customise behaviour without
-editing source. Plugin-specific host-environment setup lives in each plugin's own
-<code>setup()</code> hook, not here.</p>
-<p>Every variable EasySpeak reads and what it affects — the defaults are the constant
-values rendered below, except <code>EASYSPEAK_LOG_LEVEL</code> (handled in <code>core.log</code>) and
-<code>EASYSPEAK_ATSPI_PYTHON</code> (in <code>core.tray</code>/<code>plugins.dictation</code>):</p>
-<table>
-<thead>
-<tr>
-<th>Variable</th>
-<th>Effect</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>EASYSPEAK_LOG_LEVEL</code></td>
-<td>Logging level when no <code>-v</code>/<code>-q</code> flag is given.</td>
-</tr>
-<tr>
-<td><code>EASYSPEAK_HOTKEY</code></td>
-<td>Disable hold-to-dictate silent activation.</td>
-</tr>
-<tr>
-<td><code>EASYSPEAK_HOTKEY_COMBO</code></td>
-<td>Keys held to dictate without the wake word.</td>
-</tr>
-<tr>
-<td><code>EASYSPEAK_PIPER_MODEL</code></td>
-<td>Piper voice <code>.onnx</code> used for speech output.</td>
-</tr>
-<tr>
-<td><code>EASYSPEAK_PIPER_BIN</code></td>
-<td>Piper TTS binary.</td>
-</tr>
-<tr>
-<td><code>EASYSPEAK_WHISPER_MODEL</code></td>
-<td>faster-whisper model used for transcription.</td>
-</tr>
-<tr>
-<td><code>EASYSPEAK_WHISPER_COMPUTE_TYPE</code></td>
-<td>CTranslate2 compute type.</td>
-</tr>
-<tr>
-<td><code>EASYSPEAK_WHISPER_CPU_THREADS</code></td>
-<td>CPU threads for transcription.</td>
-</tr>
-<tr>
-<td><code>EASYSPEAK_SOUNDS_DIR</code></td>
-<td>Directory of the wake chime and error bell.</td>
-</tr>
-<tr>
-<td><code>EASYSPEAK_ATSPI_PYTHON</code></td>
-<td>Interpreter running the dictation AT-SPI helper.</td>
-</tr>
-</tbody>
-</table>
+        <p>Central tuning constants and the speech-model factory for EasySpeak.</p>
+<p>Holds the wake-word, audio, silent-hotkey, speech-model, and desktop-sound
+settings the daemon reads at import, alongside <code>load_whisper_model()</code>, which
+builds the faster-whisper model from them. Most are plain constants; these
+honor an <code>EASYSPEAK_*</code> environment variable:</p>
+<ul>
+<li><code>EASYSPEAK_HOTKEY</code></li>
+<li><code>EASYSPEAK_HOTKEY_COMBO</code></li>
+<li><code>EASYSPEAK_PIPER_BIN</code></li>
+<li><code>EASYSPEAK_PIPER_MODEL</code></li>
+<li><code>EASYSPEAK_SOUNDS_DIR</code></li>
+<li><code>EASYSPEAK_WHISPER_COMPUTE_TYPE</code></li>
+<li><code>EASYSPEAK_WHISPER_CPU_THREADS</code></li>
+<li><code>EASYSPEAK_WHISPER_MODEL</code></li>
+</ul>
+<p>See the <a href="../../usage/#configuration">Configuration guide</a> for what each does, its
+default, and EasySpeak's other <code>EASYSPEAK_*</code> variables.</p>
+<p>A plugin that needs host-environment setup does it in its own <code>setup()</code> hook —
+see <a href="../../plugins/">Writing Plugins</a>.</p>
 
 
 
@@ -4016,19 +3978,19 @@ values rendered below, except <code>EASYSPEAK_LOG_LEVEL</code> (handled in <code
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/core/config.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-114">114</a></span>
-<span class="normal"><a href="#__codelineno-0-115">115</a></span>
-<span class="normal"><a href="#__codelineno-0-116">116</a></span>
-<span class="normal"><a href="#__codelineno-0-117">117</a></span>
-<span class="normal"><a href="#__codelineno-0-118">118</a></span>
-<span class="normal"><a href="#__codelineno-0-119">119</a></span>
-<span class="normal"><a href="#__codelineno-0-120">120</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-114" name="__codelineno-0-114"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_whisper_model</span><span class="p">(</span>
-<a id="__codelineno-0-115" name="__codelineno-0-115"></a>    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">WHISPER_MODEL</span><span class="p">,</span>
-<a id="__codelineno-0-116" name="__codelineno-0-116"></a>    <span class="n">compute_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">WHISPER_COMPUTE_TYPE</span><span class="p">,</span>
-<a id="__codelineno-0-117" name="__codelineno-0-117"></a>    <span class="n">cpu_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">WHISPER_CPU_THREADS</span><span class="p">,</span>
-<a id="__codelineno-0-118" name="__codelineno-0-118"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WhisperModel</span><span class="p">:</span>
-<a id="__codelineno-0-119" name="__codelineno-0-119"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a faster-whisper model from the configured (or given) settings.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-120" name="__codelineno-0-120"></a>    <span class="k">return</span> <span class="n">WhisperModel</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">compute_type</span><span class="o">=</span><span class="n">compute_type</span><span class="p">,</span> <span class="n">cpu_threads</span><span class="o">=</span><span class="n">cpu_threads</span><span class="p">)</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-103">103</a></span>
+<span class="normal"><a href="#__codelineno-0-104">104</a></span>
+<span class="normal"><a href="#__codelineno-0-105">105</a></span>
+<span class="normal"><a href="#__codelineno-0-106">106</a></span>
+<span class="normal"><a href="#__codelineno-0-107">107</a></span>
+<span class="normal"><a href="#__codelineno-0-108">108</a></span>
+<span class="normal"><a href="#__codelineno-0-109">109</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_whisper_model</span><span class="p">(</span>
+<a id="__codelineno-0-104" name="__codelineno-0-104"></a>    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">WHISPER_MODEL</span><span class="p">,</span>
+<a id="__codelineno-0-105" name="__codelineno-0-105"></a>    <span class="n">compute_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">WHISPER_COMPUTE_TYPE</span><span class="p">,</span>
+<a id="__codelineno-0-106" name="__codelineno-0-106"></a>    <span class="n">cpu_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">WHISPER_CPU_THREADS</span><span class="p">,</span>
+<a id="__codelineno-0-107" name="__codelineno-0-107"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WhisperModel</span><span class="p">:</span>
+<a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a faster-whisper model from the configured (or given) settings.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-109" name="__codelineno-0-109"></a>    <span class="k">return</span> <span class="n">WhisperModel</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">compute_type</span><span class="o">=</span><span class="n">compute_type</span><span class="p">,</span> <span class="n">cpu_threads</span><span class="o">=</span><span class="n">cpu_threads</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
