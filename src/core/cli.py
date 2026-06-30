@@ -1,4 +1,11 @@
-"""Command-line entry point: parse arguments, set up logging, run the app."""
+"""Command-line entry point: parse arguments, set up logging, run the app.
+
+Verbosity comes from the mutually exclusive `-v`/`--verbose` and `-q`/`--quiet`
+flags, or — with neither — the `EASYSPEAK_LOG_LEVEL` environment variable, which
+the flags override (see [`resolve_level`][core.log.resolve_level]). The one-shot
+`--configure` and `--show` subcommands set up or print the desktop-integration
+files and exit. All `EASYSPEAK_*` variables are listed in [`core.config`][core.config].
+"""
 
 import argparse
 
