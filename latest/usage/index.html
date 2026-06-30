@@ -981,11 +981,6 @@ the module that reads each (linked to its API reference).</p>
 <tbody>
 <tr>
 <td><code>EASYSPEAK_HOTKEY</code></td>
-<td><code>1</code></td>
-<td>Set <code>0</code> to disable hold-to-dictate silent activation</td>
-</tr>
-<tr>
-<td><code>EASYSPEAK_HOTKEY_COMBO</code></td>
 <td><code>ctrl+shift</code></td>
 <td>Keys held to dictate without the wake word</td>
 </tr>
@@ -1021,9 +1016,10 @@ the module that reads each (linked to its API reference).</p>
 </tr>
 </tbody>
 </table>
-<p><code>EASYSPEAK_HOTKEY_COMBO</code> takes the <code>ctrl</code>/<code>shift</code>/<code>alt</code>/<code>super</code> aliases or raw
-evdev key names joined with <code>+</code>, and needs read access to <code>/dev/input</code> (be in
-the <code>input</code> group).</p>
+<p><code>EASYSPEAK_HOTKEY</code> takes the <code>ctrl</code>/<code>shift</code>/<code>alt</code>/<code>super</code> aliases or raw evdev
+key names joined with <code>+</code> (e.g. <code>ctrl+space</code>); set it to empty, <code>off</code>, or <code>none</code>
+to turn it off, and an unrecognized key disables it too. See
+<a href="../packaging/">Packaging</a> for the device access it needs.</p>
 <h3 id="corelog"><a class="autorefs autorefs-internal" title="            core.log" href="../reference/core/#core.log"><code>core.log</code></a><a class="headerlink" href="#corelog" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
