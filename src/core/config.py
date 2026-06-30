@@ -82,6 +82,18 @@ COMMAND_PROMPT = (
 )
 
 
+# --- Desktop sounds ---
+# The wake chime and error bell come from the freedesktop sound theme. The
+# directory is the FHS location by default; on NixOS that path doesn't exist, so
+# the flake points EASYSPEAK_SOUNDS_DIR at the sound-theme-freedesktop store path
+# (for both `nix run` and the dev shell) so the files are actually found.
+SOUNDS_DIR = os.environ.get(
+    "EASYSPEAK_SOUNDS_DIR", "/usr/share/sounds/freedesktop/stereo"
+)
+WAKE_SOUND = os.path.join(SOUNDS_DIR, "message.oga")
+ERROR_SOUND = os.path.join(SOUNDS_DIR, "dialog-error.oga")
+
+
 def load_whisper_model(
     model_name: str = WHISPER_MODEL,
     compute_type: str = WHISPER_COMPUTE_TYPE,

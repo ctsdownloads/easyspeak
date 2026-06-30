@@ -78,10 +78,8 @@
           portaudio
         ];
 
-        # FHS-style sounds directory baked into the source (wake chime in
-        # core.main, error chime in core.tray); doesn't exist on NixOS, so we
-        # sed-replace it with the Nix store one during the sync step.
-        soundsFhsDir = "/usr/share/sounds/freedesktop/stereo";
+        # The chime/error-bell default to the FHS sounds dir, absent on NixOS;
+        # EASYSPEAK_SOUNDS_DIR (commonEnv) redirects to the Nix store one.
         soundsNixDir = "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo";
 
         # Piper voice model (Amy, US English) — fetched at build time so the
@@ -106,6 +104,26 @@
         ];
         piperModelPath = "${piperVoice}/en_US-amy-medium.onnx";
 
+        # Env shared by the `nix run` wrapper and the dev shell, so `uv run
+        # easyspeak` behaves identically in both; `:-`/`:+` defaulting lets a
+        # value the user already exported win. SETUPTOOLS_SCM matters only when
+        # .git is missing (e.g. a tarball checkout); the pyaudio build flags
+        # compile it against the Nix-store portaudio (CPPFLAGS/LDFLAGS feed
+        # distutils, C_INCLUDE_PATH/LIBRARY_PATH feed gcc).
+        commonEnv = ''
+          export UV_PYTHON='${python}/bin/python'
+          export EASYSPEAK_PIPER_MODEL="''${EASYSPEAK_PIPER_MODEL:-${piperModelPath}}"
+          export EASYSPEAK_SOUNDS_DIR="''${EASYSPEAK_SOUNDS_DIR:-${soundsNixDir}}"
+          export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX="''${SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX:-${pretendVersion}}"
+          export CPPFLAGS="-I${pkgs.portaudio}/include ''${CPPFLAGS:-}"
+          export LDFLAGS="-L${pkgs.portaudio}/lib -Wl,-rpath,${pkgs.portaudio}/lib ''${LDFLAGS:-}"
+          export C_INCLUDE_PATH="${pkgs.portaudio}/include''${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}"
+          export LIBRARY_PATH="${pkgs.portaudio}/lib''${LIBRARY_PATH:+:$LIBRARY_PATH}"
+          export LD_LIBRARY_PATH='${pkgs.lib.makeLibraryPath runtimeLibs}'":''${LD_LIBRARY_PATH:-}"
+          export EASYSPEAK_ATSPI_PYTHON='${atspiPython}/bin/python3'
+          export GI_TYPELIB_PATH='${giTypelibPath}'":''${GI_TYPELIB_PATH:-}"
+        '';
+
         easyspeak = pkgs.writeShellApplication {
           name = "easyspeak";
           runtimeInputs = [
@@ -129,30 +147,12 @@
             if [ ! -f "$stamp" ] || [ "$(cat "$stamp" 2>/dev/null || true)" != "${./.}" ]; then
               rm -rf "$src_dir"
               cp -r --no-preserve=mode,ownership "${./.}" "$src_dir"
-              sed -i 's|${soundsFhsDir}|${soundsNixDir}|g' \
-                "$src_dir/src/core/main.py" "$src_dir/src/core/tray.py"
               echo "${./.}" > "$stamp"
             fi
 
-            export UV_PYTHON='${python}/bin/python'
             export UV_CACHE_DIR="''${XDG_CACHE_HOME:-$HOME/.cache}/easyspeak/uv"
             export UV_PROJECT_ENVIRONMENT="$state_dir/venv"
-            export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX='${pretendVersion}'
-            export EASYSPEAK_PIPER_MODEL='${piperModelPath}'
-            # pyaudio's setup.py hard-codes /usr/include and won't find
-            # headers from the Nix store. CPPFLAGS/LDFLAGS are picked up by
-            # distutils; C_INCLUDE_PATH/LIBRARY_PATH are read by gcc itself,
-            # bypassing any Nix cc-wrapper variable-name quirks.
-            export CPPFLAGS="-I${pkgs.portaudio}/include ''${CPPFLAGS:-}"
-            export LDFLAGS="-L${pkgs.portaudio}/lib -Wl,-rpath,${pkgs.portaudio}/lib ''${LDFLAGS:-}"
-            export C_INCLUDE_PATH="${pkgs.portaudio}/include''${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}"
-            export LIBRARY_PATH="${pkgs.portaudio}/lib''${LIBRARY_PATH:+:$LIBRARY_PATH}"
-            export LD_LIBRARY_PATH='${pkgs.lib.makeLibraryPath runtimeLibs}'":''${LD_LIBRARY_PATH:-}"
-            # Dictation's AT-SPI helper runs in this PyGObject-equipped
-            # interpreter, with the typelibs it imports on GI_TYPELIB_PATH.
-            export EASYSPEAK_ATSPI_PYTHON='${atspiPython}/bin/python3'
-            export GI_TYPELIB_PATH='${giTypelibPath}'":''${GI_TYPELIB_PATH:-}"
-
+            ${commonEnv}
             cd "$src_dir"
             exec uv run easyspeak "$@"
           '';
@@ -194,18 +194,7 @@
             # tagged with the wrong ABI. Strip both to keep uv pure.
             unset PYTHONPATH PYTHONHOME
 
-            export LD_LIBRARY_PATH='${pkgs.lib.makeLibraryPath runtimeLibs}'":''${LD_LIBRARY_PATH:-}"
-            export EASYSPEAK_ATSPI_PYTHON='${atspiPython}/bin/python3'
-            export GI_TYPELIB_PATH='${giTypelibPath}'":''${GI_TYPELIB_PATH:-}"
-            export CPPFLAGS="-I${pkgs.portaudio}/include ''${CPPFLAGS:-}"
-            export LDFLAGS="-L${pkgs.portaudio}/lib -Wl,-rpath,${pkgs.portaudio}/lib ''${LDFLAGS:-}"
-            export C_INCLUDE_PATH="${pkgs.portaudio}/include''${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}"
-            export LIBRARY_PATH="${pkgs.portaudio}/lib''${LIBRARY_PATH:+:$LIBRARY_PATH}"
-            export UV_PYTHON='${python}/bin/python'
-            export EASYSPEAK_PIPER_MODEL="''${EASYSPEAK_PIPER_MODEL:-${piperModelPath}}"
-            # Only used when .git is missing (e.g. tarball checkout); a real
-            # git tree lets setuptools_scm derive the proper version.
-            export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX="''${SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX:-${pretendVersion}}"
+            ${commonEnv}
             echo "EasySpeak dev shell — Python $(python --version 2>&1 | awk '{print $2}'), uv $(uv --version | awk '{print $2}')"
             echo "Run:  uv run [--extra head-tracking] easyspeak"
             echo "      just --list"

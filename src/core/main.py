@@ -27,6 +27,7 @@ from .config import (
     SILENCE_DURATION,
     SILENCE_THRESHOLD,
     WAKE_COOLDOWN,
+    WAKE_SOUND,
     WAKE_THRESHOLD,
     WHISPER_COMPUTE_TYPE,
     WHISPER_CPU_THREADS,
@@ -407,10 +408,7 @@ class EasySpeak:
         Flushing drops the chime audio that bled into the mic so it isn't mistaken for
         the user speaking.
         """
-        subprocess.run(
-            ["paplay", "/usr/share/sounds/freedesktop/stereo/message.oga"],
-            capture_output=True,
-        )
+        subprocess.run(["paplay", WAKE_SOUND], capture_output=True)
         self.flush_stream()
 
     def _drain_feedback(self):

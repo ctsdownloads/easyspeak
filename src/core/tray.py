@@ -28,6 +28,7 @@ import time
 from pathlib import Path
 
 from .about import DOCS_URL
+from .config import ERROR_SOUND
 
 logger = logging.getLogger(__name__)
 
@@ -52,12 +53,6 @@ ABOUT_HELPER = str(Path(__file__).with_name("about.py"))
 
 # Shared with the extension's ScreenshotManager, which creates ~/.cache/easyspeak.
 CONTROL_FILE = Path.home() / ".cache" / "easyspeak" / "control"
-
-# Desktop "something failed" sound, played alongside the spoken apology when a
-# menu helper can't open. FHS path (from sound-theme-freedesktop); the flake
-# sed-replaces this directory with the Nix store one at sync time, mirroring the
-# wake chime in core.main.
-ERROR_SOUND = "/usr/share/sounds/freedesktop/stereo/dialog-error.oga"
 
 # How long to idle between control-file probes while the assistant is asleep.
 SLEEP_POLL_INTERVAL = 0.2
