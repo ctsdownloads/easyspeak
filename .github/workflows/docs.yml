@@ -65,21 +65,10 @@ jobs:
         git config user.email "github-actions[bot]@users.noreply.github.com"
     - name: Archive tagged release snapshot
       if: startsWith(github.ref, 'refs/tags/')
-      run: just docs-publish deploy --push "${GITHUB_REF_NAME}"
+      run: just docs-mike deploy --push "${GITHUB_REF_NAME}"
     - name: Publish "latest" docs from main
       if: github.ref == 'refs/heads/main'
-      run: just docs-publish deploy --push latest
+      run: just docs-mike deploy --push latest
     - name: Mirror main to the root and redirect /latest to it
       if: github.ref == 'refs/heads/main'
-      run: |
-        git fetch origin gh-pages
-        git worktree add gh-pages-root origin/gh-pages
-        python packaging/sync-docs-root.py site gh-pages-root
-        python packaging/make-latest-redirects.py site gh-pages-root/latest
-        git -C gh-pages-root add -A
-        if git -C gh-pages-root diff --cached --quiet; then
-          echo "Site root already up to date."
-        else
-          git -C gh-pages-root commit -m "Mirror main docs to root; redirect /latest"
-          git -C gh-pages-root push origin HEAD:gh-pages
-        fi
+      run: bash packaging/docs-mirror-root.sh

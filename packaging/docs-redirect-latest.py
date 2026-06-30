@@ -1,7 +1,7 @@
 """Replace the gh-pages ``/latest/`` tree with redirect stubs to the site root.
 
 The site root serves the current ``main`` docs at clean, version-less URLs (see
-sync-docs-root.py). ``/latest/`` is kept only as a stable, addressable alias for
+docs-sync-root.py). ``/latest/`` is kept only as a stable, addressable alias for
 that same content: every page under it redirects to its root counterpart, with a
 ``rel=canonical`` pointing at the root so search engines treat the root as the
 single canonical copy. GitHub Pages can't issue a real HTTP 301, so each stub is
@@ -9,7 +9,7 @@ a meta-refresh + canonical (the same technique mike's redirect aliases use) and
 carries any URL fragment (e.g. ``#core.config``) across the hop.
 
 Usage:
-    python make-latest-redirects.py <built-site-dir> <latest-dir> [base-url]
+    python docs-redirect-latest.py <built-site-dir> <latest-dir> [base-url]
 """
 
 import shutil
