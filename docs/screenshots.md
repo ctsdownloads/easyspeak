@@ -20,9 +20,9 @@ noise (suppressed in newer versions).
 ## Tray menu and Quick Settings
 
 EasySpeak lives in the GNOME top bar, ready whenever you want to mute it, wake
-it, or reach its settings. It shows up either as a panel tray icon or as a
-[Quick Settings](https://help.gnome.org/gnome-help/quick-settings.html) toggle —
-a single switch in its extension settings decides which.
+it, or reach its settings. It shows up either as a panel tray icon (when asleep)
+or as a [Quick Settings](https://help.gnome.org/gnome-help/quick-settings.html)
+toggle -- a single switch in its extension settings decides which.
 
 <div markdown style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start; justify-content: center;">
 
