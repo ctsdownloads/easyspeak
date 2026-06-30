@@ -12,7 +12,7 @@ import {
     setAutostartEnabledInText,
     autostartEnabledFromText,
     pickAutostartSource,
-} from '../../gnome@easyspeak.dev/extension-helpers.js';
+} from '../../src/gnome@easyspeak.dev/extension-helpers.js';
 
 test('clampToWorkArea returns the rectangle unchanged without a work area', () => {
     assert.deepEqual(clampToWorkArea(10, 20, 30, 40, null), [10, 20, 30, 40]);

@@ -108,6 +108,9 @@ show_missing = true
 source = ["src"]
 
 [tool.mypy]
+# The extension's UUID-named folder isn't a valid Python package name (it's
+# mapped to easyspeak.gnome via package-dir); it holds only JS and a docstring.
+exclude = ['src/gnome@easyspeak\.dev/']
 ignore_missing_imports = true
 warn_redundant_casts = true
 warn_unreachable = true
@@ -166,7 +169,7 @@ ignore = [
 ]
 "src/plugins/00_*.py" = ["N999"]    # numeric prefix sets plugin load order
 "src/plugins/zz_base.py" = ["N999"] # zz_ prefix loads the base plugin last
-"gnome@easyspeak.dev/__init__.py" = ["N999"] # folder is the extension UUID, not a module name
+"src/gnome@easyspeak.dev/__init__.py" = ["N999"] # folder is the extension UUID, not a module name
 "tests/**" = [
   "S101",    # asserts are the whole point of a test
   "D",       # docstrings enforced on src/, not on tests
@@ -194,12 +197,12 @@ packages = [
   "easyspeak.plugins",
   "easyspeak.data",
   "easyspeak.gnome",
+  "easyspeak.gnome.schemas",
 ]
 
 [tool.setuptools.package-dir]
 "easyspeak" = "src"
-"easyspeak.data" = "data"
-"easyspeak.gnome" = "gnome@easyspeak.dev"
+"easyspeak.gnome" = "src/gnome@easyspeak.dev"
 
 [tool.setuptools.package-data]
 "easyspeak.data" = ["*"]

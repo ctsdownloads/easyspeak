@@ -6,7 +6,7 @@
 // (undefined names, unused vars) without trying to resolve modules.
 export default [
   {
-    files: ["gnome@easyspeak.dev/*.js"],
+    files: ["src/gnome@easyspeak.dev/*.js"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
