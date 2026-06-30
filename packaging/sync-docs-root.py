@@ -19,10 +19,13 @@ from pathlib import Path
 # Root entries mike owns; never delete these when refreshing the canonical docs.
 MIKE_FILES = {".nojekyll", "versions.json"}
 
+# GitHub Pages reads the custom domain from `CNAME` at the publishing-branch root
+PAGES_FILES = {"CNAME"}
+
 
 def preserved_names(gh_pages: Path) -> set[str]:
     """Names of root entries to keep: git internals, mike metadata, versions."""
-    keep = {".git"} | MIKE_FILES
+    keep = {".git"} | MIKE_FILES | PAGES_FILES
     versions = gh_pages / "versions.json"
     if versions.is_file():
         keep |= {entry["version"] for entry in json.loads(versions.read_text())}
