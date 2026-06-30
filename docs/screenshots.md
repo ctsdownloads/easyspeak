@@ -34,12 +34,12 @@ toggle -- a single switch in its extension settings decides which.
 
 </div>
 
-Say, "stop listening", to make EasySpeak stop responding to your voice. The
-panel icon (left) switches to a muted microphone to show it's asleep, and
-EasySpeak ignores everything until you wake it again. Click the icon and choose
-**Reactivate EasySpeak** to start listening once more; the same menu opens
-**Settings…**, **Help**, and the **About EasySpeak** dialog, or shuts the daemon
-down with **Quit EasySpeak**.
+Say, ["stop listening"](commands.md#general), to make EasySpeak stop
+responding to your voice. The panel icon (left) switches to a muted
+microphone to show it's asleep, and EasySpeak ignores everything until you
+wake it again. Click the icon and choose **Reactivate EasySpeak** to start
+listening once more; the same menu opens **Settings…**, **Help**, and the
+**About EasySpeak** dialog, or shuts the daemon down with **Quit EasySpeak**.
 
 Prefer to keep the top bar tidy? Turn on **Show EasySpeak in Quick Settings
 Menu** in the extension settings (right) and EasySpeak moves into GNOME's Quick
