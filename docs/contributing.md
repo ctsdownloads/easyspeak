@@ -87,8 +87,23 @@ The packaging configuration is in `pyproject.toml`, supported by
 [setuptools-scm](https://setuptools-scm.readthedocs.io/) based on the
 latest Git tag and the distance from that tag in number of commits.
 
-To publish a new release, push a new Git tag (e.g. 2.1.0) to GitHub.
+We create releases by drafting a new release from the
+[GitHub Releases][gh:releases]:
+
+1. Extend the [CHANGELOG](changelog.md) by a release entry (see steps
+   3 through 6 below for the content).
+2. Click on <kbd>Draft a new release</kbd>.
+3. Pick or enter the next suitable semantic version number in the tag
+   selector (target: `main`).
+4. Enter a title, e.g. "`<version>` · `<a-catchy-phrase>` ·
+   `<date>`" (in GitHub Releases, leave out the date).
+5. Click on <kbd>Generate release notes</kbd>.
+6. Write a concise summary of one or two paragraphs at most.
+7. Commit the CHANGELOG, e.g. with a "Release `<version>`" commit
+   message.
+8. Finally, press <kbd>Publish Release</kbd> (release label "Latest").
 
 [gh:source]: https://github.com/ctsdownloads/easyspeak
+[gh:releases]: https://github.com/ctsdownloads/easyspeak/releases
 [gh:issues]: https://github.com/ctsdownloads/easyspeak/issues
 [gh:discuss]: https://github.com/ctsdownloads/easyspeak/discussions
