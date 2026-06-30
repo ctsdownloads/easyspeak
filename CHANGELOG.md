@@ -5,6 +5,39 @@ canonical, GitHub-independent record of releases. It is updated once per
 release. The format loosely follows [Keep a Changelog](https://keepachangelog.com/),
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.6.0 · Made to Configure · 2026-06-30
+
+**Configurable Chimes, a Single Hotkey Variable, and Versioned Docs**
+
+`EASYSPEAK_*` environment variables now drive **cross-platform configurability**:
+rather than carrying platform-specific patches, EasySpeak exposes whatever
+differs between systems as a variable you set — and documents every one of
+them in the generated reference. The wake and sleep chimes, for one, stayed
+silent under `uv run easyspeak` in the Nix dev shell (they only played under
+`nix run`, which rewrote the freedesktop sound path that doesn't exist on
+NixOS); instead of special-casing NixOS, the sound directory now lives behind
+a new `EASYSPEAK_SOUNDS_DIR` variable. The two hotkey variables collapse into
+one: `EASYSPEAK_HOTKEY` now holds the combo itself (default `ctrl+shift`; set
+it empty or to `off`/`none` to disable), with a mistyped combo logging a
+warning and disabling the listener instead of silently arming a dead key.
+
+The documentation site moves to **mike's native versioning**, so the version
+selector switches in place and always knows which version it is on. The
+in-development docs from `main` now serve at `/latest/`, the most recent
+release at `/stable/`, and every tagged release stays archived under its own
+`/<version>/` path.
+
+### What's Changed
+
+- Make desktop sounds configurable, document env vars by @bittner in [#103](https://github.com/ctsdownloads/easyspeak/pull/103)
+- Serve main docs at the root, redirect `/latest` to it by @bittner in [#104](https://github.com/ctsdownloads/easyspeak/pull/104)
+- Tidy the docs deploy scripts and names by @bittner in [#106](https://github.com/ctsdownloads/easyspeak/pull/106)
+- Consolidate the env-var reference in the Usage guide by @bittner in [#105](https://github.com/ctsdownloads/easyspeak/pull/105)
+- Switch docs deploy to mike's convention by @bittner in [#107](https://github.com/ctsdownloads/easyspeak/pull/107)
+- Merge the two HOTKEY env vars and validate the combo by @bittner in [#108](https://github.com/ctsdownloads/easyspeak/pull/108)
+
+**Full Changelog**: [`0.5.0...0.6.0`](https://github.com/ctsdownloads/easyspeak/compare/0.5.0...0.6.0)
+
 ## 0.5.0 · New Domain, Modular Extension · 2026-06-30
 
 **Quick Settings, the easyspeak.dev Domain, and a Modular Extension**
