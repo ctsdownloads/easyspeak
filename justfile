@@ -142,14 +142,14 @@ lint-docstrings:
 lint-md *args:
     git ls-files '*.md' | xargs uvx --from pymarkdownlnt pymarkdown {{ args }} scan
 
-# Build the docs (use `serve` to serve at http://127.0.0.1:8000 with live-reload)
+# Build the docs (use `serve` to serve them locally with live-reload)
 [group('docs')]
 docs *args=('build --strict'):
     uv run --extra=docs mkdocs {{ args }}
 
-# Publish versioned docs via mike (CI; e.g. `just docs-publish deploy --push dev`)
+# Run a mike command for the versioned docs (e.g. `just docs-mike list`, `just docs-mike delete 0.4.0rc1`)
 [group('docs')]
-docs-publish *args:
+docs-mike *args:
     uv run --extra=docs mike {{ args }}
 
 # Build the Debian package and verify its contents

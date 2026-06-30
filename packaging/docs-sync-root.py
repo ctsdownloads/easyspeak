@@ -8,7 +8,7 @@ gh-pages root, replacing the previous canonical files but leaving mike's version
 directories and metadata untouched.
 
 Usage:
-    python sync-docs-root.py <built-site-dir> <gh-pages-checkout>
+    python docs-sync-root.py <built-site-dir> <gh-pages-checkout>
 """
 
 import json
