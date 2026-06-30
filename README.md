@@ -5,8 +5,8 @@ Voice control for Linux desktops. Fully local, no cloud, Wayland-native.
 Say "Hey Jarvis" and control your desktop with your voice.
 
 [![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](https://github.com/ctsdownloads/easyspeak/blob/main/LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)](https://easyspeak.dev/installation/)
-[![Desktop](https://img.shields.io/badge/desktop-GNOME%20%7C%20Wayland-green.svg)](https://easyspeak.dev/how-it-works/)
+[![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)](https://easyspeak.dev/latest/installation/)
+[![Desktop](https://img.shields.io/badge/desktop-GNOME%20%7C%20Wayland-green.svg)](https://easyspeak.dev/latest/how-it-works/)
 [![Status](https://img.shields.io/badge/status-Alpha-orange.svg)](https://github.com/ctsdownloads/easyspeak/releases)
 [![Pipeline](https://github.com/ctsdownloads/easyspeak/actions/workflows/pipeline.yml/badge.svg)](https://github.com/ctsdownloads/easyspeak/actions/workflows/pipeline.yml)
 [![Safety](https://github.com/ctsdownloads/easyspeak/actions/workflows/safety.yml/badge.svg)](https://github.com/ctsdownloads/easyspeak/actions/workflows/safety.yml)
@@ -47,29 +47,29 @@ cd ~/easyspeak
 uv run easyspeak
 ```
 
-You also need [Piper TTS](https://easyspeak.dev/installation/#3-piper-tts) installed for voice feedback.
-See the **[Installation guide](https://easyspeak.dev/installation/)** for the venv-based path, head tracking, and full details.
+You also need [Piper TTS](https://easyspeak.dev/latest/installation/#3-piper-tts) installed for voice feedback.
+See the **[Installation guide](https://easyspeak.dev/latest/installation/)** for the venv-based path, head tracking, and full details.
 
 Prefer prebuilt packages? Grab the `easyspeak` app `.deb`/`.rpm` **plus a language
 pack** (e.g. `easyspeak-lang-en`) from the
 [Releases page](https://github.com/ctsdownloads/easyspeak/releases) and install them
 together — a self-contained, offline install (Python runtime, `piper`, GNOME
 extension, and speech models). See the
-**[Packaging guide](https://easyspeak.dev/packaging/)**.
+**[Packaging guide](https://easyspeak.dev/latest/packaging/)**.
 
 Then say "Hey Jarvis" followed by a command. Say "help" to list all commands.
 
 ## Documentation
 
-- **[Installation](https://easyspeak.dev/installation/)** — system packages, Python, Piper TTS
-- **[Usage](https://easyspeak.dev/usage/)** — running the daemon, CLI flags, configuration
-- **[Commands](https://easyspeak.dev/commands/)** — the full command reference
-- **[Writing plugins](https://easyspeak.dev/plugins/)** — extend EasySpeak with a Python file
-- **[Troubleshooting](https://easyspeak.dev/troubleshooting/)** — common problems and fixes
-- **[How it works](https://easyspeak.dev/how-it-works/)** — the architecture
-- **[API reference](https://easyspeak.dev/reference/core/)** — generated from the source docstrings
-- **[Contributing](https://easyspeak.dev/contributing/)** — how to set up a dev environment and submit changes
-- **[License](https://easyspeak.dev/license/)** — GPL-3.0
+- **[Installation](https://easyspeak.dev/latest/installation/)** — system packages, Python, Piper TTS
+- **[Usage](https://easyspeak.dev/latest/usage/)** — running the daemon, CLI flags, configuration
+- **[Commands](https://easyspeak.dev/latest/commands/)** — the full command reference
+- **[Writing plugins](https://easyspeak.dev/latest/plugins/)** — extend EasySpeak with a Python file
+- **[Troubleshooting](https://easyspeak.dev/latest/troubleshooting/)** — common problems and fixes
+- **[How it works](https://easyspeak.dev/latest/how-it-works/)** — the architecture
+- **[API reference](https://easyspeak.dev/latest/reference/core/)** — generated from the source docstrings
+- **[Contributing](https://easyspeak.dev/latest/contributing/)** — how to set up a dev environment and submit changes
+- **[License](https://easyspeak.dev/latest/license/)** — GPL-3.0
 
 ## Acknowledgments
 

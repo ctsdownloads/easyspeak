@@ -57,18 +57,18 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y portaudio19-dev
-    - name: Build docs site
-      run: just docs
     - name: Configure git identity for mike
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-    - name: Archive tagged release snapshot
-      if: startsWith(github.ref, 'refs/tags/')
-      run: just docs-mike deploy --push "${GITHUB_REF_NAME}"
+    # mike serves each version at /<version>/. `main` is "latest" and is the
+    # default, so the site root redirects there; releases archive at their
+    # version, with the "stable" alias tracking the newest one.
     - name: Publish "latest" docs from main
       if: github.ref == 'refs/heads/main'
-      run: just docs-mike deploy --push latest
-    - name: Mirror main to the root and redirect /latest to it
-      if: github.ref == 'refs/heads/main'
-      run: bash packaging/docs-mirror-root.sh
+      run: |
+        just docs-mike deploy --push latest
+        just docs-mike set-default --push latest
+    - name: Archive a release and move the "stable" alias
+      if: startsWith(github.ref, 'refs/tags/')
+      run: just docs-mike deploy --push --update-aliases --alias-type=copy "${GITHUB_REF_NAME}" stable
