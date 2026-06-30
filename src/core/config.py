@@ -1,25 +1,24 @@
-"""Tuning constants and model factory for EasySpeak.
+"""Central tuning constants and the speech-model factory for EasySpeak.
 
-Override the `EASYSPEAK_*` environment variables to customise behaviour without
-editing source. Plugin-specific host-environment setup lives in each plugin's own
-`setup()` hook, not here.
+Holds the wake-word, audio, silent-hotkey, speech-model, and desktop-sound
+settings the daemon reads at import, alongside `load_whisper_model()`, which
+builds the faster-whisper model from them. Most are plain constants; these
+honor an `EASYSPEAK_*` environment variable:
 
-Every variable EasySpeak reads and what it affects — the defaults are the constant
-values rendered below, except `EASYSPEAK_LOG_LEVEL` (handled in `core.log`) and
-`EASYSPEAK_ATSPI_PYTHON` (in `core.tray`/`plugins.dictation`):
+- `EASYSPEAK_HOTKEY`
+- `EASYSPEAK_HOTKEY_COMBO`
+- `EASYSPEAK_PIPER_BIN`
+- `EASYSPEAK_PIPER_MODEL`
+- `EASYSPEAK_SOUNDS_DIR`
+- `EASYSPEAK_WHISPER_COMPUTE_TYPE`
+- `EASYSPEAK_WHISPER_CPU_THREADS`
+- `EASYSPEAK_WHISPER_MODEL`
 
-| Variable                         | Effect                                           |
-| -------------------------------- | ------------------------------------------------ |
-| `EASYSPEAK_LOG_LEVEL`            | Logging level when no `-v`/`-q` flag is given.   |
-| `EASYSPEAK_HOTKEY`               | Disable hold-to-dictate silent activation.       |
-| `EASYSPEAK_HOTKEY_COMBO`         | Keys held to dictate without the wake word.      |
-| `EASYSPEAK_PIPER_MODEL`          | Piper voice `.onnx` used for speech output.      |
-| `EASYSPEAK_PIPER_BIN`            | Piper TTS binary.                                |
-| `EASYSPEAK_WHISPER_MODEL`        | faster-whisper model used for transcription.     |
-| `EASYSPEAK_WHISPER_COMPUTE_TYPE` | CTranslate2 compute type.                        |
-| `EASYSPEAK_WHISPER_CPU_THREADS`  | CPU threads for transcription.                   |
-| `EASYSPEAK_SOUNDS_DIR`           | Directory of the wake chime and error bell.      |
-| `EASYSPEAK_ATSPI_PYTHON`         | Interpreter running the dictation AT-SPI helper. |
+See the [Configuration guide](../usage.md#configuration) for what each does, its
+default, and EasySpeak's other `EASYSPEAK_*` variables.
+
+A plugin that needs host-environment setup does it in its own `setup()` hook —
+see [Writing Plugins](../plugins.md).
 """
 
 import os
@@ -41,10 +40,6 @@ MISUNDERSTAND_GRACE = 4.0  # Seconds to ignore repeat misses after feedback
 FOLLOWUP_IDLE_ROUNDS = 2  # Quiet listens tolerated before a command session ends
 
 # --- Keyboard (silent) activation ---
-# Hold this combo to dictate without the wake word; release to stop. Accepts the
-# aliases ctrl/shift/alt/super or raw evdev key names, joined with '+'. Needs
-# read access to /dev/input (be in the 'input' group). Set EASYSPEAK_HOTKEY=0
-# to turn the feature off.
 HOTKEY_COMBO = os.environ.get("EASYSPEAK_HOTKEY_COMBO", "ctrl+shift")
 HOTKEY_ENABLED = os.environ.get("EASYSPEAK_HOTKEY", "1").lower() not in (
     "0",
@@ -67,10 +62,8 @@ def _bundled_bin(name, *, default):
     return str(exe) if exe.exists() else default
 
 
-# The .deb/.rpm bundle the speech models beside the venv (under
-# /opt/easyspeak/models) and `piper` inside it. The defaults below locate them
-# from our own interpreter, so no launcher or PATH setup is needed; pip/source
-# installs have no such tree and fall back to a download name / the home dir.
+# The .deb/.rpm ship the models and `piper` beside the venv, so these defaults
+# locate them from our interpreter; pip/source installs fall back to a download.
 PIPER_MODEL = os.environ.get("EASYSPEAK_PIPER_MODEL") or _bundled_model(
     "models",
     "piper",
@@ -85,8 +78,6 @@ WHISPER_MODEL = os.environ.get("EASYSPEAK_WHISPER_MODEL") or _bundled_model(
 )
 WHISPER_COMPUTE_TYPE = os.environ.get("EASYSPEAK_WHISPER_COMPUTE_TYPE", "int8")
 try:
-    # 0 == let CTranslate2 pick (uses all logical cores, which oversubscribes
-    # hyper-threaded CPUs). Set to physical core count for best CPU-only latency.
     WHISPER_CPU_THREADS = max(
         0, int(os.environ.get("EASYSPEAK_WHISPER_CPU_THREADS", "0"))
     )
@@ -100,10 +91,8 @@ COMMAND_PROMPT = (
 
 
 # --- Desktop sounds ---
-# The wake chime and error bell come from the freedesktop sound theme. The
-# directory is the FHS location by default; on NixOS that path doesn't exist, so
-# the flake points EASYSPEAK_SOUNDS_DIR at the sound-theme-freedesktop store path
-# (for both `nix run` and the dev shell) so the files are actually found.
+# Default to the FHS sound-theme path; on NixOS the flake overrides
+# EASYSPEAK_SOUNDS_DIR to the Nix store copy, which actually exists.
 SOUNDS_DIR = os.environ.get(
     "EASYSPEAK_SOUNDS_DIR", "/usr/share/sounds/freedesktop/stereo"
 )
