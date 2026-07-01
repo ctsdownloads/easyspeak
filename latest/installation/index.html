@@ -1073,6 +1073,11 @@ so installing into it directly fails:</p>
 <a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="nb">cd</span><span class="w"> </span>~/easyspeak
 <a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </code></pre></div>
+<p>A Python-only installation has no bundled speech-recognition model, and EasySpeak
+stays offline by default (<a href="../usage/#configuration"><code>EASYSPEAK_OFFLINE=strict</code></a>),
+so on first run it reports the model as missing. Set <code>EASYSPEAK_OFFLINE=relaxed</code>
+to have it fetch <code>base.en</code> (about 140 MB) from Hugging Face for you, or install a
+language pack.</p>
 <h3 id="3-piper-tts">3. Piper TTS<a class="headerlink" href="#3-piper-tts" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.local/bin
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nb">cd</span><span class="w"> </span>~/.local/bin

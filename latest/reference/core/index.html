@@ -3564,7 +3564,11 @@ the microphone and draining speech on the way out.</p>
 <span class="normal"><a href="#__codelineno-0-599">599</a></span>
 <span class="normal"><a href="#__codelineno-0-600">600</a></span>
 <span class="normal"><a href="#__codelineno-0-601">601</a></span>
-<span class="normal"><a href="#__codelineno-0-602">602</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-483" name="__codelineno-0-483"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal"><a href="#__codelineno-0-602">602</a></span>
+<span class="normal"><a href="#__codelineno-0-603">603</a></span>
+<span class="normal"><a href="#__codelineno-0-604">604</a></span>
+<span class="normal"><a href="#__codelineno-0-605">605</a></span>
+<span class="normal"><a href="#__codelineno-0-606">606</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-483" name="__codelineno-0-483"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <a id="__codelineno-0-484" name="__codelineno-0-484"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Load models and plugins, then run the wake-word listen loop forever.</span>
 <a id="__codelineno-0-485" name="__codelineno-0-485"></a>
 <a id="__codelineno-0-486" name="__codelineno-0-486"></a><span class="sd">        Blocks until the user quits (voice command, tray, or Ctrl-C), always releasing</span>
@@ -3579,111 +3583,115 @@ the microphone and draining speech on the way out.</p>
 <a id="__codelineno-0-495" name="__codelineno-0-495"></a>            <span class="n">WHISPER_COMPUTE_TYPE</span><span class="p">,</span>
 <a id="__codelineno-0-496" name="__codelineno-0-496"></a>            <span class="n">WHISPER_CPU_THREADS</span> <span class="ow">or</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
 <a id="__codelineno-0-497" name="__codelineno-0-497"></a>        <span class="p">)</span>
-<a id="__codelineno-0-498" name="__codelineno-0-498"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">whisper</span> <span class="o">=</span> <span class="n">load_whisper_model</span><span class="p">()</span>
-<a id="__codelineno-0-499" name="__codelineno-0-499"></a>
-<a id="__codelineno-0-500" name="__codelineno-0-500"></a>        <span class="c1"># The GNOME Shell extension powers both the panel indicator and the</span>
-<a id="__codelineno-0-501" name="__codelineno-0-501"></a>        <span class="c1"># mouse grid, so core (not a plugin) owns installing/refreshing/enabling</span>
-<a id="__codelineno-0-502" name="__codelineno-0-502"></a>        <span class="c1"># it before anything starts driving it over D-Bus.</span>
-<a id="__codelineno-0-503" name="__codelineno-0-503"></a>        <span class="n">ensure_extension</span><span class="p">()</span>
-<a id="__codelineno-0-504" name="__codelineno-0-504"></a>
-<a id="__codelineno-0-505" name="__codelineno-0-505"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Loading plugins...&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-506" name="__codelineno-0-506"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">load_plugins</span><span class="p">()</span>
-<a id="__codelineno-0-507" name="__codelineno-0-507"></a>
-<a id="__codelineno-0-508" name="__codelineno-0-508"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugins</span><span class="p">:</span>
-<a id="__codelineno-0-509" name="__codelineno-0-509"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No plugins loaded. Exiting.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-510" name="__codelineno-0-510"></a>            <span class="k">return</span>
+<a id="__codelineno-0-498" name="__codelineno-0-498"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-499" name="__codelineno-0-499"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">whisper</span> <span class="o">=</span> <span class="n">load_whisper_model</span><span class="p">()</span>
+<a id="__codelineno-0-500" name="__codelineno-0-500"></a>        <span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+<a id="__codelineno-0-501" name="__codelineno-0-501"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot start EasySpeak: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>  <span class="c1"># noqa: TRY400</span>
+<a id="__codelineno-0-502" name="__codelineno-0-502"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+<a id="__codelineno-0-503" name="__codelineno-0-503"></a>
+<a id="__codelineno-0-504" name="__codelineno-0-504"></a>        <span class="c1"># The GNOME Shell extension powers both the panel indicator and the</span>
+<a id="__codelineno-0-505" name="__codelineno-0-505"></a>        <span class="c1"># mouse grid, so core (not a plugin) owns installing/refreshing/enabling</span>
+<a id="__codelineno-0-506" name="__codelineno-0-506"></a>        <span class="c1"># it before anything starts driving it over D-Bus.</span>
+<a id="__codelineno-0-507" name="__codelineno-0-507"></a>        <span class="n">ensure_extension</span><span class="p">()</span>
+<a id="__codelineno-0-508" name="__codelineno-0-508"></a>
+<a id="__codelineno-0-509" name="__codelineno-0-509"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Loading plugins...&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-510" name="__codelineno-0-510"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">load_plugins</span><span class="p">()</span>
 <a id="__codelineno-0-511" name="__codelineno-0-511"></a>
-<a id="__codelineno-0-512" name="__codelineno-0-512"></a>        <span class="c1"># Warm up the text-to-speech pipeline now so the piper model is loaded</span>
-<a id="__codelineno-0-513" name="__codelineno-0-513"></a>        <span class="c1"># during startup, not on the first spoken response.</span>
-<a id="__codelineno-0-514" name="__codelineno-0-514"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Warming up speech...&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-515" name="__codelineno-0-515"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-516" name="__codelineno-0-516"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">speech</span><span class="o">.</span><span class="n">ensure</span><span class="p">()</span>
-<a id="__codelineno-0-517" name="__codelineno-0-517"></a>        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-<a id="__codelineno-0-518" name="__codelineno-0-518"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Speech unavailable; continuing without it.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-519" name="__codelineno-0-519"></a>
-<a id="__codelineno-0-520" name="__codelineno-0-520"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="s2">╔══════════════════════════════════════════╗</span>
-<a id="__codelineno-0-522" name="__codelineno-0-522"></a><span class="s2">║            EasySpeak                     ║</span>
-<a id="__codelineno-0-523" name="__codelineno-0-523"></a><span class="s2">╠══════════════════════════════════════════╣</span>
-<a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="s2">║  Wake word: &quot;Hey Jarvis&quot;                 ║</span>
-<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="s2">║  Say &quot;help&quot; for available commands       ║</span>
-<a id="__codelineno-0-526" name="__codelineno-0-526"></a><span class="s2">╚══════════════════════════════════════════╝</span>
-<a id="__codelineno-0-527" name="__codelineno-0-527"></a><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-528" name="__codelineno-0-528"></a>
-<a id="__codelineno-0-529" name="__codelineno-0-529"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-530" name="__codelineno-0-530"></a>            <span class="c1"># PortAudio probes every ALSA/JACK device on init, spamming stderr</span>
-<a id="__codelineno-0-531" name="__codelineno-0-531"></a>            <span class="c1"># about hardware this machine lacks; redirect fd 2 to silence that</span>
-<a id="__codelineno-0-532" name="__codelineno-0-532"></a>            <span class="c1"># C-level noise. PyAudio init emits no Python stderr of its own; the</span>
-<a id="__codelineno-0-533" name="__codelineno-0-533"></a>            <span class="c1"># stream is opened separately by _open_stream().</span>
-<a id="__codelineno-0-534" name="__codelineno-0-534"></a>            <span class="k">with</span> <span class="n">suppressed_c_stderr</span><span class="p">():</span>
-<a id="__codelineno-0-535" name="__codelineno-0-535"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">audio</span> <span class="o">=</span> <span class="n">pyaudio</span><span class="o">.</span><span class="n">PyAudio</span><span class="p">()</span>
-<a id="__codelineno-0-536" name="__codelineno-0-536"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_open_stream</span><span class="p">()</span>
-<a id="__codelineno-0-537" name="__codelineno-0-537"></a>
-<a id="__codelineno-0-538" name="__codelineno-0-538"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">tray</span><span class="o">.</span><span class="n">started</span><span class="p">()</span>
-<a id="__codelineno-0-539" name="__codelineno-0-539"></a>            <span class="c1"># Start keyboard (silent) activation; no-op if disabled or no</span>
-<a id="__codelineno-0-540" name="__codelineno-0-540"></a>            <span class="c1"># /dev/input access. Plugins have registered their handlers by now.</span>
-<a id="__codelineno-0-541" name="__codelineno-0-541"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">hotkey</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-<a id="__codelineno-0-542" name="__codelineno-0-542"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Listening for wake word...&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-543" name="__codelineno-0-543"></a>            <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-544" name="__codelineno-0-544"></a>
-<a id="__codelineno-0-545" name="__codelineno-0-545"></a>            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-<a id="__codelineno-0-546" name="__codelineno-0-546"></a>                <span class="c1"># The tray controller owns sleep/quit; it releases and reopens</span>
-<a id="__codelineno-0-547" name="__codelineno-0-547"></a>                <span class="c1"># the mic via these callbacks so this loop stays about audio.</span>
-<a id="__codelineno-0-548" name="__codelineno-0-548"></a>                <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tray</span><span class="o">.</span><span class="n">poll</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_close_stream</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_stream</span><span class="p">)</span>
-<a id="__codelineno-0-549" name="__codelineno-0-549"></a>                <span class="k">if</span> <span class="n">action</span> <span class="ow">is</span> <span class="n">TrayAction</span><span class="o">.</span><span class="n">QUIT</span><span class="p">:</span>
-<a id="__codelineno-0-550" name="__codelineno-0-550"></a>                    <span class="k">break</span>
-<a id="__codelineno-0-551" name="__codelineno-0-551"></a>                <span class="k">if</span> <span class="n">action</span> <span class="ow">is</span> <span class="n">TrayAction</span><span class="o">.</span><span class="n">RESUME</span><span class="p">:</span>
-<a id="__codelineno-0-552" name="__codelineno-0-552"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_reset_detector</span><span class="p">()</span>
-<a id="__codelineno-0-553" name="__codelineno-0-553"></a>                    <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-554" name="__codelineno-0-554"></a>                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Listening for wake word...&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-555" name="__codelineno-0-555"></a>                    <span class="k">continue</span>
-<a id="__codelineno-0-556" name="__codelineno-0-556"></a>
-<a id="__codelineno-0-557" name="__codelineno-0-557"></a>                <span class="c1"># Keyboard activation bypasses the wake word: dictate while held.</span>
-<a id="__codelineno-0-558" name="__codelineno-0-558"></a>                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hotkey</span><span class="o">.</span><span class="n">take_activation</span><span class="p">():</span>
-<a id="__codelineno-0-559" name="__codelineno-0-559"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_run_push_to_talk</span><span class="p">()</span>
-<a id="__codelineno-0-560" name="__codelineno-0-560"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_reset_detector</span><span class="p">()</span>
-<a id="__codelineno-0-561" name="__codelineno-0-561"></a>                    <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-562" name="__codelineno-0-562"></a>                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Listening for wake word...&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-563" name="__codelineno-0-563"></a>                    <span class="k">continue</span>
-<a id="__codelineno-0-564" name="__codelineno-0-564"></a>
-<a id="__codelineno-0-565" name="__codelineno-0-565"></a>                <span class="n">pcm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1280</span><span class="p">,</span> <span class="n">exception_on_overflow</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<a id="__codelineno-0-566" name="__codelineno-0-566"></a>
-<a id="__codelineno-0-567" name="__codelineno-0-567"></a>                <span class="n">audio_buffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pcm</span><span class="p">)</span>
-<a id="__codelineno-0-568" name="__codelineno-0-568"></a>                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">audio_buffer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">:</span>
-<a id="__codelineno-0-569" name="__codelineno-0-569"></a>                    <span class="n">audio_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-0-512" name="__codelineno-0-512"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugins</span><span class="p">:</span>
+<a id="__codelineno-0-513" name="__codelineno-0-513"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No plugins loaded. Exiting.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-514" name="__codelineno-0-514"></a>            <span class="k">return</span>
+<a id="__codelineno-0-515" name="__codelineno-0-515"></a>
+<a id="__codelineno-0-516" name="__codelineno-0-516"></a>        <span class="c1"># Warm up the text-to-speech pipeline now so the piper model is loaded</span>
+<a id="__codelineno-0-517" name="__codelineno-0-517"></a>        <span class="c1"># during startup, not on the first spoken response.</span>
+<a id="__codelineno-0-518" name="__codelineno-0-518"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Warming up speech...&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-519" name="__codelineno-0-519"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">speech</span><span class="o">.</span><span class="n">ensure</span><span class="p">()</span>
+<a id="__codelineno-0-521" name="__codelineno-0-521"></a>        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+<a id="__codelineno-0-522" name="__codelineno-0-522"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Speech unavailable; continuing without it.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-523" name="__codelineno-0-523"></a>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="s2">╔══════════════════════════════════════════╗</span>
+<a id="__codelineno-0-526" name="__codelineno-0-526"></a><span class="s2">║            EasySpeak                     ║</span>
+<a id="__codelineno-0-527" name="__codelineno-0-527"></a><span class="s2">╠══════════════════════════════════════════╣</span>
+<a id="__codelineno-0-528" name="__codelineno-0-528"></a><span class="s2">║  Wake word: &quot;Hey Jarvis&quot;                 ║</span>
+<a id="__codelineno-0-529" name="__codelineno-0-529"></a><span class="s2">║  Say &quot;help&quot; for available commands       ║</span>
+<a id="__codelineno-0-530" name="__codelineno-0-530"></a><span class="s2">╚══════════════════════════════════════════╝</span>
+<a id="__codelineno-0-531" name="__codelineno-0-531"></a><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-532" name="__codelineno-0-532"></a>
+<a id="__codelineno-0-533" name="__codelineno-0-533"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-534" name="__codelineno-0-534"></a>            <span class="c1"># PortAudio probes every ALSA/JACK device on init, spamming stderr</span>
+<a id="__codelineno-0-535" name="__codelineno-0-535"></a>            <span class="c1"># about hardware this machine lacks; redirect fd 2 to silence that</span>
+<a id="__codelineno-0-536" name="__codelineno-0-536"></a>            <span class="c1"># C-level noise. PyAudio init emits no Python stderr of its own; the</span>
+<a id="__codelineno-0-537" name="__codelineno-0-537"></a>            <span class="c1"># stream is opened separately by _open_stream().</span>
+<a id="__codelineno-0-538" name="__codelineno-0-538"></a>            <span class="k">with</span> <span class="n">suppressed_c_stderr</span><span class="p">():</span>
+<a id="__codelineno-0-539" name="__codelineno-0-539"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">audio</span> <span class="o">=</span> <span class="n">pyaudio</span><span class="o">.</span><span class="n">PyAudio</span><span class="p">()</span>
+<a id="__codelineno-0-540" name="__codelineno-0-540"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_open_stream</span><span class="p">()</span>
+<a id="__codelineno-0-541" name="__codelineno-0-541"></a>
+<a id="__codelineno-0-542" name="__codelineno-0-542"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">tray</span><span class="o">.</span><span class="n">started</span><span class="p">()</span>
+<a id="__codelineno-0-543" name="__codelineno-0-543"></a>            <span class="c1"># Start keyboard (silent) activation; no-op if disabled or no</span>
+<a id="__codelineno-0-544" name="__codelineno-0-544"></a>            <span class="c1"># /dev/input access. Plugins have registered their handlers by now.</span>
+<a id="__codelineno-0-545" name="__codelineno-0-545"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">hotkey</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<a id="__codelineno-0-546" name="__codelineno-0-546"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Listening for wake word...&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-547" name="__codelineno-0-547"></a>            <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-548" name="__codelineno-0-548"></a>
+<a id="__codelineno-0-549" name="__codelineno-0-549"></a>            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+<a id="__codelineno-0-550" name="__codelineno-0-550"></a>                <span class="c1"># The tray controller owns sleep/quit; it releases and reopens</span>
+<a id="__codelineno-0-551" name="__codelineno-0-551"></a>                <span class="c1"># the mic via these callbacks so this loop stays about audio.</span>
+<a id="__codelineno-0-552" name="__codelineno-0-552"></a>                <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tray</span><span class="o">.</span><span class="n">poll</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_close_stream</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_stream</span><span class="p">)</span>
+<a id="__codelineno-0-553" name="__codelineno-0-553"></a>                <span class="k">if</span> <span class="n">action</span> <span class="ow">is</span> <span class="n">TrayAction</span><span class="o">.</span><span class="n">QUIT</span><span class="p">:</span>
+<a id="__codelineno-0-554" name="__codelineno-0-554"></a>                    <span class="k">break</span>
+<a id="__codelineno-0-555" name="__codelineno-0-555"></a>                <span class="k">if</span> <span class="n">action</span> <span class="ow">is</span> <span class="n">TrayAction</span><span class="o">.</span><span class="n">RESUME</span><span class="p">:</span>
+<a id="__codelineno-0-556" name="__codelineno-0-556"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_reset_detector</span><span class="p">()</span>
+<a id="__codelineno-0-557" name="__codelineno-0-557"></a>                    <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-558" name="__codelineno-0-558"></a>                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Listening for wake word...&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-559" name="__codelineno-0-559"></a>                    <span class="k">continue</span>
+<a id="__codelineno-0-560" name="__codelineno-0-560"></a>
+<a id="__codelineno-0-561" name="__codelineno-0-561"></a>                <span class="c1"># Keyboard activation bypasses the wake word: dictate while held.</span>
+<a id="__codelineno-0-562" name="__codelineno-0-562"></a>                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hotkey</span><span class="o">.</span><span class="n">take_activation</span><span class="p">():</span>
+<a id="__codelineno-0-563" name="__codelineno-0-563"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_run_push_to_talk</span><span class="p">()</span>
+<a id="__codelineno-0-564" name="__codelineno-0-564"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_reset_detector</span><span class="p">()</span>
+<a id="__codelineno-0-565" name="__codelineno-0-565"></a>                    <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-566" name="__codelineno-0-566"></a>                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Listening for wake word...&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-567" name="__codelineno-0-567"></a>                    <span class="k">continue</span>
+<a id="__codelineno-0-568" name="__codelineno-0-568"></a>
+<a id="__codelineno-0-569" name="__codelineno-0-569"></a>                <span class="n">pcm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1280</span><span class="p">,</span> <span class="n">exception_on_overflow</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <a id="__codelineno-0-570" name="__codelineno-0-570"></a>
-<a id="__codelineno-0-571" name="__codelineno-0-571"></a>                <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wakeword</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">pcm</span><span class="p">)</span>
-<a id="__codelineno-0-572" name="__codelineno-0-572"></a>
-<a id="__codelineno-0-573" name="__codelineno-0-573"></a>                <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="n">WAKE_THRESHOLD</span><span class="p">:</span>
-<a id="__codelineno-0-574" name="__codelineno-0-574"></a>                    <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<a id="__codelineno-0-575" name="__codelineno-0-575"></a>                    <span class="k">if</span> <span class="n">now</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_wake_time</span> <span class="o">&lt;</span> <span class="n">WAKE_COOLDOWN</span><span class="p">:</span>
-<a id="__codelineno-0-576" name="__codelineno-0-576"></a>                        <span class="k">continue</span>
-<a id="__codelineno-0-577" name="__codelineno-0-577"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">last_wake_time</span> <span class="o">=</span> <span class="n">now</span>
-<a id="__codelineno-0-578" name="__codelineno-0-578"></a>
-<a id="__codelineno-0-579" name="__codelineno-0-579"></a>                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;🎤 Wake! (confidence: </span><span class="si">%.2f</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
-<a id="__codelineno-0-580" name="__codelineno-0-580"></a>
-<a id="__codelineno-0-581" name="__codelineno-0-581"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_reset_detector</span><span class="p">()</span>
-<a id="__codelineno-0-582" name="__codelineno-0-582"></a>                    <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-583" name="__codelineno-0-583"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_play_wake_chime</span><span class="p">()</span>
+<a id="__codelineno-0-571" name="__codelineno-0-571"></a>                <span class="n">audio_buffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pcm</span><span class="p">)</span>
+<a id="__codelineno-0-572" name="__codelineno-0-572"></a>                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">audio_buffer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">:</span>
+<a id="__codelineno-0-573" name="__codelineno-0-573"></a>                    <span class="n">audio_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-0-574" name="__codelineno-0-574"></a>
+<a id="__codelineno-0-575" name="__codelineno-0-575"></a>                <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wakeword</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">pcm</span><span class="p">)</span>
+<a id="__codelineno-0-576" name="__codelineno-0-576"></a>
+<a id="__codelineno-0-577" name="__codelineno-0-577"></a>                <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="n">WAKE_THRESHOLD</span><span class="p">:</span>
+<a id="__codelineno-0-578" name="__codelineno-0-578"></a>                    <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<a id="__codelineno-0-579" name="__codelineno-0-579"></a>                    <span class="k">if</span> <span class="n">now</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_wake_time</span> <span class="o">&lt;</span> <span class="n">WAKE_COOLDOWN</span><span class="p">:</span>
+<a id="__codelineno-0-580" name="__codelineno-0-580"></a>                        <span class="k">continue</span>
+<a id="__codelineno-0-581" name="__codelineno-0-581"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">last_wake_time</span> <span class="o">=</span> <span class="n">now</span>
+<a id="__codelineno-0-582" name="__codelineno-0-582"></a>
+<a id="__codelineno-0-583" name="__codelineno-0-583"></a>                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;🎤 Wake! (confidence: </span><span class="si">%.2f</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
 <a id="__codelineno-0-584" name="__codelineno-0-584"></a>
-<a id="__codelineno-0-585" name="__codelineno-0-585"></a>                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_capture_command_session</span><span class="p">():</span>
-<a id="__codelineno-0-586" name="__codelineno-0-586"></a>                        <span class="k">break</span>
-<a id="__codelineno-0-587" name="__codelineno-0-587"></a>
-<a id="__codelineno-0-588" name="__codelineno-0-588"></a>                    <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-589" name="__codelineno-0-589"></a>                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Listening for wake word...&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-590" name="__codelineno-0-590"></a>
-<a id="__codelineno-0-591" name="__codelineno-0-591"></a>        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-<a id="__codelineno-0-592" name="__codelineno-0-592"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Bye!&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-593" name="__codelineno-0-593"></a>        <span class="k">finally</span><span class="p">:</span>
-<a id="__codelineno-0-594" name="__codelineno-0-594"></a>            <span class="c1"># Hide the indicator so the daemon&#39;s exit doesn&#39;t leave a stale icon.</span>
-<a id="__codelineno-0-595" name="__codelineno-0-595"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">tray</span><span class="o">.</span><span class="n">stopped</span><span class="p">()</span>
-<a id="__codelineno-0-596" name="__codelineno-0-596"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">hotkey</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
-<a id="__codelineno-0-597" name="__codelineno-0-597"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">speech</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
-<a id="__codelineno-0-598" name="__codelineno-0-598"></a>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-599" name="__codelineno-0-599"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">stop_stream</span><span class="p">()</span>
-<a id="__codelineno-0-600" name="__codelineno-0-600"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-<a id="__codelineno-0-601" name="__codelineno-0-601"></a>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">audio</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-602" name="__codelineno-0-602"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">audio</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+<a id="__codelineno-0-585" name="__codelineno-0-585"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_reset_detector</span><span class="p">()</span>
+<a id="__codelineno-0-586" name="__codelineno-0-586"></a>                    <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-587" name="__codelineno-0-587"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_play_wake_chime</span><span class="p">()</span>
+<a id="__codelineno-0-588" name="__codelineno-0-588"></a>
+<a id="__codelineno-0-589" name="__codelineno-0-589"></a>                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_capture_command_session</span><span class="p">():</span>
+<a id="__codelineno-0-590" name="__codelineno-0-590"></a>                        <span class="k">break</span>
+<a id="__codelineno-0-591" name="__codelineno-0-591"></a>
+<a id="__codelineno-0-592" name="__codelineno-0-592"></a>                    <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-593" name="__codelineno-0-593"></a>                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Listening for wake word...&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-594" name="__codelineno-0-594"></a>
+<a id="__codelineno-0-595" name="__codelineno-0-595"></a>        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+<a id="__codelineno-0-596" name="__codelineno-0-596"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Bye!&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-597" name="__codelineno-0-597"></a>        <span class="k">finally</span><span class="p">:</span>
+<a id="__codelineno-0-598" name="__codelineno-0-598"></a>            <span class="c1"># Hide the indicator so the daemon&#39;s exit doesn&#39;t leave a stale icon.</span>
+<a id="__codelineno-0-599" name="__codelineno-0-599"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">tray</span><span class="o">.</span><span class="n">stopped</span><span class="p">()</span>
+<a id="__codelineno-0-600" name="__codelineno-0-600"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">hotkey</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+<a id="__codelineno-0-601" name="__codelineno-0-601"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">speech</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
+<a id="__codelineno-0-602" name="__codelineno-0-602"></a>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-603" name="__codelineno-0-603"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">stop_stream</span><span class="p">()</span>
+<a id="__codelineno-0-604" name="__codelineno-0-604"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<a id="__codelineno-0-605" name="__codelineno-0-605"></a>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">audio</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-606" name="__codelineno-0-606"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">audio</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3949,6 +3957,7 @@ builds the faster-whisper model from them. Most are plain constants; these
 honor an <code>EASYSPEAK_*</code> environment variable:</p>
 <ul>
 <li><code>EASYSPEAK_HOTKEY</code></li>
+<li><code>EASYSPEAK_OFFLINE</code></li>
 <li><code>EASYSPEAK_PIPER_BIN</code></li>
 <li><code>EASYSPEAK_PIPER_MODEL</code></li>
 <li><code>EASYSPEAK_SOUNDS_DIR</code></li>
@@ -3995,23 +4004,74 @@ see <a href="../../plugins/">Writing Plugins</a>.</p>
     <div class="doc doc-contents ">
 
         <p>Build a faster-whisper model from the configured (or given) settings.</p>
+<p>A model already on disk — bundled in a language pack or cached from an earlier
+run — loads without any network access. When it is missing, EasySpeak stays
+offline by default and raises an actionable message; setting
+<code>EASYSPEAK_OFFLINE=relaxed</code> (see <code>NETWORK_ALLOWED</code>) lets it fetch a bare name
+like <code>base.en</code> from Hugging Face instead.</p>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/core/config.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-99"> 99</a></span>
-<span class="normal"><a href="#__codelineno-0-100">100</a></span>
-<span class="normal"><a href="#__codelineno-0-101">101</a></span>
-<span class="normal"><a href="#__codelineno-0-102">102</a></span>
-<span class="normal"><a href="#__codelineno-0-103">103</a></span>
-<span class="normal"><a href="#__codelineno-0-104">104</a></span>
-<span class="normal"><a href="#__codelineno-0-105">105</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-99" name="__codelineno-0-99"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_whisper_model</span><span class="p">(</span>
-<a id="__codelineno-0-100" name="__codelineno-0-100"></a>    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">WHISPER_MODEL</span><span class="p">,</span>
-<a id="__codelineno-0-101" name="__codelineno-0-101"></a>    <span class="n">compute_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">WHISPER_COMPUTE_TYPE</span><span class="p">,</span>
-<a id="__codelineno-0-102" name="__codelineno-0-102"></a>    <span class="n">cpu_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">WHISPER_CPU_THREADS</span><span class="p">,</span>
-<a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WhisperModel</span><span class="p">:</span>
-<a id="__codelineno-0-104" name="__codelineno-0-104"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a faster-whisper model from the configured (or given) settings.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-105" name="__codelineno-0-105"></a>    <span class="k">return</span> <span class="n">WhisperModel</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">compute_type</span><span class="o">=</span><span class="n">compute_type</span><span class="p">,</span> <span class="n">cpu_threads</span><span class="o">=</span><span class="n">cpu_threads</span><span class="p">)</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-107">107</a></span>
+<span class="normal"><a href="#__codelineno-0-108">108</a></span>
+<span class="normal"><a href="#__codelineno-0-109">109</a></span>
+<span class="normal"><a href="#__codelineno-0-110">110</a></span>
+<span class="normal"><a href="#__codelineno-0-111">111</a></span>
+<span class="normal"><a href="#__codelineno-0-112">112</a></span>
+<span class="normal"><a href="#__codelineno-0-113">113</a></span>
+<span class="normal"><a href="#__codelineno-0-114">114</a></span>
+<span class="normal"><a href="#__codelineno-0-115">115</a></span>
+<span class="normal"><a href="#__codelineno-0-116">116</a></span>
+<span class="normal"><a href="#__codelineno-0-117">117</a></span>
+<span class="normal"><a href="#__codelineno-0-118">118</a></span>
+<span class="normal"><a href="#__codelineno-0-119">119</a></span>
+<span class="normal"><a href="#__codelineno-0-120">120</a></span>
+<span class="normal"><a href="#__codelineno-0-121">121</a></span>
+<span class="normal"><a href="#__codelineno-0-122">122</a></span>
+<span class="normal"><a href="#__codelineno-0-123">123</a></span>
+<span class="normal"><a href="#__codelineno-0-124">124</a></span>
+<span class="normal"><a href="#__codelineno-0-125">125</a></span>
+<span class="normal"><a href="#__codelineno-0-126">126</a></span>
+<span class="normal"><a href="#__codelineno-0-127">127</a></span>
+<span class="normal"><a href="#__codelineno-0-128">128</a></span>
+<span class="normal"><a href="#__codelineno-0-129">129</a></span>
+<span class="normal"><a href="#__codelineno-0-130">130</a></span>
+<span class="normal"><a href="#__codelineno-0-131">131</a></span>
+<span class="normal"><a href="#__codelineno-0-132">132</a></span>
+<span class="normal"><a href="#__codelineno-0-133">133</a></span>
+<span class="normal"><a href="#__codelineno-0-134">134</a></span>
+<span class="normal"><a href="#__codelineno-0-135">135</a></span>
+<span class="normal"><a href="#__codelineno-0-136">136</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-107" name="__codelineno-0-107"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_whisper_model</span><span class="p">(</span>
+<a id="__codelineno-0-108" name="__codelineno-0-108"></a>    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">WHISPER_MODEL</span><span class="p">,</span>
+<a id="__codelineno-0-109" name="__codelineno-0-109"></a>    <span class="n">compute_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">WHISPER_COMPUTE_TYPE</span><span class="p">,</span>
+<a id="__codelineno-0-110" name="__codelineno-0-110"></a>    <span class="n">cpu_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">WHISPER_CPU_THREADS</span><span class="p">,</span>
+<a id="__codelineno-0-111" name="__codelineno-0-111"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WhisperModel</span><span class="p">:</span>
+<a id="__codelineno-0-112" name="__codelineno-0-112"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a faster-whisper model from the configured (or given) settings.</span>
+<a id="__codelineno-0-113" name="__codelineno-0-113"></a>
+<a id="__codelineno-0-114" name="__codelineno-0-114"></a><span class="sd">    A model already on disk — bundled in a language pack or cached from an earlier</span>
+<a id="__codelineno-0-115" name="__codelineno-0-115"></a><span class="sd">    run — loads without any network access. When it is missing, EasySpeak stays</span>
+<a id="__codelineno-0-116" name="__codelineno-0-116"></a><span class="sd">    offline by default and raises an actionable message; setting</span>
+<a id="__codelineno-0-117" name="__codelineno-0-117"></a><span class="sd">    `EASYSPEAK_OFFLINE=relaxed` (see `NETWORK_ALLOWED`) lets it fetch a bare name</span>
+<a id="__codelineno-0-118" name="__codelineno-0-118"></a><span class="sd">    like `base.en` from Hugging Face instead.</span>
+<a id="__codelineno-0-119" name="__codelineno-0-119"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-120" name="__codelineno-0-120"></a>    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;compute_type&quot;</span><span class="p">:</span> <span class="n">compute_type</span><span class="p">,</span> <span class="s2">&quot;cpu_threads&quot;</span><span class="p">:</span> <span class="n">cpu_threads</span><span class="p">}</span>
+<a id="__codelineno-0-121" name="__codelineno-0-121"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-122" name="__codelineno-0-122"></a>        <span class="k">return</span> <span class="n">WhisperModel</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">local_files_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-0-123" name="__codelineno-0-123"></a>    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+<a id="__codelineno-0-124" name="__codelineno-0-124"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">NETWORK_ALLOWED</span><span class="p">:</span>
+<a id="__codelineno-0-125" name="__codelineno-0-125"></a>            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-0-126" name="__codelineno-0-126"></a>                <span class="sa">f</span><span class="s2">&quot;speech model </span><span class="si">{</span><span class="n">model_name</span><span class="si">!r}</span><span class="s2"> is not installed; set &quot;</span>
+<a id="__codelineno-0-127" name="__codelineno-0-127"></a>                <span class="s2">&quot;EASYSPEAK_OFFLINE=relaxed to download it, or install a language pack&quot;</span>
+<a id="__codelineno-0-128" name="__codelineno-0-128"></a>            <span class="p">)</span>
+<a id="__codelineno-0-129" name="__codelineno-0-129"></a>            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+<a id="__codelineno-0-130" name="__codelineno-0-130"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+<a id="__codelineno-0-131" name="__codelineno-0-131"></a>            <span class="s2">&quot;Speech model </span><span class="si">%r</span><span class="s2"> is not installed; downloading it from Hugging Face. &quot;</span>
+<a id="__codelineno-0-132" name="__codelineno-0-132"></a>            <span class="s2">&quot;Install a language pack to avoid this, or set EASYSPEAK_OFFLINE=strict &quot;</span>
+<a id="__codelineno-0-133" name="__codelineno-0-133"></a>            <span class="s2">&quot;to keep EasySpeak offline.&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-134" name="__codelineno-0-134"></a>            <span class="n">model_name</span><span class="p">,</span>
+<a id="__codelineno-0-135" name="__codelineno-0-135"></a>        <span class="p">)</span>
+<a id="__codelineno-0-136" name="__codelineno-0-136"></a>        <span class="k">return</span> <span class="n">WhisperModel</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">local_files_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
