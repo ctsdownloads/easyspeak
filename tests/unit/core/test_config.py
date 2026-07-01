@@ -23,6 +23,7 @@ def _restore_config(monkeypatch):
         "EASYSPEAK_PIPER_MODEL",
         "EASYSPEAK_PIPER_BIN",
         "EASYSPEAK_HOTKEY",
+        "EASYSPEAK_OFFLINE",
     ]:
         monkeypatch.delenv(var, raising=False)
     importlib.reload(config)
@@ -57,11 +58,13 @@ def test_whisper_cpu_threads_negative_clamped(monkeypatch):
 
 
 def test_load_whisper_model_invokes_whisper():
-    """load_whisper_model passes its args through to WhisperModel()."""
+    """A locally-present model loads once, offline (local_files_only=True)."""
     with patch("easyspeak.core.config.WhisperModel") as mock_model:
         result = config.load_whisper_model("tiny.en", "float32", 4)
 
-    mock_model.assert_called_once_with("tiny.en", compute_type="float32", cpu_threads=4)
+    mock_model.assert_called_once_with(
+        "tiny.en", local_files_only=True, compute_type="float32", cpu_threads=4
+    )
     assert result is mock_model.return_value
 
 
@@ -72,9 +75,65 @@ def test_load_whisper_model_uses_module_defaults():
 
     mock_model.assert_called_once_with(
         config.WHISPER_MODEL,
+        local_files_only=True,
         compute_type=config.WHISPER_COMPUTE_TYPE,
         cpu_threads=config.WHISPER_CPU_THREADS,
     )
+
+
+def test_load_whisper_model_downloads_when_missing_and_relaxed(monkeypatch, caplog):
+    """Relaxed mode: an absent local model is re-fetched with downloads allowed."""
+    monkeypatch.setattr(config, "NETWORK_ALLOWED", True)
+    downloaded = object()
+    with (
+        patch(
+            "easyspeak.core.config.WhisperModel",
+            side_effect=[FileNotFoundError, downloaded],
+        ) as mock_model,
+        caplog.at_level("WARNING"),
+    ):
+        result = config.load_whisper_model("base.en", "int8", 0)
+
+    assert result is downloaded
+    assert mock_model.call_args_list[0].kwargs["local_files_only"] is True
+    assert mock_model.call_args_list[1].kwargs["local_files_only"] is False
+    assert "downloading" in caplog.text.lower()
+
+
+def test_load_whisper_model_strict_raises_when_missing(monkeypatch):
+    """Strict mode: an absent local model raises rather than downloading."""
+    monkeypatch.setattr(config, "NETWORK_ALLOWED", False)
+    with (
+        patch(
+            "easyspeak.core.config.WhisperModel", side_effect=FileNotFoundError
+        ) as mock_model,
+        pytest.raises(RuntimeError, match="EASYSPEAK_OFFLINE=relaxed"),
+    ):
+        config.load_whisper_model("base.en")
+
+    mock_model.assert_called_once()
+
+
+def test_offline_default_blocks_network(monkeypatch):
+    """Unset EASYSPEAK_OFFLINE: defaults to strict, so no network access."""
+    monkeypatch.delenv("EASYSPEAK_OFFLINE", raising=False)
+    importlib.reload(config)
+    assert config.NETWORK_ALLOWED is False
+
+
+@pytest.mark.parametrize("value", ["relaxed", "RELAXED", "  relaxed  "])
+def test_offline_relaxed_allows_network(monkeypatch, value):
+    """EASYSPEAK_OFFLINE=relaxed (any case, trimmed) permits network access."""
+    monkeypatch.setenv("EASYSPEAK_OFFLINE", value)
+    importlib.reload(config)
+    assert config.NETWORK_ALLOWED is True
+
+
+def test_offline_unknown_value_stays_strict(monkeypatch):
+    """Any value other than relaxed is treated as strict (no network)."""
+    monkeypatch.setenv("EASYSPEAK_OFFLINE", "yes")
+    importlib.reload(config)
+    assert config.NETWORK_ALLOWED is False
 
 
 def test_piper_model_env_override(monkeypatch):

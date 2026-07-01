@@ -6,6 +6,7 @@ builds the faster-whisper model from them. Most are plain constants; these
 honor an `EASYSPEAK_*` environment variable:
 
 - `EASYSPEAK_HOTKEY`
+- `EASYSPEAK_OFFLINE`
 - `EASYSPEAK_PIPER_BIN`
 - `EASYSPEAK_PIPER_MODEL`
 - `EASYSPEAK_SOUNDS_DIR`
@@ -20,11 +21,18 @@ A plugin that needs host-environment setup does it in its own `setup()` hook —
 see [Writing Plugins](../plugins.md).
 """
 
+import logging
 import os
 import sys
 from pathlib import Path
 
 from faster_whisper import WhisperModel
+
+logger = logging.getLogger(__name__)
+
+# --- Network policy ---
+OFFLINE_MODE = os.environ.get("EASYSPEAK_OFFLINE", "strict").strip().lower()
+NETWORK_ALLOWED = OFFLINE_MODE == "relaxed"
 
 # --- Wake word ---
 WAKE_WORD = "hey_jarvis"  # OpenWakeWord model name
@@ -101,5 +109,28 @@ def load_whisper_model(
     compute_type: str = WHISPER_COMPUTE_TYPE,
     cpu_threads: int = WHISPER_CPU_THREADS,
 ) -> WhisperModel:
-    """Build a faster-whisper model from the configured (or given) settings."""
-    return WhisperModel(model_name, compute_type=compute_type, cpu_threads=cpu_threads)
+    """Build a faster-whisper model from the configured (or given) settings.
+
+    A model already on disk — bundled in a language pack or cached from an earlier
+    run — loads without any network access. When it is missing, EasySpeak stays
+    offline by default and raises an actionable message; setting
+    `EASYSPEAK_OFFLINE=relaxed` (see `NETWORK_ALLOWED`) lets it fetch a bare name
+    like `base.en` from Hugging Face instead.
+    """
+    kwargs = {"compute_type": compute_type, "cpu_threads": cpu_threads}
+    try:
+        return WhisperModel(model_name, local_files_only=True, **kwargs)
+    except FileNotFoundError:
+        if not NETWORK_ALLOWED:
+            msg = (
+                f"speech model {model_name!r} is not installed; set "
+                "EASYSPEAK_OFFLINE=relaxed to download it, or install a language pack"
+            )
+            raise RuntimeError(msg) from None
+        logger.warning(
+            "Speech model %r is not installed; downloading it from Hugging Face. "
+            "Install a language pack to avoid this, or set EASYSPEAK_OFFLINE=strict "
+            "to keep EasySpeak offline.",
+            model_name,
+        )
+        return WhisperModel(model_name, local_files_only=False, **kwargs)
