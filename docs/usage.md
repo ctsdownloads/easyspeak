@@ -45,6 +45,7 @@ the module that reads each (linked to its API reference).
 | Variable                         | Default                                | Effect                                     |
 | -------------------------------- | -------------------------------------- | ------------------------------------------ |
 | `EASYSPEAK_HOTKEY`               | `ctrl+shift`                           | Keys held to dictate without the wake word |
+| `EASYSPEAK_OFFLINE`              | `strict`                               | Stay offline; `relaxed` downloads models   |
 | `EASYSPEAK_PIPER_BIN`            | `piper`                                | Piper TTS binary                           |
 | `EASYSPEAK_PIPER_MODEL`          | bundled Amy voice                      | Piper voice `.onnx` for speech output      |
 | `EASYSPEAK_SOUNDS_DIR`           | `/usr/share/sounds/freedesktop/stereo` | Directory of the wake chime and error bell |

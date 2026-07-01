@@ -106,6 +106,8 @@
         commonEnv = with pkgs; ''
           export UV_PYTHON='${python}/bin/python'
           export EASYSPEAK_PIPER_MODEL="''${EASYSPEAK_PIPER_MODEL:-${piperModelPath}}"
+          # No Whisper model is bundled here, so allow fetching it on demand.
+          export EASYSPEAK_OFFLINE="''${EASYSPEAK_OFFLINE:-relaxed}"
           export EASYSPEAK_SOUNDS_DIR="''${EASYSPEAK_SOUNDS_DIR:-${soundsNixDir}}"
           export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX="''${SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX:-${pretendVersion}}"
           export CPPFLAGS="-I${portaudio}/include ''${CPPFLAGS:-}"
