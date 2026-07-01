@@ -37,9 +37,6 @@ only when `pins.toml` does.
 - uv itself: latest in CI (`astral-sh/setup-uv`) and in the build container
   (install script); pinned only for the dev shell via `flake.lock`.
 - GitHub Actions: pinned by major version tag, floating within it.
-- The distro bundle's Python dependency resolution:
-  `packaging/stage-bundle.sh` installs the built wheel with `uv pip install`,
-  resolving at build time rather than from `uv.lock`.
 - The Whisper model at *runtime*: with `EASYSPEAK_OFFLINE=relaxed` and no
   local model, faster-whisper fetches the latest snapshot from Hugging Face
   (`src/core/config.py`); installing the language package avoids this

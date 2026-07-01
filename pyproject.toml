@@ -68,6 +68,11 @@ benchmark = [
   "pytest>=8",
   "pytest-benchmark>=5",
 ]
+# The distro bundle ships the `piper` binary inside its venv — no system piper
+# is packaged (see packaging/stage-bundle.sh). An extra so uv.lock pins it.
+bundle = [
+  "piper-tts>=1.4",
+]
 docs = [
   "mike>=2.1",
   # Cap MkDocs below 2.0: the 2.0 line may drop the plugin API that
