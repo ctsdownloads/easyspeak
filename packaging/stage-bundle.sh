@@ -33,15 +33,9 @@ mkdir -p "$PREFIX/python"
 # (plain cp -r keeps symlinks pointing back into uv's cache, breaking relocation.)
 cp -rL "$SRC_PY"/. "$PREFIX/python/"
 
-echo ">> creating venv from the bundled interpreter"
-"$PREFIX/python/bin/python3" -m venv "$PREFIX/venv"
-
 echo ">> installing the app and its locked dependencies into the venv"
-# --frozen installs exactly what uv.lock records — the same resolution CI
-# tests — plus the bundle extra (piper-tts, providing the `piper` binary; no
-# system piper is packaged). --no-editable builds the project into a wheel and
-# installs it; --python keeps uv on the bundled interpreter so it reuses the
-# venv above instead of recreating it from a cached toolchain.
+# uv creates the venv from the bundled interpreter, keeping its paths under
+# $PREFIX; the bundle extra adds piper-tts (no system piper is packaged).
 ( cd "$REPO_ROOT" && UV_PROJECT_ENVIRONMENT="$PREFIX/venv" \
     uv sync --frozen --no-dev --no-editable --extra bundle \
     --python "$PREFIX/python/bin/python3" )
