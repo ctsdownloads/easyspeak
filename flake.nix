@@ -102,21 +102,21 @@
         # value the user already exported win. SETUPTOOLS_SCM matters only when
         # .git is missing (e.g. a tarball checkout); the pyaudio build flags
         # compile it against the Nix-store portaudio (CPPFLAGS/LDFLAGS feed
-        # distutils, C_INCLUDE_PATH/LIBRARY_PATH feed gcc).
+        # distutils, C_INCLUDE_PATH/LIBRARY_PATH feed gcc); relaxed download
+        # behavior allows EasySpeak to fetch a Whisper model from Hugging Face.
         commonEnv = with pkgs; ''
-          export UV_PYTHON='${python}/bin/python'
-          export EASYSPEAK_PIPER_MODEL="''${EASYSPEAK_PIPER_MODEL:-${piperModelPath}}"
-          # No Whisper model is bundled here, so allow fetching it on demand.
-          export EASYSPEAK_OFFLINE="''${EASYSPEAK_OFFLINE:-relaxed}"
-          export EASYSPEAK_SOUNDS_DIR="''${EASYSPEAK_SOUNDS_DIR:-${soundsNixDir}}"
-          export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX="''${SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX:-${pretendVersion}}"
-          export CPPFLAGS="-I${portaudio}/include ''${CPPFLAGS:-}"
-          export LDFLAGS="-L${portaudio}/lib -Wl,-rpath,${portaudio}/lib ''${LDFLAGS:-}"
           export C_INCLUDE_PATH="${portaudio}/include''${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}"
-          export LIBRARY_PATH="${portaudio}/lib''${LIBRARY_PATH:+:$LIBRARY_PATH}"
-          export LD_LIBRARY_PATH='${lib.makeLibraryPath runtimeLibs}'":''${LD_LIBRARY_PATH:-}"
+          export CPPFLAGS="-I${portaudio}/include ''${CPPFLAGS:-}"
           export EASYSPEAK_ATSPI_PYTHON='${atspiPython}/bin/python3'
+          export EASYSPEAK_OFFLINE="''${EASYSPEAK_OFFLINE:-relaxed}"
+          export EASYSPEAK_PIPER_MODEL="''${EASYSPEAK_PIPER_MODEL:-${piperModelPath}}"
+          export EASYSPEAK_SOUNDS_DIR="''${EASYSPEAK_SOUNDS_DIR:-${soundsNixDir}}"
           export GI_TYPELIB_PATH='${giTypelibPath}'":''${GI_TYPELIB_PATH:-}"
+          export LD_LIBRARY_PATH='${lib.makeLibraryPath runtimeLibs}'":''${LD_LIBRARY_PATH:-}"
+          export LDFLAGS="-L${portaudio}/lib -Wl,-rpath,${portaudio}/lib ''${LDFLAGS:-}"
+          export LIBRARY_PATH="${portaudio}/lib''${LIBRARY_PATH:+:$LIBRARY_PATH}"
+          export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX="''${SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX:-${pretendVersion}}"
+          export UV_PYTHON='${python}/bin/python'
         '';
 
         easyspeak = pkgs.writeShellApplication {
