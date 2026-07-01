@@ -813,6 +813,20 @@ class TestEasySpeakRun:
 
     @patch("easyspeak.core.main.WakeWordModel")
     @patch("easyspeak.core.main.load_whisper_model")
+    def test_run_aborts_when_speech_model_missing(
+        self, mock_whisper_model, mock_wakeword_model, caplog
+    ):
+        """A missing speech model aborts startup cleanly, not mid-run."""
+        mock_whisper_model.side_effect = RuntimeError("install a language pack")
+
+        with caplog.at_level("ERROR"), pytest.raises(SystemExit) as excinfo:
+            EasySpeak().run()
+
+        assert excinfo.value.code == 1
+        assert "language pack" in caplog.text
+
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
     @patch.object(EasySpeak, "load_plugins")
     def test_run_no_plugins(
         self, mock_load_plugins, mock_whisper_model, mock_wakeword_model, readlog
