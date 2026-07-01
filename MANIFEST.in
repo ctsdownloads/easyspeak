@@ -1,4 +1,4 @@
-exclude CHANGELOG.md CONTRIBUTING.md flake.* .gitignore .gitattributes justfile MANIFEST.in *.mjs package.json uv.lock *.yaml *.yml
+exclude CHANGELOG.md CONTRIBUTING.md DEPENDENCIES.md flake.* .gitignore .gitattributes justfile MANIFEST.in *.mjs package.json pins.toml uv.lock *.yaml *.yml
 prune docs
 prune .github
 prune packaging
