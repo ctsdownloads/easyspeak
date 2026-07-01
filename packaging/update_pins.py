@@ -19,6 +19,8 @@ committed; review with `git diff pins.toml`.
 import datetime
 import hashlib
 import json
+import os
+import subprocess
 import urllib.request
 
 import tomllib
@@ -28,10 +30,26 @@ from packaging.version import Version
 PINS = "pins.toml"
 
 
-def fetch_json(url):
+def fetch_json(url, token=None):
     """Return the JSON document at `url`."""
-    with urllib.request.urlopen(url) as response:
+    request = urllib.request.Request(url)
+    if token:
+        request.add_header("Authorization", f"Bearer {token}")
+    with urllib.request.urlopen(request) as response:
         return json.load(response)
+
+
+def github_token():
+    """Return a GitHub token from `GITHUB_TOKEN` or the gh CLI, else None."""
+    if token := os.environ.get("GITHUB_TOKEN"):
+        return token
+    try:
+        gh = subprocess.run(
+            ["gh", "auth", "token"], capture_output=True, text=True, check=True
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    return gh.stdout.strip() or None
 
 
 def sha256_of(url):
@@ -73,7 +91,10 @@ def supported_ubuntu_image(current):
 
 def latest_nfpm():
     """Return the newest nfpm release version."""
-    release = fetch_json("https://api.github.com/repos/goreleaser/nfpm/releases/latest")
+    release = fetch_json(
+        "https://api.github.com/repos/goreleaser/nfpm/releases/latest",
+        token=github_token(),
+    )
     return release["tag_name"].removeprefix("v")
 
 
