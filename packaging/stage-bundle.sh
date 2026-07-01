@@ -24,11 +24,6 @@ with open(sys.argv[1], "rb") as f:
 PY
 )}"
 
-echo ">> building wheel"
-( cd "$REPO_ROOT" && uv build --wheel --out-dir "$REPO_ROOT/dist" )
-WHEEL=$(ls -t "$REPO_ROOT"/dist/easyspeak_linux-*.whl | head -1)
-echo "   $WHEEL"
-
 echo ">> materialising standalone CPython $PY_VERSION at $PREFIX/python"
 uv python install "$PY_VERSION"
 SRC_PY=$(dirname "$(dirname "$(uv python find "$PY_VERSION")")")
@@ -41,9 +36,15 @@ cp -rL "$SRC_PY"/. "$PREFIX/python/"
 echo ">> creating venv from the bundled interpreter"
 "$PREFIX/python/bin/python3" -m venv "$PREFIX/venv"
 
-echo ">> installing app + runtime extras into the venv"
-# piper-tts: provides the `piper` binary inside the venv (no system piper packaged).
-uv pip install --python "$PREFIX/venv/bin/python" "$WHEEL" piper-tts
+echo ">> installing the app and its locked dependencies into the venv"
+# --frozen installs exactly what uv.lock records — the same resolution CI
+# tests — plus the bundle extra (piper-tts, providing the `piper` binary; no
+# system piper is packaged). --no-editable builds the project into a wheel and
+# installs it; --python keeps uv on the bundled interpreter so it reuses the
+# venv above instead of recreating it from a cached toolchain.
+( cd "$REPO_ROOT" && UV_PROJECT_ENVIRONMENT="$PREFIX/venv" \
+    uv sync --frozen --no-dev --no-editable --extra bundle \
+    --python "$PREFIX/python/bin/python3" )
 
 echo ">> rendering the GNOME-extension refresh unit for the bundled interpreter"
 # `--preview service` prints the unit the bundled interpreter would install, so the
