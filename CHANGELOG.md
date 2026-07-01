@@ -5,6 +5,39 @@ canonical, GitHub-independent record of releases. It is updated once per
 release. The format loosely follows [Keep a Changelog](https://keepachangelog.com/),
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.7.0 · Offline by Default · 2026-07-01
+
+**A Strict Offline Switch, a Clean Abort When the Model Is Missing, and `--preview`**
+
+A single `EASYSPEAK_OFFLINE` variable now governs whether EasySpeak may reach
+the network, and it defaults to `strict` — nothing is fetched at runtime unless
+you opt in, true to the fully-local ethos. The recognition model loads locally
+first, so a bundled or previously-cached model needs no network at all. When it
+is missing under the default, startup aborts cleanly: an actionable message
+(set `EASYSPEAK_OFFLINE=relaxed` to download it, or install a language pack) and
+a non-zero exit, mirroring the existing no-microphone handling. Set `relaxed` to
+opt into the on-demand `base.en` download from Hugging Face, announced with a
+warning.
+
+A CLI-usability fix renames the one-shot `--show` desktop-integration option to
+**`--preview`**, aligning the mental model of the two paired options: `--preview`
+now prints exactly what `--configure` would install, so the two read as a single
+preview-then-apply gesture rather than an odd `show`/`configure` mismatch. It also
+takes exactly one item, since concatenating several files to stdout served no
+purpose. Under the hood the data and extension folders move back under `src/`, the
+packaging tests gain a README, and the GitHub Releases workflow is documented in
+CONTRIBUTING.
+
+### What's Changed
+
+- Gate implicit Whisper downloads behind `EASYSPEAK_OFFLINE` by @bittner in [#114](https://github.com/ctsdownloads/easyspeak/pull/114)
+- Rename `--show` CLI option to `--preview` by @bittner in [#113](https://github.com/ctsdownloads/easyspeak/pull/113)
+- Move data and extension folders back to `src/` by @bittner in [#111](https://github.com/ctsdownloads/easyspeak/pull/111)
+- Add README for the packaging tests by @bittner in [#112](https://github.com/ctsdownloads/easyspeak/pull/112)
+- Document the GitHub Releases workflow in CONTRIBUTING by @bittner in [#110](https://github.com/ctsdownloads/easyspeak/pull/110)
+
+**Full Changelog**: [`0.6.0...0.7.0`](https://github.com/ctsdownloads/easyspeak/compare/0.6.0...0.7.0)
+
 ## 0.6.0 · Made to Configure · 2026-06-30
 
 **Configurable Chimes, a Single Hotkey Variable, and Versioned Docs**
