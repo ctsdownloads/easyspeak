@@ -8,7 +8,7 @@ has() { grep -q "$1" <<<"$files" || { echo "  MISSING: $1" >&2; exit 1; }; }
 lacks() { ! grep -qE "$1" <<<"$files" || { echo "  FORBIDDEN: $1" >&2; exit 1; }; }
 
 echo "The sdist ships no markdown, docs, tests, or dev tooling config"
-lacks 'C.*\.md|docs|package\.json|tests|\.lock|\.mjs|\.nix|\.ya?ml'
+lacks 'C.*\.md|DEPENDENCIES\.md|pins\.toml|docs|package\.json|tests|\.lock|\.mjs|\.nix|\.ya?ml'
 
 echo "The sdist ships the core module and the plugins"
 has core
