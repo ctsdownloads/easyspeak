@@ -6,7 +6,7 @@ files changes — the consuming scripts stay untouched.
 
 | Lock file        | Maintained          | Pins                                                  |
 |------------------|---------------------|-------------------------------------------------------|
-| `pins.toml`      | by hand             | Speech models, bundled CPython, build container, nfpm |
+| `pins.toml`      | `just update-pins`  | Speech models, bundled CPython, build container, nfpm |
 | `pyproject.toml` | by hand             | Supported Python range, dependency lower bounds       |
 | `uv.lock`        | `just requirements` | Exact Python library versions, wheel hashes           |
 | `flake.lock`     | `nix flake update`  | nixpkgs revision for dev shell and `nix run`          |
@@ -31,6 +31,11 @@ file. Its consumers:
 The `easyspeak-lang-*` packages carry the app's release version, so a newer
 package version does not imply newer model content — the model content changes
 only when `pins.toml` does.
+
+`just update-pins` bumps every entry to its current upstream version and
+recomputes checksums; the build container advances only when its LTS leaves
+standard support, since its glibc is the packages' compatibility floor.
+Review the diff before committing.
 
 ## Deliberately floating
 

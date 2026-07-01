@@ -60,6 +60,12 @@ requirements:
     uvx uv lock --upgrade
     git diff --color --exit-code uv.lock
 
+# Bump the hand-maintained pins in pins.toml to their current upstream versions
+[group('safety')]
+update-pins:
+    uv run --no-project --with packaging python packaging/update_pins.py
+    git diff --color pins.toml
+
 # Run test suite and show coverage (unit tests, integration, acceptance)
 [group('tests')]
 test: test-js pytest coverage integration acceptance

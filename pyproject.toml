@@ -171,6 +171,8 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "packaging/**" = [
   "INP001",  # standalone build scripts, run directly — not an importable package
+  "S310",    # https URLs to known registries (endoflife.date, GitHub, Hugging Face)
+  "T201",    # build scripts report progress on the console
 ]
 "src/plugins/00_*.py" = ["N999"]    # numeric prefix sets plugin load order
 "src/plugins/zz_base.py" = ["N999"] # zz_ prefix loads the base plugin last
