@@ -81,28 +81,18 @@ def test_item_text_returns_the_items_artifact(item, needle):
     assert needle in di.item_text(item)
 
 
-def test_show_single_item_is_unlabelled(capsys):
-    di.show(["service"])
+def test_preview_prints_the_item_content(capsys):
+    di.preview("service")
 
-    out = capsys.readouterr().out
-    assert out.startswith("[Unit]")
-    assert "# service" not in out
-
-
-def test_show_multiple_items_are_labelled(capsys):
-    di.show(["autostart", "desktop"])
-
-    out = capsys.readouterr().out
-    assert "# autostart\n" in out
-    assert "# desktop\n" in out
+    assert capsys.readouterr().out.startswith("[Unit]")
 
 
 @pytest.mark.parametrize(
     ("text", "expected"),
     [("no-newline", "no-newline\n"), ("has-newline\n", "has-newline\n")],
 )
-def test_show_normalises_the_trailing_newline(capsys, text, expected):
+def test_preview_normalises_the_trailing_newline(capsys, text, expected):
     with patch.object(di, "item_text", return_value=text):
-        di.show(["service"])
+        di.preview("service")
 
     assert capsys.readouterr().out == expected

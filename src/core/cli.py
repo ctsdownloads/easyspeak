@@ -3,7 +3,7 @@
 Verbosity comes from the mutually exclusive `-v`/`--verbose` and `-q`/`--quiet`
 flags, or — with neither — the `EASYSPEAK_LOG_LEVEL` environment variable, which
 the flags override (see [`resolve_level`][core.log.resolve_level]). The one-shot
-`--configure` and `--show` subcommands set up or print the desktop-integration
+`--configure` and `--preview` subcommands set up or print the desktop-integration
 files and exit. All `EASYSPEAK_*` variables are listed in [`core.config`][core.config].
 """
 
@@ -37,17 +37,14 @@ def parse_args(argv=None):
         ),
     )
     parser.add_argument(
-        "--show",
-        nargs="*",
+        "--preview",
         choices=config_items,
-        help="print the listed items' files to stdout and exit (default: all)",
+        help="print the file content that would be configured and exit",
     )
     args = parser.parse_args(argv)
 
     if args.configure is not None:
         args.configure = set(args.configure) or config_defaults
-    if args.show is not None:
-        args.show = set(args.show) or config_items
 
     return args
 
@@ -60,10 +57,10 @@ def run(argv=None):
     """
     args = parse_args(argv)
 
-    if args.show is not None:
-        from .desktop_integration import show
+    if args.preview is not None:
+        from .desktop_integration import preview
 
-        show(args.show)
+        preview(args.preview)
         return
 
     log.configure(log.resolve_level(verbose=args.verbose, quiet=args.quiet))

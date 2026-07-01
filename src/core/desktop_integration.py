@@ -90,7 +90,7 @@ def configure(items: set[str]):
 def item_text(item):
     """Return the text a configure item creates or uses, for inspection.
 
-    Backs `--show`, and lets packaging capture e.g. the refresh-service unit as
+    Backs `--preview`, and lets packaging capture e.g. the refresh-service unit as
     rendered for the running interpreter — without installing anything.
     """
     if item == "service":
@@ -103,11 +103,7 @@ def item_text(item):
     return (extension_source_dir() / "metadata.json").read_text()
 
 
-def show(items):
-    """Print each item's text to stdout, header-separated only when several."""
-    labelled = len(items) > 1
-    for item in items:
-        if labelled:
-            sys.stdout.write(f"# {item}\n")
-        text = item_text(item)
-        sys.stdout.write(text if text.endswith("\n") else text + "\n")
+def preview(item):
+    """Print the item's file content to stdout, with a trailing newline."""
+    text = item_text(item)
+    sys.stdout.write(text if text.endswith("\n") else text + "\n")
