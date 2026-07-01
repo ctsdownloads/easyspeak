@@ -495,7 +495,11 @@ class EasySpeak:
             WHISPER_COMPUTE_TYPE,
             WHISPER_CPU_THREADS or "auto",
         )
-        self.whisper = load_whisper_model()
+        try:
+            self.whisper = load_whisper_model()
+        except RuntimeError as exc:
+            logger.error("Cannot start EasySpeak: %s", exc)  # noqa: TRY400
+            raise SystemExit(1) from exc
 
         # The GNOME Shell extension powers both the panel indicator and the
         # mouse grid, so core (not a plugin) owns installing/refreshing/enabling
