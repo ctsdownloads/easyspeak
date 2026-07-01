@@ -173,7 +173,7 @@
             just
             eslint # JS linter for the GNOME Shell extension (see `just lint-js`)
             nodejs # `node --test` for the extension's JS helpers (see `just test-js`)
-            desktop-file-utils # desktop-file-validate for the launcher (see `just gate`)
+            desktop-file-utils # desktop-file-validate for the launcher (see `just check-desktop-integration`)
             glib.dev # glib-compile-schemas for the extension's GSettings schema (see `just compile-schemas`)
             dpkg # dpkg-deb to read .deb contents (see tests/packaging/test_deb.sh)
             rpm # rpm to read .rpm contents (see tests/packaging/test_rpm.sh)
