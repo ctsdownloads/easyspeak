@@ -38,7 +38,7 @@ def _remove_test_unit(unit_path):
 def test_install_refresh_unit_enables_via_real_systemctl(user_systemd, monkeypatch):
     """install_refresh_unit writes a unit a real user systemd manager enables."""
     monkeypatch.setattr(gnome_extension, "REFRESH_UNIT_NAME", TEST_UNIT)
-    unit_path = gnome_extension._unit_path()
+    unit_path = gnome_extension.unit_path()
 
     _remove_test_unit(unit_path)  # clear any leftover from a prior failed run
     try:

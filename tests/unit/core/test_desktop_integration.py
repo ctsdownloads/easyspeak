@@ -77,22 +77,31 @@ def test_configure_runs_exactly_the_requested_activities(items):
         ("extension", '"uuid"'),  # the metadata.json manifest
     ],
 )
-def test_item_text_returns_the_items_artifact(item, needle):
-    assert needle in di.item_text(item)
+def test_preview_renders_each_items_artifact(item, needle, capsys):
+    di.preview(item)
+
+    assert needle in capsys.readouterr().out
 
 
-def test_preview_prints_the_item_content(capsys):
-    di.preview("service")
+@pytest.mark.parametrize("text", ["no-newline", "has-newline\n"])
+def test_preview_writes_content_verbatim(capsys, text):
+    """The content goes to stdout unchanged — no trailing-newline fixup."""
+    with patch.object(di, "data_text", return_value=text):
+        di.preview("desktop")
 
-    assert capsys.readouterr().out.startswith("[Unit]")
+    assert capsys.readouterr().out == text
 
 
-@pytest.mark.parametrize(
-    ("text", "expected"),
-    [("no-newline", "no-newline\n"), ("has-newline\n", "has-newline\n")],
-)
-def test_preview_normalises_the_trailing_newline(capsys, text, expected):
-    with patch.object(di, "item_text", return_value=text):
-        di.preview("service")
+def test_preview_prints_target_path_to_stderr(capsys):
+    """The `TARGET:` line goes to stderr, keeping stdout to just the content."""
+    with (
+        patch.object(di, "data_text", return_value="body"),
+        patch.object(
+            di, "desktop_path", return_value=di.Path("/dest/easyspeak.desktop")
+        ),
+    ):
+        di.preview("desktop")
 
-    assert capsys.readouterr().out == expected
+    captured = capsys.readouterr()
+    assert captured.out == "body"
+    assert captured.err == "TARGET: /dest/easyspeak.desktop\n"
