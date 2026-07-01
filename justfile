@@ -16,6 +16,18 @@ all: codestyle safety test check-docs check-desktop-integration compile-schemas 
 clean *args:
     uvx pyclean . {{ args }} --debris all --erase .benchmarks 'build/**/*' build result results.json 'site/**/*' site --yes
 
+# Check project dependencies are up-to-date (uv.lock)
+[group('lifecycle')]
+requirements:
+    uvx uv lock --upgrade
+    git diff --color --exit-code uv.lock
+
+# Bump the hand-maintained pins in pins.toml to their current upstream versions
+[group('lifecycle')]
+update-pins:
+    uv run --no-project --with packaging python packaging/update_pins.py
+    git diff --color --exit-code pins.toml
+
 # Run all code style checks (format, lint, js, yaml)
 [group('codestyle')]
 codestyle: format lint lint-js lint-yaml
@@ -45,26 +57,14 @@ lint-yaml *args:
 types *args:
     uv run --extra=mypy mypy src {{ args }}
 
-# Run all safety checks (types, requirements, audit)
+# Run all safety checks (update-pins, requirements, audit, types)
 [group('safety')]
-safety: types requirements audit
+safety: update-pins requirements audit types
 
 # Check project dependencies for known vulnerabilities
 [group('safety')]
 audit *args:
     uv run --with=pip-audit pip-audit --progress-spinner=off --skip-editable {{ args }}
-
-# Check project dependencies are up-to-date (uv.lock)
-[group('safety')]
-requirements:
-    uvx uv lock --upgrade
-    git diff --color --exit-code uv.lock
-
-# Bump the hand-maintained pins in pins.toml to their current upstream versions
-[group('safety')]
-update-pins:
-    uv run --no-project --with packaging python packaging/update_pins.py
-    git diff --color pins.toml
 
 # Run test suite and show coverage (unit tests, integration, acceptance)
 [group('tests')]
