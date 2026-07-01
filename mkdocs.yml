@@ -54,6 +54,7 @@ nav:
 - Home: index.md
 - Installation: installation.md
 - Packaging: packaging.md
+- Dependencies: dependencies.md
 - Usage: usage.md
 - Screenshots: screenshots.md
 - Commands: commands.md

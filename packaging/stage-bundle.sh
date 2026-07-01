@@ -10,10 +10,19 @@
 set -euo pipefail
 
 PREFIX="${PREFIX:-/opt/easyspeak}"
-PY_VERSION="${PY_VERSION:-3.14}"
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 command -v uv >/dev/null || { echo "error: uv is required (https://astral.sh/uv)" >&2; exit 1; }
+
+# The bundled CPython version is pinned in pins.toml at the repo root.
+PY_VERSION="${PY_VERSION:-$(uv run --no-project python - "$REPO_ROOT/pins.toml" <<'PY'
+import sys
+import tomllib
+
+with open(sys.argv[1], "rb") as f:
+    print(tomllib.load(f)["python"]["bundle"])
+PY
+)}"
 
 echo ">> building wheel"
 ( cd "$REPO_ROOT" && uv build --wheel --out-dir "$REPO_ROOT/dist" )

@@ -8,7 +8,9 @@ set -euo pipefail
 
 VERSION="${1:-0.0.0}"
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-IMAGE="${IMAGE:-ubuntu:24.04}"
+# Grep, not a TOML parser: this host side runs with nothing but docker + git
+# (the CI packages job has no uv), and the key is unique in pins.toml.
+IMAGE="${IMAGE:-$(grep -Po '^ubuntu_image = "\K[^"]+' "$REPO_ROOT/pins.toml")}"
 
 command -v docker >/dev/null || { echo "error: docker is required" >&2; exit 1; }
 mkdir -p "$REPO_ROOT/dist"
@@ -25,8 +27,8 @@ docker run --rm \
     curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null 2>&1
     export PATH="$HOME/.local/bin:$PATH"
 
-    # Install nfpm (static Go binary) from the latest GitHub release.
-    NFPM_VER=$(curl -fsSL https://api.github.com/repos/goreleaser/nfpm/releases/latest | grep -oP "\"tag_name\":\s*\"v\K[^\"]+")
+    # Install nfpm (static Go binary) at the version pinned in pins.toml.
+    NFPM_VER=$(uv run --no-project python -c "import tomllib; print(tomllib.load(open(\"/src/pins.toml\", \"rb\"))[\"toolchain\"][\"nfpm\"])")
     curl -fsSL "https://github.com/goreleaser/nfpm/releases/download/v${NFPM_VER}/nfpm_${NFPM_VER}_linux_x86_64.tar.gz" \
       | tar -xz -C /usr/local/bin nfpm
 

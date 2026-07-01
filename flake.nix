@@ -76,26 +76,28 @@
         # EASYSPEAK_SOUNDS_DIR (commonEnv) redirects to the Nix store one.
         soundsNixDir = "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo";
 
-        # Piper voice (Amy, US English), fetched at build time. Piper wants the
-        # .onnx and .onnx.json side by side, so linkFarm them and point
-        # EASYSPEAK_PIPER_MODEL at the .onnx.
-        piperVoice = pkgs.linkFarm "piper-voice-en-US-amy-medium" [
+        # Piper voice, fetched at build time from the revision pinned in
+        # pins.toml. Piper wants the .onnx and .onnx.json side by side, so
+        # linkFarm them and point EASYSPEAK_PIPER_MODEL at the .onnx.
+        piperPin = (builtins.fromTOML (builtins.readFile ./pins.toml)).lang.en.piper;
+        piperBaseUrl = "https://huggingface.co/${piperPin.repo}/resolve/${piperPin.revision}/${piperPin.path}";
+        piperVoice = pkgs.linkFarm "piper-voice-${piperPin.voice}" [
           {
-            name = "en_US-amy-medium.onnx";
+            name = "${piperPin.voice}.onnx";
             path = pkgs.fetchurl {
-              url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx";
-              sha256 = "063c43bbs0nb09f86l4avnf9mxah38b1h9ffl3kgpixqaxxy99mk";
+              url = "${piperBaseUrl}/${piperPin.voice}.onnx";
+              sha256 = piperPin.onnx_sha256;
             };
           }
           {
-            name = "en_US-amy-medium.onnx.json";
+            name = "${piperPin.voice}.onnx.json";
             path = pkgs.fetchurl {
-              url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx.json";
-              sha256 = "0xvxjxk59byydx9gj6rdvvydp5zm8mzsrf9vyy6x6299sjs3x8lm";
+              url = "${piperBaseUrl}/${piperPin.voice}.onnx.json";
+              sha256 = piperPin.json_sha256;
             };
           }
         ];
-        piperModelPath = "${piperVoice}/en_US-amy-medium.onnx";
+        piperModelPath = "${piperVoice}/${piperPin.voice}.onnx";
 
         # Env shared by the `nix run` wrapper and the dev shell, so `uv run
         # easyspeak` behaves identically in both; `:-`/`:+` defaulting lets a
