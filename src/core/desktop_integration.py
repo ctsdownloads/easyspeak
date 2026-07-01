@@ -11,13 +11,17 @@ opt-in, since not everyone wants EasySpeak in their menu or starting at login.
 
 import logging
 import sys
-from importlib import resources
+from functools import partial
 from pathlib import Path
+
+from easyspeak.data import data_text
 
 from .gnome_extension import (
     activate_extension,
+    extension_dest_dir,
     extension_source_dir,
     install_refresh_unit,
+    unit_path,
     unit_text,
 )
 
@@ -41,16 +45,11 @@ def desktop_path():
     return Path.home() / ".local" / "share" / "applications" / INSTALLED_DESKTOP_NAME
 
 
-def _data_text(name):
-    """Read a bundled data file (package data) as text."""
-    return (resources.files("easyspeak.data") / name).read_text()
-
-
 def _install_data_file(template, dest):
     """Copy a bundled desktop file into `dest`, best-effort."""
     try:
         dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_text(_data_text(template))
+        dest.write_text(data_text(template))
     except OSError as e:
         logger.warning("could not write %s (%s)", dest, e)
         return False
@@ -87,23 +86,23 @@ def configure(items: set[str]):
         install_autostart_file()
 
 
-def item_text(item):
-    """Return the text a configure item creates or uses, for inspection.
-
-    Backs `--preview`, and lets packaging capture e.g. the refresh-service unit as
-    rendered for the running interpreter — without installing anything.
-    """
-    if item == "service":
-        return unit_text()
-    if item == "autostart":
-        return _data_text(AUTOSTART_TEMPLATE)
-    if item == "desktop":
-        return _data_text(DESKTOP_TEMPLATE)
-    # extension: its metadata.json manifest is the one representative file.
+def _manifest_text():
+    """The GNOME extension's `metadata.json`, its one representative file."""
     return (extension_source_dir() / "metadata.json").read_text()
 
 
 def preview(item):
-    """Print the item's file content to stdout, with a trailing newline."""
-    text = item_text(item)
-    sys.stdout.write(text if text.endswith("\n") else text + "\n")
+    """Write an item's content to stdout and its target install path to stderr.
+
+    Backs `--preview`. The `TARGET:` line goes to stderr so packaging can capture
+    just the content off stdout; the content is written verbatim, since adding a
+    trailing newline is packaging's concern, not this function's.
+    """
+    render, path = {
+        "extension": (_manifest_text, extension_dest_dir),
+        "service": (unit_text, unit_path),
+        "desktop": (partial(data_text, DESKTOP_TEMPLATE), desktop_path),
+        "autostart": (partial(data_text, AUTOSTART_TEMPLATE), autostart_path),
+    }[item]
+    sys.stderr.write(f"TARGET: {path()}\n")
+    sys.stdout.write(render())

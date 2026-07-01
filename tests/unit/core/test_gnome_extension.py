@@ -287,7 +287,7 @@ def testunit_text_contains_ordering_and_execstart():
 
 def test_unit_path(tmp_path):
     with patch.object(gnome_extension.Path, "home", return_value=tmp_path):
-        assert gnome_extension._unit_path() == (
+        assert gnome_extension.unit_path() == (
             tmp_path / ".config" / "systemd" / "user" / UNIT_NAME
         )
 

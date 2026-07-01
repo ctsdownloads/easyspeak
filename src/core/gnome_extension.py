@@ -22,6 +22,8 @@ import sys
 from importlib import resources
 from pathlib import Path
 
+from easyspeak.data import data_text
+
 logger = logging.getLogger(__name__)
 
 EXTENSION_UUID = "gnome@easyspeak.dev"
@@ -151,7 +153,8 @@ def refresh_installed_extension():
     return refresh_extension_files(extension_source_dir(), extension_dest_dir())
 
 
-def _unit_path():
+def unit_path():
+    """User-local path of the extension-refresh unit."""
     return Path.home() / ".config" / "systemd" / "user" / REFRESH_UNIT_NAME
 
 
@@ -200,8 +203,8 @@ def unit_text():
     — on Wayland the shell only loads extensions at login. And both ExecStart
     arguments are quoted, since systemd splits ExecStart on whitespace.
     """
-    template = (resources.files("easyspeak.data") / REFRESH_UNIT_TEMPLATE).read_text()
-    return template.format(
+    return data_text(
+        REFRESH_UNIT_TEMPLATE,
         target=PRE_SHELL_TARGET,
         python=_stable_interpreter(),
         script=Path(__file__).resolve(),
@@ -260,30 +263,30 @@ def install_refresh_unit():
     if shutil.which("systemctl") is None:
         return None
 
-    unit_path = _unit_path()
+    path = unit_path()
 
     if _system_unit_exists():
         # The package owns the unit; don't shadow it with a user copy. Clear out a
         # stale one a prior pip/dev install left — `~/.config/systemd/user` takes
         # precedence over the packaged path and would point at a vanished
         # interpreter, so it must go for the packaged unit to take effect.
-        if unit_path.is_file():
+        if path.is_file():
             _run_systemctl("disable", REFRESH_UNIT_NAME)
             with contextlib.suppress(OSError):
-                unit_path.unlink()
+                path.unlink()
         return None
 
     desired = unit_text()
     try:
-        current = unit_path.read_text() if unit_path.is_file() else None
+        current = path.read_text() if path.is_file() else None
     except OSError:
         current = None
 
     changed = current != desired
     if changed:
         try:
-            unit_path.parent.mkdir(parents=True, exist_ok=True)
-            unit_path.write_text(desired)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(desired)
         except OSError:
             return None
         _run_systemctl("daemon-reload")
