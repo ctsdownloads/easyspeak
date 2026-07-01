@@ -113,30 +113,21 @@ def test_parse_args_configure_default(argv, expected):
     assert cli.parse_args(argv).configure == expected
 
 
-@patch("easyspeak.core.desktop_integration.show")
-def test_run_show_prints_items_and_skips_app(mock_show):
-    """--show prints the requested items and does not start the app."""
-    cli.run(["--show", "service"])
+@patch("easyspeak.core.desktop_integration.preview")
+def test_run_preview_prints_item_and_skips_app(mock_preview):
+    """--preview prints the requested item and does not start the app."""
+    cli.run(["--preview", "service"])
 
-    mock_show.assert_called_once_with({"service"})
-
-
-@patch("easyspeak.core.desktop_integration.show")
-def test_run_show_with_no_items_defaults_to_all(mock_show):
-    """--show with no items prints every item."""
-    cli.run(["--show"])
-
-    mock_show.assert_called_once_with({"extension", "service", "autostart", "desktop"})
+    mock_preview.assert_called_once_with("service")
 
 
 @pytest.mark.parametrize(
     ("argv", "expected"),
     [
-        ([], None),  # no --show
-        (["--show"], {"extension", "service", "autostart", "desktop"}),  # empty → all
-        (["--show", "desktop"], {"desktop"}),  # explicit item kept
+        ([], None),  # no --preview: run the app
+        (["--preview", "desktop"], "desktop"),  # the single item to print
     ],
 )
-def test_parse_args_show_default(argv, expected):
-    """parse_args expands a bare --show to all items."""
-    assert cli.parse_args(argv).show == expected
+def test_parse_args_preview(argv, expected):
+    """parse_args records the one --preview item, or None when absent."""
+    assert cli.parse_args(argv).preview == expected

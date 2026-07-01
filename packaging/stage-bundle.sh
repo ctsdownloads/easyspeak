@@ -37,11 +37,11 @@ echo ">> installing app + runtime extras into the venv"
 uv pip install --python "$PREFIX/venv/bin/python" "$WHEEL" piper-tts
 
 echo ">> rendering the GNOME-extension refresh unit for the bundled interpreter"
-# `--show service` prints the unit the bundled interpreter would install, so the
+# `--preview service` prints the unit the bundled interpreter would install, so the
 # packaged file is byte-identical to the runtime-generated one — baked with the
 # bundle's stable interpreter and module paths (PREFIX is the final install path,
 # so they're valid on the target). nfpm ships this to /usr/lib/systemd/user.
-"$PREFIX/venv/bin/easyspeak" --show service \
+"$PREFIX/venv/bin/easyspeak" --preview service \
   > "$REPO_ROOT/dist/easyspeak-extension-refresh.service"
 
 # Where language packages drop their models; config.py discovers them here.

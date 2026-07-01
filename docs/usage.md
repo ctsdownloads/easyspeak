@@ -20,14 +20,14 @@ wake word each time.
 
 ## Command-line options
 
-| Flag                     | Default             | Effect                                           |
-| ------------------------ | ------------------- | ------------------------------------------------ |
-| `-v`, `--verbose`        |                     | Show debug output                                |
-| `-q`, `--quiet`          |                     | Show only warnings and errors                    |
-| `--configure [ITEM ...]` | `extension service` | Set up the listed integrations and exit          |
-| `--show [ITEM ...]`      | all                 | Print the listed items' files to stdout and exit |
+| Flag                     | Default             | Effect                                                   |
+| ------------------------ | ------------------- | -------------------------------------------------------- |
+| `-v`, `--verbose`        |                     | Show debug output                                        |
+| `-q`, `--quiet`          |                     | Show only warnings and errors                            |
+| `--configure [ITEM ...]` | `extension service` | Set up the listed integrations and exit                  |
+| `--preview ITEM`         |                     | Print the file content that would be configured and exit |
 
-For `--configure`/`--show`, each `ITEM` is one of `extension`, `service`,
+For `--configure`/`--preview`, each `ITEM` is one of `extension`, `service`,
 `autostart`, or `desktop`. Verbosity can also be set with the
 `EASYSPEAK_LOG_LEVEL` environment variable (e.g. `DEBUG`, `INFO`, `WARNING`),
 but the command-line flags take precedence.
