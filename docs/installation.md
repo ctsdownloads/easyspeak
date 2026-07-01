@@ -88,6 +88,12 @@ cd ~/easyspeak
 pip install -e .
 ```
 
+A Python-only installation has no bundled speech-recognition model, and EasySpeak
+stays offline by default ([`EASYSPEAK_OFFLINE=strict`](usage.md#configuration)),
+so on first run it reports the model as missing. Set `EASYSPEAK_OFFLINE=relaxed`
+to have it fetch `base.en` (about 140 MB) from Hugging Face for you, or install a
+language pack.
+
 ### 3. Piper TTS
 
 ```bash
