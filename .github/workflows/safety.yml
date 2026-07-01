@@ -18,6 +18,7 @@ jobs:
         task:
         - audit
         - requirements
+        - update-pins
       fail-fast: false
     steps:
     - uses: actions/checkout@v6
@@ -30,3 +31,5 @@ jobs:
         sudo apt update
         sudo apt install -y portaudio19-dev
     - run: just ${{ matrix.task }}
+      env:
+        GITHUB_TOKEN: ${{ github.token }}  # lifts the unauthenticated API rate limit
