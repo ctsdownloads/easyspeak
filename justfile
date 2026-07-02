@@ -16,7 +16,7 @@ all: codestyle safety test check-docs check-desktop-integration compile-schemas 
 clean *args:
     uvx pyclean . {{ args }} --debris all --erase .benchmarks 'build/**/*' build result results.json 'site/**/*' site --yes
 
-# Check project dependencies are up-to-date (uv.lock)
+# Check Python dependencies are up-to-date (uv.lock)
 [group('lifecycle')]
 requirements:
     uvx uv lock --upgrade
