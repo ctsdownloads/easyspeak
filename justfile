@@ -68,7 +68,7 @@ audit *args:
 
 # Run test suite and show coverage (unit tests, integration, acceptance)
 [group('tests')]
-test: test-js pytest coverage integration acceptance
+test: test-js pytest coverage integration acceptance check-python-packages
 
 # Unit-test the GNOME Shell extension's pure JS helpers (needs node >= 22.5)
 [group('tests')]
