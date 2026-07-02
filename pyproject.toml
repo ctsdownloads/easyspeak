@@ -228,3 +228,8 @@ packages = [
 
 [tool.setuptools_scm]
 local_scheme = "no-local-version"
+
+[tool.uv]
+required-environments = [
+  "sys_platform == 'linux' and platform_machine == 'x86_64'",
+]
