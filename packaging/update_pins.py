@@ -22,12 +22,13 @@ import json
 import os
 import subprocess
 import urllib.request
+from pathlib import Path
 
 import tomllib
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
-PINS = "pins.toml"
+PINS = Path("pins.toml")
 
 
 def fetch_json(url, token=None):
@@ -123,12 +124,10 @@ def bump(text, key, old, new, label):
 
 def main():
     """Refresh every pin and rewrite pins.toml when anything moved."""
-    with open(PINS, "rb") as f:
-        pins = tomllib.load(f)
-    with open("pyproject.toml", "rb") as f:
-        requires_python = tomllib.load(f)["project"]["requires-python"]
-    with open(PINS, encoding="utf-8") as f:
-        text = original = f.read()
+    text = original = PINS.read_text(encoding="utf-8")
+    pins = tomllib.loads(text)
+    pyproject = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+    requires_python = pyproject["project"]["requires-python"]
 
     text = bump(
         text,
@@ -188,8 +187,7 @@ def main():
             print(f"  ok    lang.{code}.piper.revision = {new_tag}")
 
     if text != original:
-        with open(PINS, "w", encoding="utf-8") as f:
-            f.write(text)
+        PINS.write_text(text, encoding="utf-8")
 
 
 if __name__ == "__main__":

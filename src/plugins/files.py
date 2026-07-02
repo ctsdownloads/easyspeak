@@ -1,6 +1,6 @@
 """Files Plugin - Open folders in file manager."""
 
-import os
+from pathlib import Path
 
 NAME = "files"
 DESCRIPTION = "Folder navigation"
@@ -42,7 +42,7 @@ def open_folder(path, core):
     environment (see core.host_run) so it doesn't inherit EasySpeak's library
     paths.
     """
-    expanded = os.path.expanduser(path)
+    expanded = Path(path).expanduser()
     if core.host_run(["which", "xdg-open"]).returncode != 0:
         return False
     core.host_run(["xdg-open", expanded], background=True, clean_env=True)

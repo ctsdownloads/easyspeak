@@ -627,9 +627,9 @@ class TestEasySpeakAudio:
         assert result is None
 
     @patch("wave.open")
-    @patch("os.remove")
+    @patch("easyspeak.core.main.Path")
     @patch("tempfile.NamedTemporaryFile")
-    def test_transcribe(self, mock_tempfile, mock_remove, mock_wave):
+    def test_transcribe(self, mock_tempfile, mock_path, mock_wave):
         """Test transcribe method."""
         easy = EasySpeak()
 
@@ -653,12 +653,13 @@ class TestEasySpeakAudio:
         result = easy.transcribe(audio_data)
 
         assert result == "Hello world"
-        mock_remove.assert_called_once_with("/tmp/test.wav")
+        mock_path.assert_called_once_with("/tmp/test.wav")
+        mock_path.return_value.unlink.assert_called_once_with()
 
     @patch("wave.open")
-    @patch("os.remove")
+    @patch("easyspeak.core.main.Path")
     @patch("tempfile.NamedTemporaryFile")
-    def test_transcribe_with_custom_prompt(self, mock_tempfile, mock_remove, mock_wave):
+    def test_transcribe_with_custom_prompt(self, mock_tempfile, mock_path, mock_wave):
         """Test transcribe method with custom prompt."""
         easy = EasySpeak()
 
@@ -689,9 +690,9 @@ class TestEasySpeakAudio:
         assert call_args[1]["initial_prompt"] == custom_prompt
 
     @patch("wave.open")
-    @patch("os.remove")
+    @patch("easyspeak.core.main.Path")
     @patch("tempfile.NamedTemporaryFile")
-    def test_transcribe_multiple_segments(self, mock_tempfile, mock_remove, mock_wave):
+    def test_transcribe_multiple_segments(self, mock_tempfile, mock_path, mock_wave):
         """Test transcribe method with multiple segments."""
         easy = EasySpeak()
 

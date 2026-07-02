@@ -13,22 +13,19 @@ def test_setup_stores_core_reference(mock_core):
     assert files.core == mock_core
 
 
-@patch(
-    "easyspeak.plugins.files.os.path.expanduser", return_value="/home/user/Documents"
-)
-def test_open_folder_expands_path(mock_expanduser, mock_core):
+@patch("easyspeak.plugins.files.Path")
+def test_open_folder_expands_path(mock_path, mock_core):
     """When open_folder is used with a user path then it expands the path."""
     files.open_folder("~/Documents", mock_core)
 
-    assert mock_expanduser.call_count == 1
-    assert mock_expanduser.call_args.args == ("~/Documents",)
+    mock_path.assert_called_once_with("~/Documents")
+    mock_path.return_value.expanduser.assert_called_once_with()
 
 
-@patch(
-    "easyspeak.plugins.files.os.path.expanduser", return_value="/home/user/Documents"
-)
-def test_open_folder_uses_xdg_open(mock_expanduser, mock_core_which_finds_file_manager):
+@patch("easyspeak.plugins.files.Path")
+def test_open_folder_uses_xdg_open(mock_path, mock_core_which_finds_file_manager):
     """When xdg-open is available then open_folder launches it with a clean env."""
+    mock_path.return_value.expanduser.return_value = "/home/user/Documents"
     core = mock_core_which_finds_file_manager("xdg-open")
 
     result = files.open_folder("~/Documents", core)
@@ -40,11 +37,8 @@ def test_open_folder_uses_xdg_open(mock_expanduser, mock_core_which_finds_file_m
     assert launch.kwargs["clean_env"] is True
 
 
-@patch(
-    "easyspeak.plugins.files.os.path.expanduser", return_value="/home/user/Documents"
-)
 def test_open_folder_returns_false_when_no_file_manager_found(
-    mock_expanduser, mock_core_no_file_manager
+    mock_core_no_file_manager,
 ):
     """When no file manager is available then open_folder returns False."""
     result = files.open_folder("~/Documents", mock_core_no_file_manager)
