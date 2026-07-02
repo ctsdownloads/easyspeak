@@ -29,8 +29,8 @@ print(f'WHISPER_REPO="{whisper["repo"]}"')
 print(f'WHISPER_REV="{whisper["revision"]}"')
 print(f'PIPER_VOICE="{piper["voice"]}"')
 print(f'PIPER_BASE="https://huggingface.co/{piper["repo"]}/resolve/{piper["revision"]}/{piper["path"]}"')
-print(f'PIPER_ONNX_SHA256="{piper["onnx_sha256"]}"')
-print(f'PIPER_JSON_SHA256="{piper["json_sha256"]}"')
+print(f'PIPER_ONNX_SHA256="{piper["files"][piper["voice"] + ".onnx"]}"')
+print(f'PIPER_JSON_SHA256="{piper["files"][piper["voice"] + ".onnx.json"]}"')
 PY
 )"
 eval "$MODEL_VARS"

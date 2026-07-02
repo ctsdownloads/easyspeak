@@ -15,18 +15,32 @@ files changes — the consuming scripts stay untouched.
 
 The hand-maintained lock file for everything that is *downloaded* by the
 packaging scripts and the Nix flake rather than resolved by a package manager.
-Each entry pins an immutable revision (a Hugging Face commit or tag, a release
-version, an image tag), plus SHA-256 checksums where the artifact is a single
-file. Its consumers:
+Each language pack pins an immutable Hugging Face revision — a commit for the
+Whisper model, a tag for the Piper voice — next to a `[lang.<code>.<model>.files]`
+table mapping every downloaded filename to its SHA-256. Other entries pin the
+bundled CPython, the build-container image, and nfpm. Its consumers:
 
-- `flake.nix` — fetches the Piper voice via `builtins.fromTOML`,
-  checksum-verified by `fetchurl`.
+- `flake.nix` — fetches the Piper voice via `builtins.fromTOML`, each file
+  checksum-verified by `fetchurl` against the `piper.files` table.
 - `packaging/stage-lang.sh` — downloads the speech models for each
   `easyspeak-lang-*` package; Piper files are checksum-verified with
-  `sha256sum`.
+  `sha256sum`, the Whisper model by its pinned revision.
 - `packaging/stage-bundle.sh` — materialises the pinned standalone CPython.
 - `packaging/build-in-docker.sh` — pulls the pinned build-container image and
   nfpm release.
+
+The per-file `.files` tables are generated, not hand-written — they also let an
+out-of-tree Nix package pin each file up front instead of hashing whole repos.
+`just update-pins` regenerates every `.files` table from the pinned revision on
+each run — large LFS weights read their sha256 from the Hugging Face tree
+listing, so it stays cheap — so any edit is picked up with no extra step:
+
+- Add a language by writing only its scalar fields — `[lang.<code>.whisper]`
+  (`model`/`repo`/`revision`) and `[lang.<code>.piper]`
+  (`voice`/`repo`/`revision`/`path`) — then run `just update-pins` to bump the
+  revisions and fill both `.files` tables.
+- Change a voice or model in place by editing its scalar fields and running
+  `just update-pins`; the `.files` table follows automatically.
 
 The `easyspeak-lang-*` packages carry the app's release version, so a newer
 package version does not imply newer model content — the model content changes

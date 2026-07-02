@@ -9,8 +9,12 @@ One policy per pin:
   "newest LTS" would silently drop older target distros.
 - `toolchain.nfpm` — latest GitHub release.
 - `lang.*.whisper.revision` — the model repo's current snapshot commit.
-- `lang.*.piper.revision` — the voice repo's newest tag; the file checksums
-  are re-downloaded and recomputed when the tag moves.
+- `lang.*.piper.revision` — the voice repo's newest tag.
+
+The `lang.*.<model>.files` checksum tables are regenerated from the pinned
+revision on every run (large LFS weights read their sha256 from the Hugging
+Face tree listing, so this stays cheap), so an in-place `voice`/`path` edit is
+reflected with no extra step.
 
 Values are rewritten in place, so comments in pins.toml survive. Nothing is
 committed; review with `git diff pins.toml`.
@@ -20,6 +24,7 @@ import datetime
 import hashlib
 import json
 import os
+import re
 import subprocess
 import urllib.request
 from pathlib import Path
@@ -104,6 +109,76 @@ def whisper_revision(repo):
     return fetch_json(f"https://huggingface.co/api/models/{repo}")["sha"]
 
 
+def whisper_files(repo, revision):
+    """Return `{filename: hex_sha256}` for the Whisper model files at `revision`.
+
+    Mirrors stage-lang.sh's `*.bin`/`*.json`/`*.txt` selection. LFS weights
+    already carry their sha256 in the tree listing; the smaller files are hashed
+    by download, since their tree `oid` is a git SHA-1, not a content hash.
+    """
+    tree = fetch_json(
+        f"https://huggingface.co/api/models/{repo}/tree/{revision}?recursive=true"
+    )
+    files = {}
+    for entry in tree:
+        path = entry["path"]
+        if entry.get("type") != "file" or not path.endswith((".bin", ".json", ".txt")):
+            continue
+        if lfs := entry.get("lfs"):
+            files[path] = lfs["oid"].removeprefix("sha256:")
+        else:
+            files[path] = sha256_of(
+                f"https://huggingface.co/{repo}/resolve/{revision}/{path}"
+            )
+    return files
+
+
+def piper_files(piper, revision):
+    """Return `{filename: hex_sha256}` for the Piper voice's two files at `revision`.
+
+    The `.onnx` weight is LFS, so its sha256 comes from the tree listing (no
+    multi-MB download); the small `.onnx.json` is hashed by download. The listing
+    is scoped to `path` because the voice repo holds every language's voices.
+    """
+    tree = fetch_json(
+        f"https://huggingface.co/api/models/{piper['repo']}/tree/{revision}/{piper['path']}"
+    )
+    wanted = {f"{piper['voice']}.onnx", f"{piper['voice']}.onnx.json"}
+    files = {}
+    for entry in tree:
+        name = entry["path"].rsplit("/", 1)[-1]
+        if name not in wanted:
+            continue
+        if lfs := entry.get("lfs"):
+            files[name] = lfs["oid"].removeprefix("sha256:")
+        else:
+            files[name] = sha256_of(
+                f"https://huggingface.co/{piper['repo']}/resolve"
+                f"/{revision}/{piper['path']}/{name}"
+            )
+    return files
+
+
+def set_files(text, code, model, files):
+    """Insert or replace the `[lang.<code>.<model>.files]` table in `text`.
+
+    The table is machine-owned, so it is rewritten wholesale rather than bumped
+    key by key; a first run drops it in after the model's scalar keys, before
+    the next table.
+    """
+    block = "\n".join(
+        [f"[lang.{code}.{model}.files]"]
+        + [f'"{name}" = "{files[name]}"' for name in sorted(files)]
+    )
+    if match := re.search(rf"\[lang\.{re.escape(code)}\.{model}\.files\][^\[]*", text):
+        separator = "\n\n" if match.end() < len(text) else "\n"
+        return text[: match.start()] + block + separator + text[match.end() :]
+    scalars = re.search(
+        rf"\[lang\.{re.escape(code)}\.{model}\]\n(?:[^\[\n].*\n)*", text
+    )
+    return text[: scalars.end()] + "\n" + block + "\n" + text[scalars.end() :]
+
+
 def latest_piper_tag(repo):
     """Return the newest release tag of the Hugging Face `repo`."""
     refs = fetch_json(f"https://huggingface.co/api/models/{repo}/refs")
@@ -149,42 +224,29 @@ def main():
 
     for code, lang in pins["lang"].items():
         whisper, piper = lang["whisper"], lang["piper"]
+        new_revision = whisper_revision(whisper["repo"])
         text = bump(
             text,
             "revision",
             whisper["revision"],
-            whisper_revision(whisper["repo"]),
+            new_revision,
             f"lang.{code}.whisper.revision",
         )
+        files = whisper_files(whisper["repo"], new_revision)
+        text = set_files(text, code, "whisper", files)
+        print(f"  files lang.{code}.whisper.files ({len(files)} files)")
+
         new_tag = latest_piper_tag(piper["repo"])
-        if new_tag != piper["revision"]:
-            base = (
-                f"https://huggingface.co/{piper['repo']}/resolve"
-                f"/{new_tag}/{piper['path']}/{piper['voice']}"
-            )
-            text = bump(
-                text,
-                "revision",
-                piper["revision"],
-                new_tag,
-                f"lang.{code}.piper.revision",
-            )
-            text = bump(
-                text,
-                "onnx_sha256",
-                piper["onnx_sha256"],
-                sha256_of(f"{base}.onnx"),
-                f"lang.{code}.piper.onnx_sha256",
-            )
-            text = bump(
-                text,
-                "json_sha256",
-                piper["json_sha256"],
-                sha256_of(f"{base}.onnx.json"),
-                f"lang.{code}.piper.json_sha256",
-            )
-        else:
-            print(f"  ok    lang.{code}.piper.revision = {new_tag}")
+        text = bump(
+            text,
+            "revision",
+            piper["revision"],
+            new_tag,
+            f"lang.{code}.piper.revision",
+        )
+        files = piper_files(piper, new_tag)
+        text = set_files(text, code, "piper", files)
+        print(f"  files lang.{code}.piper.files ({len(files)} files)")
 
     if text != original:
         PINS.write_text(text, encoding="utf-8")
