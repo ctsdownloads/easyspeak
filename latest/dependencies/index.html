@@ -906,18 +906,32 @@ files changes — the consuming scripts stay untouched.</p>
 <h2 id="pinstoml">pins.toml<a class="headerlink" href="#pinstoml" title="Permanent link">&para;</a></h2>
 <p>The hand-maintained lock file for everything that is <em>downloaded</em> by the
 packaging scripts and the Nix flake rather than resolved by a package manager.
-Each entry pins an immutable revision (a Hugging Face commit or tag, a release
-version, an image tag), plus SHA-256 checksums where the artifact is a single
-file. Its consumers:</p>
+Each language pack pins an immutable Hugging Face revision — a commit for the
+Whisper model, a tag for the Piper voice — next to a <code>[lang.&lt;code&gt;.&lt;model&gt;.files]</code>
+table mapping every downloaded filename to its SHA-256. Other entries pin the
+bundled CPython, the build-container image, and nfpm. Its consumers:</p>
 <ul>
-<li><code>flake.nix</code> — fetches the Piper voice via <code>builtins.fromTOML</code>,
-  checksum-verified by <code>fetchurl</code>.</li>
+<li><code>flake.nix</code> — fetches the Piper voice via <code>builtins.fromTOML</code>, each file
+  checksum-verified by <code>fetchurl</code> against the <code>piper.files</code> table.</li>
 <li><code>packaging/stage-lang.sh</code> — downloads the speech models for each
   <code>easyspeak-lang-*</code> package; Piper files are checksum-verified with
-  <code>sha256sum</code>.</li>
+  <code>sha256sum</code>, the Whisper model by its pinned revision.</li>
 <li><code>packaging/stage-bundle.sh</code> — materialises the pinned standalone CPython.</li>
 <li><code>packaging/build-in-docker.sh</code> — pulls the pinned build-container image and
   nfpm release.</li>
+</ul>
+<p>The per-file <code>.files</code> tables are generated, not hand-written — they also let an
+out-of-tree Nix package pin each file up front instead of hashing whole repos.
+<code>just update-pins</code> regenerates every <code>.files</code> table from the pinned revision on
+each run — large LFS weights read their sha256 from the Hugging Face tree
+listing, so it stays cheap — so any edit is picked up with no extra step:</p>
+<ul>
+<li>Add a language by writing only its scalar fields — <code>[lang.&lt;code&gt;.whisper]</code>
+  (<code>model</code>/<code>repo</code>/<code>revision</code>) and <code>[lang.&lt;code&gt;.piper]</code>
+  (<code>voice</code>/<code>repo</code>/<code>revision</code>/<code>path</code>) — then run <code>just update-pins</code> to bump the
+  revisions and fill both <code>.files</code> tables.</li>
+<li>Change a voice or model in place by editing its scalar fields and running
+  <code>just update-pins</code>; the <code>.files</code> table follows automatically.</li>
 </ul>
 <p>The <code>easyspeak-lang-*</code> packages carry the app's release version, so a newer
 package version does not imply newer model content — the model content changes
