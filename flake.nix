@@ -86,14 +86,14 @@
             name = "${piperPin.voice}.onnx";
             path = pkgs.fetchurl {
               url = "${piperBaseUrl}/${piperPin.voice}.onnx";
-              sha256 = piperPin.onnx_sha256;
+              sha256 = piperPin.files."${piperPin.voice}.onnx";
             };
           }
           {
             name = "${piperPin.voice}.onnx.json";
             path = pkgs.fetchurl {
               url = "${piperBaseUrl}/${piperPin.voice}.onnx.json";
-              sha256 = piperPin.json_sha256;
+              sha256 = piperPin.files."${piperPin.voice}.onnx.json";
             };
           }
         ];
