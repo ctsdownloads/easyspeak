@@ -142,7 +142,6 @@ ignore = [
   "S603",    # subprocess use is how a desktop voice controller works, by design
   "S607",    # binaries (piper, wl-copy, ...) resolved via PATH for portability
   "PLC0415", # imports inside functions lazily load optional deps (cv2, ...)
-  "PTH",     # os.path/open are kept; they're the seams the unit tests mock
   "PLW0603", # module-level global state is part of the runtime/plugin design
   "PLW0602", # ditto: globals declared for clarity even when only read
   "C901",    # cyclomatic-complexity threshold not enforced

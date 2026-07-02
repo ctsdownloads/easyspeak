@@ -72,7 +72,7 @@ PIPER_MODEL = os.environ.get("EASYSPEAK_PIPER_MODEL") or _bundled_model(
     "models",
     "piper",
     "en_US-amy-medium.onnx",
-    default=os.path.expanduser("~/.local/share/piper/en_US-amy-medium.onnx"),
+    default=str(Path("~/.local/share/piper/en_US-amy-medium.onnx").expanduser()),
 )
 PIPER_BIN = os.environ.get("EASYSPEAK_PIPER_BIN") or _bundled_bin(
     "piper", default="piper"
@@ -97,11 +97,11 @@ COMMAND_PROMPT = (
 # --- Desktop sounds ---
 # Default to the FHS sound-theme path; on NixOS the flake overrides
 # EASYSPEAK_SOUNDS_DIR to the Nix store copy, which actually exists.
-SOUNDS_DIR = os.environ.get(
-    "EASYSPEAK_SOUNDS_DIR", "/usr/share/sounds/freedesktop/stereo"
+SOUNDS_DIR = Path(
+    os.environ.get("EASYSPEAK_SOUNDS_DIR", "/usr/share/sounds/freedesktop/stereo")
 )
-WAKE_SOUND = os.path.join(SOUNDS_DIR, "message.oga")
-ERROR_SOUND = os.path.join(SOUNDS_DIR, "dialog-error.oga")
+WAKE_SOUND = SOUNDS_DIR / "message.oga"
+ERROR_SOUND = SOUNDS_DIR / "dialog-error.oga"
 
 
 def load_whisper_model(

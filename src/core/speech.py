@@ -51,7 +51,7 @@ def suppressed_c_stderr():
         yield
         return
     try:
-        with open(os.devnull, "w") as devnull:
+        with open(os.devnull, "w") as devnull:  # noqa: PTH123
             try:
                 os.dup2(devnull.fileno(), stderr_fd)
             except OSError:
@@ -86,7 +86,7 @@ class SpeechPipeline:
     def _piper_sample_rate(self):
         """Read the model's output sample rate (defaults to 22050)."""
         try:
-            with open(f"{PIPER_MODEL}.json") as f:
+            with open(f"{PIPER_MODEL}.json") as f:  # noqa: PTH123
                 return int(json.load(f)["audio"]["sample_rate"])
         except (OSError, ValueError, KeyError, TypeError):
             return 22050

@@ -1,6 +1,6 @@
 """Apps Plugin - Launch and close applications."""
 
-import os
+from pathlib import Path
 
 NAME = "apps"
 DESCRIPTION = "Launch and close applications"
@@ -117,10 +117,10 @@ def _register_from_argv(argv, core):
     the caller falls back to TERMINAL_FALLBACKS instead of registering a
     "terminal" entry whose launch would raise.
     """
-    args = [a for a in argv if "=" not in a and os.path.basename(a) != "env"]
+    args = [a for a in argv if "=" not in a and Path(a).name != "env"]
     if not args:
         return False
-    command = os.path.basename(args[0])
+    command = Path(args[0]).name
     if command in ("flatpak", "snap"):
         target = next(
             (a for a in args[1:] if a != "run" and not a.startswith("-")), None

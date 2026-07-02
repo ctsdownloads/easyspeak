@@ -388,7 +388,7 @@ class EasySpeak:
                 f.name, initial_prompt=use_prompt, beam_size=1, vad_filter=True
             )
             text = " ".join([s.text for s in segments]).strip()
-            os.remove(f.name)
+            Path(f.name).unlink()
             return text
 
     # --- Main loop ---
