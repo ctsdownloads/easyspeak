@@ -5,7 +5,7 @@ sdist=$(ls -t dist/easyspeak_linux-*.tar.gz | head -1)
 files=$(tar tzf "$sdist")
 
 has() { grep -q "$1" <<<"$files" || { echo "  MISSING: $1" >&2; exit 1; }; }
-lacks() { ! grep -qE "$1" <<<"$files" || { echo "  FORBIDDEN: $1" >&2; exit 1; }; }
+lacks() { m=$(grep -E "$1" <<<"$files") || return 0; sed 's/^/  FORBIDDEN: /' <<<"$m" >&2; exit 1; }
 
 echo "The sdist ships no markdown, docs, tests, or dev tooling config"
 lacks 'C.*\.md|DEPENDENCIES\.md|pins\.toml|docs|package\.json|tests|\.lock|\.mjs|\.nix|\.ya?ml'
