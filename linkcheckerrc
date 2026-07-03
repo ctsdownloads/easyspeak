@@ -1,0 +1,19 @@
+[checking]
+useragent=LinkChecker
+
+[filtering]
+checkextern=1
+ignore=
+  /404\.html
+  easyspeak\.dev/latest/
+  bencher\.dev
+  github\.com/.*/compare/
+  github\.com/.*/pull/
+
+[output]
+warnings=0
+ignoreerrors=
+  ^https://www\.freedesktop\.org/ ^418
+
+[text]
+parts=url,parenturl,realurl,result,warning,info,stats,outro
