@@ -5,6 +5,42 @@ canonical, GitHub-independent record of releases. It is updated once per
 release. The format loosely follows [Keep a Changelog](https://keepachangelog.com/),
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.8.0 · Voices on Their Own · 2026-07-04
+
+**Independently Versioned Language Packs and Verifiable, Pinned Model Downloads**
+
+Language packs now carry their own version and ship on their own release tag
+(`lang-en-1.0.0` is the first), decoupled from the application's release
+cadence — a `lang-en-*` tag builds and publishes each pack on its own, and
+points at a Releases view filtered to that language.
+
+Version pinning also becomes transparent: a checked-in `pins.toml` records
+exactly which model and dependency versions an install resolves to, and speech
+models are now verified against per-file checksums — so an offline-by-default
+setup stays reproducible and tamper-evident. This groundwork also paves the way
+for a proper NixOS package, whose fully-pinned, hash-verified builds need
+exactly this manifest. Rounding it out, filesystem handling moves to `pathlib`,
+prek pre-commit hooks add file-hygiene and shellcheck gates, the API reference
+regains its missing modules, and a flaky freedesktop link check (a WAF 418) is
+quieted.
+
+### What's Changed
+
+- Transparent version pinning (`pins.toml`) by @bittner in [#116](https://github.com/ctsdownloads/easyspeak/pull/116)
+- Adopt pathlib for filesystem paths by @bittner in [#118](https://github.com/ctsdownloads/easyspeak/pull/118)
+- Pin per-file checksums for speech models by @bittner in [#119](https://github.com/ctsdownloads/easyspeak/pull/119)
+- Add missing modules to the API documentation by @bittner in [#122](https://github.com/ctsdownloads/easyspeak/pull/122)
+- Give language packs their own version by @bittner in [#123](https://github.com/ctsdownloads/easyspeak/pull/123)
+- Split language-pack builds from the application build by @bittner in [#124](https://github.com/ctsdownloads/easyspeak/pull/124)
+- Add prek pre-commit hooks for file hygiene and shellcheck by @bittner in [#125](https://github.com/ctsdownloads/easyspeak/pull/125)
+- Fix flaky link check on freedesktop's WAF (418) by @bittner in [#127](https://github.com/ctsdownloads/easyspeak/pull/127)
+- Release language packs on their own trigger by @bittner in [#126](https://github.com/ctsdownloads/easyspeak/pull/126)
+- Fold language-pack builds into the Release workflow by @bittner in [#128](https://github.com/ctsdownloads/easyspeak/pull/128)
+- Skip the Docs workflow for language-pack tags by @bittner in [#129](https://github.com/ctsdownloads/easyspeak/pull/129)
+- Link the language pack to its filtered Releases view by @bittner in [#130](https://github.com/ctsdownloads/easyspeak/pull/130)
+
+**Full Changelog**: [`0.7.0...0.8.0`](https://github.com/ctsdownloads/easyspeak/compare/0.7.0...0.8.0)
+
 ## 0.7.0 · Offline by Default · 2026-07-01
 
 **A Strict Offline Switch, a Clean Abort When the Model Is Missing, and `--preview`**
