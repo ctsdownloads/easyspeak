@@ -1103,12 +1103,18 @@ word, however, needs a custom-trained model that pyopen-wakeword can load.</p>
 <p>The packages are built in a clean Ubuntu container, so the result is identical
 whether produced locally or in CI — handy on NixOS, where the bundle's standalone
 CPython and manylinux wheels can't run on the host:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>just<span class="w"> </span>package-distro<span class="w">            </span><span class="c1"># -&gt; ./dist/ : app + language .deb and .rpm</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>just<span class="w"> </span>package-distro<span class="w"> </span><span class="m">1</span>.2.3<span class="w">      </span><span class="c1"># set an explicit version</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>just<span class="w"> </span>package-app<span class="w">              </span><span class="c1"># -&gt; ./dist/ : the easyspeak app .deb and .rpm</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>just<span class="w"> </span>package-app<span class="w"> </span><span class="m">1</span>.2.3<span class="w">        </span><span class="c1"># set an explicit app version</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>just<span class="w"> </span>package-lang<span class="w">             </span><span class="c1"># -&gt; ./dist/ : every easyspeak-lang-* .deb and .rpm</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>just<span class="w"> </span>package-lang<span class="w"> </span>en<span class="w">          </span><span class="c1"># ... or just the named pack(s)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>just<span class="w"> </span>package-distro<span class="w">           </span><span class="c1"># both of the above (every distro package)</span>
 </code></pre></div>
-<p>This produces the <code>easyspeak</code> app packages and every <code>easyspeak-lang-*</code> data
-package. CI builds them automatically: <code>.github/workflows/release.yml</code> runs the same
-script on every published GitHub Release and attaches all archives to it.</p>
+<p>The app and the language packs build independently. The app build needs a
+compiler and the standalone CPython bundle; a language pack is only downloaded
+speech models, so it builds in a lighter container with no compiler and carries
+its own version from <code>pins.toml</code>, independent of the app release. CI builds all
+of them on every published GitHub Release (<code>.github/workflows/release.yml</code>) and
+attaches the archives to it.</p>
 <h2 id="other-distributions">Other distributions<a class="headerlink" href="#other-distributions" title="Permanent link">&para;</a></h2>
 <p>These formats are maintained <strong>outside this repository</strong>. The notes below capture
 what each one needs.</p>
