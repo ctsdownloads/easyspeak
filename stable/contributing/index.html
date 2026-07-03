@@ -1057,13 +1057,26 @@ cadence.</p>
 <p>A language pack changes only when its models in <code>pins.toml</code> do, so it is
 versioned and released independently of the application. Its <code>[lang.&lt;code&gt;]</code>
 <code>version</code> reflects that pack's pinned content and is bumped by <code>just update-pins</code>
-whenever the models change (review it in <code>git diff pins.toml</code>). To release the
-pack, push a matching <code>lang-&lt;code&gt;-&lt;version&gt;</code> tag:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="go">git tag lang-en-1.0.0</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="go">git push origin lang-en-1.0.0</span>
-</code></pre></div>
-<p>This runs <code>release-lang.yml</code>, which verifies the tag's version against
-<code>pins.toml</code>, builds the pack, and publishes it to a <code>lang-en-1.0.0</code> release.</p>
+whenever the models change (review it in <code>git diff pins.toml</code>).</p>
+<p>Release a pack from the <a href="https://github.com/ctsdownloads/easyspeak/releases">GitHub Releases</a>, the same way as the app
+but simpler — no CHANGELOG entry, no generated notes, and it is not the "Latest"
+release:</p>
+<ol>
+<li>Click on <kbd>Draft a new release</kbd>.</li>
+<li>In the tag selector (target: <code>main</code>), enter <code>lang-&lt;code&gt;-&lt;version&gt;</code>, e.g.
+   <code>lang-en-1.0.0</code>. The version segment must match <code>[lang.&lt;code&gt;].version</code> in
+   <code>pins.toml</code>, or the workflow fails.</li>
+<li>Enter the title <code>&lt;version&gt; · Language pack · &lt;Language&gt;</code>, e.g.
+   <code>1.0.0 · Language pack · English</code>.</li>
+<li>For the body, copy the pack's previous release and adjust only what changed
+   (the models rarely do); for the first release of a new language, adapt the
+   English pack's text.</li>
+<li>Press <kbd>Publish Release</kbd> with the release label set to <strong>None</strong> — a
+   data package is never the project's "Latest" release.</li>
+</ol>
+<p>Publishing runs <code>release.yml</code>, which verifies the tag's version against
+<code>pins.toml</code>, skips the application <code>pypi</code> and <code>packages</code> jobs, builds the pack,
+and attaches its <code>.deb</code> and <code>.rpm</code> to the release.</p>
 
 
 
