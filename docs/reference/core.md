@@ -26,9 +26,17 @@ instance and use its small public API (`speak`, `host_run`, `transcribe`,
 
 ::: core.speech
 
+## core.wakeword
+
+::: core.wakeword
+
 ## core.tray
 
 ::: core.tray
+
+## core.about
+
+::: core.about
 
 ## core.hotkey
 
@@ -41,3 +49,7 @@ instance and use its small public API (`speak`, `host_run`, `transcribe`,
 ## core.gnome_extension
 
 ::: core.gnome_extension
+
+## core.desktop_integration
+
+::: core.desktop_integration
