@@ -1,12 +1,30 @@
 name: Release
 
+# The application and the language data packages both release through a GitHub
+# Release (the `release: published` event); the tag decides what gets built.
+# An application tag (e.g. `v1.2.3`) runs the `pypi` and `packages` jobs, while
+# a `lang-<code>-<version>` tag (e.g. `lang-en-1.0.0`) skips those and instead
+# runs `plan-languages` and the `languages` build matrix, attaching the packs to
+# the same release. A language tag's version segment must match the pack's
+# version in pins.toml.
+#
+# A manual run (workflow_dispatch) builds the named language packs — or every
+# language in pins.toml when none are given — and uploads them as artifacts
+# instead of publishing a release.
+
 on:
   release:
     types:
     - published
+  workflow_dispatch:
+    inputs:
+      codes:
+        description: Language codes to build, space-separated; empty builds all
+        default: ''
 
 jobs:
   pypi:
+    if: github.event_name == 'release' && !startsWith(github.event.release.tag_name, 'lang-')
     environment: pypi
     runs-on: ubuntu-latest
     permissions:
@@ -31,6 +49,7 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
 
   packages:
+    if: github.event_name == 'release' && !startsWith(github.event.release.tag_name, 'lang-')
     runs-on: ubuntu-latest
     permissions:
       contents: write   # upload assets to the release
@@ -44,3 +63,46 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
       run: gh release upload '${{ github.event.release.tag_name }}' dist/*.deb dist/*.rpm --clobber
+
+  plan-languages:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'lang-')
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.resolve.outputs.matrix }}
+    steps:
+    - uses: actions/checkout@v6
+    - name: Resolve language codes to build
+      id: resolve
+      env:
+        EVENT: ${{ github.event_name }}
+        TAG: ${{ github.event.release.tag_name }}
+        INPUT_CODES: ${{ github.event.inputs.codes }}
+      run: python3 packaging/plan_lang_release.py
+
+  languages:
+    needs: plan-languages
+    name: lang-${{ matrix.code }} (${{ matrix.version }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # attach the packs to the language release
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan-languages.outputs.matrix) }}
+    steps:
+    - uses: actions/checkout@v6
+    - name: Build the language pack
+      env:
+        CODE: ${{ matrix.code }}
+      run: bash packaging/build-lang-in-docker.sh "$CODE"
+    - name: Attach packs to the release
+      if: github.event_name == 'release'
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ github.event.release.tag_name }}
+      run: gh release upload "$TAG" dist/*-lang-*.deb dist/*-lang-*.rpm --clobber
+    - name: Upload build artifacts
+      if: github.event_name == 'workflow_dispatch'
+      uses: actions/upload-artifact@v4
+      with:
+        name: language-pack-${{ matrix.code }}
+        path: dist/*-lang-*.*

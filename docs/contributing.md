@@ -112,16 +112,27 @@ cadence.
 A language pack changes only when its models in `pins.toml` do, so it is
 versioned and released independently of the application. Its `[lang.<code>]`
 `version` reflects that pack's pinned content and is bumped by `just update-pins`
-whenever the models change (review it in `git diff pins.toml`). To release the
-pack, push a matching `lang-<code>-<version>` tag:
+whenever the models change (review it in `git diff pins.toml`).
 
-```console
-git tag lang-en-1.0.0
-git push origin lang-en-1.0.0
-```
+Release a pack from the [GitHub Releases][gh:releases], the same way as the app
+but simpler — no CHANGELOG entry, no generated notes, and it is not the "Latest"
+release:
 
-This runs `release-lang.yml`, which verifies the tag's version against
-`pins.toml`, builds the pack, and publishes it to a `lang-en-1.0.0` release.
+1. Click on <kbd>Draft a new release</kbd>.
+2. In the tag selector (target: `main`), enter `lang-<code>-<version>`, e.g.
+   `lang-en-1.0.0`. The version segment must match `[lang.<code>].version` in
+   `pins.toml`, or the workflow fails.
+3. Enter the title `<version> · Language pack · <Language>`, e.g.
+   `1.0.0 · Language pack · English`.
+4. For the body, copy the pack's previous release and adjust only what changed
+   (the models rarely do); for the first release of a new language, adapt the
+   English pack's text.
+5. Press <kbd>Publish Release</kbd> with the release label set to **None** — a
+   data package is never the project's "Latest" release.
+
+Publishing runs `release.yml`, which verifies the tag's version against
+`pins.toml`, skips the application `pypi` and `packages` jobs, builds the pack,
+and attaches its `.deb` and `.rpm` to the release.
 
 [gh:source]: https://github.com/ctsdownloads/easyspeak
 [gh:releases]: https://github.com/ctsdownloads/easyspeak/releases
