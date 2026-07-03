@@ -24,8 +24,9 @@ without re-downloading the runtime. See [Language](#language).
 
 Download the latest packages from the
 [Releases page](https://github.com/ctsdownloads/easyspeak/releases) — grab **both**
-the app and a language pack — and install them **together** (the language pack is a
-separate file, not auto-fetched from GitHub):
+the app and a [language pack](https://github.com/ctsdownloads/easyspeak/releases?q=lang) —
+and install them **together** (the language pack is a separate file, not
+auto-fetched from GitHub):
 
 === "Debian / Ubuntu"
 

@@ -12,7 +12,8 @@ Tested on Fedora and NixOS.
 
 ## Quick install (prebuilt packages)
 
-The easiest path. Download the latest **app** package and a **language pack**
+The easiest path. Download the latest **app** package and a
+**[language pack](https://github.com/ctsdownloads/easyspeak/releases?q=lang)**
 from the [Releases page](https://github.com/ctsdownloads/easyspeak/releases)
 and install them together:
 
