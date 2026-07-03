@@ -96,9 +96,12 @@ just package-distro           # both of the above (every distro package)
 The app and the language packs build independently. The app build needs a
 compiler and the standalone CPython bundle; a language pack is only downloaded
 speech models, so it builds in a lighter container with no compiler and carries
-its own version from `pins.toml`, independent of the app release. CI builds all
-of them on every published GitHub Release (`.github/workflows/release.yml`) and
-attaches the archives to it.
+its own version from `pins.toml`, independent of the app release. They release
+on separate triggers too: a published GitHub Release builds and attaches the app
+packages (`.github/workflows/release.yml`), while pushing a
+`lang-<code>-<version>` tag builds that language pack and publishes it to its own
+release (`.github/workflows/release-lang.yml`, which fans the codes out over a
+matrix).
 
 ## Other distributions
 
