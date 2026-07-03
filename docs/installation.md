@@ -13,10 +13,9 @@ Tested on Fedora and NixOS.
 ## Quick install (prebuilt packages)
 
 The easiest path. Download the latest **app** package and a
-**[language pack](https://github.com/ctsdownloads/easyspeak/releases?q=lang)**
-from the [Releases page](https://github.com/ctsdownloads/easyspeak/releases)
-and install them together — just take the latest of each; the app and
-language-pack version numbers are independent and need not match:
+**[language pack][gh:releases:lang]** from the [Releases page][gh:releases] and
+install them together — just take the latest of each; the app and language-pack
+version numbers are independent and need not match:
 
 === "Debian / Ubuntu"
 
@@ -134,3 +133,6 @@ uv run --extra head-tracking easyspeak
 ```
 
 The `head-tracking` extra pulls in `sixdrepnet` and `opencv-python`.
+
+[gh:releases]: https://github.com/ctsdownloads/easyspeak/releases
+[gh:releases:lang]: https://github.com/ctsdownloads/easyspeak/releases?q=lang
