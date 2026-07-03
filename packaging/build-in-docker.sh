@@ -40,10 +40,13 @@ docker run --rm \
     nfpm package -f packaging/nfpm.yaml -p rpm -t /out
 
     # Language data packages (noarch). Add more languages here as they appear.
+    # Each pack carries its own version from pins.toml, independent of the app
+    # release VERSION above, so its content changes drive its version, not ours.
     for lang in en; do
       bash packaging/stage-lang.sh "$lang"
-      nfpm package -f "packaging/nfpm-lang-$lang.yaml" -p deb -t /out
-      nfpm package -f "packaging/nfpm-lang-$lang.yaml" -p rpm -t /out
+      LANG_VERSION=$(uv run --no-project python -c "import tomllib; print(tomllib.load(open(\"pins.toml\", \"rb\"))[\"lang\"][\"$lang\"][\"version\"])")
+      VERSION="$LANG_VERSION" nfpm package -f "packaging/nfpm-lang-$lang.yaml" -p deb -t /out
+      VERSION="$LANG_VERSION" nfpm package -f "packaging/nfpm-lang-$lang.yaml" -p rpm -t /out
     done
 
     chmod a+rw /out/*.deb /out/*.rpm
