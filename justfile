@@ -173,9 +173,14 @@ check-deb-package: (package-distro)
 check-rpm-package: (package-distro)
     bash tests/packaging/test_rpm.sh
 
-# Build the distro packages once (just dedupes package-distro), check deb and rpm
+# Build the language packages and verify their contents and independent version
 [group('release')]
-check-distro-packages: check-deb-package check-rpm-package
+check-lang-packages: (package-distro)
+    bash tests/packaging/test_lang.sh en
+
+# Build the distro packages once (just dedupes package-distro), check them all
+[group('release')]
+check-distro-packages: check-deb-package check-rpm-package check-lang-packages
 
 # Build the wheel and sdist, then verify their contents
 [group('release')]

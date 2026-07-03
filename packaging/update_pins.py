@@ -10,6 +10,10 @@ One policy per pin:
 - `toolchain.nfpm` — latest GitHub release.
 - `lang.*.whisper.revision` — the model repo's current snapshot commit.
 - `lang.*.piper.revision` — the voice repo's newest tag.
+- `lang.*.version` — the language pack's own release version. Not fetched from
+  upstream: its patch component is bumped whenever that pack's downloaded
+  content (its `.files` checksums) changes, so the version always tracks the
+  delivered models. Hand-edit it for a larger, semantic bump (e.g. a new voice).
 
 The `lang.*.<model>.files` checksum tables are regenerated from the pinned
 revision on every run (large LFS weights read their sha256 from the Hugging
@@ -197,6 +201,37 @@ def bump(text, key, old, new, label):
     return text.replace(f'{key} = "{old}"', f'{key} = "{new}"', 1)
 
 
+def content(lang):
+    """Return a language pack's file→checksum map: its actual shipped content.
+
+    Empty until the `.files` tables have been generated, so a newly added pack
+    (scalars only) reads as no content yet.
+    """
+    return {**lang["whisper"].get("files", {}), **lang["piper"].get("files", {})}
+
+
+def next_patch(version):
+    """Return `version` (X.Y.Z) with its patch component incremented."""
+    major, minor, patch = version.split(".")
+    return f"{major}.{minor}.{int(patch) + 1}"
+
+
+def bump_lang_version(text, code, old, new):
+    """Replace the `version` under the `[lang.<code>]` header, reporting it.
+
+    Anchored to the pack's own table header so packs that share a version number
+    don't collide, unlike the section-agnostic `bump`.
+    """
+    print(f"  bump  lang.{code}.version: {old} -> {new}")
+    header = re.escape(f"[lang.{code}]")
+    return re.sub(
+        rf'({header}\nversion = ")({re.escape(old)})(")',
+        rf"\g<1>{new}\g<3>",
+        text,
+        count=1,
+    )
+
+
 def main():
     """Refresh every pin and rewrite pins.toml when anything moved."""
     text = original = PINS.read_text(encoding="utf-8")
@@ -247,6 +282,20 @@ def main():
         files = piper_files(piper, new_tag)
         text = set_files(text, code, "piper", files)
         print(f"  files lang.{code}.piper.files ({len(files)} files)")
+
+    # A pack's version follows its content: bump it wherever the regenerated
+    # checksums differ from what was pinned, so a changed model always ships
+    # under a new version. A newly added pack (no `.files` yet) keeps its
+    # hand-set version — the first fill is not a change.
+    updated = tomllib.loads(text)["lang"]
+    for code, lang in pins["lang"].items():
+        was = content(lang)
+        if was and was != content(updated[code]):
+            text = bump_lang_version(
+                text, code, lang["version"], next_patch(lang["version"])
+            )
+        else:
+            print(f"  ok    lang.{code}.version = {lang['version']}")
 
     if text != original:
         PINS.write_text(text, encoding="utf-8")
