@@ -86,13 +86,19 @@ whether produced locally or in CI — handy on NixOS, where the bundle's standal
 CPython and manylinux wheels can't run on the host:
 
 ```bash
-just package-distro            # -> ./dist/ : app + language .deb and .rpm
-just package-distro 1.2.3      # set an explicit version
+just package-app              # -> ./dist/ : the easyspeak app .deb and .rpm
+just package-app 1.2.3        # set an explicit app version
+just package-lang             # -> ./dist/ : every easyspeak-lang-* .deb and .rpm
+just package-lang en          # ... or just the named pack(s)
+just package-distro           # both of the above (every distro package)
 ```
 
-This produces the `easyspeak` app packages and every `easyspeak-lang-*` data
-package. CI builds them automatically: `.github/workflows/release.yml` runs the same
-script on every published GitHub Release and attaches all archives to it.
+The app and the language packs build independently. The app build needs a
+compiler and the standalone CPython bundle; a language pack is only downloaded
+speech models, so it builds in a lighter container with no compiler and carries
+its own version from `pins.toml`, independent of the app release. CI builds all
+of them on every published GitHub Release (`.github/workflows/release.yml`) and
+attaches the archives to it.
 
 ## Other distributions
 

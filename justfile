@@ -165,20 +165,20 @@ docs-mike *args:
 
 # Build the Debian package and verify its contents
 [group('release')]
-check-deb-package: (package-distro)
+check-deb-package: (package-app)
     bash tests/packaging/test_deb.sh
 
 # Build the RedHat package and verify its contents
 [group('release')]
-check-rpm-package: (package-distro)
+check-rpm-package: (package-app)
     bash tests/packaging/test_rpm.sh
 
-# Build the language packages and verify their contents and independent version
+# Build every language pack and verify each carries its own version and models
 [group('release')]
-check-lang-packages: (package-distro)
-    bash tests/packaging/test_lang.sh en
+check-lang-packages: (package-lang)
+    bash tests/packaging/test_lang.sh
 
-# Build the distro packages once (just dedupes package-distro), check them all
+# Build the app once and each language pack once (just dedupes), check them all
 [group('release')]
 check-distro-packages: check-deb-package check-rpm-package check-lang-packages
 
@@ -232,7 +232,16 @@ stage-bundle:
 stage-lang code:
     bash packaging/stage-lang.sh {{ code }}
 
-# Build .deb and .rpm locally in a clean ubuntu container -> ./dist
+# Build the application .deb and .rpm in a clean ubuntu container -> ./dist
 [group('packaging')]
-package-distro version='0.0.0':
+package-app version='0.0.0':
     bash packaging/build-in-docker.sh {{ version }}
+
+# Build language packs' .deb and .rpm; no code builds all, e.g. `just package-lang en`
+[group('packaging')]
+package-lang *codes:
+    bash packaging/build-lang-in-docker.sh {{ codes }}
+
+# Build every distro package (app + all language packs) locally -> ./dist
+[group('packaging')]
+package-distro version='0.0.0': (package-app version) (package-lang)
