@@ -22,11 +22,10 @@ without re-downloading the runtime. See [Language](#language).
 
 ## Install
 
-Download the latest packages from the
-[Releases page](https://github.com/ctsdownloads/easyspeak/releases) — grab **both**
-the app and a [language pack](https://github.com/ctsdownloads/easyspeak/releases?q=lang) —
-and install them **together**. Just take the latest of each: a pack is a separate
-file (not auto-fetched from GitHub) and is versioned by its models, so the app and
+Download the latest packages from the [Releases page][gh:releases] — grab
+**both** the app and a [language pack][gh:releases:lang] — and install them
+**together**. Just take the latest of each: a pack is a separate file (not
+auto-fetched from GitHub) and is versioned by its models, so the app and
 language-pack version numbers are independent and need not match:
 
 === "Debian / Ubuntu"
@@ -144,3 +143,6 @@ to install a GNOME Shell extension into your home directory, and to spawn host
 binaries (`piper`, `qutebrowser`, `gnome-extensions`, `gsettings`, …). Granting all
 of that to a sandbox removes the confinement that is the whole point of those
 formats.
+
+[gh:releases]: https://github.com/ctsdownloads/easyspeak/releases
+[gh:releases:lang]: https://github.com/ctsdownloads/easyspeak/releases?q=lang
