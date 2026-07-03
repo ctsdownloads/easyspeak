@@ -51,6 +51,16 @@ def test_parse_args_verbose_and_quiet_are_mutually_exclusive():
         cli.parse_args(["-v", "-q"])
 
 
+def test_version_prints_program_and_version_then_exits(capsys):
+    """--version prints "easyspeak <version>" and exits without running the app."""
+    with pytest.raises(SystemExit) as exc:
+        cli.parse_args(["--version"])
+
+    assert exc.value.code == 0
+    out = capsys.readouterr().out
+    assert out == f"easyspeak {cli.app_version()}\n"
+
+
 def _run_then_log(argv, capsys, level, message):
     """Run the CLI with argv, emit one log record, return its formatted stderr.
 
