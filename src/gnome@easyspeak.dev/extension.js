@@ -26,7 +26,7 @@ const DBUS_INTERFACE = `
       <arg type="i" direction="in" name="width"/>
       <arg type="i" direction="in" name="height"/>
     </method>
-    
+
     <!-- Mouse control -->
     <method name="Click">
       <arg type="i" direction="in" name="x"/>
@@ -62,12 +62,12 @@ const DBUS_INTERFACE = `
       <arg type="s" direction="in" name="direction"/>
       <arg type="i" direction="in" name="clicks"/>
     </method>
-    
+
     <!-- Screenshot for OCR -->
     <method name="TakeScreenshot">
       <arg type="s" direction="out" name="path"/>
     </method>
-    
+
     <!-- Window management (focused window) -->
     <method name="CloseWindow"/>
     <method name="MinimizeWindow"/>
@@ -77,7 +77,7 @@ const DBUS_INTERFACE = `
     <method name="UnfullscreenWindow"/>
     <method name="TileLeft"/>
     <method name="TileRight"/>
-    
+
     <!-- Window queries and focus -->
     <method name="GetWindows">
       <arg type="s" direction="out" name="json"/>
@@ -86,7 +86,7 @@ const DBUS_INTERFACE = `
       <arg type="s" direction="in" name="title"/>
       <arg type="b" direction="out" name="success"/>
     </method>
-    
+
     <!-- Workspace control -->
     <method name="SwitchWorkspace">
       <arg type="i" direction="in" name="index"/>
@@ -99,7 +99,7 @@ const DBUS_INTERFACE = `
     <method name="GetCurrentWorkspace">
       <arg type="i" direction="out" name="index"/>
     </method>
-    
+
     <!-- Screen info -->
     <method name="GetScreenSize">
       <arg type="i" direction="out" name="width"/>
@@ -165,7 +165,7 @@ export default class EasySpeakGridExtension extends Extension {
             Show: () => this._grid.show(),
             Hide: () => this._grid.hide(),
             Update: (x, y, width, height) => this._grid.update(x, y, width, height),
-            
+
             // Mouse
             Click: (x, y) => this._grid.click(x, y),
             DoubleClick: (x, y) => this._grid.doubleClick(x, y),
@@ -175,10 +175,10 @@ export default class EasySpeakGridExtension extends Extension {
             StartDrag: (x, y) => this._grid.startDrag(x, y),
             EndDrag: (x, y) => this._grid.endDrag(x, y),
             Scroll: (x, y, direction, clicks) => this._grid.scroll(x, y, direction, clicks),
-            
+
             // Screenshot
             TakeScreenshot: () => this._screenMgr.takeScreenshotSync(),
-            
+
             // Window management
             CloseWindow: () => this._winMgr.closeWindow(),
             MinimizeWindow: () => this._winMgr.minimizeWindow(),
@@ -188,18 +188,18 @@ export default class EasySpeakGridExtension extends Extension {
             UnfullscreenWindow: () => this._winMgr.unfullscreenWindow(),
             TileLeft: () => this._winMgr.tileLeft(),
             TileRight: () => this._winMgr.tileRight(),
-            
+
             // Window queries
             GetWindows: () => this._winMgr.getWindows(),
             FocusWindow: (title) => this._winMgr.focusWindow(title),
-            
+
             // Workspaces
             SwitchWorkspace: (index) => this._winMgr.switchWorkspace(index),
             NextWorkspace: () => this._winMgr.nextWorkspace(),
             PrevWorkspace: () => this._winMgr.prevWorkspace(),
             GetWorkspaceCount: () => this._winMgr.getWorkspaceCount(),
             GetCurrentWorkspace: () => this._winMgr.getCurrentWorkspace(),
-            
+
             // Screen info
             GetScreenSize: () => this._grid.getScreenSize(),
 

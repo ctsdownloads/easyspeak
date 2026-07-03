@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-rpm=$(ls -t dist/easyspeak-*.rpm | grep -v -- '-lang-' | head -1)
+rpm=$(ls -t dist/easyspeak-*.x86_64.rpm | head -1)
 files=$(rpm --query --list --package "$rpm" 2>/dev/null)
 
 has() { grep -q "$1" <<<"$files" || { echo "  MISSING: $1" >&2; exit 1; }; }

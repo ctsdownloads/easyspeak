@@ -17,6 +17,7 @@ jobs:
         - format --diff
         - lint --diff
         - lint-yaml
+        - precommit
         - types
         - package
         - check-desktop-integration

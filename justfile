@@ -28,9 +28,9 @@ update-pins:
     uv run --no-project --with packaging python packaging/update_pins.py
     git diff --color --exit-code pins.toml
 
-# Run all code style checks (format, lint, js, yaml)
+# Run all code style checks (format, lint, js, yaml, pre-commit hooks)
 [group('codestyle')]
-codestyle: format lint lint-js lint-yaml
+codestyle: format lint lint-js lint-yaml precommit
 
 # Check Python code style (use -- to apply, --diff to preview)
 [group('codestyle')]
@@ -51,6 +51,11 @@ lint-js *args:
 [group('codestyle')]
 lint-yaml *args:
     git ls-files '*.yml' '*.yaml' | xargs uvx yamllint -s {{ args }}
+
+# Run the prek pre-commit hooks (file hygiene + shellcheck) over all files
+[group('codestyle')]
+precommit *args=('run --all-files'):
+    uvx prek {{ args }}
 
 # Static type checking (use --pretty for error details)
 [group('safety')]
