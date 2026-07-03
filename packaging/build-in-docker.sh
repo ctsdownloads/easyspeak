@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Build the EasySpeak .deb and .rpm locally inside a clean ubuntu:24.04 container
-# (mirrors the GitHub `release.yml` runner). Handy on NixOS, where the bundle's
-# standalone CPython/manylinux wheels can't run on the host. Outputs to ./dist.
+# Build the EasySpeak application .deb and .rpm locally inside a clean
+# ubuntu:24.04 container (mirrors the GitHub `release.yml` runner). Handy on
+# NixOS, where the bundle's standalone CPython/manylinux wheels can't run on the
+# host. Language packs build separately, without a compiler or CPython bundle —
+# see packaging/build-lang-in-docker.sh. Outputs to ./dist.
 #
 #   packaging/build-in-docker.sh [VERSION]   (default VERSION: 0.0.0)
 set -euo pipefail
@@ -34,23 +36,14 @@ docker run --rm \
 
     cp -r /src /build && cd /build
 
-    # Application package (amd64).
+    # Application package (amd64). Speech models ship as separate noarch
+    # easyspeak-lang-* packages — see packaging/build-lang-in-docker.sh.
     PREFIX=/opt/easyspeak bash packaging/stage-bundle.sh
     nfpm package -f packaging/nfpm.yaml -p deb -t /out
     nfpm package -f packaging/nfpm.yaml -p rpm -t /out
 
-    # Language data packages (noarch). Add more languages here as they appear.
-    # Each pack carries its own version from pins.toml, independent of the app
-    # release VERSION above, so its content changes drive its version, not ours.
-    for lang in en; do
-      bash packaging/stage-lang.sh "$lang"
-      LANG_VERSION=$(uv run --no-project python -c "import tomllib; print(tomllib.load(open(\"pins.toml\", \"rb\"))[\"lang\"][\"$lang\"][\"version\"])")
-      VERSION="$LANG_VERSION" nfpm package -f "packaging/nfpm-lang-$lang.yaml" -p deb -t /out
-      VERSION="$LANG_VERSION" nfpm package -f "packaging/nfpm-lang-$lang.yaml" -p rpm -t /out
-    done
-
-    chmod a+rw /out/*.deb /out/*.rpm
+    chmod a+rw /out/easyspeak_*_amd64.deb /out/easyspeak-*.x86_64.rpm
   '
 
 echo "built:"
-ls -lh "$REPO_ROOT"/dist/*.deb "$REPO_ROOT"/dist/*.rpm
+ls -lh "$REPO_ROOT"/dist/easyspeak_*_amd64.deb "$REPO_ROOT"/dist/easyspeak-*.x86_64.rpm

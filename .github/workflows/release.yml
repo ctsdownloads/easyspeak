@@ -36,12 +36,12 @@ jobs:
       contents: write   # upload assets to the release
     steps:
     - uses: actions/checkout@v6
-    - name: Build .deb and .rpm
-      # Reuses the same containerised build as `just package-distro`, so local
-      # and CI builds are byte-for-byte the same path. Strips a leading "v".
+    - name: Build app packages
       run: |
         tag='${{ github.event.release.tag_name }}'
         bash packaging/build-in-docker.sh "${tag#v}"
+    - name: Build language packs
+      run: bash packaging/build-lang-in-docker.sh
     - name: Attach packages to the release
       env:
         GH_TOKEN: ${{ github.token }}
