@@ -918,7 +918,7 @@ bundled CPython, the build-container image, and nfpm. Its consumers:</p>
   <code>sha256sum</code>, the Whisper model by its pinned revision.</li>
 <li><code>packaging/stage-bundle.sh</code> — materialises the pinned standalone CPython.</li>
 <li><code>packaging/build-in-docker.sh</code> — pulls the pinned build-container image and
-  nfpm release.</li>
+  nfpm release, and reads each language pack's <code>version</code> to stamp its package.</li>
 </ul>
 <p>The per-file <code>.files</code> tables are generated, not hand-written — they also let an
 out-of-tree Nix package pin each file up front instead of hashing whole repos.
@@ -926,16 +926,20 @@ out-of-tree Nix package pin each file up front instead of hashing whole repos.
 each run — large LFS weights read their sha256 from the Hugging Face tree
 listing, so it stays cheap — so any edit is picked up with no extra step:</p>
 <ul>
-<li>Add a language by writing only its scalar fields — <code>[lang.&lt;code&gt;.whisper]</code>
-  (<code>model</code>/<code>repo</code>/<code>revision</code>) and <code>[lang.&lt;code&gt;.piper]</code>
-  (<code>voice</code>/<code>repo</code>/<code>revision</code>/<code>path</code>) — then run <code>just update-pins</code> to bump the
-  revisions and fill both <code>.files</code> tables.</li>
+<li>Add a language by writing its <code>[lang.&lt;code&gt;]</code> <code>version</code> and the scalar fields
+  of <code>[lang.&lt;code&gt;.whisper]</code> (<code>model</code>/<code>repo</code>/<code>revision</code>) and
+  <code>[lang.&lt;code&gt;.piper]</code> (<code>voice</code>/<code>repo</code>/<code>revision</code>/<code>path</code>) — then run
+  <code>just update-pins</code> to bump the revisions and fill both <code>.files</code> tables.</li>
 <li>Change a voice or model in place by editing its scalar fields and running
-  <code>just update-pins</code>; the <code>.files</code> table follows automatically.</li>
+  <code>just update-pins</code>; the <code>.files</code> table and the pack <code>version</code> both follow
+  automatically.</li>
 </ul>
-<p>The <code>easyspeak-lang-*</code> packages carry the app's release version, so a newer
-package version does not imply newer model content — the model content changes
-only when <code>pins.toml</code> does.</p>
+<p>Each <code>easyspeak-lang-*</code> package carries its own <code>[lang.&lt;code&gt;].version</code>,
+independent of the application's release version. <code>just update-pins</code> bumps its
+patch component whenever that language's pinned content changes, so the version
+always tracks the delivered models (hand-edit it for a larger, semantic bump).
+The app package only <code>recommends</code> the language pack by name, without a version
+constraint, so the two release on their own cadence.</p>
 <p><code>just update-pins</code> bumps every entry to its current upstream version and
 recomputes checksums; the build container advances only when its LTS leaves
 standard support, since its glibc is the packages' compatibility floor.
