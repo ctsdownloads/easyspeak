@@ -1112,9 +1112,12 @@ CPython and manylinux wheels can't run on the host:</p>
 <p>The app and the language packs build independently. The app build needs a
 compiler and the standalone CPython bundle; a language pack is only downloaded
 speech models, so it builds in a lighter container with no compiler and carries
-its own version from <code>pins.toml</code>, independent of the app release. CI builds all
-of them on every published GitHub Release (<code>.github/workflows/release.yml</code>) and
-attaches the archives to it.</p>
+its own version from <code>pins.toml</code>, independent of the app release. They release
+on separate triggers too: a published GitHub Release builds and attaches the app
+packages (<code>.github/workflows/release.yml</code>), while pushing a
+<code>lang-&lt;code&gt;-&lt;version&gt;</code> tag builds that language pack and publishes it to its own
+release (<code>.github/workflows/release-lang.yml</code>, which fans the codes out over a
+matrix).</p>
 <h2 id="other-distributions">Other distributions<a class="headerlink" href="#other-distributions" title="Permanent link">&para;</a></h2>
 <p>These formats are maintained <strong>outside this repository</strong>. The notes below capture
 what each one needs.</p>

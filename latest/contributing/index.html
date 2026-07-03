@@ -771,6 +771,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Packaging &amp; Version Numbers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#language-packs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Language packs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -920,6 +937,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Packaging &amp; Version Numbers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#language-packs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Language packs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1016,6 +1050,20 @@ latest Git tag and the distance from that tag in number of commits.</p>
    message.</li>
 <li>Finally, press <kbd>Publish Release</kbd> (release label "Latest").</li>
 </ol>
+<p>Publishing a release builds the <code>easyspeak</code> application packages and attaches
+them; the <code>easyspeak-lang-*</code> data packages release separately, on their own
+cadence.</p>
+<h3 id="language-packs">Language packs<a class="headerlink" href="#language-packs" title="Permanent link">&para;</a></h3>
+<p>A language pack changes only when its models in <code>pins.toml</code> do, so it is
+versioned and released independently of the application. Its <code>[lang.&lt;code&gt;]</code>
+<code>version</code> reflects that pack's pinned content and is bumped by <code>just update-pins</code>
+whenever the models change (review it in <code>git diff pins.toml</code>). To release the
+pack, push a matching <code>lang-&lt;code&gt;-&lt;version&gt;</code> tag:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="go">git tag lang-en-1.0.0</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="go">git push origin lang-en-1.0.0</span>
+</code></pre></div>
+<p>This runs <code>release-lang.yml</code>, which verifies the tag's version against
+<code>pins.toml</code>, builds the pack, and publishes it to a <code>lang-en-1.0.0</code> release.</p>
 
 
 
