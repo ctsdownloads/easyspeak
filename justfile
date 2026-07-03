@@ -122,25 +122,11 @@ check-docs: lint-docstrings lint-md check-links
 # Check built docs and README/CONTRIBUTING for dead external links (network)
 [group('docs')]
 check-links *args: docs
-    # README/CONTRIBUTING are GitHub-facing; render to HTML (linkchecker can't parse
-    # Markdown) so their links are checked too. Outside site/ so a deploy ignores them.
+    # linkchecker can't parse Markdown, so render README/CONTRIBUTING to HTML.
     mkdir -p build/linkcheck
     uvx --from markdown markdown_py README.md > build/linkcheck/readme.html
     uvx --from markdown markdown_py CONTRIBUTING.md > build/linkcheck/contributing.html
-    # No flag drops linkchecker's copyright banner; omit the 'intro' output part instead.
-    printf '[text]\nparts=url,parenturl,realurl,result,warning,info,stats,outro\n' > build/.linkcheckrc
-    # Skips: 404 page (absolute site_url links 404 on disk), the site's own /latest/
-    # pages (the local build IS /latest/, checked on disk; canonicals of new pages
-    # 404 online until the next deploy), bencher.dev (bot 403s), GitHub /compare
-    # (404s until the just-pushed tag propagates) and /pull links (permanent, never
-    # outdate); custom UA dodges freedesktop's WAF (418 to "Mozilla").
-    uvx linkchecker --config build/.linkcheckrc --check-extern --no-warnings \
-        --ignore-url '/404\.html' \
-        --ignore-url 'easyspeak\.dev/latest/' \
-        --ignore-url 'bencher\.dev' \
-        --ignore-url 'github\.com/.*/compare/' \
-        --ignore-url 'github\.com/.*/pull/' \
-        --user-agent LinkChecker {{ args }} \
+    uvx linkchecker --config linkcheckerrc {{ args }} \
         site/index.html build/linkcheck/readme.html build/linkcheck/contributing.html
 
 # Guard docstrings against reST markup (mkdocstrings renders Markdown, not reST)
