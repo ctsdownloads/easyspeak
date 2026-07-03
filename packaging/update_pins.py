@@ -232,13 +232,8 @@ def bump_lang_version(text, code, old, new):
     )
 
 
-def main():
-    """Refresh every pin and rewrite pins.toml when anything moved."""
-    text = original = PINS.read_text(encoding="utf-8")
-    pins = tomllib.loads(text)
-    pyproject = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
-    requires_python = pyproject["project"]["requires-python"]
-
+def update_toolchain(text, pins, requires_python):
+    """Bump the bundled CPython, build-container image, and nfpm pins in `text`."""
     text = bump(
         text,
         "bundle",
@@ -253,40 +248,45 @@ def main():
         supported_ubuntu_image(pins["toolchain"]["ubuntu_image"]),
         "toolchain.ubuntu_image",
     )
-    text = bump(
+    return bump(
         text, "nfpm", pins["toolchain"]["nfpm"], latest_nfpm(), "toolchain.nfpm"
     )
 
-    for code, lang in pins["lang"].items():
-        whisper, piper = lang["whisper"], lang["piper"]
-        new_revision = whisper_revision(whisper["repo"])
-        text = bump(
-            text,
-            "revision",
-            whisper["revision"],
-            new_revision,
-            f"lang.{code}.whisper.revision",
-        )
-        files = whisper_files(whisper["repo"], new_revision)
-        text = set_files(text, code, "whisper", files)
-        print(f"  files lang.{code}.whisper.files ({len(files)} files)")
 
-        new_tag = latest_piper_tag(piper["repo"])
-        text = bump(
-            text,
-            "revision",
-            piper["revision"],
-            new_tag,
-            f"lang.{code}.piper.revision",
-        )
-        files = piper_files(piper, new_tag)
-        text = set_files(text, code, "piper", files)
-        print(f"  files lang.{code}.piper.files ({len(files)} files)")
+def update_language(text, code, lang):
+    """Bump one language pack's Whisper and Piper revisions and refill its `.files`."""
+    whisper, piper = lang["whisper"], lang["piper"]
+    new_revision = whisper_revision(whisper["repo"])
+    text = bump(
+        text,
+        "revision",
+        whisper["revision"],
+        new_revision,
+        f"lang.{code}.whisper.revision",
+    )
+    files = whisper_files(whisper["repo"], new_revision)
+    text = set_files(text, code, "whisper", files)
+    print(f"  files lang.{code}.whisper.files ({len(files)} files)")
 
-    # A pack's version follows its content: bump it wherever the regenerated
-    # checksums differ from what was pinned, so a changed model always ships
-    # under a new version. A newly added pack (no `.files` yet) keeps its
-    # hand-set version — the first fill is not a change.
+    new_tag = latest_piper_tag(piper["repo"])
+    text = bump(
+        text, "revision", piper["revision"], new_tag, f"lang.{code}.piper.revision"
+    )
+    files = piper_files(piper, new_tag)
+    text = set_files(text, code, "piper", files)
+    print(f"  files lang.{code}.piper.files ({len(files)} files)")
+    return text
+
+
+def bump_versions(text, pins):
+    """Bump each language pack's version to follow its regenerated content.
+
+    A pack's version tracks its models: where the refreshed `.files` checksums in
+    `text` differ from what `pins` held, the patch component is bumped, so a
+    changed model always ships under a new version. A newly added pack (no
+    `.files` yet) keeps its hand-set version — the first checksum fill is not a
+    change.
+    """
     updated = tomllib.loads(text)["lang"]
     for code, lang in pins["lang"].items():
         was = content(lang)
@@ -296,6 +296,19 @@ def main():
             )
         else:
             print(f"  ok    lang.{code}.version = {lang['version']}")
+    return text
+
+
+def main():
+    """Refresh every pin and rewrite pins.toml when anything moved."""
+    text = original = PINS.read_text(encoding="utf-8")
+    pins = tomllib.loads(text)
+    pyproject = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+
+    text = update_toolchain(text, pins, pyproject["project"]["requires-python"])
+    for code, lang in pins["lang"].items():
+        text = update_language(text, code, lang)
+    text = bump_versions(text, pins)
 
     if text != original:
         PINS.write_text(text, encoding="utf-8")
