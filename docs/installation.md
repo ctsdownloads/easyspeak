@@ -15,7 +15,8 @@ Tested on Fedora and NixOS.
 The easiest path. Download the latest **app** package and a
 **[language pack](https://github.com/ctsdownloads/easyspeak/releases?q=lang)**
 from the [Releases page](https://github.com/ctsdownloads/easyspeak/releases)
-and install them together:
+and install them together — just take the latest of each; the app and
+language-pack version numbers are independent and need not match:
 
 === "Debian / Ubuntu"
 
