@@ -10,6 +10,7 @@ files and exit. All `EASYSPEAK_*` variables are listed in [`core.config`][core.c
 import argparse
 
 from . import log
+from .about import app_version
 
 
 def parse_args(argv=None):
@@ -40,6 +41,12 @@ def parse_args(argv=None):
         "--preview",
         choices=config_items,
         help="print the file content that would be configured and exit",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {app_version()}",
+        help="show the installed version and exit",
     )
     args = parser.parse_args(argv)
 
