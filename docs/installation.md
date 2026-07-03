@@ -68,34 +68,7 @@ sudo dnf install \
 window. They ship with any GNOME desktop, so they're usually already present;
 they're listed here for the sake of minimal or non-GNOME installs.
 
-### 2. Python packages
-
-The simplest path is [uv](https://docs.astral.sh/uv/), which transparently
-creates and updates a virtual environment and runs EasySpeak from in there:
-
-```bash
-uv run easyspeak
-```
-
-Prefer plain `pip`? Create a virtual environment first — most distributions ship
-their system Python as [externally managed](https://peps.python.org/pep-0668/),
-so installing into it directly fails:
-
-```bash
-python3 -m venv ~/easyspeak-venv
-source ~/easyspeak-venv/bin/activate
-pip install faster-whisper pyopen-wakeword numpy pyaudio
-cd ~/easyspeak
-pip install -e .
-```
-
-A Python-only installation has no bundled speech-recognition model, and EasySpeak
-stays offline by default ([`EASYSPEAK_OFFLINE=strict`](usage.md#configuration)),
-so on first run it reports the model as missing. Set `EASYSPEAK_OFFLINE=relaxed`
-to have it fetch `base.en` (about 140 MB) from Hugging Face for you, or install a
-language pack.
-
-### 3. Piper TTS
+### 2. Piper TTS
 
 ```bash
 mkdir -p ~/.local/bin
@@ -115,24 +88,63 @@ wget -O en_US-amy-medium.onnx.json \
   "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx.json"
 ```
 
-### 4. Clone the repository
+### 3. Clone the repository
 
 ```bash
 git clone https://github.com/ctsdownloads/easyspeak.git ~/easyspeak
 cd ~/easyspeak
 ```
 
+### 4. Python packages
+
+The simplest path is [uv][uv]. Run it from the cloned repository and it does
+everything in one step — it creates and updates the virtual environment, installs
+every dependency declared in `pyproject.toml`, and launches EasySpeak from inside
+that environment. There's no separate "install the requirements" command; the
+first `uv run` sets it all up for you:
+
+```bash
+cd ~/easyspeak
+uv run easyspeak
+```
+
+Prefer plain `pip`? Create a virtual environment first — most distributions ship
+their system Python as [externally managed][pep-668], so installing into it
+directly fails:
+
+```bash
+python3 -m venv ~/easyspeak-venv
+source ~/easyspeak-venv/bin/activate
+cd ~/easyspeak
+pip install -e .
+easyspeak
+```
+
+A Python-only installation has no bundled speech-recognition model, and EasySpeak
+stays offline by default ([`EASYSPEAK_OFFLINE=strict`](usage.md#configuration)),
+so on first run it reports the model as missing. Set `EASYSPEAK_OFFLINE=relaxed`
+to have it fetch `base.en` (about 140 MB) from Hugging Face for you, or install a
+[language pack][gh:releases:lang].
+
 ### Head tracking (optional)
 
-Head tracking requires a webcam and additional dependencies:
+Head tracking requires a webcam and additional dependencies. With uv, add the
+extra to the run command and it pulls them in for you:
+
+```bash
+uv run --extra head-tracking easyspeak
+```
+
+With a plain `pip` virtual environment, install the extra before running
+`easyspeak`:
 
 ```bash
 pip install '.[head-tracking]'
-# or, with uv
-uv run --extra head-tracking easyspeak
 ```
 
 The `head-tracking` extra pulls in `sixdrepnet` and `opencv-python`.
 
 [gh:releases]: https://github.com/ctsdownloads/easyspeak/releases
 [gh:releases:lang]: https://github.com/ctsdownloads/easyspeak/releases?q=lang
+[pep-668]: https://peps.python.org/pep-0668/
+[uv]: https://docs.astral.sh/uv/
