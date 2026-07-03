@@ -103,6 +103,26 @@ We create releases by drafting a new release from the
    message.
 8. Finally, press <kbd>Publish Release</kbd> (release label "Latest").
 
+Publishing a release builds the `easyspeak` application packages and attaches
+them; the `easyspeak-lang-*` data packages release separately, on their own
+cadence.
+
+### Language packs
+
+A language pack changes only when its models in `pins.toml` do, so it is
+versioned and released independently of the application. Its `[lang.<code>]`
+`version` reflects that pack's pinned content and is bumped by `just update-pins`
+whenever the models change (review it in `git diff pins.toml`). To release the
+pack, push a matching `lang-<code>-<version>` tag:
+
+```console
+git tag lang-en-1.0.0
+git push origin lang-en-1.0.0
+```
+
+This runs `release-lang.yml`, which verifies the tag's version against
+`pins.toml`, builds the pack, and publishes it to a `lang-en-1.0.0` release.
+
 [gh:source]: https://github.com/ctsdownloads/easyspeak
 [gh:releases]: https://github.com/ctsdownloads/easyspeak/releases
 [gh:issues]: https://github.com/ctsdownloads/easyspeak/issues
