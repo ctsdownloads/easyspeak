@@ -1,0 +1,7 @@
+[general]
+ignore=body-is-missing
+regex-style-search=True
+
+[ignore-by-title]
+regex=^Update outdated package dependencies
+ignore=body-max-line-length
