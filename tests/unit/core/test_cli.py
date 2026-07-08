@@ -51,14 +51,14 @@ def test_parse_args_verbose_and_quiet_are_mutually_exclusive():
         cli.parse_args(["-v", "-q"])
 
 
-def test_version_prints_program_and_version_then_exits(capsys):
-    """--version prints "easyspeak <version>" and exits without running the app."""
+@patch("easyspeak.core.cli.app_version", return_value="1.2.3")
+def test_version_prints_program_and_version_then_exits(_app_version, capsys):
+    """--version prints "easyspeak <version>" and exits 0 without running the app."""
     with pytest.raises(SystemExit) as exc:
         cli.parse_args(["--version"])
 
     assert exc.value.code == 0
-    out = capsys.readouterr().out
-    assert out == f"easyspeak {cli.app_version()}\n"
+    assert capsys.readouterr().out == "easyspeak 1.2.3\n"
 
 
 def _run_then_log(argv, capsys, level, message):
