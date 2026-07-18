@@ -35,6 +35,7 @@ runs:
   - name: Track benchmarks with Bencher
     shell: bash
     env:
+      EASYSPEAK_OFFLINE: relaxed
       FORCE_COLOR: '1'
       PY_COLORS: '1'
     run: |
