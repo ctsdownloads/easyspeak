@@ -566,10 +566,32 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dictation-types-nothing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dictation types nothing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#browser-plugin-link-numbers-dont-work" class="md-nav__link">
     <span class="md-ellipsis">
       
         Browser plugin: link numbers don't work
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#browser-hints-or-scrolling-stop-working-after-going-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Browser: hints or scrolling stop working after going back
       
     </span>
   </a>
@@ -603,6 +625,17 @@
     <span class="md-ellipsis">
       
         Commands misheard
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#everything-takes-several-seconds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Everything takes several seconds
       
     </span>
   </a>
@@ -911,10 +944,32 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dictation-types-nothing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dictation types nothing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#browser-plugin-link-numbers-dont-work" class="md-nav__link">
     <span class="md-ellipsis">
       
         Browser plugin: link numbers don't work
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#browser-hints-or-scrolling-stop-working-after-going-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Browser: hints or scrolling stop working after going back
       
     </span>
   </a>
@@ -948,6 +1003,17 @@
     <span class="md-ellipsis">
       
         Commands misheard
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#everything-takes-several-seconds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Everything takes several seconds
       
     </span>
   </a>
@@ -1021,13 +1087,49 @@ desktop), run it manually:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>gsettings<span class="w"> </span><span class="nb">set</span><span class="w"> </span>org.gnome.desktop.interface<span class="w"> </span>toolkit-accessibility<span class="w"> </span><span class="nb">true</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1"># Log out and back in</span>
 </code></pre></div>
+<h2 id="dictation-types-nothing">Dictation types nothing<a class="headerlink" href="#dictation-types-nothing" title="Permanent link">&para;</a></h2>
+<p>Dictation places text by putting it on the clipboard and sending a paste
+keystroke. Install the clipboard tool for your session:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>wl-clipboard<span class="w">   </span><span class="c1"># Wayland; use xclip on X11</span>
+</code></pre></div>
+<p>Without it, insertion falls back to the accessibility bridge, which
+Chromium-based applications (qutebrowser, Electron apps) accept and silently
+discard — the log says so:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>No clipboard tool found, so dictation is falling back to AT-SPI, ...
+</code></pre></div>
+<p>If you hear <strong>"No text field focused"</strong>, click into a text field first, or use
+the browser's <code>numbers</code> command and pick the hint on the field you want.</p>
 <h2 id="browser-plugin-link-numbers-dont-work">Browser plugin: link numbers don't work<a class="headerlink" href="#browser-plugin-link-numbers-dont-work" title="Permanent link">&para;</a></h2>
-<p>EasySpeak appends two required lines to <code>~/.config/qutebrowser/config.py</code> on
-first run (you'll see a <code>browser: wrote ...</code> or <code>browser: updated ...</code> message).
-If you see a <code>browser: note: ... is read-only</code> or a similar error instead, add
-these lines to the config module yourself:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">config</span><span class="o">.</span><span class="n">load_autoconfig</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">c</span><span class="o">.</span><span class="n">hints</span><span class="o">.</span><span class="n">chars</span> <span class="o">=</span> <span class="s1">&#39;0123456789&#39;</span>
+<p>EasySpeak appends the lines below to <code>~/.config/qutebrowser/config.py</code> on first
+run (you'll see a <code>browser: wrote ...</code> or <code>browser: updated ...</code> message). If you
+see a <code>browser: note: ... is read-only</code> or a similar error instead, add them to
+the config module yourself:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">config</span><span class="o">.</span><span class="n">load_autoconfig</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">c</span><span class="o">.</span><span class="n">hints</span><span class="o">.</span><span class="n">chars</span> <span class="o">=</span> <span class="s2">&quot;0123456789&quot;</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">c</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">tls</span><span class="o">.</span><span class="n">certificate_errors</span> <span class="o">=</span> <span class="s2">&quot;ask-block-thirdparty&quot;</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">c</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="n">c</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">geolocation</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="n">c</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">autoplay</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">c</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">blocking</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s2">&quot;hosts&quot;</span>
+</code></pre></div>
+<p>The last four answer prompts and block distractions that voice cannot dismiss: a
+modal "allow notifications?" or expired-certificate dialog stops hands-free
+browsing dead, and ad overlays are numbered like any other element, so they take
+hints away from the page underneath.</p>
+<p>Set <code>c.content.blocking.method = 'both'</code> for Brave's element-level blocking,
+which is what removes overlays rather than just ad domains. It needs
+<code>python3-adblock</code> installed — EasySpeak checks for it and writes whichever value
+works, so installing the package is enough. <strong>Restart qutebrowser</strong> after any
+config change.</p>
+<h2 id="browser-hints-or-scrolling-stop-working-after-going-back">Browser: hints or scrolling stop working after going back<a class="headerlink" href="#browser-hints-or-scrolling-stop-working-after-going-back" title="Permanent link">&para;</a></h2>
+<p>Fixed automatically, but worth knowing why the page reloads. qutebrowser runs
+JavaScript in the page to find hintable elements and to scroll the container
+under the cursor. Going back restores the page from cache without a load, so that
+JavaScript is never re-established — hinting fails with "Unknown error while
+getting elements" and scrolling silently does nothing.</p>
+<p>EasySpeak reloads the page before the next hint or scroll after a history
+navigation, which costs your scroll position. You'll hear "Reloading" and see:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>↻ Reloading: page scripts don&#39;t survive a history navigation
 </code></pre></div>
 <h2 id="wake-word-not-detecting">Wake word not detecting<a class="headerlink" href="#wake-word-not-detecting" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1036,19 +1138,31 @@ these lines to the config module yourself:</p>
 </ul>
 <h2 id="wake-word-triggers-multiple-times">Wake word triggers multiple times<a class="headerlink" href="#wake-word-triggers-multiple-times" title="Permanent link">&para;</a></h2>
 <p>Mic gain too high. Lower the capture level:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>alsamixer
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="c1"># Press F6 to select your mic device</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="c1"># Press Tab to switch to Capture</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># Lower to ~70</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>alsamixer
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="c1"># Press F6 to select your mic device</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="c1"># Press Tab to switch to Capture</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Lower to ~70</span>
 </code></pre></div>
 <h2 id="commands-misheard">Commands misheard<a class="headerlink" href="#commands-misheard" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Adjust <code>SILENCE_THRESHOLD</code> — see <a class="autorefs autorefs-internal" title="            core.config" href="../reference/core/#core.config"><code>core.config</code></a></li>
 <li>Speak clearly after the beep</li>
+<li>Check the noise floor printed at startup: <code>Room noise floor 412; silence
+  threshold 1030</code>. The threshold is measured from the room each time, so stay
+  quiet for the first second after launch. Override it with
+  <code>EASYSPEAK_SILENCE_THRESHOLD</code> — see <a href="../usage/#configuration">Configuration</a></li>
 </ul>
+<h2 id="everything-takes-several-seconds">Everything takes several seconds<a class="headerlink" href="#everything-takes-several-seconds" title="Permanent link">&para;</a></h2>
+<p>Run with <code>-v</code> and compare the two numbers on this line:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>transcribed 4.2s of audio in 0.45s
+</code></pre></div>
+<p>The second number is the transcription. If it's small and the first is large,
+recording isn't stopping when you do: silence isn't being detected, so every
+utterance runs to its time cap. Check the noise floor above — if the room is
+loud enough that speech and silence look alike, move the microphone closer or set
+<code>EASYSPEAK_SILENCE_THRESHOLD</code> by hand.</p>
 <h2 id="piper-permission-denied">Piper permission denied<a class="headerlink" href="#piper-permission-denied" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>~/.local/bin/piper/piper
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>chmod<span class="w"> </span>+x<span class="w"> </span>~/.local/bin/piper/espeak-ng
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>~/.local/bin/piper/piper
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>chmod<span class="w"> </span>+x<span class="w"> </span>~/.local/bin/piper/espeak-ng
 </code></pre></div>
 <h2 id="pip-install-fails-with-pyavcython-errors">pip install fails with PyAV/Cython errors<a class="headerlink" href="#pip-install-fails-with-pyavcython-errors" title="Permanent link">&para;</a></h2>
 <p>You're on an unsupported Python version. EasySpeak is tested against Python 3.10,

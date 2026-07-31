@@ -578,6 +578,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#knowing-which-mode-is-listening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowing which mode is listening
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#general" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -988,6 +999,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#knowing-which-mode-is-listening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowing which mode is listening
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#general" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1186,12 +1208,20 @@ until you're over your target, then <strong>"click"</strong>.</p>
 <td>Close current tab</td>
 </tr>
 <tr>
-<td>tab left/right</td>
-<td>Switch tabs</td>
+<td>next tab / switch tab</td>
+<td>Go to the next tab</td>
+</tr>
+<tr>
+<td>last tab / previous tab</td>
+<td>Go to the previous tab</td>
 </tr>
 <tr>
 <td>tab [number]</td>
-<td>Jump to specific tab</td>
+<td>Switch to a tab by number</td>
+</tr>
+<tr>
+<td>close tab [number]</td>
+<td>Close a tab by number</td>
 </tr>
 <tr>
 <td>undo tab</td>
@@ -1243,7 +1273,12 @@ until you're over your target, then <strong>"click"</strong>.</p>
 </tr>
 </tbody>
 </table>
+<p>Commands may start with a filler word — "and scroll down", "so back" — which is
+stripped before matching, since Whisper adds them.</p>
 <h2 id="dictation">Dictation<a class="headerlink" href="#dictation" title="Permanent link">&para;</a></h2>
+<p>Dictation places text by pasting it, which needs <code>wl-clipboard</code> (Wayland) or
+<code>xclip</code> (X11) installed, and needs a text field focused. In the browser, use
+<code>numbers</code> and pick the hint on the field first.</p>
 <table>
 <thead>
 <tr>
@@ -1422,7 +1457,7 @@ system's default terminal, whichever one that is, rather than a fixed app.</p>
 </thead>
 <tbody>
 <tr>
-<td>play</td>
+<td>play / resume</td>
 <td>Resume playback</td>
 </tr>
 <tr>
@@ -1434,7 +1469,7 @@ system's default terminal, whichever one that is, rather than a fixed app.</p>
 <td>Next track</td>
 </tr>
 <tr>
-<td>previous / back</td>
+<td>previous</td>
 <td>Previous track</td>
 </tr>
 </tbody>
@@ -1472,6 +1507,16 @@ system's default terminal, whichever one that is, rather than a fixed app.</p>
 </table>
 <p>Volume changes are silent — GNOME's own on-screen display and chime acknowledge
 them.</p>
+<h2 id="knowing-which-mode-is-listening">Knowing which mode is listening<a class="headerlink" href="#knowing-which-mode-is-listening" title="Permanent link">&para;</a></h2>
+<p>Modes announce themselves, so you don't need a terminal to follow along:
+"Browser", "Grid", "Dictation", "Ready" when link hints appear, "Clicked",
+"Holding" and "Dropped" while dragging, "Hints closed", "Left the browser".</p>
+<p>Modes also end on their own after a spell with no recognised command — 30 seconds
+for the grid and head tracking, a minute for dictation, three minutes for the
+browser. When one does, you'll hear what changed:</p>
+<blockquote>
+<p>"Leaving browser. Say Hey Jarvis to continue."</p>
+</blockquote>
 <h2 id="general">General<a class="headerlink" href="#general" title="Permanent link">&para;</a></h2>
 <table>
 <thead>

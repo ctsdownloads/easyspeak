@@ -1072,6 +1072,10 @@ language-pack version numbers are independent and need not match:</p>
 <p>This is <strong>fully offline</strong> (assuming the system dependencies — GTK4, PortAudio,
 PyGObject, … — are already present, as on any GNOME desktop). Then launch
 <strong>EasySpeak</strong> from the applications menu, or run <code>easyspeak</code>.</p>
+<p>Dictation additionally needs a clipboard tool — <code>wl-clipboard</code> on Wayland,
+<code>xclip</code> on X11 — since it places text by pasting rather than through the
+accessibility bridge, which Chromium-based applications ignore. It is a
+<code>recommends</code>, so a minimal install may not pull it in.</p>
 <p>Installing the app <strong>without</strong> a language pack also works: the wake word is built
 in, the Whisper model then downloads automatically on first run, and voice feedback
 stays off until you add a Piper voice.</p>

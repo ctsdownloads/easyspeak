@@ -1080,13 +1080,24 @@ default <code>python3</code> (3.14) works out of the box.</p>
 <a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span>ffmpeg-free<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">  </span>pulseaudio-utils<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">  </span>sound-theme-freedesktop<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">  </span>portaudio-devel<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">  </span>python3-devel<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">  </span>gcc
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">  </span>wl-clipboard<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">  </span>portaudio-devel<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">  </span>python3-devel<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">  </span>gcc
 </code></pre></div>
+<p><code>wl-clipboard</code> is what dictation uses to place text. It types by putting the
+text on the clipboard and sending a paste keystroke, because accessibility-level
+insertion is silently ignored by Chromium-based applications — they accept the
+call, report success, and discard the text. Without <code>wl-clipboard</code> (or <code>xclip</code> on
+X11) dictation falls back to that path and quietly does nothing in a browser.</p>
 <p><code>python3-gobject</code> and <code>libadwaita</code> power the tray menu's <strong>About EasySpeak</strong>
 window. They ship with any GNOME desktop, so they're usually already present;
 they're listed here for the sake of minimal or non-GNOME installs.</p>
+<p>Optionally, <code>sudo dnf install python3-adblock</code> gives qutebrowser Brave's
+element-level ad blocker. EasySpeak configures the browser to use it when it is
+present and falls back to host blocking when it is not, so this is worth having:
+ad overlays are numbered like any other element, so they take link hints away
+from the page underneath.</p>
 <h3 id="2-piper-tts">2. Piper TTS<a class="headerlink" href="#2-piper-tts" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.local/bin
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nb">cd</span><span class="w"> </span>~/.local/bin
