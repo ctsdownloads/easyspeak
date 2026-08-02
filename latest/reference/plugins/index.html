@@ -7237,9 +7237,9 @@ chord that does nothing.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Return the (copy, paste) commands for this session, or (None, None).</p>
-<p>wl-clipboard on Wayland, xclip on X11. Both are ordinary desktop packages;
-without either there is no way to put text on the clipboard.</p>
+        <p>Return the (copy, paste) commands, or (None, None) if wl-clipboard is absent.</p>
+<p>EasySpeak targets Wayland, so wl-clipboard is the only supported tool. Without
+it there is no way to put text on the clipboard.</p>
 
 
             <details class="mkdocstrings-source">
@@ -7252,25 +7252,15 @@ without either there is no way to put text on the clipboard.</p>
 <span class="normal"><a href="#__codelineno-0-276">276</a></span>
 <span class="normal"><a href="#__codelineno-0-277">277</a></span>
 <span class="normal"><a href="#__codelineno-0-278">278</a></span>
-<span class="normal"><a href="#__codelineno-0-279">279</a></span>
-<span class="normal"><a href="#__codelineno-0-280">280</a></span>
-<span class="normal"><a href="#__codelineno-0-281">281</a></span>
-<span class="normal"><a href="#__codelineno-0-282">282</a></span>
-<span class="normal"><a href="#__codelineno-0-283">283</a></span>
-<span class="normal"><a href="#__codelineno-0-284">284</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-271" name="__codelineno-0-271"></a><span class="k">def</span><span class="w"> </span><span class="nf">clipboard_tools</span><span class="p">():</span>
-<a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the (copy, paste) commands for this session, or (None, None).</span>
+<span class="normal"><a href="#__codelineno-0-279">279</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-271" name="__codelineno-0-271"></a><span class="k">def</span><span class="w"> </span><span class="nf">clipboard_tools</span><span class="p">():</span>
+<a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the (copy, paste) commands, or (None, None) if wl-clipboard is absent.</span>
 <a id="__codelineno-0-273" name="__codelineno-0-273"></a>
-<a id="__codelineno-0-274" name="__codelineno-0-274"></a><span class="sd">    wl-clipboard on Wayland, xclip on X11. Both are ordinary desktop packages;</span>
-<a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="sd">    without either there is no way to put text on the clipboard.</span>
+<a id="__codelineno-0-274" name="__codelineno-0-274"></a><span class="sd">    EasySpeak targets Wayland, so wl-clipboard is the only supported tool. Without</span>
+<a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="sd">    it there is no way to put text on the clipboard.</span>
 <a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-277" name="__codelineno-0-277"></a>    <span class="k">if</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">&quot;wl-copy&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">&quot;wl-paste&quot;</span><span class="p">):</span>
 <a id="__codelineno-0-278" name="__codelineno-0-278"></a>        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;wl-copy&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;wl-paste&quot;</span><span class="p">,</span> <span class="s2">&quot;--no-newline&quot;</span><span class="p">]</span>
-<a id="__codelineno-0-279" name="__codelineno-0-279"></a>    <span class="k">if</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">&quot;xclip&quot;</span><span class="p">):</span>
-<a id="__codelineno-0-280" name="__codelineno-0-280"></a>        <span class="k">return</span> <span class="p">(</span>
-<a id="__codelineno-0-281" name="__codelineno-0-281"></a>            <span class="p">[</span><span class="s2">&quot;xclip&quot;</span><span class="p">,</span> <span class="s2">&quot;-selection&quot;</span><span class="p">,</span> <span class="s2">&quot;clipboard&quot;</span><span class="p">],</span>
-<a id="__codelineno-0-282" name="__codelineno-0-282"></a>            <span class="p">[</span><span class="s2">&quot;xclip&quot;</span><span class="p">,</span> <span class="s2">&quot;-selection&quot;</span><span class="p">,</span> <span class="s2">&quot;clipboard&quot;</span><span class="p">,</span> <span class="s2">&quot;-o&quot;</span><span class="p">],</span>
-<a id="__codelineno-0-283" name="__codelineno-0-283"></a>        <span class="p">)</span>
-<a id="__codelineno-0-284" name="__codelineno-0-284"></a>    <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a>    <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7303,7 +7293,12 @@ machinery for something a user rarely notices.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/dictation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-287">287</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-282">282</a></span>
+<span class="normal"><a href="#__codelineno-0-283">283</a></span>
+<span class="normal"><a href="#__codelineno-0-284">284</a></span>
+<span class="normal"><a href="#__codelineno-0-285">285</a></span>
+<span class="normal"><a href="#__codelineno-0-286">286</a></span>
+<span class="normal"><a href="#__codelineno-0-287">287</a></span>
 <span class="normal"><a href="#__codelineno-0-288">288</a></span>
 <span class="normal"><a href="#__codelineno-0-289">289</a></span>
 <span class="normal"><a href="#__codelineno-0-290">290</a></span>
@@ -7323,37 +7318,32 @@ machinery for something a user rarely notices.</p>
 <span class="normal"><a href="#__codelineno-0-304">304</a></span>
 <span class="normal"><a href="#__codelineno-0-305">305</a></span>
 <span class="normal"><a href="#__codelineno-0-306">306</a></span>
-<span class="normal"><a href="#__codelineno-0-307">307</a></span>
-<span class="normal"><a href="#__codelineno-0-308">308</a></span>
-<span class="normal"><a href="#__codelineno-0-309">309</a></span>
-<span class="normal"><a href="#__codelineno-0-310">310</a></span>
-<span class="normal"><a href="#__codelineno-0-311">311</a></span>
-<span class="normal"><a href="#__codelineno-0-312">312</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="k">def</span><span class="w"> </span><span class="nf">read_clipboard</span><span class="p">(</span><span class="n">paste_cmd</span><span class="p">):</span>
-<a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the current clipboard text, or None if there isn&#39;t any.</span>
+<span class="normal"><a href="#__codelineno-0-307">307</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="k">def</span><span class="w"> </span><span class="nf">read_clipboard</span><span class="p">(</span><span class="n">paste_cmd</span><span class="p">):</span>
+<a id="__codelineno-0-283" name="__codelineno-0-283"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the current clipboard text, or None if there isn&#39;t any.</span>
+<a id="__codelineno-0-284" name="__codelineno-0-284"></a>
+<a id="__codelineno-0-285" name="__codelineno-0-285"></a><span class="sd">    Read as bytes and decoded here rather than by `subprocess`, because the</span>
+<a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="sd">    clipboard often isn&#39;t text at all -- a copied image arrives as PNG bytes, and</span>
+<a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="sd">    decoding those as UTF-8 raised straight out of the middle of an insertion and</span>
+<a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="sd">    killed dictation mid-sentence.</span>
 <a id="__codelineno-0-289" name="__codelineno-0-289"></a>
-<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="sd">    Read as bytes and decoded here rather than by `subprocess`, because the</span>
-<a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="sd">    clipboard often isn&#39;t text at all -- a copied image arrives as PNG bytes, and</span>
-<a id="__codelineno-0-292" name="__codelineno-0-292"></a><span class="sd">    decoding those as UTF-8 raised straight out of the middle of an insertion and</span>
-<a id="__codelineno-0-293" name="__codelineno-0-293"></a><span class="sd">    killed dictation mid-sentence.</span>
-<a id="__codelineno-0-294" name="__codelineno-0-294"></a>
-<a id="__codelineno-0-295" name="__codelineno-0-295"></a><span class="sd">    Non-text content simply isn&#39;t preserved: the dictated text still gets pasted,</span>
-<a id="__codelineno-0-296" name="__codelineno-0-296"></a><span class="sd">    but whatever was on the clipboard is gone afterwards. Restoring arbitrary</span>
-<a id="__codelineno-0-297" name="__codelineno-0-297"></a><span class="sd">    binary would mean tracking MIME types through both tools, which is a lot of</span>
-<a id="__codelineno-0-298" name="__codelineno-0-298"></a><span class="sd">    machinery for something a user rarely notices.</span>
-<a id="__codelineno-0-299" name="__codelineno-0-299"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-300" name="__codelineno-0-300"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-301" name="__codelineno-0-301"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-<a id="__codelineno-0-302" name="__codelineno-0-302"></a>            <span class="n">paste_cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">CLIPBOARD_TIMEOUT</span>
-<a id="__codelineno-0-303" name="__codelineno-0-303"></a>        <span class="p">)</span>
-<a id="__codelineno-0-304" name="__codelineno-0-304"></a>    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">):</span>
-<a id="__codelineno-0-305" name="__codelineno-0-305"></a>        <span class="k">return</span> <span class="kc">None</span>
-<a id="__codelineno-0-306" name="__codelineno-0-306"></a>    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="sd">    Non-text content simply isn&#39;t preserved: the dictated text still gets pasted,</span>
+<a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="sd">    but whatever was on the clipboard is gone afterwards. Restoring arbitrary</span>
+<a id="__codelineno-0-292" name="__codelineno-0-292"></a><span class="sd">    binary would mean tracking MIME types through both tools, which is a lot of</span>
+<a id="__codelineno-0-293" name="__codelineno-0-293"></a><span class="sd">    machinery for something a user rarely notices.</span>
+<a id="__codelineno-0-294" name="__codelineno-0-294"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-295" name="__codelineno-0-295"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-296" name="__codelineno-0-296"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+<a id="__codelineno-0-297" name="__codelineno-0-297"></a>            <span class="n">paste_cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">CLIPBOARD_TIMEOUT</span>
+<a id="__codelineno-0-298" name="__codelineno-0-298"></a>        <span class="p">)</span>
+<a id="__codelineno-0-299" name="__codelineno-0-299"></a>    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">):</span>
+<a id="__codelineno-0-300" name="__codelineno-0-300"></a>        <span class="k">return</span> <span class="kc">None</span>
+<a id="__codelineno-0-301" name="__codelineno-0-301"></a>    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-302" name="__codelineno-0-302"></a>        <span class="k">return</span> <span class="kc">None</span>
+<a id="__codelineno-0-303" name="__codelineno-0-303"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-304" name="__codelineno-0-304"></a>        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-305" name="__codelineno-0-305"></a>    <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
+<a id="__codelineno-0-306" name="__codelineno-0-306"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;clipboard holds non-text data; it won&#39;t be restored&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-307" name="__codelineno-0-307"></a>        <span class="k">return</span> <span class="kc">None</span>
-<a id="__codelineno-0-308" name="__codelineno-0-308"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-309" name="__codelineno-0-309"></a>        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-310" name="__codelineno-0-310"></a>    <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
-<a id="__codelineno-0-311" name="__codelineno-0-311"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;clipboard holds non-text data; it won&#39;t be restored&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-312" name="__codelineno-0-312"></a>        <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7383,7 +7373,12 @@ dictation reported that it couldn't reach the clipboard.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/dictation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-315">315</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-310">310</a></span>
+<span class="normal"><a href="#__codelineno-0-311">311</a></span>
+<span class="normal"><a href="#__codelineno-0-312">312</a></span>
+<span class="normal"><a href="#__codelineno-0-313">313</a></span>
+<span class="normal"><a href="#__codelineno-0-314">314</a></span>
+<span class="normal"><a href="#__codelineno-0-315">315</a></span>
 <span class="normal"><a href="#__codelineno-0-316">316</a></span>
 <span class="normal"><a href="#__codelineno-0-317">317</a></span>
 <span class="normal"><a href="#__codelineno-0-318">318</a></span>
@@ -7406,40 +7401,35 @@ dictation reported that it couldn't reach the clipboard.</p>
 <span class="normal"><a href="#__codelineno-0-335">335</a></span>
 <span class="normal"><a href="#__codelineno-0-336">336</a></span>
 <span class="normal"><a href="#__codelineno-0-337">337</a></span>
-<span class="normal"><a href="#__codelineno-0-338">338</a></span>
-<span class="normal"><a href="#__codelineno-0-339">339</a></span>
-<span class="normal"><a href="#__codelineno-0-340">340</a></span>
-<span class="normal"><a href="#__codelineno-0-341">341</a></span>
-<span class="normal"><a href="#__codelineno-0-342">342</a></span>
-<span class="normal"><a href="#__codelineno-0-343">343</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-315" name="__codelineno-0-315"></a><span class="k">def</span><span class="w"> </span><span class="nf">write_clipboard</span><span class="p">(</span><span class="n">copy_cmd</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
-<a id="__codelineno-0-316" name="__codelineno-0-316"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Put text on the clipboard; False if that failed.</span>
-<a id="__codelineno-0-317" name="__codelineno-0-317"></a>
-<a id="__codelineno-0-318" name="__codelineno-0-318"></a><span class="sd">    Output goes to /dev/null rather than a pipe. `wl-copy` forks a daemon to hold</span>
-<a id="__codelineno-0-319" name="__codelineno-0-319"></a><span class="sd">    the selection for as long as it owns it, and that daemon inherits whatever</span>
-<a id="__codelineno-0-320" name="__codelineno-0-320"></a><span class="sd">    pipes we hand the parent -- so capturing output makes `subprocess.run` wait on</span>
-<a id="__codelineno-0-321" name="__codelineno-0-321"></a><span class="sd">    a process that never exits (CPython bpo-37424). Every copy timed out, and</span>
-<a id="__codelineno-0-322" name="__codelineno-0-322"></a><span class="sd">    dictation reported that it couldn&#39;t reach the clipboard.</span>
-<a id="__codelineno-0-323" name="__codelineno-0-323"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-324" name="__codelineno-0-324"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-325" name="__codelineno-0-325"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-<a id="__codelineno-0-326" name="__codelineno-0-326"></a>            <span class="n">copy_cmd</span><span class="p">,</span>
-<a id="__codelineno-0-327" name="__codelineno-0-327"></a>            <span class="nb">input</span><span class="o">=</span><span class="n">text</span><span class="p">,</span>
-<a id="__codelineno-0-328" name="__codelineno-0-328"></a>            <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-0-329" name="__codelineno-0-329"></a>            <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
-<a id="__codelineno-0-330" name="__codelineno-0-330"></a>            <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
-<a id="__codelineno-0-331" name="__codelineno-0-331"></a>            <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-0-332" name="__codelineno-0-332"></a>            <span class="n">timeout</span><span class="o">=</span><span class="n">CLIPBOARD_TIMEOUT</span><span class="p">,</span>
-<a id="__codelineno-0-333" name="__codelineno-0-333"></a>        <span class="p">)</span>
-<a id="__codelineno-0-334" name="__codelineno-0-334"></a>    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">:</span>
-<a id="__codelineno-0-335" name="__codelineno-0-335"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> did not finish within </span><span class="si">%s</span><span class="s2">s&quot;</span><span class="p">,</span> <span class="n">copy_cmd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">CLIPBOARD_TIMEOUT</span><span class="p">)</span>
-<a id="__codelineno-0-336" name="__codelineno-0-336"></a>        <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-337" name="__codelineno-0-337"></a>    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-<a id="__codelineno-0-338" name="__codelineno-0-338"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;could not run </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">copy_cmd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">exc</span><span class="p">)</span>
-<a id="__codelineno-0-339" name="__codelineno-0-339"></a>        <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-340" name="__codelineno-0-340"></a>    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-<a id="__codelineno-0-341" name="__codelineno-0-341"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> exited with code </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">copy_cmd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span><span class="p">)</span>
-<a id="__codelineno-0-342" name="__codelineno-0-342"></a>        <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-343" name="__codelineno-0-343"></a>    <span class="k">return</span> <span class="kc">True</span>
+<span class="normal"><a href="#__codelineno-0-338">338</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-310" name="__codelineno-0-310"></a><span class="k">def</span><span class="w"> </span><span class="nf">write_clipboard</span><span class="p">(</span><span class="n">copy_cmd</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+<a id="__codelineno-0-311" name="__codelineno-0-311"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Put text on the clipboard; False if that failed.</span>
+<a id="__codelineno-0-312" name="__codelineno-0-312"></a>
+<a id="__codelineno-0-313" name="__codelineno-0-313"></a><span class="sd">    Output goes to /dev/null rather than a pipe. `wl-copy` forks a daemon to hold</span>
+<a id="__codelineno-0-314" name="__codelineno-0-314"></a><span class="sd">    the selection for as long as it owns it, and that daemon inherits whatever</span>
+<a id="__codelineno-0-315" name="__codelineno-0-315"></a><span class="sd">    pipes we hand the parent -- so capturing output makes `subprocess.run` wait on</span>
+<a id="__codelineno-0-316" name="__codelineno-0-316"></a><span class="sd">    a process that never exits (CPython bpo-37424). Every copy timed out, and</span>
+<a id="__codelineno-0-317" name="__codelineno-0-317"></a><span class="sd">    dictation reported that it couldn&#39;t reach the clipboard.</span>
+<a id="__codelineno-0-318" name="__codelineno-0-318"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-319" name="__codelineno-0-319"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-320" name="__codelineno-0-320"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+<a id="__codelineno-0-321" name="__codelineno-0-321"></a>            <span class="n">copy_cmd</span><span class="p">,</span>
+<a id="__codelineno-0-322" name="__codelineno-0-322"></a>            <span class="nb">input</span><span class="o">=</span><span class="n">text</span><span class="p">,</span>
+<a id="__codelineno-0-323" name="__codelineno-0-323"></a>            <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-0-324" name="__codelineno-0-324"></a>            <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
+<a id="__codelineno-0-325" name="__codelineno-0-325"></a>            <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
+<a id="__codelineno-0-326" name="__codelineno-0-326"></a>            <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-0-327" name="__codelineno-0-327"></a>            <span class="n">timeout</span><span class="o">=</span><span class="n">CLIPBOARD_TIMEOUT</span><span class="p">,</span>
+<a id="__codelineno-0-328" name="__codelineno-0-328"></a>        <span class="p">)</span>
+<a id="__codelineno-0-329" name="__codelineno-0-329"></a>    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">:</span>
+<a id="__codelineno-0-330" name="__codelineno-0-330"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> did not finish within </span><span class="si">%s</span><span class="s2">s&quot;</span><span class="p">,</span> <span class="n">copy_cmd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">CLIPBOARD_TIMEOUT</span><span class="p">)</span>
+<a id="__codelineno-0-331" name="__codelineno-0-331"></a>        <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-332" name="__codelineno-0-332"></a>    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+<a id="__codelineno-0-333" name="__codelineno-0-333"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;could not run </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">copy_cmd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">exc</span><span class="p">)</span>
+<a id="__codelineno-0-334" name="__codelineno-0-334"></a>        <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-335" name="__codelineno-0-335"></a>    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-336" name="__codelineno-0-336"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> exited with code </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">copy_cmd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span><span class="p">)</span>
+<a id="__codelineno-0-337" name="__codelineno-0-337"></a>        <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-338" name="__codelineno-0-338"></a>    <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7467,29 +7457,29 @@ misbehave, which looked like dictation breaking the browser on its way out.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/dictation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-379">379</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-374">374</a></span>
+<span class="normal"><a href="#__codelineno-0-375">375</a></span>
+<span class="normal"><a href="#__codelineno-0-376">376</a></span>
+<span class="normal"><a href="#__codelineno-0-377">377</a></span>
+<span class="normal"><a href="#__codelineno-0-378">378</a></span>
+<span class="normal"><a href="#__codelineno-0-379">379</a></span>
 <span class="normal"><a href="#__codelineno-0-380">380</a></span>
 <span class="normal"><a href="#__codelineno-0-381">381</a></span>
 <span class="normal"><a href="#__codelineno-0-382">382</a></span>
 <span class="normal"><a href="#__codelineno-0-383">383</a></span>
 <span class="normal"><a href="#__codelineno-0-384">384</a></span>
-<span class="normal"><a href="#__codelineno-0-385">385</a></span>
-<span class="normal"><a href="#__codelineno-0-386">386</a></span>
-<span class="normal"><a href="#__codelineno-0-387">387</a></span>
-<span class="normal"><a href="#__codelineno-0-388">388</a></span>
-<span class="normal"><a href="#__codelineno-0-389">389</a></span>
-<span class="normal"><a href="#__codelineno-0-390">390</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-379" name="__codelineno-0-379"></a><span class="k">def</span><span class="w"> </span><span class="nf">leave_browser_insert_mode</span><span class="p">():</span>
-<a id="__codelineno-0-380" name="__codelineno-0-380"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Hand qutebrowser back in normal mode once dictation is over.</span>
-<a id="__codelineno-0-381" name="__codelineno-0-381"></a>
-<a id="__codelineno-0-382" name="__codelineno-0-382"></a><span class="sd">    Insert mode is entered so a paste reaches the page, but leaving the browser in</span>
-<a id="__codelineno-0-383" name="__codelineno-0-383"></a><span class="sd">    it means every later keystroke is treated as text: hinting and scrolling both</span>
-<a id="__codelineno-0-384" name="__codelineno-0-384"></a><span class="sd">    misbehave, which looked like dictation breaking the browser on its way out.</span>
-<a id="__codelineno-0-385" name="__codelineno-0-385"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-386" name="__codelineno-0-386"></a>    <span class="k">global</span> <span class="n">_left_browser_in_insert_mode</span>
-<a id="__codelineno-0-387" name="__codelineno-0-387"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">_left_browser_in_insert_mode</span><span class="p">:</span>
-<a id="__codelineno-0-388" name="__codelineno-0-388"></a>        <span class="k">return</span>
-<a id="__codelineno-0-389" name="__codelineno-0-389"></a>    <span class="n">_left_browser_in_insert_mode</span> <span class="o">=</span> <span class="kc">False</span>
-<a id="__codelineno-0-390" name="__codelineno-0-390"></a>    <span class="n">_qb_command</span><span class="p">(</span><span class="s2">&quot;mode-leave&quot;</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-385">385</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-374" name="__codelineno-0-374"></a><span class="k">def</span><span class="w"> </span><span class="nf">leave_browser_insert_mode</span><span class="p">():</span>
+<a id="__codelineno-0-375" name="__codelineno-0-375"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Hand qutebrowser back in normal mode once dictation is over.</span>
+<a id="__codelineno-0-376" name="__codelineno-0-376"></a>
+<a id="__codelineno-0-377" name="__codelineno-0-377"></a><span class="sd">    Insert mode is entered so a paste reaches the page, but leaving the browser in</span>
+<a id="__codelineno-0-378" name="__codelineno-0-378"></a><span class="sd">    it means every later keystroke is treated as text: hinting and scrolling both</span>
+<a id="__codelineno-0-379" name="__codelineno-0-379"></a><span class="sd">    misbehave, which looked like dictation breaking the browser on its way out.</span>
+<a id="__codelineno-0-380" name="__codelineno-0-380"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-381" name="__codelineno-0-381"></a>    <span class="k">global</span> <span class="n">_left_browser_in_insert_mode</span>
+<a id="__codelineno-0-382" name="__codelineno-0-382"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">_left_browser_in_insert_mode</span><span class="p">:</span>
+<a id="__codelineno-0-383" name="__codelineno-0-383"></a>        <span class="k">return</span>
+<a id="__codelineno-0-384" name="__codelineno-0-384"></a>    <span class="n">_left_browser_in_insert_mode</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-0-385" name="__codelineno-0-385"></a>    <span class="n">_qb_command</span><span class="p">(</span><span class="s2">&quot;mode-leave&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7521,31 +7511,31 @@ paste -- the old behaviour, blind but willing, is the better fallback.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/dictation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-393">393</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-388">388</a></span>
+<span class="normal"><a href="#__codelineno-0-389">389</a></span>
+<span class="normal"><a href="#__codelineno-0-390">390</a></span>
+<span class="normal"><a href="#__codelineno-0-391">391</a></span>
+<span class="normal"><a href="#__codelineno-0-392">392</a></span>
+<span class="normal"><a href="#__codelineno-0-393">393</a></span>
 <span class="normal"><a href="#__codelineno-0-394">394</a></span>
 <span class="normal"><a href="#__codelineno-0-395">395</a></span>
 <span class="normal"><a href="#__codelineno-0-396">396</a></span>
 <span class="normal"><a href="#__codelineno-0-397">397</a></span>
 <span class="normal"><a href="#__codelineno-0-398">398</a></span>
 <span class="normal"><a href="#__codelineno-0-399">399</a></span>
-<span class="normal"><a href="#__codelineno-0-400">400</a></span>
-<span class="normal"><a href="#__codelineno-0-401">401</a></span>
-<span class="normal"><a href="#__codelineno-0-402">402</a></span>
-<span class="normal"><a href="#__codelineno-0-403">403</a></span>
-<span class="normal"><a href="#__codelineno-0-404">404</a></span>
-<span class="normal"><a href="#__codelineno-0-405">405</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-393" name="__codelineno-0-393"></a><span class="k">def</span><span class="w"> </span><span class="nf">has_focused_text_field</span><span class="p">():</span>
-<a id="__codelineno-0-394" name="__codelineno-0-394"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether anything is focused that could receive text.</span>
-<a id="__codelineno-0-395" name="__codelineno-0-395"></a>
-<a id="__codelineno-0-396" name="__codelineno-0-396"></a><span class="sd">    Chromium-based apps accept an AT-SPI insertion and quietly discard it, which</span>
-<a id="__codelineno-0-397" name="__codelineno-0-397"></a><span class="sd">    is why text goes in by clipboard and paste instead. They do still report which</span>
-<a id="__codelineno-0-398" name="__codelineno-0-398"></a><span class="sd">    element holds focus, though, so the helper is run with an empty string purely</span>
-<a id="__codelineno-0-399" name="__codelineno-0-399"></a><span class="sd">    as a question: it finds the insertion point, writes nothing, and says whether</span>
-<a id="__codelineno-0-400" name="__codelineno-0-400"></a><span class="sd">    there was one.</span>
-<a id="__codelineno-0-401" name="__codelineno-0-401"></a>
-<a id="__codelineno-0-402" name="__codelineno-0-402"></a><span class="sd">    Any failure answers yes. A probe that can&#39;t run is no reason to refuse to</span>
-<a id="__codelineno-0-403" name="__codelineno-0-403"></a><span class="sd">    paste -- the old behaviour, blind but willing, is the better fallback.</span>
-<a id="__codelineno-0-404" name="__codelineno-0-404"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-405" name="__codelineno-0-405"></a>    <span class="k">return</span> <span class="n">insert_via_atspi</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">NO_FOCUS</span>
+<span class="normal"><a href="#__codelineno-0-400">400</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-388" name="__codelineno-0-388"></a><span class="k">def</span><span class="w"> </span><span class="nf">has_focused_text_field</span><span class="p">():</span>
+<a id="__codelineno-0-389" name="__codelineno-0-389"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether anything is focused that could receive text.</span>
+<a id="__codelineno-0-390" name="__codelineno-0-390"></a>
+<a id="__codelineno-0-391" name="__codelineno-0-391"></a><span class="sd">    Chromium-based apps accept an AT-SPI insertion and quietly discard it, which</span>
+<a id="__codelineno-0-392" name="__codelineno-0-392"></a><span class="sd">    is why text goes in by clipboard and paste instead. They do still report which</span>
+<a id="__codelineno-0-393" name="__codelineno-0-393"></a><span class="sd">    element holds focus, though, so the helper is run with an empty string purely</span>
+<a id="__codelineno-0-394" name="__codelineno-0-394"></a><span class="sd">    as a question: it finds the insertion point, writes nothing, and says whether</span>
+<a id="__codelineno-0-395" name="__codelineno-0-395"></a><span class="sd">    there was one.</span>
+<a id="__codelineno-0-396" name="__codelineno-0-396"></a>
+<a id="__codelineno-0-397" name="__codelineno-0-397"></a><span class="sd">    Any failure answers yes. A probe that can&#39;t run is no reason to refuse to</span>
+<a id="__codelineno-0-398" name="__codelineno-0-398"></a><span class="sd">    paste -- the old behaviour, blind but willing, is the better fallback.</span>
+<a id="__codelineno-0-399" name="__codelineno-0-399"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-400" name="__codelineno-0-400"></a>    <span class="k">return</span> <span class="n">insert_via_atspi</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">NO_FOCUS</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7573,7 +7563,12 @@ installed, which is the only case where the old path was ever the better one.</p
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/dictation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-408">408</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-403">403</a></span>
+<span class="normal"><a href="#__codelineno-0-404">404</a></span>
+<span class="normal"><a href="#__codelineno-0-405">405</a></span>
+<span class="normal"><a href="#__codelineno-0-406">406</a></span>
+<span class="normal"><a href="#__codelineno-0-407">407</a></span>
+<span class="normal"><a href="#__codelineno-0-408">408</a></span>
 <span class="normal"><a href="#__codelineno-0-409">409</a></span>
 <span class="normal"><a href="#__codelineno-0-410">410</a></span>
 <span class="normal"><a href="#__codelineno-0-411">411</a></span>
@@ -7648,92 +7643,87 @@ installed, which is the only case where the old path was ever the better one.</p
 <span class="normal"><a href="#__codelineno-0-480">480</a></span>
 <span class="normal"><a href="#__codelineno-0-481">481</a></span>
 <span class="normal"><a href="#__codelineno-0-482">482</a></span>
-<span class="normal"><a href="#__codelineno-0-483">483</a></span>
-<span class="normal"><a href="#__codelineno-0-484">484</a></span>
-<span class="normal"><a href="#__codelineno-0-485">485</a></span>
-<span class="normal"><a href="#__codelineno-0-486">486</a></span>
-<span class="normal"><a href="#__codelineno-0-487">487</a></span>
-<span class="normal"><a href="#__codelineno-0-488">488</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-408" name="__codelineno-0-408"></a><span class="k">def</span><span class="w"> </span><span class="nf">insert_text</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
-<a id="__codelineno-0-409" name="__codelineno-0-409"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Insert text into the focused application by pasting it.</span>
-<a id="__codelineno-0-410" name="__codelineno-0-410"></a>
-<a id="__codelineno-0-411" name="__codelineno-0-411"></a><span class="sd">    The clipboard is put back afterwards, so dictating doesn&#39;t quietly cost the</span>
-<a id="__codelineno-0-412" name="__codelineno-0-412"></a><span class="sd">    user whatever they had copied. Falls back to AT-SPI when no clipboard tool is</span>
-<a id="__codelineno-0-413" name="__codelineno-0-413"></a><span class="sd">    installed, which is the only case where the old path was ever the better one.</span>
-<a id="__codelineno-0-414" name="__codelineno-0-414"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-415" name="__codelineno-0-415"></a>    <span class="c1"># A paste goes wherever the keyboard is pointing, and if that&#39;s a web page</span>
-<a id="__codelineno-0-416" name="__codelineno-0-416"></a>    <span class="c1"># with no field focused it vanishes without a trace -- the keystroke is sent,</span>
-<a id="__codelineno-0-417" name="__codelineno-0-417"></a>    <span class="c1"># the clipboard held the text, and nothing reports a problem. Ask first, so</span>
-<a id="__codelineno-0-418" name="__codelineno-0-418"></a>    <span class="c1"># the user is told rather than left wondering.</span>
-<a id="__codelineno-0-419" name="__codelineno-0-419"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_focused_text_field</span><span class="p">():</span>
-<a id="__codelineno-0-420" name="__codelineno-0-420"></a>        <span class="k">return</span> <span class="n">NO_FOCUS</span>
-<a id="__codelineno-0-421" name="__codelineno-0-421"></a>
-<a id="__codelineno-0-422" name="__codelineno-0-422"></a>    <span class="n">copy_cmd</span><span class="p">,</span> <span class="n">paste_cmd</span> <span class="o">=</span> <span class="n">clipboard_tools</span><span class="p">()</span>
-<a id="__codelineno-0-423" name="__codelineno-0-423"></a>    <span class="k">if</span> <span class="n">copy_cmd</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-424" name="__codelineno-0-424"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-<a id="__codelineno-0-425" name="__codelineno-0-425"></a>            <span class="s2">&quot;No clipboard tool found, so dictation is falling back to AT-SPI, &quot;</span>
-<a id="__codelineno-0-426" name="__codelineno-0-426"></a>            <span class="s2">&quot;which Chromium-based apps accept and ignore. Install wl-clipboard &quot;</span>
-<a id="__codelineno-0-427" name="__codelineno-0-427"></a>            <span class="s2">&quot;(Wayland) or xclip (X11) for text to reach the browser.&quot;</span>
-<a id="__codelineno-0-428" name="__codelineno-0-428"></a>        <span class="p">)</span>
-<a id="__codelineno-0-429" name="__codelineno-0-429"></a>        <span class="k">return</span> <span class="n">insert_via_atspi</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-<a id="__codelineno-0-430" name="__codelineno-0-430"></a>
-<a id="__codelineno-0-431" name="__codelineno-0-431"></a>    <span class="k">global</span> <span class="n">_clipboard_generation</span>
-<a id="__codelineno-0-432" name="__codelineno-0-432"></a>
-<a id="__codelineno-0-433" name="__codelineno-0-433"></a>    <span class="c1"># Looked up once and passed on. This used to be read three separate times per</span>
-<a id="__codelineno-0-434" name="__codelineno-0-434"></a>    <span class="c1"># insertion -- once to pick the chord and twice for the log lines -- and each</span>
-<a id="__codelineno-0-435" name="__codelineno-0-435"></a>    <span class="c1"># one is a gdbus round trip sitting between the user speaking and the text</span>
-<a id="__codelineno-0-436" name="__codelineno-0-436"></a>    <span class="c1"># appearing.</span>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a>    <span class="n">target</span> <span class="o">=</span> <span class="n">focused_wm_class</span><span class="p">()</span>
+<span class="normal"><a href="#__codelineno-0-483">483</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-403" name="__codelineno-0-403"></a><span class="k">def</span><span class="w"> </span><span class="nf">insert_text</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+<a id="__codelineno-0-404" name="__codelineno-0-404"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Insert text into the focused application by pasting it.</span>
+<a id="__codelineno-0-405" name="__codelineno-0-405"></a>
+<a id="__codelineno-0-406" name="__codelineno-0-406"></a><span class="sd">    The clipboard is put back afterwards, so dictating doesn&#39;t quietly cost the</span>
+<a id="__codelineno-0-407" name="__codelineno-0-407"></a><span class="sd">    user whatever they had copied. Falls back to AT-SPI when no clipboard tool is</span>
+<a id="__codelineno-0-408" name="__codelineno-0-408"></a><span class="sd">    installed, which is the only case where the old path was ever the better one.</span>
+<a id="__codelineno-0-409" name="__codelineno-0-409"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-410" name="__codelineno-0-410"></a>    <span class="c1"># A paste goes wherever the keyboard is pointing, and if that&#39;s a web page</span>
+<a id="__codelineno-0-411" name="__codelineno-0-411"></a>    <span class="c1"># with no field focused it vanishes without a trace -- the keystroke is sent,</span>
+<a id="__codelineno-0-412" name="__codelineno-0-412"></a>    <span class="c1"># the clipboard held the text, and nothing reports a problem. Ask first, so</span>
+<a id="__codelineno-0-413" name="__codelineno-0-413"></a>    <span class="c1"># the user is told rather than left wondering.</span>
+<a id="__codelineno-0-414" name="__codelineno-0-414"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_focused_text_field</span><span class="p">():</span>
+<a id="__codelineno-0-415" name="__codelineno-0-415"></a>        <span class="k">return</span> <span class="n">NO_FOCUS</span>
+<a id="__codelineno-0-416" name="__codelineno-0-416"></a>
+<a id="__codelineno-0-417" name="__codelineno-0-417"></a>    <span class="n">copy_cmd</span><span class="p">,</span> <span class="n">paste_cmd</span> <span class="o">=</span> <span class="n">clipboard_tools</span><span class="p">()</span>
+<a id="__codelineno-0-418" name="__codelineno-0-418"></a>    <span class="k">if</span> <span class="n">copy_cmd</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-419" name="__codelineno-0-419"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+<a id="__codelineno-0-420" name="__codelineno-0-420"></a>            <span class="s2">&quot;wl-clipboard is not installed, so dictation is falling back to &quot;</span>
+<a id="__codelineno-0-421" name="__codelineno-0-421"></a>            <span class="s2">&quot;AT-SPI, which Chromium-based apps accept and ignore. Install &quot;</span>
+<a id="__codelineno-0-422" name="__codelineno-0-422"></a>            <span class="s2">&quot;wl-clipboard for text to reach the browser.&quot;</span>
+<a id="__codelineno-0-423" name="__codelineno-0-423"></a>        <span class="p">)</span>
+<a id="__codelineno-0-424" name="__codelineno-0-424"></a>        <span class="k">return</span> <span class="n">insert_via_atspi</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<a id="__codelineno-0-425" name="__codelineno-0-425"></a>
+<a id="__codelineno-0-426" name="__codelineno-0-426"></a>    <span class="k">global</span> <span class="n">_clipboard_generation</span>
+<a id="__codelineno-0-427" name="__codelineno-0-427"></a>
+<a id="__codelineno-0-428" name="__codelineno-0-428"></a>    <span class="c1"># Looked up once and passed on. This used to be read three separate times per</span>
+<a id="__codelineno-0-429" name="__codelineno-0-429"></a>    <span class="c1"># insertion -- once to pick the chord and twice for the log lines -- and each</span>
+<a id="__codelineno-0-430" name="__codelineno-0-430"></a>    <span class="c1"># one is a gdbus round trip sitting between the user speaking and the text</span>
+<a id="__codelineno-0-431" name="__codelineno-0-431"></a>    <span class="c1"># appearing.</span>
+<a id="__codelineno-0-432" name="__codelineno-0-432"></a>    <span class="n">target</span> <span class="o">=</span> <span class="n">focused_wm_class</span><span class="p">()</span>
+<a id="__codelineno-0-433" name="__codelineno-0-433"></a>
+<a id="__codelineno-0-434" name="__codelineno-0-434"></a>    <span class="n">saved</span> <span class="o">=</span> <span class="n">read_clipboard</span><span class="p">(</span><span class="n">paste_cmd</span><span class="p">)</span>
+<a id="__codelineno-0-435" name="__codelineno-0-435"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">write_clipboard</span><span class="p">(</span><span class="n">copy_cmd</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+<a id="__codelineno-0-436" name="__codelineno-0-436"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not put the dictated text on the clipboard.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a>        <span class="k">return</span> <span class="n">BACKEND_ERROR</span>
 <a id="__codelineno-0-438" name="__codelineno-0-438"></a>
-<a id="__codelineno-0-439" name="__codelineno-0-439"></a>    <span class="n">saved</span> <span class="o">=</span> <span class="n">read_clipboard</span><span class="p">(</span><span class="n">paste_cmd</span><span class="p">)</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">write_clipboard</span><span class="p">(</span><span class="n">copy_cmd</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
-<a id="__codelineno-0-441" name="__codelineno-0-441"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not put the dictated text on the clipboard.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a>        <span class="k">return</span> <span class="n">BACKEND_ERROR</span>
-<a id="__codelineno-0-443" name="__codelineno-0-443"></a>
-<a id="__codelineno-0-444" name="__codelineno-0-444"></a>    <span class="n">_clipboard_generation</span> <span class="o">+=</span> <span class="mi">1</span>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a>    <span class="n">chord</span> <span class="o">=</span> <span class="n">paste_chord</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
-<a id="__codelineno-0-446" name="__codelineno-0-446"></a>
-<a id="__codelineno-0-447" name="__codelineno-0-447"></a>    <span class="c1"># qutebrowser is modal: in normal mode a keystroke is a command, not text, and</span>
-<a id="__codelineno-0-448" name="__codelineno-0-448"></a>    <span class="c1"># Ctrl+V isn&#39;t bound there at all -- the paste simply goes nowhere. Following a</span>
-<a id="__codelineno-0-449" name="__codelineno-0-449"></a>    <span class="c1"># hint into a field auto-enters insert mode, which is why dictation worked</span>
-<a id="__codelineno-0-450" name="__codelineno-0-450"></a>    <span class="c1"># after &quot;numbers&quot; and silently did nothing without it. Asking for insert mode</span>
-<a id="__codelineno-0-451" name="__codelineno-0-451"></a>    <span class="c1"># first makes it work either way. Safe to send when already in insert.</span>
-<a id="__codelineno-0-452" name="__codelineno-0-452"></a>    <span class="k">if</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">BROWSER_WM_CLASSES</span><span class="p">:</span>
-<a id="__codelineno-0-453" name="__codelineno-0-453"></a>        <span class="n">_enter_browser_insert_mode</span><span class="p">()</span>
-<a id="__codelineno-0-454" name="__codelineno-0-454"></a>    <span class="c1"># Say which mechanism ran and where it aimed. Insertion used to report success</span>
-<a id="__codelineno-0-455" name="__codelineno-0-455"></a>    <span class="c1"># without naming the path it took or the window it targeted, so a paste that</span>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a>    <span class="c1"># went nowhere looked exactly like one that worked.</span>
-<a id="__codelineno-0-457" name="__codelineno-0-457"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-<a id="__codelineno-0-458" name="__codelineno-0-458"></a>        <span class="s2">&quot;⌨️  pasting </span><span class="si">%d</span><span class="s2"> chars into </span><span class="si">%s</span><span class="s2"> with </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-459" name="__codelineno-0-459"></a>        <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">),</span>
-<a id="__codelineno-0-460" name="__codelineno-0-460"></a>        <span class="n">target</span> <span class="ow">or</span> <span class="s2">&quot;an unknown window&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-461" name="__codelineno-0-461"></a>        <span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-<a id="__codelineno-0-462" name="__codelineno-0-462"></a>            <span class="nb">next</span><span class="p">(</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">KEYCODES</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">part</span><span class="p">)</span>
-<a id="__codelineno-0-463" name="__codelineno-0-463"></a>            <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">chord</span>
-<a id="__codelineno-0-464" name="__codelineno-0-464"></a>        <span class="p">),</span>
-<a id="__codelineno-0-465" name="__codelineno-0-465"></a>    <span class="p">)</span>
-<a id="__codelineno-0-466" name="__codelineno-0-466"></a>
-<a id="__codelineno-0-467" name="__codelineno-0-467"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-468" name="__codelineno-0-468"></a>        <span class="kn">from</span><span class="w"> </span><span class="nn">easyspeak.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">mediakeys</span>
-<a id="__codelineno-0-469" name="__codelineno-0-469"></a>
-<a id="__codelineno-0-470" name="__codelineno-0-470"></a>        <span class="n">mediakeys</span><span class="o">.</span><span class="n">tap_chord</span><span class="p">(</span><span class="n">chord</span><span class="p">)</span>
-<a id="__codelineno-0-471" name="__codelineno-0-471"></a>    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-<a id="__codelineno-0-472" name="__codelineno-0-472"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-<a id="__codelineno-0-473" name="__codelineno-0-473"></a>            <span class="s2">&quot;Could not send the paste keystroke. Dictation needs GNOME&#39;s &quot;</span>
-<a id="__codelineno-0-474" name="__codelineno-0-474"></a>            <span class="s2">&quot;RemoteDesktop interface, which this session doesn&#39;t provide.&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-475" name="__codelineno-0-475"></a>            <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-0-476" name="__codelineno-0-476"></a>        <span class="p">)</span>
-<a id="__codelineno-0-477" name="__codelineno-0-477"></a>        <span class="k">return</span> <span class="n">BACKEND_ERROR</span>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a>    <span class="n">_clipboard_generation</span> <span class="o">+=</span> <span class="mi">1</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a>    <span class="n">chord</span> <span class="o">=</span> <span class="n">paste_chord</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a>    <span class="c1"># qutebrowser is modal: in normal mode a keystroke is a command, not text, and</span>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a>    <span class="c1"># Ctrl+V isn&#39;t bound there at all -- the paste simply goes nowhere. Following a</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a>    <span class="c1"># hint into a field auto-enters insert mode, which is why dictation worked</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a>    <span class="c1"># after &quot;numbers&quot; and silently did nothing without it. Asking for insert mode</span>
+<a id="__codelineno-0-446" name="__codelineno-0-446"></a>    <span class="c1"># first makes it work either way. Safe to send when already in insert.</span>
+<a id="__codelineno-0-447" name="__codelineno-0-447"></a>    <span class="k">if</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">BROWSER_WM_CLASSES</span><span class="p">:</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a>        <span class="n">_enter_browser_insert_mode</span><span class="p">()</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a>    <span class="c1"># Say which mechanism ran and where it aimed. Insertion used to report success</span>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a>    <span class="c1"># without naming the path it took or the window it targeted, so a paste that</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a>    <span class="c1"># went nowhere looked exactly like one that worked.</span>
+<a id="__codelineno-0-452" name="__codelineno-0-452"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a>        <span class="s2">&quot;⌨️  pasting </span><span class="si">%d</span><span class="s2"> chars into </span><span class="si">%s</span><span class="s2"> with </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a>        <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">),</span>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a>        <span class="n">target</span> <span class="ow">or</span> <span class="s2">&quot;an unknown window&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a>        <span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a>            <span class="nb">next</span><span class="p">(</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">KEYCODES</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">part</span><span class="p">)</span>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a>            <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">chord</span>
+<a id="__codelineno-0-459" name="__codelineno-0-459"></a>        <span class="p">),</span>
+<a id="__codelineno-0-460" name="__codelineno-0-460"></a>    <span class="p">)</span>
+<a id="__codelineno-0-461" name="__codelineno-0-461"></a>
+<a id="__codelineno-0-462" name="__codelineno-0-462"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a>        <span class="kn">from</span><span class="w"> </span><span class="nn">easyspeak.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">mediakeys</span>
+<a id="__codelineno-0-464" name="__codelineno-0-464"></a>
+<a id="__codelineno-0-465" name="__codelineno-0-465"></a>        <span class="n">mediakeys</span><span class="o">.</span><span class="n">tap_chord</span><span class="p">(</span><span class="n">chord</span><span class="p">)</span>
+<a id="__codelineno-0-466" name="__codelineno-0-466"></a>    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-0-467" name="__codelineno-0-467"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+<a id="__codelineno-0-468" name="__codelineno-0-468"></a>            <span class="s2">&quot;Could not send the paste keystroke. Dictation needs GNOME&#39;s &quot;</span>
+<a id="__codelineno-0-469" name="__codelineno-0-469"></a>            <span class="s2">&quot;RemoteDesktop interface, which this session doesn&#39;t provide.&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-470" name="__codelineno-0-470"></a>            <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-0-471" name="__codelineno-0-471"></a>        <span class="p">)</span>
+<a id="__codelineno-0-472" name="__codelineno-0-472"></a>        <span class="k">return</span> <span class="n">BACKEND_ERROR</span>
+<a id="__codelineno-0-473" name="__codelineno-0-473"></a>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a>    <span class="c1"># Name where it went. Paste lands wherever the keyboard focus is, and a page</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a>    <span class="c1"># with no focused field swallows it silently -- so the log has to say which</span>
+<a id="__codelineno-0-476" name="__codelineno-0-476"></a>    <span class="c1"># window received the keystroke, or an empty text box is unexplainable.</span>
+<a id="__codelineno-0-477" name="__codelineno-0-477"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;pasted into </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">target</span> <span class="ow">or</span> <span class="s2">&quot;an unknown window&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-478" name="__codelineno-0-478"></a>
-<a id="__codelineno-0-479" name="__codelineno-0-479"></a>    <span class="c1"># Name where it went. Paste lands wherever the keyboard focus is, and a page</span>
-<a id="__codelineno-0-480" name="__codelineno-0-480"></a>    <span class="c1"># with no focused field swallows it silently -- so the log has to say which</span>
-<a id="__codelineno-0-481" name="__codelineno-0-481"></a>    <span class="c1"># window received the keystroke, or an empty text box is unexplainable.</span>
-<a id="__codelineno-0-482" name="__codelineno-0-482"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;pasted into </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">target</span> <span class="ow">or</span> <span class="s2">&quot;an unknown window&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-483" name="__codelineno-0-483"></a>
-<a id="__codelineno-0-484" name="__codelineno-0-484"></a>    <span class="c1"># The restore waits for the paste to land, so it happens on a thread rather</span>
-<a id="__codelineno-0-485" name="__codelineno-0-485"></a>    <span class="c1"># than in front of the user: this was a fixed delay plus another subprocess</span>
-<a id="__codelineno-0-486" name="__codelineno-0-486"></a>    <span class="c1"># between finishing a sentence and seeing it.</span>
-<a id="__codelineno-0-487" name="__codelineno-0-487"></a>    <span class="n">_restore_clipboard_later</span><span class="p">(</span><span class="n">copy_cmd</span><span class="p">,</span> <span class="n">saved</span><span class="p">,</span> <span class="n">_clipboard_generation</span><span class="p">)</span>
-<a id="__codelineno-0-488" name="__codelineno-0-488"></a>    <span class="k">return</span> <span class="n">INSERTED</span>
+<a id="__codelineno-0-479" name="__codelineno-0-479"></a>    <span class="c1"># The restore waits for the paste to land, so it happens on a thread rather</span>
+<a id="__codelineno-0-480" name="__codelineno-0-480"></a>    <span class="c1"># than in front of the user: this was a fixed delay plus another subprocess</span>
+<a id="__codelineno-0-481" name="__codelineno-0-481"></a>    <span class="c1"># between finishing a sentence and seeing it.</span>
+<a id="__codelineno-0-482" name="__codelineno-0-482"></a>    <span class="n">_restore_clipboard_later</span><span class="p">(</span><span class="n">copy_cmd</span><span class="p">,</span> <span class="n">saved</span><span class="p">,</span> <span class="n">_clipboard_generation</span><span class="p">)</span>
+<a id="__codelineno-0-483" name="__codelineno-0-483"></a>    <span class="k">return</span> <span class="n">INSERTED</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7766,7 +7756,12 @@ inserted nothing.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/dictation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-521">521</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-516">516</a></span>
+<span class="normal"><a href="#__codelineno-0-517">517</a></span>
+<span class="normal"><a href="#__codelineno-0-518">518</a></span>
+<span class="normal"><a href="#__codelineno-0-519">519</a></span>
+<span class="normal"><a href="#__codelineno-0-520">520</a></span>
+<span class="normal"><a href="#__codelineno-0-521">521</a></span>
 <span class="normal"><a href="#__codelineno-0-522">522</a></span>
 <span class="normal"><a href="#__codelineno-0-523">523</a></span>
 <span class="normal"><a href="#__codelineno-0-524">524</a></span>
@@ -7777,28 +7772,23 @@ inserted nothing.</p>
 <span class="normal"><a href="#__codelineno-0-529">529</a></span>
 <span class="normal"><a href="#__codelineno-0-530">530</a></span>
 <span class="normal"><a href="#__codelineno-0-531">531</a></span>
-<span class="normal"><a href="#__codelineno-0-532">532</a></span>
-<span class="normal"><a href="#__codelineno-0-533">533</a></span>
-<span class="normal"><a href="#__codelineno-0-534">534</a></span>
-<span class="normal"><a href="#__codelineno-0-535">535</a></span>
-<span class="normal"><a href="#__codelineno-0-536">536</a></span>
-<span class="normal"><a href="#__codelineno-0-537">537</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="k">def</span><span class="w"> </span><span class="nf">atspi_python</span><span class="p">():</span>
-<a id="__codelineno-0-522" name="__codelineno-0-522"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Path to an interpreter that can actually run the AT-SPI helper, or None.</span>
+<span class="normal"><a href="#__codelineno-0-532">532</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-516" name="__codelineno-0-516"></a><span class="k">def</span><span class="w"> </span><span class="nf">atspi_python</span><span class="p">():</span>
+<a id="__codelineno-0-517" name="__codelineno-0-517"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Path to an interpreter that can actually run the AT-SPI helper, or None.</span>
+<a id="__codelineno-0-518" name="__codelineno-0-518"></a>
+<a id="__codelineno-0-519" name="__codelineno-0-519"></a><span class="sd">    The helper needs PyGObject and the AT-SPI typelib, which the app&#39;s own venv</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a><span class="sd">    usually lacks. `EASYSPEAK_ATSPI_PYTHON` lets the packaging point straight at an</span>
+<a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="sd">    interpreter that has them (the Nix flake sets it). Otherwise each candidate is</span>
+<a id="__codelineno-0-522" name="__codelineno-0-522"></a><span class="sd">    probed with the helper&#39;s own import chain and the first that works is kept.</span>
 <a id="__codelineno-0-523" name="__codelineno-0-523"></a>
-<a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="sd">    The helper needs PyGObject and the AT-SPI typelib, which the app&#39;s own venv</span>
-<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="sd">    usually lacks. `EASYSPEAK_ATSPI_PYTHON` lets the packaging point straight at an</span>
-<a id="__codelineno-0-526" name="__codelineno-0-526"></a><span class="sd">    interpreter that has them (the Nix flake sets it). Otherwise each candidate is</span>
-<a id="__codelineno-0-527" name="__codelineno-0-527"></a><span class="sd">    probed with the helper&#39;s own import chain and the first that works is kept.</span>
-<a id="__codelineno-0-528" name="__codelineno-0-528"></a>
-<a id="__codelineno-0-529" name="__codelineno-0-529"></a><span class="sd">    Falling back to a bare `python3` used to be enough, but only until the daemon</span>
-<a id="__codelineno-0-530" name="__codelineno-0-530"></a><span class="sd">    was run from an activated virtualenv: `python3` then resolves to the venv&#39;s</span>
-<a id="__codelineno-0-531" name="__codelineno-0-531"></a><span class="sd">    interpreter, which has no PyGObject, and dictation transcribed perfectly and</span>
-<a id="__codelineno-0-532" name="__codelineno-0-532"></a><span class="sd">    inserted nothing.</span>
-<a id="__codelineno-0-533" name="__codelineno-0-533"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-534" name="__codelineno-0-534"></a>    <span class="k">global</span> <span class="n">_atspi_python</span>
-<a id="__codelineno-0-535" name="__codelineno-0-535"></a>    <span class="k">if</span> <span class="n">_atspi_python</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-536" name="__codelineno-0-536"></a>        <span class="n">_atspi_python</span> <span class="o">=</span> <span class="n">_find_atspi_python</span><span class="p">()</span> <span class="ow">or</span> <span class="kc">False</span>
-<a id="__codelineno-0-537" name="__codelineno-0-537"></a>    <span class="k">return</span> <span class="n">_atspi_python</span> <span class="ow">or</span> <span class="kc">None</span>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="sd">    Falling back to a bare `python3` used to be enough, but only until the daemon</span>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="sd">    was run from an activated virtualenv: `python3` then resolves to the venv&#39;s</span>
+<a id="__codelineno-0-526" name="__codelineno-0-526"></a><span class="sd">    interpreter, which has no PyGObject, and dictation transcribed perfectly and</span>
+<a id="__codelineno-0-527" name="__codelineno-0-527"></a><span class="sd">    inserted nothing.</span>
+<a id="__codelineno-0-528" name="__codelineno-0-528"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-529" name="__codelineno-0-529"></a>    <span class="k">global</span> <span class="n">_atspi_python</span>
+<a id="__codelineno-0-530" name="__codelineno-0-530"></a>    <span class="k">if</span> <span class="n">_atspi_python</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-531" name="__codelineno-0-531"></a>        <span class="n">_atspi_python</span> <span class="o">=</span> <span class="n">_find_atspi_python</span><span class="p">()</span> <span class="ow">or</span> <span class="kc">False</span>
+<a id="__codelineno-0-532" name="__codelineno-0-532"></a>    <span class="k">return</span> <span class="n">_atspi_python</span> <span class="ow">or</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7825,7 +7815,12 @@ that matches the real cause instead of always blaming focus.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/dictation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-558">558</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-553">553</a></span>
+<span class="normal"><a href="#__codelineno-0-554">554</a></span>
+<span class="normal"><a href="#__codelineno-0-555">555</a></span>
+<span class="normal"><a href="#__codelineno-0-556">556</a></span>
+<span class="normal"><a href="#__codelineno-0-557">557</a></span>
+<span class="normal"><a href="#__codelineno-0-558">558</a></span>
 <span class="normal"><a href="#__codelineno-0-559">559</a></span>
 <span class="normal"><a href="#__codelineno-0-560">560</a></span>
 <span class="normal"><a href="#__codelineno-0-561">561</a></span>
@@ -7853,45 +7848,40 @@ that matches the real cause instead of always blaming focus.</p>
 <span class="normal"><a href="#__codelineno-0-583">583</a></span>
 <span class="normal"><a href="#__codelineno-0-584">584</a></span>
 <span class="normal"><a href="#__codelineno-0-585">585</a></span>
-<span class="normal"><a href="#__codelineno-0-586">586</a></span>
-<span class="normal"><a href="#__codelineno-0-587">587</a></span>
-<span class="normal"><a href="#__codelineno-0-588">588</a></span>
-<span class="normal"><a href="#__codelineno-0-589">589</a></span>
-<span class="normal"><a href="#__codelineno-0-590">590</a></span>
-<span class="normal"><a href="#__codelineno-0-591">591</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-558" name="__codelineno-0-558"></a><span class="k">def</span><span class="w"> </span><span class="nf">insert_via_atspi</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
-<a id="__codelineno-0-559" name="__codelineno-0-559"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Insert text via AT-SPI.</span>
-<a id="__codelineno-0-560" name="__codelineno-0-560"></a>
-<a id="__codelineno-0-561" name="__codelineno-0-561"></a><span class="sd">    Returns one of INSERTED, NO_FOCUS or BACKEND_ERROR so the caller can give feedback</span>
-<a id="__codelineno-0-562" name="__codelineno-0-562"></a><span class="sd">    that matches the real cause instead of always blaming focus.</span>
-<a id="__codelineno-0-563" name="__codelineno-0-563"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-564" name="__codelineno-0-564"></a>    <span class="n">python</span> <span class="o">=</span> <span class="n">atspi_python</span><span class="p">()</span>
-<a id="__codelineno-0-565" name="__codelineno-0-565"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;⌨️  inserting </span><span class="si">%d</span><span class="s2"> chars via AT-SPI (</span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">),</span> <span class="n">python</span><span class="p">)</span>
-<a id="__codelineno-0-566" name="__codelineno-0-566"></a>    <span class="k">if</span> <span class="n">python</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-567" name="__codelineno-0-567"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-<a id="__codelineno-0-568" name="__codelineno-0-568"></a>            <span class="s2">&quot;Dictation needs PyGObject and the AT-SPI typelib, and no interpreter &quot;</span>
-<a id="__codelineno-0-569" name="__codelineno-0-569"></a>            <span class="s2">&quot;on this system has both. Install them (Fedora: sudo dnf install &quot;</span>
-<a id="__codelineno-0-570" name="__codelineno-0-570"></a>            <span class="s2">&quot;python3-gobject at-spi2-core; Debian/Ubuntu: sudo apt install &quot;</span>
-<a id="__codelineno-0-571" name="__codelineno-0-571"></a>            <span class="s2">&quot;python3-gi gir1.2-atspi-2.0), or point EASYSPEAK_ATSPI_PYTHON at an &quot;</span>
-<a id="__codelineno-0-572" name="__codelineno-0-572"></a>            <span class="s2">&quot;interpreter that already does.&quot;</span>
-<a id="__codelineno-0-573" name="__codelineno-0-573"></a>        <span class="p">)</span>
-<a id="__codelineno-0-574" name="__codelineno-0-574"></a>        <span class="k">return</span> <span class="n">BACKEND_ERROR</span>
-<a id="__codelineno-0-575" name="__codelineno-0-575"></a>
-<a id="__codelineno-0-576" name="__codelineno-0-576"></a>    <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">python</span><span class="p">,</span> <span class="n">ATSPI_HELPER</span><span class="p">,</span> <span class="n">text</span><span class="p">]</span>
-<a id="__codelineno-0-577" name="__codelineno-0-577"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-578" name="__codelineno-0-578"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<a id="__codelineno-0-579" name="__codelineno-0-579"></a>    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-<a id="__codelineno-0-580" name="__codelineno-0-580"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;dictation backend could not start: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
-<a id="__codelineno-0-581" name="__codelineno-0-581"></a>        <span class="k">return</span> <span class="n">BACKEND_ERROR</span>
-<a id="__codelineno-0-582" name="__codelineno-0-582"></a>
-<a id="__codelineno-0-583" name="__codelineno-0-583"></a>    <span class="k">if</span> <span class="s2">&quot;OK&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">:</span>
-<a id="__codelineno-0-584" name="__codelineno-0-584"></a>        <span class="k">return</span> <span class="n">INSERTED</span>
-<a id="__codelineno-0-585" name="__codelineno-0-585"></a>    <span class="k">if</span> <span class="s2">&quot;NO_BACKEND&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span> <span class="ow">or</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-<a id="__codelineno-0-586" name="__codelineno-0-586"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-<a id="__codelineno-0-587" name="__codelineno-0-587"></a>            <span class="s2">&quot;dictation backend unavailable (PyGObject/AT-SPI missing): </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-588" name="__codelineno-0-588"></a>            <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;no detail&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-589" name="__codelineno-0-589"></a>        <span class="p">)</span>
-<a id="__codelineno-0-590" name="__codelineno-0-590"></a>        <span class="k">return</span> <span class="n">BACKEND_ERROR</span>
-<a id="__codelineno-0-591" name="__codelineno-0-591"></a>    <span class="k">return</span> <span class="n">NO_FOCUS</span>
+<span class="normal"><a href="#__codelineno-0-586">586</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-553" name="__codelineno-0-553"></a><span class="k">def</span><span class="w"> </span><span class="nf">insert_via_atspi</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+<a id="__codelineno-0-554" name="__codelineno-0-554"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Insert text via AT-SPI.</span>
+<a id="__codelineno-0-555" name="__codelineno-0-555"></a>
+<a id="__codelineno-0-556" name="__codelineno-0-556"></a><span class="sd">    Returns one of INSERTED, NO_FOCUS or BACKEND_ERROR so the caller can give feedback</span>
+<a id="__codelineno-0-557" name="__codelineno-0-557"></a><span class="sd">    that matches the real cause instead of always blaming focus.</span>
+<a id="__codelineno-0-558" name="__codelineno-0-558"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-559" name="__codelineno-0-559"></a>    <span class="n">python</span> <span class="o">=</span> <span class="n">atspi_python</span><span class="p">()</span>
+<a id="__codelineno-0-560" name="__codelineno-0-560"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;⌨️  inserting </span><span class="si">%d</span><span class="s2"> chars via AT-SPI (</span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">),</span> <span class="n">python</span><span class="p">)</span>
+<a id="__codelineno-0-561" name="__codelineno-0-561"></a>    <span class="k">if</span> <span class="n">python</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-562" name="__codelineno-0-562"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+<a id="__codelineno-0-563" name="__codelineno-0-563"></a>            <span class="s2">&quot;Dictation needs PyGObject and the AT-SPI typelib, and no interpreter &quot;</span>
+<a id="__codelineno-0-564" name="__codelineno-0-564"></a>            <span class="s2">&quot;on this system has both. Install them (Fedora: sudo dnf install &quot;</span>
+<a id="__codelineno-0-565" name="__codelineno-0-565"></a>            <span class="s2">&quot;python3-gobject at-spi2-core; Debian/Ubuntu: sudo apt install &quot;</span>
+<a id="__codelineno-0-566" name="__codelineno-0-566"></a>            <span class="s2">&quot;python3-gi gir1.2-atspi-2.0), or point EASYSPEAK_ATSPI_PYTHON at an &quot;</span>
+<a id="__codelineno-0-567" name="__codelineno-0-567"></a>            <span class="s2">&quot;interpreter that already does.&quot;</span>
+<a id="__codelineno-0-568" name="__codelineno-0-568"></a>        <span class="p">)</span>
+<a id="__codelineno-0-569" name="__codelineno-0-569"></a>        <span class="k">return</span> <span class="n">BACKEND_ERROR</span>
+<a id="__codelineno-0-570" name="__codelineno-0-570"></a>
+<a id="__codelineno-0-571" name="__codelineno-0-571"></a>    <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">python</span><span class="p">,</span> <span class="n">ATSPI_HELPER</span><span class="p">,</span> <span class="n">text</span><span class="p">]</span>
+<a id="__codelineno-0-572" name="__codelineno-0-572"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-573" name="__codelineno-0-573"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<a id="__codelineno-0-574" name="__codelineno-0-574"></a>    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+<a id="__codelineno-0-575" name="__codelineno-0-575"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;dictation backend could not start: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+<a id="__codelineno-0-576" name="__codelineno-0-576"></a>        <span class="k">return</span> <span class="n">BACKEND_ERROR</span>
+<a id="__codelineno-0-577" name="__codelineno-0-577"></a>
+<a id="__codelineno-0-578" name="__codelineno-0-578"></a>    <span class="k">if</span> <span class="s2">&quot;OK&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">:</span>
+<a id="__codelineno-0-579" name="__codelineno-0-579"></a>        <span class="k">return</span> <span class="n">INSERTED</span>
+<a id="__codelineno-0-580" name="__codelineno-0-580"></a>    <span class="k">if</span> <span class="s2">&quot;NO_BACKEND&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span> <span class="ow">or</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-581" name="__codelineno-0-581"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+<a id="__codelineno-0-582" name="__codelineno-0-582"></a>            <span class="s2">&quot;dictation backend unavailable (PyGObject/AT-SPI missing): </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-583" name="__codelineno-0-583"></a>            <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;no detail&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-584" name="__codelineno-0-584"></a>        <span class="p">)</span>
+<a id="__codelineno-0-585" name="__codelineno-0-585"></a>        <span class="k">return</span> <span class="n">BACKEND_ERROR</span>
+<a id="__codelineno-0-586" name="__codelineno-0-586"></a>    <span class="k">return</span> <span class="n">NO_FOCUS</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7916,7 +7906,12 @@ that matches the real cause instead of always blaming focus.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/dictation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-594">594</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-589">589</a></span>
+<span class="normal"><a href="#__codelineno-0-590">590</a></span>
+<span class="normal"><a href="#__codelineno-0-591">591</a></span>
+<span class="normal"><a href="#__codelineno-0-592">592</a></span>
+<span class="normal"><a href="#__codelineno-0-593">593</a></span>
+<span class="normal"><a href="#__codelineno-0-594">594</a></span>
 <span class="normal"><a href="#__codelineno-0-595">595</a></span>
 <span class="normal"><a href="#__codelineno-0-596">596</a></span>
 <span class="normal"><a href="#__codelineno-0-597">597</a></span>
@@ -8002,103 +7997,98 @@ that matches the real cause instead of always blaming focus.</p>
 <span class="normal"><a href="#__codelineno-0-677">677</a></span>
 <span class="normal"><a href="#__codelineno-0-678">678</a></span>
 <span class="normal"><a href="#__codelineno-0-679">679</a></span>
-<span class="normal"><a href="#__codelineno-0-680">680</a></span>
-<span class="normal"><a href="#__codelineno-0-681">681</a></span>
-<span class="normal"><a href="#__codelineno-0-682">682</a></span>
-<span class="normal"><a href="#__codelineno-0-683">683</a></span>
-<span class="normal"><a href="#__codelineno-0-684">684</a></span>
-<span class="normal"><a href="#__codelineno-0-685">685</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-594" name="__codelineno-0-594"></a><span class="k">def</span><span class="w"> </span><span class="nf">format_text</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
-<a id="__codelineno-0-595" name="__codelineno-0-595"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert spoken punctuation to actual punctuation.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-596" name="__codelineno-0-596"></a>    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-<a id="__codelineno-0-597" name="__codelineno-0-597"></a>
-<a id="__codelineno-0-598" name="__codelineno-0-598"></a>    <span class="c1"># Strip ALL punctuation Whisper auto-adds; only explicit commands add it back</span>
-<a id="__codelineno-0-599" name="__codelineno-0-599"></a>    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[.,!?;:]+&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-<a id="__codelineno-0-600" name="__codelineno-0-600"></a>    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-<a id="__codelineno-0-601" name="__codelineno-0-601"></a>
-<a id="__codelineno-0-602" name="__codelineno-0-602"></a>    <span class="c1"># Punctuation replacements - order matters!</span>
-<a id="__codelineno-0-603" name="__codelineno-0-603"></a>    <span class="n">replacements</span> <span class="o">=</span> <span class="p">[</span>
-<a id="__codelineno-0-604" name="__codelineno-0-604"></a>        <span class="c1"># Editing commands</span>
-<a id="__codelineno-0-605" name="__codelineno-0-605"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*backspace\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\b</span><span class="s2">&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-606" name="__codelineno-0-606"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*back space\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\b</span><span class="s2">&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-607" name="__codelineno-0-607"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*delete\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\b</span><span class="s2">&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-608" name="__codelineno-0-608"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*space\s*&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-609" name="__codelineno-0-609"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*tab\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-610" name="__codelineno-0-610"></a>        <span class="c1"># Sentence breaks - add space after</span>
-<a id="__codelineno-0-611" name="__codelineno-0-611"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*new sentence\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;. &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-612" name="__codelineno-0-612"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*next sentence\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;. &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-613" name="__codelineno-0-613"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*new paragraph\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-614" name="__codelineno-0-614"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*next paragraph\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-615" name="__codelineno-0-615"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*new para\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-616" name="__codelineno-0-616"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*new line\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-617" name="__codelineno-0-617"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*newline\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-618" name="__codelineno-0-618"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*you line\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-619" name="__codelineno-0-619"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*line break\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-620" name="__codelineno-0-620"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*enter\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-621" name="__codelineno-0-621"></a>        <span class="c1"># Punctuation - include common mishearings</span>
-<a id="__codelineno-0-622" name="__codelineno-0-622"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*comma\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-623" name="__codelineno-0-623"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*karma\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-624" name="__codelineno-0-624"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*kama\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-625" name="__codelineno-0-625"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*carma\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-626" name="__codelineno-0-626"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*calm a\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-627" name="__codelineno-0-627"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*calm him\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-628" name="__codelineno-0-628"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*calm up\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-629" name="__codelineno-0-629"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*come a\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-630" name="__codelineno-0-630"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*coma\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-631" name="__codelineno-0-631"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*calmer\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-632" name="__codelineno-0-632"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;,\s*\.&quot;</span><span class="p">,</span> <span class="s2">&quot;,&quot;</span><span class="p">),</span>  <span class="c1"># Fix comma followed by period</span>
-<a id="__codelineno-0-633" name="__codelineno-0-633"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*period\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;. &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-634" name="__codelineno-0-634"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*full stop\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;. &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-635" name="__codelineno-0-635"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*\.\s*\.+&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">),</span>  <span class="c1"># Multiple periods to one</span>
-<a id="__codelineno-0-636" name="__codelineno-0-636"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*question mark\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;? &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-637" name="__codelineno-0-637"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*exclamation mark\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;! &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-638" name="__codelineno-0-638"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*exclamation point\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;! &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-639" name="__codelineno-0-639"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*colon\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;: &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-640" name="__codelineno-0-640"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*semicolon\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;; &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-641" name="__codelineno-0-641"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*semi colon\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;; &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-642" name="__codelineno-0-642"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*dash\s*&quot;</span><span class="p">,</span> <span class="s2">&quot; - &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-643" name="__codelineno-0-643"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*hyphen\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-644" name="__codelineno-0-644"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*apostrophe\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-645" name="__codelineno-0-645"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*open quote\s*&quot;</span><span class="p">,</span> <span class="s1">&#39; &quot;&#39;</span><span class="p">),</span>
-<a id="__codelineno-0-646" name="__codelineno-0-646"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*close quote\s*&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot; &#39;</span><span class="p">),</span>
-<a id="__codelineno-0-647" name="__codelineno-0-647"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*quote\s*&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">),</span>
-<a id="__codelineno-0-648" name="__codelineno-0-648"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*open paren\s*&quot;</span><span class="p">,</span> <span class="s2">&quot; (&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-649" name="__codelineno-0-649"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*close paren\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;) &quot;</span><span class="p">),</span>
-<a id="__codelineno-0-650" name="__codelineno-0-650"></a>        <span class="c1"># Common words/symbols</span>
-<a id="__codelineno-0-651" name="__codelineno-0-651"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*at sign\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;@&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-652" name="__codelineno-0-652"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*ampersand\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-653" name="__codelineno-0-653"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*dollar sign\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;$&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-654" name="__codelineno-0-654"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*percent sign\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-655" name="__codelineno-0-655"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*percent\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-656" name="__codelineno-0-656"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*hashtag\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;#&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-657" name="__codelineno-0-657"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*hash\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;#&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-658" name="__codelineno-0-658"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*asterisk\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-659" name="__codelineno-0-659"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*star\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-660" name="__codelineno-0-660"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*underscore\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-661" name="__codelineno-0-661"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*slash\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-662" name="__codelineno-0-662"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*backslash\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\\\</span><span class="s2">&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-663" name="__codelineno-0-663"></a>    <span class="p">]</span>
-<a id="__codelineno-0-664" name="__codelineno-0-664"></a>
-<a id="__codelineno-0-665" name="__codelineno-0-665"></a>    <span class="k">for</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">replacement</span> <span class="ow">in</span> <span class="n">replacements</span><span class="p">:</span>
-<a id="__codelineno-0-666" name="__codelineno-0-666"></a>        <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">replacement</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
-<a id="__codelineno-0-667" name="__codelineno-0-667"></a>
-<a id="__codelineno-0-668" name="__codelineno-0-668"></a>    <span class="c1"># Capitalize after sentence endings</span>
-<a id="__codelineno-0-669" name="__codelineno-0-669"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">capitalize_after</span><span class="p">(</span><span class="n">match</span><span class="p">):</span>
-<a id="__codelineno-0-670" name="__codelineno-0-670"></a>        <span class="k">return</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-<a id="__codelineno-0-671" name="__codelineno-0-671"></a>
-<a id="__codelineno-0-672" name="__codelineno-0-672"></a>    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([.!?]\s+)([a-z])&quot;</span><span class="p">,</span> <span class="n">capitalize_after</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-<a id="__codelineno-0-673" name="__codelineno-0-673"></a>
-<a id="__codelineno-0-674" name="__codelineno-0-674"></a>    <span class="c1"># Capitalize first letter</span>
-<a id="__codelineno-0-675" name="__codelineno-0-675"></a>    <span class="k">if</span> <span class="n">text</span><span class="p">:</span>
-<a id="__codelineno-0-676" name="__codelineno-0-676"></a>        <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="n">text</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-<a id="__codelineno-0-677" name="__codelineno-0-677"></a>
-<a id="__codelineno-0-678" name="__codelineno-0-678"></a>    <span class="c1"># Clean up extra spaces</span>
-<a id="__codelineno-0-679" name="__codelineno-0-679"></a>    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot; +&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-<a id="__codelineno-0-680" name="__codelineno-0-680"></a>    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot; ([.,!?:;])&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-<a id="__codelineno-0-681" name="__codelineno-0-681"></a>
-<a id="__codelineno-0-682" name="__codelineno-0-682"></a>    <span class="c1"># Fix double periods</span>
-<a id="__codelineno-0-683" name="__codelineno-0-683"></a>    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\.+&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-<a id="__codelineno-0-684" name="__codelineno-0-684"></a>
-<a id="__codelineno-0-685" name="__codelineno-0-685"></a>    <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<span class="normal"><a href="#__codelineno-0-680">680</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-589" name="__codelineno-0-589"></a><span class="k">def</span><span class="w"> </span><span class="nf">format_text</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+<a id="__codelineno-0-590" name="__codelineno-0-590"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert spoken punctuation to actual punctuation.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-591" name="__codelineno-0-591"></a>    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<a id="__codelineno-0-592" name="__codelineno-0-592"></a>
+<a id="__codelineno-0-593" name="__codelineno-0-593"></a>    <span class="c1"># Strip ALL punctuation Whisper auto-adds; only explicit commands add it back</span>
+<a id="__codelineno-0-594" name="__codelineno-0-594"></a>    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[.,!?;:]+&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+<a id="__codelineno-0-595" name="__codelineno-0-595"></a>    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<a id="__codelineno-0-596" name="__codelineno-0-596"></a>
+<a id="__codelineno-0-597" name="__codelineno-0-597"></a>    <span class="c1"># Punctuation replacements - order matters!</span>
+<a id="__codelineno-0-598" name="__codelineno-0-598"></a>    <span class="n">replacements</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-0-599" name="__codelineno-0-599"></a>        <span class="c1"># Editing commands</span>
+<a id="__codelineno-0-600" name="__codelineno-0-600"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*backspace\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\b</span><span class="s2">&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-601" name="__codelineno-0-601"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*back space\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\b</span><span class="s2">&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-602" name="__codelineno-0-602"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*delete\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\b</span><span class="s2">&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-603" name="__codelineno-0-603"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*space\s*&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-604" name="__codelineno-0-604"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*tab\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-605" name="__codelineno-0-605"></a>        <span class="c1"># Sentence breaks - add space after</span>
+<a id="__codelineno-0-606" name="__codelineno-0-606"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*new sentence\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;. &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-607" name="__codelineno-0-607"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*next sentence\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;. &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-608" name="__codelineno-0-608"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*new paragraph\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-609" name="__codelineno-0-609"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*next paragraph\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-610" name="__codelineno-0-610"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*new para\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-611" name="__codelineno-0-611"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*new line\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-612" name="__codelineno-0-612"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*newline\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-613" name="__codelineno-0-613"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*you line\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-614" name="__codelineno-0-614"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*line break\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-615" name="__codelineno-0-615"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*enter\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-616" name="__codelineno-0-616"></a>        <span class="c1"># Punctuation - include common mishearings</span>
+<a id="__codelineno-0-617" name="__codelineno-0-617"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*comma\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-618" name="__codelineno-0-618"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*karma\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-619" name="__codelineno-0-619"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*kama\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-620" name="__codelineno-0-620"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*carma\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-621" name="__codelineno-0-621"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*calm a\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-622" name="__codelineno-0-622"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*calm him\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-623" name="__codelineno-0-623"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*calm up\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-624" name="__codelineno-0-624"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*come a\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-625" name="__codelineno-0-625"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*coma\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-626" name="__codelineno-0-626"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*calmer\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-627" name="__codelineno-0-627"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;,\s*\.&quot;</span><span class="p">,</span> <span class="s2">&quot;,&quot;</span><span class="p">),</span>  <span class="c1"># Fix comma followed by period</span>
+<a id="__codelineno-0-628" name="__codelineno-0-628"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*period\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;. &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-629" name="__codelineno-0-629"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*full stop\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;. &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-630" name="__codelineno-0-630"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*\.\s*\.+&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">),</span>  <span class="c1"># Multiple periods to one</span>
+<a id="__codelineno-0-631" name="__codelineno-0-631"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*question mark\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;? &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-632" name="__codelineno-0-632"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*exclamation mark\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;! &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-633" name="__codelineno-0-633"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*exclamation point\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;! &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-634" name="__codelineno-0-634"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*colon\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;: &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-635" name="__codelineno-0-635"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*semicolon\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;; &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-636" name="__codelineno-0-636"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*semi colon\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;; &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-637" name="__codelineno-0-637"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*dash\s*&quot;</span><span class="p">,</span> <span class="s2">&quot; - &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-638" name="__codelineno-0-638"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*hyphen\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-639" name="__codelineno-0-639"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*apostrophe\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-640" name="__codelineno-0-640"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*open quote\s*&quot;</span><span class="p">,</span> <span class="s1">&#39; &quot;&#39;</span><span class="p">),</span>
+<a id="__codelineno-0-641" name="__codelineno-0-641"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*close quote\s*&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot; &#39;</span><span class="p">),</span>
+<a id="__codelineno-0-642" name="__codelineno-0-642"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*quote\s*&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">),</span>
+<a id="__codelineno-0-643" name="__codelineno-0-643"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*open paren\s*&quot;</span><span class="p">,</span> <span class="s2">&quot; (&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-644" name="__codelineno-0-644"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*close paren\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;) &quot;</span><span class="p">),</span>
+<a id="__codelineno-0-645" name="__codelineno-0-645"></a>        <span class="c1"># Common words/symbols</span>
+<a id="__codelineno-0-646" name="__codelineno-0-646"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*at sign\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;@&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-647" name="__codelineno-0-647"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*ampersand\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-648" name="__codelineno-0-648"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*dollar sign\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;$&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-649" name="__codelineno-0-649"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*percent sign\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-650" name="__codelineno-0-650"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*percent\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-651" name="__codelineno-0-651"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*hashtag\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;#&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-652" name="__codelineno-0-652"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*hash\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;#&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-653" name="__codelineno-0-653"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*asterisk\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-654" name="__codelineno-0-654"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*star\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-655" name="__codelineno-0-655"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*underscore\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-656" name="__codelineno-0-656"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*slash\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-657" name="__codelineno-0-657"></a>        <span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*,?\s*backslash\s*&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\\\</span><span class="s2">&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-658" name="__codelineno-0-658"></a>    <span class="p">]</span>
+<a id="__codelineno-0-659" name="__codelineno-0-659"></a>
+<a id="__codelineno-0-660" name="__codelineno-0-660"></a>    <span class="k">for</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">replacement</span> <span class="ow">in</span> <span class="n">replacements</span><span class="p">:</span>
+<a id="__codelineno-0-661" name="__codelineno-0-661"></a>        <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">replacement</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<a id="__codelineno-0-662" name="__codelineno-0-662"></a>
+<a id="__codelineno-0-663" name="__codelineno-0-663"></a>    <span class="c1"># Capitalize after sentence endings</span>
+<a id="__codelineno-0-664" name="__codelineno-0-664"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">capitalize_after</span><span class="p">(</span><span class="n">match</span><span class="p">):</span>
+<a id="__codelineno-0-665" name="__codelineno-0-665"></a>        <span class="k">return</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+<a id="__codelineno-0-666" name="__codelineno-0-666"></a>
+<a id="__codelineno-0-667" name="__codelineno-0-667"></a>    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([.!?]\s+)([a-z])&quot;</span><span class="p">,</span> <span class="n">capitalize_after</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+<a id="__codelineno-0-668" name="__codelineno-0-668"></a>
+<a id="__codelineno-0-669" name="__codelineno-0-669"></a>    <span class="c1"># Capitalize first letter</span>
+<a id="__codelineno-0-670" name="__codelineno-0-670"></a>    <span class="k">if</span> <span class="n">text</span><span class="p">:</span>
+<a id="__codelineno-0-671" name="__codelineno-0-671"></a>        <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="n">text</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+<a id="__codelineno-0-672" name="__codelineno-0-672"></a>
+<a id="__codelineno-0-673" name="__codelineno-0-673"></a>    <span class="c1"># Clean up extra spaces</span>
+<a id="__codelineno-0-674" name="__codelineno-0-674"></a>    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot; +&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+<a id="__codelineno-0-675" name="__codelineno-0-675"></a>    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot; ([.,!?:;])&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+<a id="__codelineno-0-676" name="__codelineno-0-676"></a>
+<a id="__codelineno-0-677" name="__codelineno-0-677"></a>    <span class="c1"># Fix double periods</span>
+<a id="__codelineno-0-678" name="__codelineno-0-678"></a>    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\.+&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+<a id="__codelineno-0-679" name="__codelineno-0-679"></a>
+<a id="__codelineno-0-680" name="__codelineno-0-680"></a>    <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -8128,7 +8118,12 @@ promptly.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/dictation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-718">718</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-713">713</a></span>
+<span class="normal"><a href="#__codelineno-0-714">714</a></span>
+<span class="normal"><a href="#__codelineno-0-715">715</a></span>
+<span class="normal"><a href="#__codelineno-0-716">716</a></span>
+<span class="normal"><a href="#__codelineno-0-717">717</a></span>
+<span class="normal"><a href="#__codelineno-0-718">718</a></span>
 <span class="normal"><a href="#__codelineno-0-719">719</a></span>
 <span class="normal"><a href="#__codelineno-0-720">720</a></span>
 <span class="normal"><a href="#__codelineno-0-721">721</a></span>
@@ -8145,34 +8140,29 @@ promptly.</p>
 <span class="normal"><a href="#__codelineno-0-732">732</a></span>
 <span class="normal"><a href="#__codelineno-0-733">733</a></span>
 <span class="normal"><a href="#__codelineno-0-734">734</a></span>
-<span class="normal"><a href="#__codelineno-0-735">735</a></span>
-<span class="normal"><a href="#__codelineno-0-736">736</a></span>
-<span class="normal"><a href="#__codelineno-0-737">737</a></span>
-<span class="normal"><a href="#__codelineno-0-738">738</a></span>
-<span class="normal"><a href="#__codelineno-0-739">739</a></span>
-<span class="normal"><a href="#__codelineno-0-740">740</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-718" name="__codelineno-0-718"></a><span class="k">def</span><span class="w"> </span><span class="nf">run_push_to_talk</span><span class="p">(</span><span class="n">core</span><span class="p">,</span> <span class="n">should_continue</span><span class="p">):</span>
-<a id="__codelineno-0-719" name="__codelineno-0-719"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Dictate while the activation keys are held (the silent-activation path).</span>
-<a id="__codelineno-0-720" name="__codelineno-0-720"></a>
-<a id="__codelineno-0-721" name="__codelineno-0-721"></a><span class="sd">    Mirrors the voice `notes` loop but is gated on `should_continue` — a predicate that</span>
-<a id="__codelineno-0-722" name="__codelineno-0-722"></a><span class="sd">    is True while the keys remain held — instead of a spoken &quot;stop notes&quot;: each</span>
-<a id="__codelineno-0-723" name="__codelineno-0-723"></a><span class="sd">    utterance captured from `core` is formatted and inserted until the keys are</span>
-<a id="__codelineno-0-724" name="__codelineno-0-724"></a><span class="sd">    released. The capture waits re-check `should_continue` so releasing stops dictation</span>
-<a id="__codelineno-0-725" name="__codelineno-0-725"></a><span class="sd">    promptly.</span>
-<a id="__codelineno-0-726" name="__codelineno-0-726"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-727" name="__codelineno-0-727"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;🎙️ Push-to-talk dictation — release to end&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-728" name="__codelineno-0-728"></a>    <span class="k">while</span> <span class="n">should_continue</span><span class="p">():</span>
-<a id="__codelineno-0-729" name="__codelineno-0-729"></a>        <span class="n">core</span><span class="o">.</span><span class="n">flush_stream</span><span class="p">()</span>
-<a id="__codelineno-0-730" name="__codelineno-0-730"></a>        <span class="n">first</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">wait_for_speech</span><span class="p">(</span>
-<a id="__codelineno-0-731" name="__codelineno-0-731"></a>            <span class="n">timeout</span><span class="o">=</span><span class="n">PTT_LISTEN_TIMEOUT</span><span class="p">,</span> <span class="n">should_continue</span><span class="o">=</span><span class="n">should_continue</span>
-<a id="__codelineno-0-732" name="__codelineno-0-732"></a>        <span class="p">)</span>
-<a id="__codelineno-0-733" name="__codelineno-0-733"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">first</span><span class="p">:</span>
-<a id="__codelineno-0-734" name="__codelineno-0-734"></a>            <span class="k">continue</span>
-<a id="__codelineno-0-735" name="__codelineno-0-735"></a>        <span class="n">audio</span> <span class="o">=</span> <span class="n">first</span> <span class="o">+</span> <span class="n">core</span><span class="o">.</span><span class="n">record_until_silence</span><span class="p">(</span><span class="n">should_continue</span><span class="o">=</span><span class="n">should_continue</span><span class="p">)</span>
-<a id="__codelineno-0-736" name="__codelineno-0-736"></a>        <span class="n">text</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">transcribe</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">DICTATION_PROMPT</span><span class="p">)</span>
-<a id="__codelineno-0-737" name="__codelineno-0-737"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
-<a id="__codelineno-0-738" name="__codelineno-0-738"></a>            <span class="k">continue</span>
-<a id="__codelineno-0-739" name="__codelineno-0-739"></a>        <span class="k">if</span> <span class="n">_dictate_utterance</span><span class="p">(</span><span class="n">core</span><span class="p">,</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()):</span>
-<a id="__codelineno-0-740" name="__codelineno-0-740"></a>            <span class="k">return</span>
+<span class="normal"><a href="#__codelineno-0-735">735</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-713" name="__codelineno-0-713"></a><span class="k">def</span><span class="w"> </span><span class="nf">run_push_to_talk</span><span class="p">(</span><span class="n">core</span><span class="p">,</span> <span class="n">should_continue</span><span class="p">):</span>
+<a id="__codelineno-0-714" name="__codelineno-0-714"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Dictate while the activation keys are held (the silent-activation path).</span>
+<a id="__codelineno-0-715" name="__codelineno-0-715"></a>
+<a id="__codelineno-0-716" name="__codelineno-0-716"></a><span class="sd">    Mirrors the voice `notes` loop but is gated on `should_continue` — a predicate that</span>
+<a id="__codelineno-0-717" name="__codelineno-0-717"></a><span class="sd">    is True while the keys remain held — instead of a spoken &quot;stop notes&quot;: each</span>
+<a id="__codelineno-0-718" name="__codelineno-0-718"></a><span class="sd">    utterance captured from `core` is formatted and inserted until the keys are</span>
+<a id="__codelineno-0-719" name="__codelineno-0-719"></a><span class="sd">    released. The capture waits re-check `should_continue` so releasing stops dictation</span>
+<a id="__codelineno-0-720" name="__codelineno-0-720"></a><span class="sd">    promptly.</span>
+<a id="__codelineno-0-721" name="__codelineno-0-721"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-722" name="__codelineno-0-722"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;🎙️ Push-to-talk dictation — release to end&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-723" name="__codelineno-0-723"></a>    <span class="k">while</span> <span class="n">should_continue</span><span class="p">():</span>
+<a id="__codelineno-0-724" name="__codelineno-0-724"></a>        <span class="n">core</span><span class="o">.</span><span class="n">flush_stream</span><span class="p">()</span>
+<a id="__codelineno-0-725" name="__codelineno-0-725"></a>        <span class="n">first</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">wait_for_speech</span><span class="p">(</span>
+<a id="__codelineno-0-726" name="__codelineno-0-726"></a>            <span class="n">timeout</span><span class="o">=</span><span class="n">PTT_LISTEN_TIMEOUT</span><span class="p">,</span> <span class="n">should_continue</span><span class="o">=</span><span class="n">should_continue</span>
+<a id="__codelineno-0-727" name="__codelineno-0-727"></a>        <span class="p">)</span>
+<a id="__codelineno-0-728" name="__codelineno-0-728"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">first</span><span class="p">:</span>
+<a id="__codelineno-0-729" name="__codelineno-0-729"></a>            <span class="k">continue</span>
+<a id="__codelineno-0-730" name="__codelineno-0-730"></a>        <span class="n">audio</span> <span class="o">=</span> <span class="n">first</span> <span class="o">+</span> <span class="n">core</span><span class="o">.</span><span class="n">record_until_silence</span><span class="p">(</span><span class="n">should_continue</span><span class="o">=</span><span class="n">should_continue</span><span class="p">)</span>
+<a id="__codelineno-0-731" name="__codelineno-0-731"></a>        <span class="n">text</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">transcribe</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">DICTATION_PROMPT</span><span class="p">)</span>
+<a id="__codelineno-0-732" name="__codelineno-0-732"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
+<a id="__codelineno-0-733" name="__codelineno-0-733"></a>            <span class="k">continue</span>
+<a id="__codelineno-0-734" name="__codelineno-0-734"></a>        <span class="k">if</span> <span class="n">_dictate_utterance</span><span class="p">(</span><span class="n">core</span><span class="p">,</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()):</span>
+<a id="__codelineno-0-735" name="__codelineno-0-735"></a>            <span class="k">return</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -8202,7 +8192,12 @@ mode ends on its own, so an open microphone can't be left dictating unattended.<
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/dictation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-743">743</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-738">738</a></span>
+<span class="normal"><a href="#__codelineno-0-739">739</a></span>
+<span class="normal"><a href="#__codelineno-0-740">740</a></span>
+<span class="normal"><a href="#__codelineno-0-741">741</a></span>
+<span class="normal"><a href="#__codelineno-0-742">742</a></span>
+<span class="normal"><a href="#__codelineno-0-743">743</a></span>
 <span class="normal"><a href="#__codelineno-0-744">744</a></span>
 <span class="normal"><a href="#__codelineno-0-745">745</a></span>
 <span class="normal"><a href="#__codelineno-0-746">746</a></span>
@@ -8222,37 +8217,32 @@ mode ends on its own, so an open microphone can't be left dictating unattended.<
 <span class="normal"><a href="#__codelineno-0-760">760</a></span>
 <span class="normal"><a href="#__codelineno-0-761">761</a></span>
 <span class="normal"><a href="#__codelineno-0-762">762</a></span>
-<span class="normal"><a href="#__codelineno-0-763">763</a></span>
-<span class="normal"><a href="#__codelineno-0-764">764</a></span>
-<span class="normal"><a href="#__codelineno-0-765">765</a></span>
-<span class="normal"><a href="#__codelineno-0-766">766</a></span>
-<span class="normal"><a href="#__codelineno-0-767">767</a></span>
-<span class="normal"><a href="#__codelineno-0-768">768</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-743" name="__codelineno-0-743"></a><span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
-<a id="__codelineno-0-744" name="__codelineno-0-744"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Enter dictation mode on a whole-word &quot;note&quot;/&quot;notes&quot;; return None otherwise.</span>
-<a id="__codelineno-0-745" name="__codelineno-0-745"></a>
-<a id="__codelineno-0-746" name="__codelineno-0-746"></a><span class="sd">    Matching whole words (not substrings) keeps unrelated words like &quot;notebook&quot; or</span>
-<a id="__codelineno-0-747" name="__codelineno-0-747"></a><span class="sd">    &quot;noted&quot; from triggering it. While in dictation mode core drives the listening</span>
-<a id="__codelineno-0-748" name="__codelineno-0-748"></a><span class="sd">    (see [`listen_modal`][core.main.EasySpeak.listen_modal]), transcribing speech and</span>
-<a id="__codelineno-0-749" name="__codelineno-0-749"></a><span class="sd">    inserting it into the focused field until &quot;stop notes&quot; is heard — or until the</span>
-<a id="__codelineno-0-750" name="__codelineno-0-750"></a><span class="sd">    mode ends on its own, so an open microphone can&#39;t be left dictating unattended.</span>
-<a id="__codelineno-0-751" name="__codelineno-0-751"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-752" name="__codelineno-0-752"></a>    <span class="n">words</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-<a id="__codelineno-0-753" name="__codelineno-0-753"></a>    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;notes&quot;</span> <span class="ow">in</span> <span class="n">words</span> <span class="ow">or</span> <span class="s2">&quot;note&quot;</span> <span class="ow">in</span> <span class="n">words</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;stop&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">words</span><span class="p">:</span>
-<a id="__codelineno-0-754" name="__codelineno-0-754"></a>        <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s2">&quot;Dictation&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-755" name="__codelineno-0-755"></a>
-<a id="__codelineno-0-756" name="__codelineno-0-756"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;🎙️ Dictation mode - say &#39;stop notes&#39; to end&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-757" name="__codelineno-0-757"></a>
-<a id="__codelineno-0-758" name="__codelineno-0-758"></a>        <span class="c1"># Sentence-length recording, not command-length: the command defaults cut</span>
-<a id="__codelineno-0-759" name="__codelineno-0-759"></a>        <span class="c1"># the recording off during a mid-sentence pause and truncated anything</span>
-<a id="__codelineno-0-760" name="__codelineno-0-760"></a>        <span class="c1"># past five seconds.</span>
-<a id="__codelineno-0-761" name="__codelineno-0-761"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-762" name="__codelineno-0-762"></a>            <span class="k">return</span> <span class="n">_dictation_session</span><span class="p">(</span><span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-763" name="__codelineno-0-763"></a>        <span class="k">finally</span><span class="p">:</span>
-<a id="__codelineno-0-764" name="__codelineno-0-764"></a>            <span class="c1"># However the session ended -- &quot;stop notes&quot;, an idle timeout, the</span>
-<a id="__codelineno-0-765" name="__codelineno-0-765"></a>            <span class="c1"># tray -- the browser must not be left in insert mode.</span>
-<a id="__codelineno-0-766" name="__codelineno-0-766"></a>            <span class="n">leave_browser_insert_mode</span><span class="p">()</span>
-<a id="__codelineno-0-767" name="__codelineno-0-767"></a>
-<a id="__codelineno-0-768" name="__codelineno-0-768"></a>    <span class="k">return</span> <span class="kc">None</span>
+<span class="normal"><a href="#__codelineno-0-763">763</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-738" name="__codelineno-0-738"></a><span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
+<a id="__codelineno-0-739" name="__codelineno-0-739"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Enter dictation mode on a whole-word &quot;note&quot;/&quot;notes&quot;; return None otherwise.</span>
+<a id="__codelineno-0-740" name="__codelineno-0-740"></a>
+<a id="__codelineno-0-741" name="__codelineno-0-741"></a><span class="sd">    Matching whole words (not substrings) keeps unrelated words like &quot;notebook&quot; or</span>
+<a id="__codelineno-0-742" name="__codelineno-0-742"></a><span class="sd">    &quot;noted&quot; from triggering it. While in dictation mode core drives the listening</span>
+<a id="__codelineno-0-743" name="__codelineno-0-743"></a><span class="sd">    (see [`listen_modal`][core.main.EasySpeak.listen_modal]), transcribing speech and</span>
+<a id="__codelineno-0-744" name="__codelineno-0-744"></a><span class="sd">    inserting it into the focused field until &quot;stop notes&quot; is heard — or until the</span>
+<a id="__codelineno-0-745" name="__codelineno-0-745"></a><span class="sd">    mode ends on its own, so an open microphone can&#39;t be left dictating unattended.</span>
+<a id="__codelineno-0-746" name="__codelineno-0-746"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-747" name="__codelineno-0-747"></a>    <span class="n">words</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+<a id="__codelineno-0-748" name="__codelineno-0-748"></a>    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;notes&quot;</span> <span class="ow">in</span> <span class="n">words</span> <span class="ow">or</span> <span class="s2">&quot;note&quot;</span> <span class="ow">in</span> <span class="n">words</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;stop&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">words</span><span class="p">:</span>
+<a id="__codelineno-0-749" name="__codelineno-0-749"></a>        <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s2">&quot;Dictation&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-750" name="__codelineno-0-750"></a>
+<a id="__codelineno-0-751" name="__codelineno-0-751"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;🎙️ Dictation mode - say &#39;stop notes&#39; to end&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-752" name="__codelineno-0-752"></a>
+<a id="__codelineno-0-753" name="__codelineno-0-753"></a>        <span class="c1"># Sentence-length recording, not command-length: the command defaults cut</span>
+<a id="__codelineno-0-754" name="__codelineno-0-754"></a>        <span class="c1"># the recording off during a mid-sentence pause and truncated anything</span>
+<a id="__codelineno-0-755" name="__codelineno-0-755"></a>        <span class="c1"># past five seconds.</span>
+<a id="__codelineno-0-756" name="__codelineno-0-756"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-757" name="__codelineno-0-757"></a>            <span class="k">return</span> <span class="n">_dictation_session</span><span class="p">(</span><span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-758" name="__codelineno-0-758"></a>        <span class="k">finally</span><span class="p">:</span>
+<a id="__codelineno-0-759" name="__codelineno-0-759"></a>            <span class="c1"># However the session ended -- &quot;stop notes&quot;, an idle timeout, the</span>
+<a id="__codelineno-0-760" name="__codelineno-0-760"></a>            <span class="c1"># tray -- the browser must not be left in insert mode.</span>
+<a id="__codelineno-0-761" name="__codelineno-0-761"></a>            <span class="n">leave_browser_insert_mode</span><span class="p">()</span>
+<a id="__codelineno-0-762" name="__codelineno-0-762"></a>
+<a id="__codelineno-0-763" name="__codelineno-0-763"></a>    <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

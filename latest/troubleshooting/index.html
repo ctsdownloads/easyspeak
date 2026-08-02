@@ -1089,13 +1089,13 @@ desktop), run it manually:</p>
 </code></pre></div>
 <h2 id="dictation-types-nothing">Dictation types nothing<a class="headerlink" href="#dictation-types-nothing" title="Permanent link">&para;</a></h2>
 <p>Dictation places text by putting it on the clipboard and sending a paste
-keystroke. Install the clipboard tool for your session:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>wl-clipboard<span class="w">   </span><span class="c1"># Wayland; use xclip on X11</span>
+keystroke. Install <code>wl-clipboard</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>wl-clipboard
 </code></pre></div>
 <p>Without it, insertion falls back to the accessibility bridge, which
 Chromium-based applications (qutebrowser, Electron apps) accept and silently
 discard — the log says so:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>No clipboard tool found, so dictation is falling back to AT-SPI, ...
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>wl-clipboard is not installed, so dictation is falling back to AT-SPI, ...
 </code></pre></div>
 <p>If you hear <strong>"No text field focused"</strong>, click into a text field first, or use
 the browser's <code>numbers</code> command and pick the hint on the field you want.</p>
