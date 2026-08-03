@@ -595,6 +595,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#speakers-playing-audio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Speakers playing audio
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#knowing-which-mode-is-listening" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1026,6 +1037,17 @@
     <span class="md-ellipsis">
       
         System
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#speakers-playing-audio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Speakers playing audio
       
     </span>
   </a>
@@ -1621,6 +1643,15 @@ system's default terminal, whichever one that is, rather than a fixed app.</p>
 </table>
 <p>Volume changes are silent — GNOME's own on-screen display and chime acknowledge
 them.</p>
+<h2 id="speakers-playing-audio">Speakers playing audio<a class="headerlink" href="#speakers-playing-audio" title="Permanent link">&para;</a></h2>
+<p>Modes normally take a command on their own, with no wake word. That is faster, but
+a video playing through speakers reaches the microphone too, and its speech is
+transcribed like anything else.</p>
+<p>Say <strong>"require wake word"</strong> and modes stop accepting bare commands: say
+"Hey Jarvis, numbers" rather than "numbers". Page audio never says the wake word,
+so it can no longer trigger anything. Say <strong>"free listening"</strong> to go back.</p>
+<p>Set <code>EASYSPEAK_REQUIRE_WAKE_WORD=1</code> to start that way every time. Headphones or
+PipeWire echo cancellation solve the same problem at the audio level.</p>
 <h2 id="knowing-which-mode-is-listening">Knowing which mode is listening<a class="headerlink" href="#knowing-which-mode-is-listening" title="Permanent link">&para;</a></h2>
 <p>Modes announce themselves, so you don't need a terminal to follow along:
 "Browser", "Grid", "Dictation", "Ready" when link hints appear, "Clicked",
@@ -1666,7 +1697,7 @@ if numbers don't show.&#160;<a class="footnote-backref" href="#fnref:hints" titl
 <li id="fn:rendering">
 <p>Some graphics drivers render video sites badly under qutebrowser — smeared
 text, stuttering icons, a player that flickers. This writes
-<code>c.qt.args = ['disable-gpu-compositing']</code> to your qutebrowser config and
+<code>c.qt.args = ["disable-gpu-compositing"]</code> to your qutebrowser config and
 restarts the browser. Say "restore rendering" to undo it.&#160;<a class="footnote-backref" href="#fnref:rendering" title="Jump back to footnote 2 in the text">&#8617;</a></p>
 </li>
 <li id="fn:adblock">
