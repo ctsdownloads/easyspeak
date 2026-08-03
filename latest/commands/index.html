@@ -1299,7 +1299,23 @@ until you're over your target, then <strong>"click"</strong>.</p>
 </tr>
 <tr>
 <td>open youtube</td>
-<td>Open bookmark<sup id="fnref:bookmarks"><a class="footnote-ref" href="#fn:bookmarks">2</a></sup></td>
+<td>Open bookmark<sup id="fnref:bookmarks"><a class="footnote-ref" href="#fn:bookmarks">4</a></sup></td>
+</tr>
+<tr>
+<td>fix rendering</td>
+<td>Switch the browser to software rendering<sup id="fnref:rendering"><a class="footnote-ref" href="#fn:rendering">2</a></sup></td>
+</tr>
+<tr>
+<td>restore rendering</td>
+<td>Switch it back to hardware rendering</td>
+</tr>
+<tr>
+<td>allow ads</td>
+<td>Turn ad blocking off<sup id="fnref:adblock"><a class="footnote-ref" href="#fn:adblock">3</a></sup></td>
+</tr>
+<tr>
+<td>block ads</td>
+<td>Turn ad blocking back on</td>
 </tr>
 <tr>
 <td>enter</td>
@@ -1647,9 +1663,21 @@ needed for link hints to appear as numbers. See
 <a href="../troubleshooting/#browser-plugin-link-numbers-dont-work">Troubleshooting</a>
 if numbers don't show.&#160;<a class="footnote-backref" href="#fnref:hints" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
+<li id="fn:rendering">
+<p>Some graphics drivers render video sites badly under qutebrowser — smeared
+text, stuttering icons, a player that flickers. This writes
+<code>c.qt.args = ['disable-gpu-compositing']</code> to your qutebrowser config and
+restarts the browser. Say "restore rendering" to undo it.&#160;<a class="footnote-backref" href="#fnref:rendering" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:adblock">
+<p>Some sites detect element-level ad blocking and break on purpose. This writes
+<code>c.content.blocking.enabled = False</code> and restarts the browser. Ad overlays
+then take hint numbers away from the page underneath, so turn it back on when
+you are done.&#160;<a class="footnote-backref" href="#fnref:adblock" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
 <li id="fn:bookmarks">
 <p>Built-in bookmarks: youtube, google, gmail, github, reddit, twitter,
-facebook, amazon, netflix, duckduckgo.&#160;<a class="footnote-backref" href="#fnref:bookmarks" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+facebook, amazon, netflix, duckduckgo.&#160;<a class="footnote-backref" href="#fnref:bookmarks" title="Jump back to footnote 4 in the text">&#8617;</a></p>
 </li>
 </ol>
 </div>

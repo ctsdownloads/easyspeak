@@ -599,6 +599,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#browser-renders-badly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Browser renders badly
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-site-breaks-with-ad-blocking-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A site breaks with ad blocking on
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#wake-word-not-detecting" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -977,6 +999,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#browser-renders-badly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Browser renders badly
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-site-breaks-with-ad-blocking-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A site breaks with ad blocking on
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#wake-word-not-detecting" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1131,6 +1175,23 @@ getting elements" and scrolling silently does nothing.</p>
 navigation, which costs your scroll position. You'll hear "Reloading" and see:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>↻ Reloading: page scripts don&#39;t survive a history navigation
 </code></pre></div>
+<h2 id="browser-renders-badly">Browser renders badly<a class="headerlink" href="#browser-renders-badly" title="Permanent link">&para;</a></h2>
+<p>On some graphics drivers qutebrowser renders video sites wrong: text smears over
+itself, icons stutter, the player flickers or disappears. YouTube is the usual
+place to notice it.</p>
+<p>Say <strong>"fix rendering"</strong> in browser mode. That writes the line below to your
+qutebrowser config and restarts the browser:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">c</span><span class="o">.</span><span class="n">qt</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;disable-gpu-compositing&#39;</span><span class="p">]</span>
+</code></pre></div>
+<p>Say <strong>"restore rendering"</strong> to put it back, or delete the line by hand.</p>
+<p>This turns off GPU compositing for qutebrowser only, so video decoding is a
+little more expensive. Leave it off unless you see the problem.</p>
+<h2 id="a-site-breaks-with-ad-blocking-on">A site breaks with ad blocking on<a class="headerlink" href="#a-site-breaks-with-ad-blocking-on" title="Permanent link">&para;</a></h2>
+<p>EasySpeak turns on element-level ad blocking when <code>python3-adblock</code> is installed,
+because ad overlays are numbered like anything else and steal hint numbers from
+the page underneath. Some sites detect it and break on purpose.</p>
+<p>Say <strong>"allow ads"</strong> in browser mode to turn blocking off and restart the browser,
+and <strong>"block ads"</strong> to turn it back on.</p>
 <h2 id="wake-word-not-detecting">Wake word not detecting<a class="headerlink" href="#wake-word-not-detecting" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Check the microphone: <code>arecord -d 3 test.wav &amp;&amp; aplay test.wav</code></li>
@@ -1138,10 +1199,10 @@ navigation, which costs your scroll position. You'll hear "Reloading" and see:</
 </ul>
 <h2 id="wake-word-triggers-multiple-times">Wake word triggers multiple times<a class="headerlink" href="#wake-word-triggers-multiple-times" title="Permanent link">&para;</a></h2>
 <p>Mic gain too high. Lower the capture level:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>alsamixer
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="c1"># Press F6 to select your mic device</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="c1"># Press Tab to switch to Capture</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Lower to ~70</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>alsamixer
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="c1"># Press F6 to select your mic device</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="c1"># Press Tab to switch to Capture</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># Lower to ~70</span>
 </code></pre></div>
 <h2 id="commands-misheard">Commands misheard<a class="headerlink" href="#commands-misheard" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1153,7 +1214,7 @@ navigation, which costs your scroll position. You'll hear "Reloading" and see:</
 </ul>
 <h2 id="everything-takes-several-seconds">Everything takes several seconds<a class="headerlink" href="#everything-takes-several-seconds" title="Permanent link">&para;</a></h2>
 <p>Run with <code>-v</code> and compare the two numbers on this line:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>transcribed 4.2s of audio in 0.45s
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>transcribed 4.2s of audio in 0.45s
 </code></pre></div>
 <p>The second number is the transcription. If it's small and the first is large,
 recording isn't stopping when you do: silence isn't being detected, so every
@@ -1161,8 +1222,8 @@ utterance runs to its time cap. Check the noise floor above — if the room is
 loud enough that speech and silence look alike, move the microphone closer or set
 <code>EASYSPEAK_SILENCE_THRESHOLD</code> by hand.</p>
 <h2 id="piper-permission-denied">Piper permission denied<a class="headerlink" href="#piper-permission-denied" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>~/.local/bin/piper/piper
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>chmod<span class="w"> </span>+x<span class="w"> </span>~/.local/bin/piper/espeak-ng
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>~/.local/bin/piper/piper
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>chmod<span class="w"> </span>+x<span class="w"> </span>~/.local/bin/piper/espeak-ng
 </code></pre></div>
 <h2 id="pip-install-fails-with-pyavcython-errors">pip install fails with PyAV/Cython errors<a class="headerlink" href="#pip-install-fails-with-pyavcython-errors" title="Permanent link">&para;</a></h2>
 <p>You're on an unsupported Python version. EasySpeak is tested against Python 3.10,
