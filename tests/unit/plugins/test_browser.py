@@ -1,5 +1,6 @@
 """Tests for the browser plugin module."""
 
+import subprocess
 from unittest.mock import Mock, patch
 
 import pytest
@@ -1420,25 +1421,39 @@ def test_listen_for_hint_gives_up_on_a_page_without_hints(
 
 
 @pytest.mark.parametrize(
-    ["probe_result", "expected"],
-    [(Mock(returncode=0), "both"), (Mock(returncode=1), "hosts")],
+    ["adblock_line", "expected"],
+    [("adblock: 0.6.0", "both"), ("adblock: no", "hosts")],
 )
 @patch("subprocess.run")
-def test_adblock_method_follows_what_is_installed(mock_run, probe_result, expected):
-    """ "both" catches ad overlays, but only when python-adblock is there.
+def test_adblock_method_follows_what_qutebrowser_reports(
+    mock_run, adblock_line, expected
+):
+    """ "both" catches ad overlays, but only when qutebrowser has the module.
 
     Without it qutebrowser complains on every page load, which is worse than the
-    ads. Probing means installing it later is picked up on the next start with
-    nothing for the user to edit.
+    ads. `--version` lists `adblock: <version>` when present and `adblock: no`
+    when not, so reading it picks up an install on the next start with nothing for
+    the user to edit.
     """
-    mock_run.return_value = probe_result
+    mock_run.return_value = Mock(
+        stdout=f"qutebrowser v3.7.0\nBackend: QtWebEngine\n{adblock_line}\n"
+    )
 
     assert browser.adblock_method() == expected
+    # The question is whether qutebrowser's own interpreter has the module, so
+    # ask qutebrowser -- not a stray python3 that only coincidentally matches.
+    assert mock_run.call_args.args[0] == ["qutebrowser", "--version"]
 
 
-@patch("subprocess.run", side_effect=OSError("no python3"))
-def test_adblock_method_without_an_interpreter(mock_run):
-    """No way to probe means assume the dependency isn't there."""
+@patch("subprocess.run", side_effect=OSError("no qutebrowser"))
+def test_adblock_method_without_qutebrowser(mock_run):
+    """No qutebrowser to ask means fall back to built-in host blocking."""
+    assert browser.adblock_method() == "hosts"
+
+
+@patch("subprocess.run", side_effect=subprocess.TimeoutExpired("qutebrowser", 15))
+def test_adblock_method_when_version_hangs(mock_run):
+    """A wedged `--version` falls back rather than stalling startup forever."""
     assert browser.adblock_method() == "hosts"
 
 
@@ -1750,22 +1765,16 @@ def test_digit_homophones(spoken, digit):
 
 
 @patch("subprocess.run")
-def test_adblock_probe_falls_through_to_the_system_interpreter(mock_run):
-    """A bare `python3` is the venv's own, which never has a distro package.
+def test_adblock_method_ignores_a_python3_that_is_not_qutebrowsers(mock_run):
+    """The old probe asked whatever `python3` was on PATH and got it wrong.
 
-    Probing only that concludes python-adblock is missing on exactly the setup
-    most likely to have it installed system-wide.
+    Under a virtualenv or Nix, that interpreter is not the one that runs
+    qutebrowser: it can lack the module while qutebrowser bundles it, or carry it
+    while qutebrowser was built without. Only qutebrowser's own `--version` answer
+    counts, so a report that omits an `adblock` version means host blocking.
     """
-    mock_run.side_effect = lambda cmd, **_kw: Mock(
-        returncode=0 if cmd[0] == "/usr/bin/python3" else 1
-    )
+    mock_run.return_value = Mock(stdout="qutebrowser v3.7.0\nBackend: QtWebEngine\n")
 
-    assert browser.adblock_method() == "both"
-
-
-@patch("subprocess.run", side_effect=OSError("no such interpreter"))
-def test_adblock_probe_skips_interpreters_that_are_not_there(mock_run):
-    """A candidate that isn't installed is skipped, not raised."""
     assert browser.adblock_method() == "hosts"
 
 

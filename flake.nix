@@ -60,7 +60,7 @@
           ffmpeg # ffplay for TTS playback (NOT -headless; that strips SDL)
           pulseaudio # paplay for the wake-word chime
           piper-tts # TTS engine
-          qutebrowser # browser plugin + "open browser" / help page
+          qutebrowser # browser plugin + "open browser" / help page (bundles python-adblock)
           sound-theme-freedesktop # /usr/share/sounds/freedesktop/...
           wl-clipboard # wl-copy/wl-paste: dictation places text by pasting
           wireplumber # wpctl: absolute volume levels

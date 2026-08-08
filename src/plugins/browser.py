@@ -179,32 +179,39 @@ REQUIRED_QUTEBROWSER_LINES = [
 ]
 
 
-ADBLOCK_CANDIDATES = ("python3", "/usr/bin/python3", "/usr/bin/python")
-
-
 def adblock_method():
-    """Return the strongest ad-blocking method this system can actually run.
+    """Return the strongest ad-blocking method qutebrowser can actually run.
 
     Ad overlays and newsletter interstitials are numbered like anything else, so
     they take hint numbers away from the page underneath and a spoken hint lands
     on a popup instead of the link the user meant. "both" adds Brave's ABP engine,
-    which is what catches those overlays -- but it needs python-adblock, and
+    which is what catches those overlays -- but it needs the `adblock` module, and
     without it qutebrowser complains on every single page load, which is worse
     than the ads. Host blocking is built in and needs nothing.
 
-    Probed rather than assumed, so installing python-adblock later is picked up on
-    the next start with nothing for the user to edit.
+    The module has to be importable by the interpreter that *runs* qutebrowser,
+    which is often not the `python3` on `PATH`: a virtualenv, a distro package, a
+    Flatpak or a Nix build each ship their own. So this asks qutebrowser itself
+    rather than probing a stray interpreter, which answered correctly only when
+    the two happened to coincide. `--version` lists each optional module as
+    `adblock: <version>` when present and `adblock: no` when not, so a leading
+    digit means "both"; installing the module later is still picked up on the
+    next start. That call imports Qt and so is slow rather than instant, so the
+    15-second timeout is a ceiling for a wedged process, not an expected wait --
+    past it, host blocking (which always works) is assumed.
     """
-    for candidate in ADBLOCK_CANDIDATES:
-        try:
-            probe = subprocess.run(
-                [candidate, "-c", "import adblock"], capture_output=True, check=False
-            )
-        except OSError:
-            continue  # no such interpreter; try the next
-        if probe.returncode == 0:
-            return "both"
-    return "hosts"
+    try:
+        version = subprocess.run(
+            ["qutebrowser", "--version"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=15,  # seconds
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return "hosts"  # no qutebrowser, or it hung: host blocking always works
+    available = re.search(r"^\s*adblock:\s*\d", version.stdout, re.MULTILINE)
+    return "both" if available else "hosts"
 
 
 def required_qutebrowser_lines():
