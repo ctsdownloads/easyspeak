@@ -1376,3 +1376,31 @@ def test_backspace_shortens_what_scratch_that_removes(mock_press, mock_core):
 
     assert mock_press.call_args.args == (mediakeys.KEYS["backspace"], 11)
     assert mock_core.dictation_last_length == 0
+
+
+@patch.object(mediakeys, "press_key", return_value=False)
+def test_handle_keystroke_reports_a_missing_backend(mock_press, mock_core):
+    """A keystroke that can't be delivered is reported and stops the fall-through."""
+    mock_core.dictation_last_length = 5
+
+    assert dictation._handle_keystroke(mock_core, "backspace") is True
+    assert mock_core.speak.call_args.args[0] == "Dictation isn't set up on this system."
+
+
+@patch.object(mediakeys, "press_key", return_value=True)
+def test_a_non_delete_key_clears_the_scratch_length(mock_press, mock_core):
+    """A key other than backspace inserts nothing, so there is nothing to scratch."""
+    mock_core.dictation_last_length = 13
+
+    assert dictation._handle_keystroke(mock_core, "press enter") is True
+    assert mock_core.dictation_last_length == 0
+
+
+@patch.object(mediakeys, "press_key", return_value=True)
+def test_a_keystroke_does_not_end_the_dictation_session(mock_press, mock_core):
+    """A keystroke command is handled, then dictation keeps listening."""
+    mock_core.dictation_last_length = 0
+    mock_core.transcribe.side_effect = ["press enter", "stop notes"]
+
+    assert dictation._dictation_session(mock_core) is True
+    assert mock_core.speak.call_args.args[0] == "Done"

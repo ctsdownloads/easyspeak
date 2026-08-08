@@ -80,3 +80,27 @@ def test_tap_key_is_a_single_key_chord():
         mediakeys.tap_key(115)
 
     assert mock_chord.call_args.args[0] == [115]
+
+
+def test_parse_key_request_needs_a_key_after_press():
+    """A bare "press" with no key name behind it is not a keystroke command."""
+    assert mediakeys.parse_key_request(["press"], set()) is None
+
+
+def test_parse_key_request_rejects_an_unrecognised_count():
+    """A trailing word that is neither a digit nor a number word is refused."""
+    assert mediakeys.parse_key_request(["press", "enter", "banana"], set()) is None
+
+
+@patch("easyspeak.core.mediakeys.tap_chord")
+def test_press_key_taps_once_per_repeat(mock_chord):
+    """Each repeat is one tap_chord, and a delivered chord reports True."""
+    assert mediakeys.press_key(mediakeys.KEYS["enter"], repeats=3) is True
+    assert mock_chord.call_count == 3
+
+
+@patch("easyspeak.core.mediakeys.tap_chord", side_effect=RuntimeError("no portal"))
+def test_press_key_reports_a_missing_remotedesktop(mock_chord, readlog):
+    """Without GNOME's RemoteDesktop the keys can't be sent, so False, not a crash."""
+    assert mediakeys.press_key(mediakeys.KEYS["enter"]) is False
+    assert "RemoteDesktop" in readlog().err

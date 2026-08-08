@@ -1588,3 +1588,64 @@ class TestOpenStream:
 
         assert exc_info.value.code == 1
         assert easy.stream is None
+
+
+class TestWaitForWake:
+    """The single wake-word listen a wake-gated mode runs before each command."""
+
+    def _daemon(self, score):
+        """An EasySpeak whose mic, detector, reset and chime are stubbed out."""
+        easy = EasySpeak()
+        easy.stream = Mock()
+        easy.wakeword = Mock()
+        easy.wakeword.predict.return_value = score
+        easy._reset_detector = Mock()
+        easy._play_wake_chime = Mock()
+        return easy
+
+    def test_a_confident_score_wakes_and_chimes(self):
+        """A score over the threshold resets the detector, chimes, and returns True."""
+        easy = self._daemon(0.9)
+
+        with (
+            patch("easyspeak.core.main.time.monotonic", side_effect=[0, 1]),
+            patch("easyspeak.core.main.time.time", return_value=100.0),
+        ):
+            assert easy.wait_for_wake(timeout=5) is True
+
+        assert easy.last_wake_time == 100.0
+        easy._reset_detector.assert_called_once_with()
+        easy._play_wake_chime.assert_called_once_with()
+
+    def test_a_quiet_score_is_ignored(self):
+        """A read below the threshold is skipped; a later confident one still wakes."""
+        easy = self._daemon(0.9)
+        easy.wakeword.predict.side_effect = [0.1, 0.9]
+
+        with (
+            patch("easyspeak.core.main.time.monotonic", side_effect=[0, 1, 2]),
+            patch("easyspeak.core.main.time.time", return_value=100.0),
+        ):
+            assert easy.wait_for_wake(timeout=10) is True
+
+    def test_the_cooldown_suppresses_an_immediate_retrigger(self):
+        """A wake within the cooldown of the last one is ignored until the deadline."""
+        easy = self._daemon(0.9)
+        easy.last_wake_time = 99.0  # 1s ago, inside the 3s cooldown
+
+        with (
+            patch("easyspeak.core.main.time.monotonic", side_effect=[0, 1, 2]),
+            patch("easyspeak.core.main.time.time", return_value=100.0),
+        ):
+            assert easy.wait_for_wake(timeout=1.5) is False
+
+        easy._play_wake_chime.assert_not_called()
+
+    def test_silence_times_out(self):
+        """No wake before the deadline returns False without touching the mic."""
+        easy = self._daemon(0.9)
+
+        with patch("easyspeak.core.main.time.monotonic", side_effect=[0, 0]):
+            assert easy.wait_for_wake(timeout=0) is False
+
+        easy.stream.read.assert_not_called()

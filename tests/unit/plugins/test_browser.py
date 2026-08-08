@@ -1859,6 +1859,13 @@ def test_browser_words_keep_their_own_meaning(mock_press, command, mock_core):
     assert not mock_press.called
 
 
+@patch.object(mediakeys, "press_key", return_value=False)
+def test_browser_reports_keystrokes_need_gnome(mock_press, mock_core):
+    """A keystroke that can't be delivered is reported rather than silently dropped."""
+    assert browser.handle_browser_command("press enter", mock_core) is True
+    assert mock_core.speak.call_args.args[0] == "Keystrokes need GNOME."
+
+
 def test_software_rendering_adds_the_line(tmp_path, monkeypatch):
     """Turning it on appends the qt.args line to config.py."""
     monkeypatch.setattr(browser.Path, "home", lambda: tmp_path)
@@ -1913,6 +1920,26 @@ def test_rendering_reports_an_unwritable_config(mock_set, mock_qb, mock_core):
 
     assert not mock_qb.called
     assert "Could not write" in mock_core.speak.call_args.args[0]
+
+
+@patch.object(browser, "qb")
+@patch.object(browser, "set_config_line", return_value=True)
+def test_restore_rendering_turns_the_line_off(mock_set, mock_qb, mock_core):
+    """Going back to hardware rendering removes the software-rendering line."""
+    assert browser.handle_browser_command("restore rendering", mock_core) is True
+    assert mock_set.call_args.args[0] == browser.SOFTWARE_RENDERING_LINE
+    assert mock_set.call_args.kwargs["wanted"] is False
+
+
+def test_set_config_line_reports_a_write_failure(tmp_path, monkeypatch, readlog):
+    """A config that cannot be written warns and returns None rather than raising."""
+    monkeypatch.setattr(browser.Path, "home", lambda: tmp_path)
+    monkeypatch.setattr(
+        browser.Path, "write_text", Mock(side_effect=OSError("read-only"))
+    )
+
+    assert browser.set_config_line(browser.SOFTWARE_RENDERING_LINE, wanted=True) is None
+    assert "Could not write" in readlog().err
 
 
 @pytest.mark.parametrize(
