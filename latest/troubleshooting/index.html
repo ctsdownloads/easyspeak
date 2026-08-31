@@ -1149,12 +1149,12 @@ run (you'll see a <code>browser: wrote ...</code> or <code>browser: updated ...<
 see a <code>browser: note: ... is read-only</code> or a similar error instead, add them to
 the config module yourself:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">config</span><span class="o">.</span><span class="n">load_autoconfig</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">c</span><span class="o">.</span><span class="n">hints</span><span class="o">.</span><span class="n">chars</span> <span class="o">=</span> <span class="s2">&quot;0123456789&quot;</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">c</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">tls</span><span class="o">.</span><span class="n">certificate_errors</span> <span class="o">=</span> <span class="s2">&quot;ask-block-thirdparty&quot;</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">c</span><span class="o">.</span><span class="n">hints</span><span class="o">.</span><span class="n">chars</span> <span class="o">=</span> <span class="s2">"0123456789"</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">c</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">tls</span><span class="o">.</span><span class="n">certificate_errors</span> <span class="o">=</span> <span class="s2">"ask-block-thirdparty"</span>
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">c</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">False</span>
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="n">c</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">geolocation</span> <span class="o">=</span> <span class="kc">False</span>
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="n">c</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">autoplay</span> <span class="o">=</span> <span class="kc">False</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">c</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">blocking</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s2">&quot;hosts&quot;</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">c</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">blocking</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s2">"hosts"</span>
 </code></pre></div>
 <p>The last four answer prompts and block distractions that voice cannot dismiss: a
 modal "allow notifications?" or expired-certificate dialog stops hands-free
@@ -1173,7 +1173,7 @@ JavaScript is never re-established — hinting fails with "Unknown error while
 getting elements" and scrolling silently does nothing.</p>
 <p>EasySpeak reloads the page before the next hint or scroll after a history
 navigation, which costs your scroll position. You'll hear "Reloading" and see:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>↻ Reloading: page scripts don&#39;t survive a history navigation
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>↻ Reloading: page scripts don't survive a history navigation
 </code></pre></div>
 <h2 id="browser-renders-badly">Browser renders badly<a class="headerlink" href="#browser-renders-badly" title="Permanent link">&para;</a></h2>
 <p>On some graphics drivers qutebrowser renders video sites wrong: text smears over
@@ -1181,7 +1181,7 @@ itself, icons stutter, the player flickers or disappears. YouTube is the usual
 place to notice it.</p>
 <p>Say <strong>"fix rendering"</strong> in browser mode. That writes the line below to your
 qutebrowser config and restarts the browser:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">c</span><span class="o">.</span><span class="n">qt</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;disable-gpu-compositing&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">c</span><span class="o">.</span><span class="n">qt</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"disable-gpu-compositing"</span><span class="p">]</span>
 </code></pre></div>
 <p>Say <strong>"restore rendering"</strong> to put it back, or delete the line by hand.</p>
 <p>This turns off GPU compositing for qutebrowser only, so video decoding is a
