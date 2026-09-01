@@ -76,6 +76,15 @@ class TestYieldedCommands:
 
         assert easy.transcribe.call_args.kwargs["prompt"] == "click double"
 
+    def test_passes_language_to_transcribe(self, easy):
+        """A mode dictating in another language hands its code down."""
+        drive(easy, [b"a"], ["hallo"])
+
+        with clock():
+            list(easy.listen_modal("dictation", language="de"))
+
+        assert easy.transcribe.call_args.kwargs["language"] == "de"
+
     def test_records_the_tail_of_each_utterance(self, easy):
         """The first chunk is joined with the rest of the utterance."""
         drive(easy, [b"head"], ["click"])
@@ -363,6 +372,15 @@ class TestTranscription:
         kwargs = easy.whisper.transcribe.call_args.kwargs
         assert kwargs["condition_on_previous_text"] is False
         assert kwargs["language"] == "en"
+
+    def test_transcribes_in_the_language_asked_for(self, easy):
+        """Dictation speaks the user's language; commands stay English."""
+        easy.whisper = Mock()
+        easy.whisper.transcribe = Mock(return_value=([], None))
+
+        easy.transcribe(b"\x00\x00", language="de")
+
+        assert easy.whisper.transcribe.call_args.kwargs["language"] == "de"
 
 
 class TestSpokenReplyFeedback:

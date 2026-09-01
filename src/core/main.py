@@ -495,10 +495,13 @@ class EasySpeak:
             for i in range(len(prompt_words) - span + 1)
         )
 
-    def transcribe(self, audio_data, prompt=None):
+    def transcribe(self, audio_data, prompt=None, language="en"):
         """Transcribe raw PCM audio to text with Whisper.
 
-        `prompt` biases recognition (defaults to the command vocabulary). Plugin-facing.
+        `prompt` biases recognition (defaults to the command vocabulary), and
+        `language` is the Whisper language code to transcribe as. Commands are
+        English words, so it takes English; dictation passes the user's
+        `LANGUAGE`. Plugin-facing.
         An echo of that prompt is dropped as silence: Whisper hands its own
         `initial_prompt` back when given near-silence, and grid mode was executing
         that as a command.
@@ -512,7 +515,7 @@ class EasySpeak:
             initial_prompt=use_prompt,
             beam_size=1,
             vad_filter=True,
-            language="en",
+            language=language,
             # Nothing here reads timestamps, and generating them costs tokens.
             without_timestamps=True,
             condition_on_previous_text=False,
@@ -540,6 +543,7 @@ class EasySpeak:
         max_record_seconds=None,
         silence_duration=None,
         wake_gated=True,
+        language="en",
     ):
         """Yield transcribed commands for a plugin's modal mode. Plugin-facing.
 
@@ -565,7 +569,8 @@ class EasySpeak:
         passes larger values, since a sentence has pauses in it and runs longer
         than a command. `wake_gated` is False for modes that capture continuous
         speech rather than commands, so `require_wake_word` does not ask for the
-        wake word before every dictated sentence.
+        wake word before every dictated sentence. `language` is passed on to
+        [`transcribe`][core.main.EasySpeak.transcribe].
 
         Yields each recognised command, lowercased and stripped of surrounding
         punctuation. The generator simply stops when the mode should end, so a
@@ -611,7 +616,7 @@ class EasySpeak:
             rest = self.record_until_silence(
                 max_seconds=max_record_seconds, silence_duration=silence_duration
             )
-            text = self.transcribe(first + rest, prompt=prompt)
+            text = self.transcribe(first + rest, prompt=prompt, language=language)
             if not text:
                 # Noise, or an echo of our own prompt. Not a command, so the
                 # deadline stands.

@@ -12,6 +12,7 @@ import time
 from pathlib import Path
 
 from easyspeak.core import mediakeys
+from easyspeak.core.config import LANGUAGE
 
 logger = logging.getLogger(__name__)
 
@@ -711,7 +712,7 @@ def run_push_to_talk(core, should_continue):
         if not first:
             continue
         audio = first + core.record_until_silence(should_continue=should_continue)
-        text = core.transcribe(audio, prompt=DICTATION_PROMPT)
+        text = core.transcribe(audio, prompt=DICTATION_PROMPT, language=LANGUAGE)
         if not text:
             continue
         if _dictate_utterance(core, text.strip().lower()):
@@ -757,6 +758,7 @@ def _dictation_session(core):
         max_record_seconds=MAX_RECORD_SECONDS,
         silence_duration=SILENCE_DURATION,
         wake_gated=False,
+        language=LANGUAGE,
     ):
         logger.debug("   Raw: %s", text)
 

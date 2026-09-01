@@ -45,14 +45,15 @@ the module that reads each (linked to its API reference).
 | Variable                         | Default                                | Effect                                     |
 | -------------------------------- | -------------------------------------- | ------------------------------------------ |
 | `EASYSPEAK_HOTKEY`               | `ctrl+shift`                           | Keys held to dictate without the wake word |
+| `EASYSPEAK_LANGUAGE`             | `en`                                   | Language of dictation and spoken replies   |
 | `EASYSPEAK_OFFLINE`              | `strict`                               | Stay offline; `relaxed` downloads models   |
 | `EASYSPEAK_PIPER_BIN`            | `piper`                                | Piper TTS binary                           |
 | `EASYSPEAK_REQUIRE_WAKE_WORD`    | unset                                  | Modes wait for the wake word each command  |
-| `EASYSPEAK_PIPER_MODEL`          | bundled Amy voice                      | Piper voice `.onnx` for speech output      |
+| `EASYSPEAK_PIPER_MODEL`          | the language pack's voice              | Piper voice `.onnx` for speech output      |
 | `EASYSPEAK_SOUNDS_DIR`           | `/usr/share/sounds/freedesktop/stereo` | Directory of the wake chime and error bell |
 | `EASYSPEAK_WHISPER_COMPUTE_TYPE` | `int8`                                 | CTranslate2 compute type                   |
 | `EASYSPEAK_WHISPER_CPU_THREADS`  | `0`                                    | CPU threads for transcription (`0` = auto) |
-| `EASYSPEAK_WHISPER_MODEL`        | `base.en`                              | faster-whisper model for transcription     |
+| `EASYSPEAK_WHISPER_MODEL`        | the language pack's model              | faster-whisper model for transcription     |
 | `EASYSPEAK_SILENCE_THRESHOLD`    | measured at startup                    | Amplitude below which audio counts as quiet |
 
 `EASYSPEAK_SILENCE_THRESHOLD` is normally left alone. On startup EasySpeak

@@ -1,6 +1,7 @@
 """Tests for the core config module."""
 
 import importlib
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -23,6 +24,7 @@ def _restore_config(monkeypatch):
         "EASYSPEAK_PIPER_MODEL",
         "EASYSPEAK_PIPER_BIN",
         "EASYSPEAK_HOTKEY",
+        "EASYSPEAK_LANGUAGE",
         "EASYSPEAK_OFFLINE",
     ]:
         monkeypatch.delenv(var, raising=False)
@@ -161,18 +163,15 @@ def test_bundled_model_found(monkeypatch, tmp_path):
     """A model present beside the venv (<prefix>/../models/...) is used."""
     (tmp_path / "models" / "whisper" / "base.en").mkdir(parents=True)
     monkeypatch.setattr(config.sys, "prefix", str(tmp_path / "venv"))
-    assert config._bundled_model(
-        "models", "whisper", "base.en", default="base.en"
-    ) == str(tmp_path / "models" / "whisper" / "base.en")
+    assert config._bundled_whisper("en", default="base.en") == str(
+        tmp_path / "models" / "whisper" / "base.en"
+    )
 
 
 def test_bundled_model_missing_falls_back(monkeypatch, tmp_path):
     """With no bundled tree, the default (download name / path) is kept."""
     monkeypatch.setattr(config.sys, "prefix", str(tmp_path / "venv"))
-    assert (
-        config._bundled_model("models", "whisper", "base.en", default="base.en")
-        == "base.en"
-    )
+    assert config._bundled_whisper("en", default="base.en") == "base.en"
 
 
 def test_bundled_bin_found(monkeypatch, tmp_path):
@@ -219,3 +218,54 @@ def test_hotkey_disable_values(monkeypatch, value):
     monkeypatch.setenv("EASYSPEAK_HOTKEY", value)
     importlib.reload(config)
     assert config.HOTKEY_COMBO == ""
+
+
+class TestLanguagePacks:
+    """Which installed models a language pack's code selects.
+
+    A pack drops its models beside the venv, so these fake that layout under a
+    temporary `sys.prefix` and reload the module that reads it.
+    """
+
+    @pytest.fixture
+    def models(self, tmp_path, monkeypatch):
+        """Install fake packs beside a temporary venv; return its models dir."""
+        models = tmp_path / "models"
+        (models / "whisper" / "base.en").mkdir(parents=True)
+        (models / "whisper" / "small").mkdir()
+        (models / "piper").mkdir()
+        (models / "piper" / "en_US-amy-medium.onnx").touch()
+        (models / "piper" / "de_DE-thorsten-medium.onnx").touch()
+        monkeypatch.setattr(config.sys, "prefix", str(tmp_path / "venv"))
+        monkeypatch.delenv("EASYSPEAK_WHISPER_MODEL", raising=False)
+        monkeypatch.delenv("EASYSPEAK_PIPER_MODEL", raising=False)
+        return models
+
+    def test_defaults_to_english(self, monkeypatch):
+        """Unset env: English, as before the setting existed."""
+        monkeypatch.delenv("EASYSPEAK_LANGUAGE", raising=False)
+        importlib.reload(config)
+        assert config.LANGUAGE == "en"
+
+    def test_english_prefers_the_english_only_model(self, models, monkeypatch):
+        """`base.en` is faster than the multilingual model that sits beside it."""
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "en")
+        importlib.reload(config)
+        assert Path(config.WHISPER_MODEL) == models / "whisper" / "base.en"
+        assert Path(config.PIPER_MODEL) == models / "piper" / "en_US-amy-medium.onnx"
+
+    def test_german_skips_the_english_only_model(self, models, monkeypatch):
+        """A `.en` model cannot transcribe German, however it got installed."""
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "de")
+        importlib.reload(config)
+        assert Path(config.WHISPER_MODEL) == models / "whisper" / "small"
+        assert (
+            Path(config.PIPER_MODEL) == models / "piper" / "de_DE-thorsten-medium.onnx"
+        )
+
+    def test_falls_back_to_a_multilingual_download(self, monkeypatch):
+        """No pack installed: the name faster-whisper would fetch, not `base.en`."""
+        monkeypatch.delenv("EASYSPEAK_WHISPER_MODEL", raising=False)
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "de")
+        importlib.reload(config)
+        assert config.WHISPER_MODEL == "small"

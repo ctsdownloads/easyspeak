@@ -6,6 +6,7 @@ builds the faster-whisper model from them. Most are plain constants; these
 honor an `EASYSPEAK_*` environment variable:
 
 - `EASYSPEAK_HOTKEY`
+- `EASYSPEAK_LANGUAGE`
 - `EASYSPEAK_OFFLINE`
 - `EASYSPEAK_PIPER_BIN`
 - `EASYSPEAK_PIPER_MODEL`
@@ -72,11 +73,43 @@ _hotkey = os.environ.get("EASYSPEAK_HOTKEY", "ctrl+shift").strip()
 HOTKEY_COMBO = "" if _hotkey.lower() in ("", "off", "none") else _hotkey
 
 
+# --- Language ---
+# The language the user speaks. Commands are English words wherever a plugin
+# matches them, so this is the language of dictation and of the voice that
+# answers -- it picks which installed language pack's models are used.
+LANGUAGE = os.environ.get("EASYSPEAK_LANGUAGE", "en").strip().lower() or "en"
+
+
 # --- Models ---
-def _bundled_model(*parts, default):
-    """Return a model path bundled beside the venv, or `default` if absent."""
-    path = Path(sys.prefix).parent.joinpath(*parts)
-    return str(path) if path.exists() else default
+def _models_dir():
+    """Return the models directory a language pack installs beside the venv."""
+    return Path(sys.prefix).parent / "models"
+
+
+def _bundled_voice(language, *, default):
+    """Return the installed Piper voice for `language`, or `default` if none is.
+
+    Piper names every voice `<language>_<REGION>-<name>-<quality>.onnx`, so the
+    language code is the file's prefix; with several voices installed for one
+    language the first by name wins.
+    """
+    voices = sorted(_models_dir().glob(f"piper/{language}_*.onnx"))
+    return str(voices[0]) if voices else default
+
+
+def _bundled_whisper(language, *, default):
+    """Return the installed Whisper model for `language`, or `default` if none is.
+
+    Model directories carry no language code, but faster-whisper's `.en` suffix
+    marks an English-only model, which cannot serve any other language.
+    """
+    models = sorted(p for p in _models_dir().glob("whisper/*") if p.is_dir())
+    english_only = [p for p in models if p.name.endswith(".en")]
+    if language == "en":
+        usable = english_only or models
+    else:
+        usable = [p for p in models if p not in english_only]
+    return str(usable[0]) if usable else default
 
 
 def _bundled_bin(name, *, default):
@@ -87,17 +120,15 @@ def _bundled_bin(name, *, default):
 
 # The .deb/.rpm ship the models and `piper` beside the venv, so these defaults
 # locate them from our interpreter; pip/source installs fall back to a download.
-PIPER_MODEL = os.environ.get("EASYSPEAK_PIPER_MODEL") or _bundled_model(
-    "models",
-    "piper",
-    "en_US-amy-medium.onnx",
+PIPER_MODEL = os.environ.get("EASYSPEAK_PIPER_MODEL") or _bundled_voice(
+    LANGUAGE,
     default=str(Path("~/.local/share/piper/en_US-amy-medium.onnx").expanduser()),
 )
 PIPER_BIN = os.environ.get("EASYSPEAK_PIPER_BIN") or _bundled_bin(
     "piper", default="piper"
 )
-WHISPER_MODEL = os.environ.get("EASYSPEAK_WHISPER_MODEL") or _bundled_model(
-    "models", "whisper", "base.en", default="base.en"
+WHISPER_MODEL = os.environ.get("EASYSPEAK_WHISPER_MODEL") or _bundled_whisper(
+    LANGUAGE, default="base.en" if LANGUAGE == "en" else "small"
 )
 WHISPER_COMPUTE_TYPE = os.environ.get("EASYSPEAK_WHISPER_COMPUTE_TYPE", "int8")
 try:
