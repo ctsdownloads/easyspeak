@@ -1014,7 +1014,7 @@ the module that reads each (linked to its API reference).</p>
 <tr>
 <td><code>EASYSPEAK_LANGUAGE</code></td>
 <td><code>en</code></td>
-<td>Language of dictation and spoken replies</td>
+<td>Language you dictate in</td>
 </tr>
 <tr>
 <td><code>EASYSPEAK_MODELS_DIR</code></td>
@@ -1068,11 +1068,12 @@ the module that reads each (linked to its API reference).</p>
 </tr>
 </tbody>
 </table>
-<p><code>EASYSPEAK_LANGUAGE</code> is the language you dictate in; commands stay English. It
-also picks which installed <a href="../packaging/#language">language pack</a> the two model
-defaults come from. Without a pack for it, <code>EASYSPEAK_WHISPER_MODEL</code> falls back
-to <code>base.en</code> for English and to the multilingual <code>small</code> for any other language
-(a download, see <code>EASYSPEAK_OFFLINE</code>), and <code>EASYSPEAK_PIPER_MODEL</code> to
+<p><code>EASYSPEAK_LANGUAGE</code> is the language you dictate in; commands and spoken
+replies stay English. It picks which installed <a href="../packaging/#language">language pack</a>
+<code>EASYSPEAK_WHISPER_MODEL</code> defaults to; without one it falls back to <code>base.en</code>
+for English and to the multilingual <code>small</code> for any other language (a download,
+see <code>EASYSPEAK_OFFLINE</code>). The replies are read by the voice of their own
+language, so <code>EASYSPEAK_PIPER_MODEL</code> defaults to the English pack's voice, else
 <code>~/.local/share/piper/en_US-amy-medium.onnx</code>.</p>
 <p><code>EASYSPEAK_SILENCE_THRESHOLD</code> is normally left alone. On startup EasySpeak
 listens to the room for a second and sets the threshold above whatever it
