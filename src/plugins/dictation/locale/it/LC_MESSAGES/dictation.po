@@ -24,8 +24,36 @@ msgstr "La dettatura non è configurata su questo sistema."
 msgid "Done"
 msgstr "Fatto"
 
+msgid "Editing: backspace, backspace five, scratch that"
+msgstr "Modifica: backspace, backspace cinque, cancella quello"
+
+msgid "Keys: enter, tab, escape, page up, page down, press down five"
+msgstr "Tasti: invio, tab, escape, pagina su, pagina giù, premi giù cinque"
+
 msgid "No text field focused."
 msgstr "Nessun campo di testo selezionato."
 
 msgid "Nothing to scratch"
 msgstr "Niente da cancellare"
+
+msgid ""
+"Punctuation: comma, period, question mark, exclamation mark, colon, "
+"semicolon"
+msgstr ""
+"Punteggiatura: virgola, punto, punto interrogativo, punto esclamativo, "
+"due punti, punto e virgola"
+
+msgid "Structure: new sentence, new line, new paragraph"
+msgstr "Struttura: nuova frase, nuova riga, nuovo paragrafo"
+
+msgid ""
+"Symbols: apostrophe, quote, dash, hyphen, at sign, hashtag, percent, "
+"asterisk"
+msgstr ""
+"Simboli: apostrofo, virgolette, trattino lungo, trattino, chiocciola, "
+"cancelletto, percento, asterisco"
+
+msgid "notes - start dictation mode (say 'stop notes' to end)"
+msgstr ""
+"notes / dettatura - avvia la dettatura (di' 'fine dettatura' per "
+"terminare)"

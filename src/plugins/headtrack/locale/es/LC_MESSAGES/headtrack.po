@@ -35,3 +35,30 @@ msgstr "Detenido"
 
 msgid "Tracking"
 msgstr "Seguimiento activo"
+
+msgid "click - left click at cursor"
+msgstr "click - clic izquierdo en el cursor"
+
+msgid "double click - double click"
+msgstr "double click - doble clic"
+
+msgid "freeze - lock cursor position"
+msgstr "freeze - congelar el cursor"
+
+msgid "go - resume tracking"
+msgstr "go - reanudar el seguimiento"
+
+msgid "nudge up/down/left/right - fine tune position"
+msgstr "nudge up/down/left/right - ajustar la posición"
+
+msgid "recalibrate - reset center position"
+msgstr "recalibrate - recalibrar el centro"
+
+msgid "right click - right click"
+msgstr "right click - clic derecho"
+
+msgid "start tracking - begin head tracking"
+msgstr "start tracking - iniciar el seguimiento de la cabeza"
+
+msgid "stop tracking - end tracking"
+msgstr "stop tracking - detener el seguimiento"

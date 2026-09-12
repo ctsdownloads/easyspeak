@@ -21,22 +21,22 @@ NAME = "browser"
 DESCRIPTION = "Qutebrowser voice control"
 
 COMMANDS = [
-    "numbers - show click hints",
-    "[number] - click hint (e.g. 'one' = 1, 'zero two' = 02)",
-    "back - go back",
-    "forward - go forward",
-    "scroll up/down - scroll page",
-    "top / bottom - jump to top/bottom",
-    "reload - refresh page",
-    "new tab - open new tab",
-    "close tab - close current tab",
-    "next tab / switch tab - go to the next tab",
-    "last tab - go to the previous tab",
-    "tab [number] - switch to a tab by number",
-    "close tab [number] - close a tab (or 'close tab' for this one)",
-    "find [text] - search on page",
-    "go to [site] - open bookmarked site",
-    "search [query] - search the web",
+    _("numbers - show click hints"),
+    _("[number] - click hint (e.g. 'one' = 1, 'zero two' = 02)"),
+    _("back - go back"),
+    _("forward - go forward"),
+    _("scroll up/down - scroll page"),
+    _("top / bottom - jump to top/bottom"),
+    _("reload - refresh page"),
+    _("new tab - open new tab"),
+    _("close tab - close current tab"),
+    _("next tab / switch tab - go to the next tab"),
+    _("last tab - go to the previous tab"),
+    _("tab [number] - switch to a tab by number"),
+    _("close tab [number] - close a tab (or 'close tab' for this one)"),
+    _("find [text] - search on page"),
+    _("go to [site] - open bookmarked site"),
+    _("search [query] - search the web"),
 ]
 
 core = None

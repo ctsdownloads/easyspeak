@@ -9,10 +9,10 @@ PRIORITY = 100  # the catch-all for help and exit routes last
 DESCRIPTION = "Help and exit commands"
 
 COMMANDS = [
-    "help - list all commands",
-    "require wake word - modes wait for the wake word each command",
-    "free listening - modes accept bare commands again",
-    "quit/exit/goodbye - exit EasySpeak",
+    _("help - list all commands"),
+    _("require wake word - modes wait for the wake word each command"),
+    _("free listening - modes accept bare commands again"),
+    _("quit/exit/goodbye - exit EasySpeak"),
 ]
 
 core = None
@@ -67,7 +67,7 @@ def show_help(core):
     request (the spoken reply tells the user to read the terminal), so it must
     appear regardless of the configured log verbosity.
     """
-    print("\n=== Available Commands ===")  # noqa: T201
+    print("\n=== " + _("Available Commands") + " ===")  # noqa: T201
     for plugin in core.plugins:
         if hasattr(plugin, "COMMANDS"):
             print(f"\n{plugin.NAME}:")  # noqa: T201

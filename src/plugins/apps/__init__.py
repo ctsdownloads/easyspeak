@@ -10,9 +10,9 @@ NAME = "apps"
 DESCRIPTION = "Launch and close applications"
 
 COMMANDS = [
-    "open/launch [app] - open an application",
-    "close [app] - close an application",
-    "Apps: browser, steam, spotify, calculator, settings, terminal",
+    _("open/launch [app] - open an application"),
+    _("close [app] - close an application"),
+    _("Apps: browser, steam, spotify, calculator, settings, terminal"),
 ]
 
 # Flatpak apps

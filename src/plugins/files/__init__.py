@@ -10,9 +10,12 @@ NAME = "files"
 DESCRIPTION = "Folder navigation"
 
 COMMANDS = [
-    "open [folder] - open a folder in your default file manager",
-    "open files / file manager - open your default file manager",
-    "Folders: documents, downloads, pictures, music, videos, projects, home, desktop",
+    _("open [folder] - open a folder in your default file manager"),
+    _("open files / file manager - open your default file manager"),
+    _(
+        "Folders: documents, downloads, pictures, music, videos, projects, "
+        "home, desktop"
+    ),
 ]
 
 OPEN_VERBS = ("open", "go to", "show", "browse")

@@ -24,8 +24,34 @@ msgstr "El dictado no está configurado en este sistema."
 msgid "Done"
 msgstr "Hecho"
 
+msgid "Editing: backspace, backspace five, scratch that"
+msgstr "Edición: retroceso, retroceso cinco, borra eso"
+
+msgid "Keys: enter, tab, escape, page up, page down, press down five"
+msgstr "Teclas: intro, tab, escape, página arriba, página abajo, pulsa abajo cinco"
+
 msgid "No text field focused."
 msgstr "Ningún campo de texto seleccionado."
 
 msgid "Nothing to scratch"
 msgstr "Nada que borrar"
+
+msgid ""
+"Punctuation: comma, period, question mark, exclamation mark, colon, "
+"semicolon"
+msgstr ""
+"Puntuación: coma, punto, signo de interrogación, signo de exclamación, "
+"dos puntos, punto y coma"
+
+msgid "Structure: new sentence, new line, new paragraph"
+msgstr "Estructura: nueva frase, nueva línea, nuevo párrafo"
+
+msgid ""
+"Symbols: apostrophe, quote, dash, hyphen, at sign, hashtag, percent, "
+"asterisk"
+msgstr ""
+"Símbolos: apóstrofo, comillas, raya, guion, arroba, almohadilla, por "
+"ciento, asterisco"
+
+msgid "notes - start dictation mode (say 'stop notes' to end)"
+msgstr "notes / dictado - iniciar el dictado (di 'fin del dictado' para terminar)"

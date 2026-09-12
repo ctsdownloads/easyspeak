@@ -17,3 +17,10 @@ msgstr ""
 
 msgid "Voice control turned off."
 msgstr "Commande vocale désactivée."
+
+msgid ""
+"go to sleep / stop listening - release the mic (reactivate from the tray "
+"icon)"
+msgstr ""
+"go to sleep / stop listening - libérer le micro (réactiver depuis l'icône"
+" de la barre)"

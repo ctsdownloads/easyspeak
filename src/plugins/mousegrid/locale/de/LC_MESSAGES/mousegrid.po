@@ -15,6 +15,9 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "1-9 or chains like '3 7 5' - zoom to zone(s)"
+msgstr "1-9 oder Folgen wie '3 7 5' - in Zone(n) zoomen"
+
 msgid "Clicked"
 msgstr "Geklickt"
 
@@ -41,3 +44,27 @@ msgstr "Rechtsklick"
 
 msgid "Scrolled"
 msgstr "Gescrollt"
+
+msgid "again - reopen grid at last position"
+msgstr "again - Raster an letzter Position wieder öffnen"
+
+msgid "click - left click"
+msgstr "click - Linksklick"
+
+msgid "close/cancel - hide grid"
+msgstr "close/cancel - Raster ausblenden"
+
+msgid "grid/mouse/pointer - show mouse grid"
+msgstr "grid/mouse/pointer - Mausraster anzeigen"
+
+msgid "mark - start drag, drag - end drag"
+msgstr "mark - Ziehen beginnen, drag - Ziehen beenden"
+
+msgid "right click / double click / middle click"
+msgstr "right click / double click / middle click - Rechts-, Doppel-, Mittelklick"
+
+msgid "scroll up/down/left/right [N]"
+msgstr "scroll up/down/left/right [N] - scrollen"
+
+msgid "up/down/left/right [N] - nudge position"
+msgstr "up/down/left/right [N] - Position verschieben"

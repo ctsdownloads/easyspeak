@@ -22,15 +22,15 @@ DESCRIPTION = "Voice-controlled mouse grid"
 PRIORITY = 1
 
 COMMANDS = [
-    "grid/mouse/pointer - show mouse grid",
-    "1-9 or chains like '3 7 5' - zoom to zone(s)",
-    "up/down/left/right [N] - nudge position",
-    "click - left click",
-    "right click / double click / middle click",
-    "scroll up/down/left/right [N]",
-    "mark - start drag, drag - end drag",
-    "again - reopen grid at last position",
-    "close/cancel - hide grid",
+    _("grid/mouse/pointer - show mouse grid"),
+    _("1-9 or chains like '3 7 5' - zoom to zone(s)"),
+    _("up/down/left/right [N] - nudge position"),
+    _("click - left click"),
+    _("right click / double click / middle click"),
+    _("scroll up/down/left/right [N]"),
+    _("mark - start drag, drag - end drag"),
+    _("again - reopen grid at last position"),
+    _("close/cancel - hide grid"),
 ]
 
 core = None

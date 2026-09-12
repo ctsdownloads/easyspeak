@@ -14,7 +14,7 @@ NAME = "sleep"
 DESCRIPTION = "Deactivate (sleep) until reactivated from the tray or Quick Settings"
 
 COMMANDS = [
-    "go to sleep / stop listening - release the mic (reactivate from the tray icon)",
+    _("go to sleep / stop listening - release the mic (reactivate from the tray icon)"),
 ]
 
 SLEEP_PHRASES = ("go to sleep", "goto sleep", "stop listening")

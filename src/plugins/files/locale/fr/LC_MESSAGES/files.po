@@ -15,9 +15,22 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid ""
+"Folders: documents, downloads, pictures, music, videos, projects, home, "
+"desktop"
+msgstr ""
+"Dossiers : documents, downloads, pictures, music, videos, projects, home,"
+" desktop"
+
 msgid "No file manager found."
 msgstr "Aucun gestionnaire de fichiers trouvé."
 
 #, python-brace-format
 msgid "Opening {label}."
 msgstr "J'ouvre {label}."
+
+msgid "open [folder] - open a folder in your default file manager"
+msgstr "open [folder] - ouvrir un dossier dans le gestionnaire de fichiers"
+
+msgid "open files / file manager - open your default file manager"
+msgstr "open files / file manager - ouvrir le gestionnaire de fichiers"

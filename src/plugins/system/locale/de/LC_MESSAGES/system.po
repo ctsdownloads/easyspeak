@@ -26,3 +26,15 @@ msgstr "Nicht stören aus."
 
 msgid "Do not disturb on."
 msgstr "Nicht stören an."
+
+msgid "brightness up/down - adjust screen brightness"
+msgstr "brightness up/down - Bildschirmhelligkeit anpassen"
+
+msgid "do not disturb on/off - toggle notifications"
+msgstr "do not disturb on/off - Benachrichtigungen ein-/ausschalten"
+
+msgid "mute - toggle mute"
+msgstr "mute - stumm schalten / aufheben"
+
+msgid "volume up/down - adjust volume"
+msgstr "volume up/down - Lautstärke anpassen"

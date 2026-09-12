@@ -24,8 +24,38 @@ msgstr "La dictée n'est pas configurée sur ce système."
 msgid "Done"
 msgstr "Terminé"
 
+msgid "Editing: backspace, backspace five, scratch that"
+msgstr "Édition : retour arrière, retour arrière cinq, efface ça"
+
+msgid "Keys: enter, tab, escape, page up, page down, press down five"
+msgstr ""
+"Touches : entrée, tab, échap, page précédente, page suivante, appuie bas "
+"cinq"
+
 msgid "No text field focused."
 msgstr "Aucun champ de texte sélectionné."
 
 msgid "Nothing to scratch"
 msgstr "Rien à effacer"
+
+msgid ""
+"Punctuation: comma, period, question mark, exclamation mark, colon, "
+"semicolon"
+msgstr ""
+"Ponctuation : virgule, point, point d'interrogation, point d'exclamation,"
+" deux points, point virgule"
+
+msgid "Structure: new sentence, new line, new paragraph"
+msgstr "Structure : nouvelle phrase, nouvelle ligne, nouveau paragraphe"
+
+msgid ""
+"Symbols: apostrophe, quote, dash, hyphen, at sign, hashtag, percent, "
+"asterisk"
+msgstr ""
+"Symboles : apostrophe, guillemets, tiret, trait d'union, arobase, dièse, "
+"pour cent, astérisque"
+
+msgid "notes - start dictation mode (say 'stop notes' to end)"
+msgstr ""
+"notes / dictée - commencer la dictée (dites 'fin de la dictée' pour "
+"terminer)"

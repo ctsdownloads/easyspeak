@@ -15,6 +15,9 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "1-9 or chains like '3 7 5' - zoom to zone(s)"
+msgstr "1-9 ou des suites comme '3 7 5' - zoomer sur la zone"
+
 msgid "Clicked"
 msgstr "Cliqué"
 
@@ -41,3 +44,27 @@ msgstr "Clic droit"
 
 msgid "Scrolled"
 msgstr "Défilé"
+
+msgid "again - reopen grid at last position"
+msgstr "again - rouvrir la grille à la dernière position"
+
+msgid "click - left click"
+msgstr "click - clic gauche"
+
+msgid "close/cancel - hide grid"
+msgstr "close/cancel - masquer la grille"
+
+msgid "grid/mouse/pointer - show mouse grid"
+msgstr "grid/mouse/pointer - afficher la grille de la souris"
+
+msgid "mark - start drag, drag - end drag"
+msgstr "mark - commencer le glisser, drag - le terminer"
+
+msgid "right click / double click / middle click"
+msgstr "right click / double click / middle click - clic droit, double, du milieu"
+
+msgid "scroll up/down/left/right [N]"
+msgstr "scroll up/down/left/right [N] - faire défiler"
+
+msgid "up/down/left/right [N] - nudge position"
+msgstr "up/down/left/right [N] - déplacer la position"

@@ -8,10 +8,10 @@ NAME = "system"
 DESCRIPTION = "System controls"
 
 COMMANDS = [
-    "volume up/down - adjust volume",
-    "mute - toggle mute",
-    "brightness up/down - adjust screen brightness",
-    "do not disturb on/off - toggle notifications",
+    _("volume up/down - adjust volume"),
+    _("mute - toggle mute"),
+    _("brightness up/down - adjust screen brightness"),
+    _("do not disturb on/off - toggle notifications"),
 ]
 
 core = None

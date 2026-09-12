@@ -35,3 +35,30 @@ msgstr "Gestoppt"
 
 msgid "Tracking"
 msgstr "Verfolgung läuft"
+
+msgid "click - left click at cursor"
+msgstr "click - Linksklick am Zeiger"
+
+msgid "double click - double click"
+msgstr "double click - Doppelklick"
+
+msgid "freeze - lock cursor position"
+msgstr "freeze - Zeiger festhalten"
+
+msgid "go - resume tracking"
+msgstr "go - Verfolgung fortsetzen"
+
+msgid "nudge up/down/left/right - fine tune position"
+msgstr "nudge up/down/left/right - Position feinjustieren"
+
+msgid "recalibrate - reset center position"
+msgstr "recalibrate - Mitte neu setzen"
+
+msgid "right click - right click"
+msgstr "right click - Rechtsklick"
+
+msgid "start tracking - begin head tracking"
+msgstr "start tracking - Kopfverfolgung starten"
+
+msgid "stop tracking - end tracking"
+msgstr "stop tracking - Verfolgung beenden"

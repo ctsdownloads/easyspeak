@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import polib
 from easyspeak.core import i18n
 
 CATALOG = """\
@@ -70,3 +71,13 @@ def test_every_shipped_package_binds_a_translator():
             package / ("i18n.py" if package.name == "core" else "__init__.py")
         ).read_text(encoding="utf-8")
         assert "_ = translator(__file__)" in code, package.name
+
+
+def test_every_shipped_catalog_is_complete():
+    """A shipped `.po` has no empty or fuzzy entry: what it ships, it speaks."""
+    src = Path(i18n.__file__).parent.parent
+    for catalog in src.glob("**/locale/*/LC_MESSAGES/*.po"):
+        for entry in polib.pofile(str(catalog)):
+            if entry.msgid and not entry.obsolete:
+                assert entry.msgstr, (catalog, entry.msgid)
+                assert "fuzzy" not in entry.flags, (catalog, entry.msgid)

@@ -1,7 +1,7 @@
 # Commands
 
 Say "Hey Jarvis" followed by any of the commands below. Say **"help"** at any
-time to print the full list to the terminal.
+time to print the full list to the terminal, described in the active language.
 
 ## Mouse grid
 

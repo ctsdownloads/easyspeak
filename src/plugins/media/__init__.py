@@ -8,11 +8,11 @@ NAME = "media"
 DESCRIPTION = "Media playback controls"
 
 COMMANDS = [
-    "play/resume - resume playback",
-    "pause - pause playback",
-    "stop the music - pause playback",
-    "next/skip - next track",
-    "previous - previous track",
+    _("play/resume - resume playback"),
+    _("pause - pause playback"),
+    _("stop the music - pause playback"),
+    _("next/skip - next track"),
+    _("previous - previous track"),
 ]
 
 # Playback verbs and the MPRIS action each maps to.

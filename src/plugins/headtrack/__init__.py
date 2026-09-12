@@ -20,15 +20,15 @@ DESCRIPTION = "Head tracking for cursor control"
 PRIORITY = 0
 
 COMMANDS = [
-    "start tracking - begin head tracking",
-    "stop tracking - end tracking",
-    "freeze - lock cursor position",
-    "go - resume tracking",
-    "nudge up/down/left/right - fine tune position",
-    "click - left click at cursor",
-    "double click - double click",
-    "right click - right click",
-    "recalibrate - reset center position",
+    _("start tracking - begin head tracking"),
+    _("stop tracking - end tracking"),
+    _("freeze - lock cursor position"),
+    _("go - resume tracking"),
+    _("nudge up/down/left/right - fine tune position"),
+    _("click - left click at cursor"),
+    _("double click - double click"),
+    _("right click - right click"),
+    _("recalibrate - reset center position"),
 ]
 
 core = None

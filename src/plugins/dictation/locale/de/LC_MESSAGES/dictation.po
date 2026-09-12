@@ -24,8 +24,34 @@ msgstr "Diktat ist auf diesem System nicht eingerichtet."
 msgid "Done"
 msgstr "Fertig"
 
+msgid "Editing: backspace, backspace five, scratch that"
+msgstr "Bearbeiten: Rücktaste, Rücktaste fünf, das streichen"
+
+msgid "Keys: enter, tab, escape, page up, page down, press down five"
+msgstr "Tasten: Enter, Tab, Escape, Bild hoch, Bild runter, drücke runter fünf"
+
 msgid "No text field focused."
 msgstr "Kein Textfeld ausgewählt."
 
 msgid "Nothing to scratch"
 msgstr "Nichts zum Verwerfen"
+
+msgid ""
+"Punctuation: comma, period, question mark, exclamation mark, colon, "
+"semicolon"
+msgstr ""
+"Satzzeichen: Komma, Punkt, Fragezeichen, Ausrufezeichen, Doppelpunkt, "
+"Semikolon"
+
+msgid "Structure: new sentence, new line, new paragraph"
+msgstr "Struktur: neuer Satz, neue Zeile, neuer Absatz"
+
+msgid ""
+"Symbols: apostrophe, quote, dash, hyphen, at sign, hashtag, percent, "
+"asterisk"
+msgstr ""
+"Zeichen: Apostroph, Anführungszeichen, Gedankenstrich, Bindestrich, At-"
+"Zeichen, Raute, Prozent, Sternchen"
+
+msgid "notes - start dictation mode (say 'stop notes' to end)"
+msgstr "notes / Diktat - Diktat starten (sag 'Notizen beenden' zum Beenden)"

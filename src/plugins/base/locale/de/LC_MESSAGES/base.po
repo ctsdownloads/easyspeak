@@ -15,6 +15,9 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "Available Commands"
+msgstr "Verfügbare Befehle"
+
 msgid "Check the terminal for available commands."
 msgstr "Die verfügbaren Befehle stehen im Terminal."
 
@@ -26,3 +29,15 @@ msgstr "Modi nehmen Befehle jetzt direkt entgegen."
 
 msgid "Modes now wait for the wake word."
 msgstr "Modi warten jetzt auf das Aktivierungswort."
+
+msgid "free listening - modes accept bare commands again"
+msgstr "free listening - Modi nehmen Befehle wieder direkt entgegen"
+
+msgid "help - list all commands"
+msgstr "help - alle Befehle auflisten"
+
+msgid "quit/exit/goodbye - exit EasySpeak"
+msgstr "quit/exit/goodbye - EasySpeak beenden"
+
+msgid "require wake word - modes wait for the wake word each command"
+msgstr "require wake word - Modi warten vor jedem Befehl auf das Aktivierungswort"

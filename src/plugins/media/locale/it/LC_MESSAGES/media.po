@@ -29,3 +29,18 @@ msgstr "In riproduzione."
 
 msgid "Previous."
 msgstr "Precedente."
+
+msgid "next/skip - next track"
+msgstr "next/skip - brano successivo"
+
+msgid "pause - pause playback"
+msgstr "pause - mette in pausa"
+
+msgid "play/resume - resume playback"
+msgstr "play/resume - riprende la riproduzione"
+
+msgid "previous - previous track"
+msgstr "previous - brano precedente"
+
+msgid "stop the music - pause playback"
+msgstr "stop the music - mette in pausa"

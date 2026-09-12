@@ -73,6 +73,54 @@ msgstr "Software-Rendering an"
 msgid "The browser isn't running."
 msgstr "Der Browser läuft nicht."
 
+msgid "[number] - click hint (e.g. 'one' = 1, 'zero two' = 02)"
+msgstr "[number] - Hinweis anklicken (z. B. 'one' = 1, 'zero two' = 02)"
+
+msgid "back - go back"
+msgstr "back - zurück"
+
+msgid "close tab - close current tab"
+msgstr "close tab - aktuellen Tab schließen"
+
+msgid "close tab [number] - close a tab (or 'close tab' for this one)"
+msgstr "close tab [number] - einen Tab schließen (oder 'close tab' für diesen)"
+
+msgid "find [text] - search on page"
+msgstr "find [text] - auf der Seite suchen"
+
+msgid "forward - go forward"
+msgstr "forward - vorwärts"
+
+msgid "go to [site] - open bookmarked site"
+msgstr "go to [site] - gespeicherte Seite öffnen"
+
+msgid "last tab - go to the previous tab"
+msgstr "last tab - zum vorherigen Tab"
+
+msgid "new tab - open new tab"
+msgstr "new tab - neuen Tab öffnen"
+
+msgid "next tab / switch tab - go to the next tab"
+msgstr "next tab / switch tab - zum nächsten Tab"
+
+msgid "numbers - show click hints"
+msgstr "numbers - Klick-Hinweise anzeigen"
+
+msgid "reload - refresh page"
+msgstr "reload - Seite neu laden"
+
+msgid "scroll up/down - scroll page"
+msgstr "scroll up/down - Seite scrollen"
+
+msgid "search [query] - search the web"
+msgstr "search [query] - im Web suchen"
+
+msgid "tab [number] - switch to a tab by number"
+msgstr "tab [number] - zu Tab Nummer wechseln"
+
+msgid "top / bottom - jump to top/bottom"
+msgstr "top / bottom - zum Anfang/Ende springen"
+
 #, python-brace-format
 msgid "{spoken}. Restarting the browser."
 msgstr "{spoken}. Browser wird neu gestartet."

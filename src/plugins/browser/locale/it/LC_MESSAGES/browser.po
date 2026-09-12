@@ -73,6 +73,54 @@ msgstr "Rendering software attivato"
 msgid "The browser isn't running."
 msgstr "Il browser non è in esecuzione."
 
+msgid "[number] - click hint (e.g. 'one' = 1, 'zero two' = 02)"
+msgstr "[number] - clicca il suggerimento (es. 'one' = 1, 'zero two' = 02)"
+
+msgid "back - go back"
+msgstr "back - indietro"
+
+msgid "close tab - close current tab"
+msgstr "close tab - chiude la scheda corrente"
+
+msgid "close tab [number] - close a tab (or 'close tab' for this one)"
+msgstr "close tab [number] - chiude una scheda (o 'close tab' per questa)"
+
+msgid "find [text] - search on page"
+msgstr "find [text] - cerca nella pagina"
+
+msgid "forward - go forward"
+msgstr "forward - avanti"
+
+msgid "go to [site] - open bookmarked site"
+msgstr "go to [site] - apre un sito dai segnalibri"
+
+msgid "last tab - go to the previous tab"
+msgstr "last tab - torna alla scheda precedente"
+
+msgid "new tab - open new tab"
+msgstr "new tab - apre una nuova scheda"
+
+msgid "next tab / switch tab - go to the next tab"
+msgstr "next tab / switch tab - passa alla scheda successiva"
+
+msgid "numbers - show click hints"
+msgstr "numbers - mostra i suggerimenti per i clic"
+
+msgid "reload - refresh page"
+msgstr "reload - ricarica la pagina"
+
+msgid "scroll up/down - scroll page"
+msgstr "scroll up/down - scorre la pagina"
+
+msgid "search [query] - search the web"
+msgstr "search [query] - cerca sul web"
+
+msgid "tab [number] - switch to a tab by number"
+msgstr "tab [number] - passa alla scheda con quel numero"
+
+msgid "top / bottom - jump to top/bottom"
+msgstr "top / bottom - salta all'inizio/alla fine"
+
 #, python-brace-format
 msgid "{spoken}. Restarting the browser."
 msgstr "{spoken}. Riavvio il browser."

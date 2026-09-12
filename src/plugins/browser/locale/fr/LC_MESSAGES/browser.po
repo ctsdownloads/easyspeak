@@ -73,6 +73,54 @@ msgstr "Rendu logiciel activé"
 msgid "The browser isn't running."
 msgstr "Le navigateur n'est pas lancé."
 
+msgid "[number] - click hint (e.g. 'one' = 1, 'zero two' = 02)"
+msgstr "[number] - cliquer sur l'indice (p. ex. 'one' = 1, 'zero two' = 02)"
+
+msgid "back - go back"
+msgstr "back - page précédente"
+
+msgid "close tab - close current tab"
+msgstr "close tab - fermer l'onglet courant"
+
+msgid "close tab [number] - close a tab (or 'close tab' for this one)"
+msgstr "close tab [number] - fermer un onglet (ou 'close tab' pour celui-ci)"
+
+msgid "find [text] - search on page"
+msgstr "find [text] - chercher dans la page"
+
+msgid "forward - go forward"
+msgstr "forward - page suivante"
+
+msgid "go to [site] - open bookmarked site"
+msgstr "go to [site] - ouvrir un site en favori"
+
+msgid "last tab - go to the previous tab"
+msgstr "last tab - onglet précédent"
+
+msgid "new tab - open new tab"
+msgstr "new tab - ouvrir un nouvel onglet"
+
+msgid "next tab / switch tab - go to the next tab"
+msgstr "next tab / switch tab - onglet suivant"
+
+msgid "numbers - show click hints"
+msgstr "numbers - afficher les indices de clic"
+
+msgid "reload - refresh page"
+msgstr "reload - recharger la page"
+
+msgid "scroll up/down - scroll page"
+msgstr "scroll up/down - faire défiler la page"
+
+msgid "search [query] - search the web"
+msgstr "search [query] - chercher sur le web"
+
+msgid "tab [number] - switch to a tab by number"
+msgstr "tab [number] - aller à l'onglet numéro"
+
+msgid "top / bottom - jump to top/bottom"
+msgstr "top / bottom - aller en haut/en bas"
+
 #, python-brace-format
 msgid "{spoken}. Restarting the browser."
 msgstr "{spoken}. Je redémarre le navigateur."
