@@ -1024,8 +1024,9 @@ translation exists. A plugin opts in with one line and wraps what it speaks:</p>
 <code>myplugin/locale/de/LC_MESSAGES/myplugin.po</code>, the domain being the package's
 name. <code>just translations de</code> extracts the wrapped strings and creates or
 refreshes every <code>.po</code> for German; then fill in the <code>msgstr</code> lines, in Poedit or
-any editor. A string without a translation is spoken in English. See
-<a class="autorefs autorefs-internal" title="            core.i18n" href="../reference/core/#core.i18n"><code>core.i18n</code></a>.</p>
+any editor. A string without a translation is spoken in English, and
+<code>just check-translations</code> (run in CI) fails while a catalog lags behind the
+code. See <a class="autorefs autorefs-internal" title="            core.i18n" href="../reference/core/#core.i18n"><code>core.i18n</code></a>.</p>
 <p>See the <a href="../reference/plugins/">Plugins API reference</a> for the generated
 documentation of every bundled plugin.</p>
 
