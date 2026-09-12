@@ -9,7 +9,11 @@ import subprocess
 import threading
 import time
 
+from easyspeak.core.i18n import translator
+
 logger = logging.getLogger(__name__)
+
+_ = translator(__file__)
 
 NAME = "headtrack"
 DESCRIPTION = "Head tracking for cursor control"
@@ -346,14 +350,14 @@ def start_tracking():
     global tracking_active, tracking_thread, stop_event, frozen
 
     if tracking_active:
-        return False, "Already tracking"
+        return False, _("Already tracking")
 
     frozen = False
     stop_event.clear()
     tracking_active = True
     tracking_thread = threading.Thread(target=run_tracking, daemon=True)
     tracking_thread.start()
-    return True, "Tracking"
+    return True, _("Tracking")
 
 
 def stop_tracking():
@@ -362,7 +366,7 @@ def stop_tracking():
     stop_event.set()
     tracking_active = False
     time.sleep(0.2)
-    return True, "Stopped"
+    return True, _("Stopped")
 
 
 def recalibrate():
@@ -372,8 +376,8 @@ def recalibrate():
         stop_tracking()
         time.sleep(0.3)
         start_tracking()
-        return True, "Recalibrating"
-    return False, "Not tracking"
+        return True, _("Recalibrating")
+    return False, _("Not tracking")
 
 
 def handle(cmd, core):
@@ -464,7 +468,7 @@ def listen_for_tracking_commands(core):
         ):
             frozen = False
             stop_tracking()
-            core.speak("Stopped")
+            core.speak(_("Stopped"))
             return
 
         # Freeze/Go
@@ -472,13 +476,13 @@ def listen_for_tracking_commands(core):
             frozen = True
             # "Frozen" contains none of the words that trigger this branch, so
             # hearing itself back can't freeze again.
-            core.speak("Frozen")
+            core.speak(_("Frozen"))
             logger.debug("  → Frozen at (%d, %d)", int(cursor_x), int(cursor_y))
             continue
 
         if cmd_lower in ["go", "go go", "unfreeze", "resume", "track"]:
             frozen = False
-            core.speak("Following")
+            core.speak(_("Following"))
             logger.debug("  → Resumed")
             continue
 
@@ -501,7 +505,7 @@ def listen_for_tracking_commands(core):
         if "recalibrate" in cmd_lower or "calibrate" in cmd_lower:
             frozen = False
             recalibrate()
-            core.speak("Recalibrating")
+            core.speak(_("Recalibrating"))
             continue
 
         # Click commands

@@ -26,6 +26,10 @@ instance and use its small public API (`speak`, `host_run`, `transcribe`,
 
 ::: core.speech
 
+## core.i18n
+
+::: core.i18n
+
 ## core.wakeword
 
 ::: core.wakeword

@@ -1,5 +1,9 @@
 """System Plugin - Volume, brightness, do not disturb."""
 
+from easyspeak.core.i18n import translator
+
+_ = translator(__file__)
+
 NAME = "system"
 DESCRIPTION = "System controls"
 
@@ -144,11 +148,11 @@ def handle(cmd, core):
     # command and a stray "up"/"down" inside another word can't flip the direction.
     if "brightness" in words or "screen" in words:
         if "up" in words or "brighter" in words:
-            core.speak("Brighter.")
+            core.speak(_("Brighter."))
             brightness_up(core)
             return True
         if "down" in words or "dimmer" in words or "darker" in words:
-            core.speak("Dimmer.")
+            core.speak(_("Dimmer."))
             brightness_down(core)
             return True
 
@@ -161,10 +165,10 @@ def handle(cmd, core):
         # Silencing notifications is do-not-disturb ON, so the notifications
         # vocabulary maps the other way round.
         if turning_on if dnd_named else turning_off:
-            core.speak("Do not disturb on.")
+            core.speak(_("Do not disturb on."))
             dnd_on(core)
         else:
-            core.speak("Do not disturb off.")
+            core.speak(_("Do not disturb off."))
             dnd_off(core)
         return True
 

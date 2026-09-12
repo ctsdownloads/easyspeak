@@ -13,8 +13,11 @@ from pathlib import Path
 
 from easyspeak.core import mediakeys
 from easyspeak.core.config import LANGUAGE
+from easyspeak.core.i18n import translator
 
 logger = logging.getLogger(__name__)
+
+_ = translator(__file__)
 
 NAME = "dictation"
 DESCRIPTION = "Voice dictation into any text field"
@@ -644,14 +647,14 @@ def _handle_keystroke(core, text):
     if scratching:
         pending = core.dictation_last_length
         if not pending:
-            core.speak("Nothing to scratch")
+            core.speak(_("Nothing to scratch"))
             return True
         request = (mediakeys.KEYS["backspace"], pending)
     if request is None:
         return False
     keycode, repeats = request
     if not mediakeys.press_key(keycode, repeats):
-        core.speak("Dictation isn't set up on this system.")
+        core.speak(_("Dictation isn't set up on this system."))
         return True
     if scratching:
         core.dictation_last_length = 0
@@ -681,10 +684,10 @@ def _dictate_utterance(core, text):
     if status == INSERTED:
         core.dictation_last_length = len(formatted)
     if status == NO_FOCUS:
-        core.speak("No text field focused.")
+        core.speak(_("No text field focused."))
         return True
     if status == BACKEND_ERROR:
-        core.speak("Dictation isn't set up on this system.")
+        core.speak(_("Dictation isn't set up on this system."))
         return True
     return False
 
@@ -730,7 +733,7 @@ def handle(cmd, core):
     """
     words = cmd.split()
     if ("notes" in words or "note" in words) and "stop" not in words:
-        core.speak("Dictation")
+        core.speak(_("Dictation"))
 
         logger.info("🎙️ Dictation mode - say 'stop notes' to end")
 
@@ -763,7 +766,7 @@ def _dictation_session(core):
         logger.debug("   Raw: %s", text)
 
         if is_exit_phrase(text):
-            core.speak("Done")
+            core.speak(_("Done"))
             return True
 
         if _handle_keystroke(core, text):

@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-eyetrack_plugin = importlib.import_module("easyspeak.plugins.00_eyetrack")
+eyetrack_plugin = importlib.import_module("easyspeak.plugins.headtrack")
 
 
 @pytest.fixture(autouse=True)

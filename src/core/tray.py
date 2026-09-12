@@ -29,6 +29,7 @@ from pathlib import Path
 
 from .about import DOCS_URL
 from .config import ERROR_SOUND
+from .i18n import _
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +114,7 @@ class Tray:
         """
         self.take_command()
         self.set_state(STATE_LISTENING)
-        self._speak("Welcome! I'm ready.")
+        self._speak(_("Welcome! I'm ready."))
 
     def stopped(self):
         """Daemon is exiting; hide the indicator so no stale icon is left."""
@@ -223,7 +224,7 @@ class Tray:
         """
         with contextlib.suppress(OSError):
             subprocess.run(["paplay", ERROR_SOUND], capture_output=True)
-        self._speak(f"Sorry, I couldn't open the {what}.")
+        self._speak(_("Sorry, I couldn't open the {what}.").format(what=what))
 
     def sleep(self, release_mic, acquire_mic, announce=True):
         """Release the mic and idle until reactivated, then greet and resume.
@@ -249,12 +250,12 @@ class Tray:
                 "Tray indicator unavailable; staying awake so you keep a way to "
                 "reactivate."
             )
-            self._speak("I couldn't turn voice control off, so I'll keep listening.")
+            self._speak(_("I couldn't turn voice control off, so I'll keep listening."))
             return TrayAction.CONTINUE
         release_mic()
         logger.info("Muted; microphone released. Waiting for reactivation...")
         if announce:
-            self._speak("Voice control turned off.")
+            self._speak(_("Voice control turned off."))
         next_repush = time.monotonic() + MUTED_REPUSH_INTERVAL
         while True:
             command = self.take_command()
@@ -263,7 +264,7 @@ class Tray:
             if command == COMMAND_UNMUTE:
                 acquire_mic()
                 self.set_state(STATE_LISTENING)
-                self._speak("Welcome! I'm ready.")
+                self._speak(_("Welcome! I'm ready."))
                 return TrayAction.RESUME
             self._run_menu_action(command)
             if time.monotonic() >= next_repush:

@@ -13,6 +13,7 @@ lacks 'C.*\.md|DEPENDENCIES\.md|pins\.toml|docs|package\.json|tests|\.lock|\.mjs
 echo "The wheel ships the core module and the plugins"
 has core
 has plugins
+has locale/de/LC_MESSAGES/dictation.po
 
 echo "The wheel ships the launcher data and the GNOME extension"
 has easyspeak.desktop

@@ -2,6 +2,10 @@
 
 from pathlib import Path
 
+from easyspeak.core.i18n import translator
+
+_ = translator(__file__)
+
 NAME = "apps"
 DESCRIPTION = "Launch and close applications"
 
@@ -190,14 +194,14 @@ def handle(cmd, core):
     for app in all_apps:
         if ("open" in cmd or "launch" in cmd) and app in cmd:
             if launch_app(app, core):
-                core.speak(f"Opening {app}.")
+                core.speak(_("Opening {app}.").format(app=app))
             else:
-                core.speak(f"{app} not installed.")
+                core.speak(_("{app} not installed.").format(app=app))
             return True
 
         if "close" in cmd and app in cmd:
             close_app(app, core)
-            core.speak(f"Closing {app}.")
+            core.speak(_("Closing {app}.").format(app=app))
             return True
 
     return None  # Not handled

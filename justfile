@@ -208,6 +208,28 @@ check-desktop-integration:
     desktop-file-validate src/data/easyspeak.desktop
     desktop-file-validate src/data/easyspeak-autostart.desktop
 
+# Refresh a language's reply translations from the code, e.g. `just translations de`
+[group('lifecycle')]
+translations lang:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    pot=$(mktemp)
+    trap 'rm -f "$pot"' EXIT
+    for package in src/core src/plugins/*/; do
+        package="${package%/}"
+        domain=$(basename "$package")
+        uvx --from babel pybabel -q extract --no-location --sort-output --project EasySpeak --version '' --copyright-holder 'EasySpeak contributors' --msgid-bugs-address https://github.com/ctsdownloads/easyspeak/issues -o "$pot" "$package"
+        grep -q '^msgid "[^"]' "$pot" || continue
+        po="$package/locale/{{ lang }}/LC_MESSAGES/$domain.po"
+        if [ -f "$po" ]; then
+            uvx --from babel pybabel -q update --ignore-pot-creation-date -i "$pot" -o "$po" -l {{ lang }}
+        else
+            mkdir -p "$(dirname "$po")"
+            uvx --from babel pybabel -q init -i "$pot" -o "$po" -l {{ lang }}
+        fi
+        echo "$po"
+    done
+
 # Recompile the bundled GSettings schema after editing the .gschema.xml
 [group('packaging')]
 compile-schemas:

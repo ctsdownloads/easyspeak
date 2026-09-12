@@ -41,6 +41,7 @@ from .config import (
 )
 from .gnome_extension import ensure_extension
 from .hotkey import HotkeyListener
+from .i18n import _
 from .speech import SpeechPipeline, suppressed_c_stderr
 from .tray import Tray, TrayAction
 from .wakeword import WakeWordModel
@@ -202,12 +203,17 @@ class EasySpeak:
     # --- Plugin management ---
 
     def load_plugins(self):
-        """Discover and import every plugin module from the `plugins/` dir.
+        """Discover and import every plugin from the `plugins/` dir.
 
-        Files are loaded in sorted order (numeric prefixes set load order); names
-        starting with `_` are skipped. A module is registered only if it exposes `NAME`
-        and `handle`; its optional `setup` hook runs once. Import or setup failures are
-        logged and skipped, never fatal.
+        A plugin is a package (a directory with `__init__.py`, and a `locale/` for
+        its translations) or a plain module; names starting with `_` are skipped. A
+        plugin is registered only if it exposes `NAME` and `handle`; its optional
+        `setup` hook runs once. Import or setup failures are logged and skipped,
+        never fatal.
+
+        Commands are routed to the plugins in order of their `PRIORITY` (default
+        50, lower first; equal ones by name), so a mode that must see a command
+        first declares a low one, and the catch-all for help and exit a high one.
         """
         plugins_dir = Path(__file__).parent.parent / "plugins"
         if not plugins_dir.exists():
@@ -216,26 +222,35 @@ class EasySpeak:
 
         sys.path.insert(0, str(plugins_dir.parent))
 
-        for file in sorted(plugins_dir.glob("*.py")):
-            if file.name.startswith("_"):
+        loaded = []
+        for file in sorted(plugins_dir.iterdir()):
+            is_package = file.is_dir() and (file / "__init__.py").is_file()
+            if file.name.startswith("_") or not (is_package or file.suffix == ".py"):
                 continue
 
             module_name = f"plugins.{file.stem}"
             try:
                 module = importlib.import_module(module_name)
-
-                if hasattr(module, "NAME") and hasattr(module, "handle"):
-                    if hasattr(module, "setup"):
-                        module.setup(self)
-
-                    self.plugins.append(module)
-                    logger.info("  ✓ Loaded: %s", module.NAME)
-                else:
-                    logger.warning(
-                        "  ✗ Invalid plugin: %s (missing NAME or handle)", file.name
-                    )
             except Exception as e:
                 logger.warning("  ✗ Failed to load %s: %s", file.name, e)
+                continue
+            if hasattr(module, "NAME") and hasattr(module, "handle"):
+                loaded.append(module)
+            else:
+                logger.warning(
+                    "  ✗ Invalid plugin: %s (missing NAME or handle)", file.name
+                )
+
+        loaded.sort(key=lambda m: (getattr(m, "PRIORITY", 50), m.NAME))
+        for module in loaded:
+            try:
+                if hasattr(module, "setup"):
+                    module.setup(self)
+            except Exception as e:
+                logger.warning("  ✗ Failed to load %s: %s", module.NAME, e)
+                continue
+            self.plugins.append(module)
+            logger.info("  ✓ Loaded: %s", module.NAME)
 
     def get_all_commands(self):
         """Get all commands from all plugins for help text."""
@@ -291,10 +306,10 @@ class EasySpeak:
         self.unrecognized = True
         self.misunderstand_count += 1
         if self.misunderstand_count == 1:
-            self.speak("Sorry, I didn't understand.")
+            self.speak(_("Sorry, I didn't understand."))
             return
 
-        self.speak("I didn't understand.")
+        self.speak(_("I didn't understand."))
         if not self.help_shown:
             self._show_help()
             self.help_shown = True
@@ -386,7 +401,7 @@ class EasySpeak:
                 return
 
         chunks = []
-        for _ in range(int(SILENCE_CALIBRATION_SECONDS * 16000 / 1600)):
+        for _tick in range(int(SILENCE_CALIBRATION_SECONDS * 16000 / 1600)):
             with contextlib.suppress(Exception):
                 pcm = self.stream.read(1600, exception_on_overflow=False)
                 chunks.append(np.abs(np.frombuffer(pcm, dtype=np.int16)).mean())
@@ -455,7 +470,7 @@ class EasySpeak:
         `should_continue` (used by push-to-talk) returns None early once it goes False,
         so a key release ends the wait.
         """
-        for _ in range(int(timeout * 16000 / 1600)):
+        for _tick in range(int(timeout * 16000 / 1600)):
             if should_continue is not None and not should_continue():
                 return None
             pcm = self.stream.read(1600, exception_on_overflow=False)
@@ -591,13 +606,21 @@ class EasySpeak:
                 return
             if action is TrayAction.RESUME:
                 logger.info("%s mode ended: reactivated", label.capitalize())
-                self.speak(f"Leaving {label}. Say {WAKE_WORD_SPOKEN} to continue.")
+                self.speak(
+                    _("Leaving {label}. Say {wake_word_spoken} to continue.").format(
+                        label=label, wake_word_spoken=WAKE_WORD_SPOKEN
+                    )
+                )
                 return
 
             remaining = deadline - time.monotonic()
             if remaining <= 0:
                 logger.info("%s mode ended: idle", label.capitalize())
-                self.speak(f"Leaving {label}. Say {WAKE_WORD_SPOKEN} to continue.")
+                self.speak(
+                    _("Leaving {label}. Say {wake_word_spoken} to continue.").format(
+                        label=label, wake_word_spoken=WAKE_WORD_SPOKEN
+                    )
+                )
                 return
 
             if (
@@ -755,7 +778,7 @@ class EasySpeak:
             heard = self.wait_for_speech(timeout=5)
             if heard is None:
                 if awake:
-                    self.speak("I didn't hear anything.")
+                    self.speak(_("I didn't hear anything."))
             else:
                 cmd = self.transcribe(heard + self.record_until_silence())
                 if cmd:

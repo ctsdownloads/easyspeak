@@ -7,12 +7,15 @@ import time
 from pathlib import Path
 
 from easyspeak.core import mediakeys
+from easyspeak.core.i18n import translator
 
 logger = logging.getLogger(__name__)
 
 # down, up, tab and escape already mean something in this mode, so every key but
 # enter needs the "press" prefix.
 BARE_KEYS = frozenset({"enter"})
+
+_ = translator(__file__)
 
 NAME = "browser"
 DESCRIPTION = "Qutebrowser voice control"
@@ -264,9 +267,9 @@ def set_config_line(line, *, wanted):
 def _apply_config_line(core, line, spoken, *, wanted):
     """Write a config toggle and restart qutebrowser so it takes effect."""
     if set_config_line(line, wanted=wanted) is None:
-        core.speak("Could not write the browser config.")
+        core.speak(_("Could not write the browser config."))
         return True
-    core.speak(f"{spoken}. Restarting the browser.")
+    core.speak(_("{spoken}. Restarting the browser.").format(spoken=spoken))
     qb("restart")
     return True
 
@@ -526,7 +529,7 @@ def _reload_if_page_js_is_stale(core):
         return
     core.browser_page_js_stale = False
     logger.debug("  ↻ Reloading: page scripts don't survive a history navigation")
-    core.speak("Reloading")
+    core.speak(_("Reloading"))
     qb("reload")
     time.sleep(RELOAD_SETTLE)
 
@@ -554,7 +557,7 @@ def listen_for_hint(core, retries_left=3):
     listener open, so a run of mishearings can't recurse without end.
     """
     logger.info("  🔢 Say hint number (e.g. 'zero two'), 'exit links' to cancel")
-    core.speak("Ready")
+    core.speak(_("Ready"))
 
     # Small delay to let hints render
     time.sleep(0.3)
@@ -573,7 +576,7 @@ def listen_for_hint(core, retries_left=3):
             listen_for_hint(core, retries_left - 1)
             return
         logger.info("  ⏱ Timeout - hints cancelled")
-        core.speak("Hints closed")
+        core.speak(_("Hints closed"))
         qb("fake-key <Escape>")
         logger.debug("  [listen_for_hint returning - timeout]")
         return
@@ -603,7 +606,7 @@ def listen_for_hint(core, retries_left=3):
     if cmd_lower in HINT_TRIGGERS:
         if retries_left <= 0:
             logger.info("  ✗ Hints aren't appearing on this page")
-            core.speak("No hints on this page")
+            core.speak(_("No hints on this page"))
             qb("fake-key <Escape>")
             return
         logger.debug("  ↻ Showing hints again")
@@ -624,7 +627,7 @@ def listen_for_hint(core, retries_left=3):
     ]:
         qb("fake-key <Escape>")
         logger.info("  ✗ Hints cancelled")
-        core.speak("Hints closed")
+        core.speak(_("Hints closed"))
         logger.debug("  [listen_for_hint returning - cancelled]")
         return
 
@@ -710,10 +713,10 @@ def handle(cmd, core):
     # browser mode -- there would be no browser left to drive.
     if cmd_lower in CLOSE_BROWSER:
         if not _qutebrowser_running(core):
-            core.speak("The browser isn't running.")
+            core.speak(_("The browser isn't running."))
             return True
         qb("quit")
-        core.speak("Closing browser.")
+        core.speak(_("Closing browser."))
         return True
 
     # Already outside browser mode: acknowledge rather than fall through to the
@@ -755,7 +758,7 @@ def browser_mode(core):
     browser mode holds the microphone, and an
     unattended session ends on its own instead of leaving the wake word unreachable.
     """
-    core.speak("Browser")
+    core.speak(_("Browser"))
     logger.info("=== BROWSER MODE ACTIVE ===")
     logger.info("Say commands directly. 'exit browser' to leave.")
 
@@ -774,14 +777,14 @@ def _run_browser_mode(core):
         # Leave the mode, browser left running
         if cmd_lower in LEAVE_BROWSER_MODE:
             logger.info("=== BROWSER MODE EXIT ===")
-            core.speak("Left the browser")
+            core.speak(_("Left the browser"))
             return
 
         # Close the application, which leaves the mode too
         if cmd_lower in CLOSE_BROWSER:
             logger.info("=== BROWSER MODE EXIT (closing browser) ===")
             qb("quit")
-            core.speak("Closing browser.")
+            core.speak(_("Closing browser."))
             return
 
         # Grid triggers - escape to grid mode
@@ -954,29 +957,29 @@ def handle_browser_command(cmd_lower, core):
     # --- Browser config toggles ---
     if cmd_lower in ["software rendering", "fix rendering", "fix the display"]:
         return _apply_config_line(
-            core, SOFTWARE_RENDERING_LINE, "Software rendering on", wanted=True
+            core, SOFTWARE_RENDERING_LINE, _("Software rendering on"), wanted=True
         )
 
     if cmd_lower in ["hardware rendering", "restore rendering"]:
         return _apply_config_line(
-            core, SOFTWARE_RENDERING_LINE, "Hardware rendering on", wanted=False
+            core, SOFTWARE_RENDERING_LINE, _("Hardware rendering on"), wanted=False
         )
 
     if cmd_lower in ["allow ads", "stop blocking ads", "disable ad blocking"]:
         return _apply_config_line(
-            core, ADBLOCK_OFF_LINE, "Ad blocking off", wanted=True
+            core, ADBLOCK_OFF_LINE, _("Ad blocking off"), wanted=True
         )
 
     if cmd_lower in ["block ads", "enable ad blocking"]:
         return _apply_config_line(
-            core, ADBLOCK_OFF_LINE, "Ad blocking on", wanted=False
+            core, ADBLOCK_OFF_LINE, _("Ad blocking on"), wanted=False
         )
 
     # --- Keystrokes ---
     request = mediakeys.parse_key_request(cmd_lower.split(), BARE_KEYS)
     if request is not None:
         if not mediakeys.press_key(*request):
-            core.speak("Keystrokes need GNOME.")
+            core.speak(_("Keystrokes need GNOME."))
         return True
 
     # --- Bookmarks ---
@@ -986,7 +989,7 @@ def handle_browser_command(cmd_lower, core):
     ) and " as " in cmd_lower:
         name = cmd_lower.split(" as ")[-1].strip()
         if name:
-            core.speak(f"Saved as {name}.")
+            core.speak(_("Saved as {name}.").format(name=name))
             qb(f"quickmark-save {name}")
             return True
 
@@ -997,14 +1000,14 @@ def handle_browser_command(cmd_lower, core):
         # Check predefined bookmarks first
         for site, url in BOOKMARKS.items():
             if site == target:
-                core.speak(f"Opening {site}.")
+                core.speak(_("Opening {site}.").format(site=site))
                 qb_open(url)
                 return True
 
         # Try as spoken URL (contains "dot")
         if "dot" in target or "." in target:
             url = parse_spoken_url(target)
-            core.speak(f"Opening {url}.")
+            core.speak(_("Opening {url}.").format(url=url))
             qb_open(url)
             return True
 
@@ -1021,7 +1024,7 @@ def handle_browser_command(cmd_lower, core):
         query = cmd_lower.replace("search for ", "").replace("search ", "").strip()
         if query:
             url = f"https://duckduckgo.com/?q={query.replace(' ', '+')}"
-            core.speak(f"Searching for {query}.")
+            core.speak(_("Searching for {query}.").format(query=query))
             qb_open(url)
             return True
 

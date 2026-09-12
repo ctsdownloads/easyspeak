@@ -254,11 +254,23 @@ class TestLanguagePacks:
         assert Path(config.WHISPER_MODEL) == packs / language / "whisper" / whisper
 
     def test_replies_with_the_voice_of_their_own_language(self, packs, monkeypatch):
-        """The replies are English, so their voice is the English pack's."""
-        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "de")
+        """Replies in a language without a translation are English, in its voice."""
+        install_pack(packs, "fr", "small", "fr_FR-siwis-medium")
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "fr")
         importlib.reload(config)
+        assert config.REPLY_LANGUAGE == "en"
         assert (
             Path(config.PIPER_MODEL) == packs / "en" / "piper" / "en_US-amy-medium.onnx"
+        )
+
+    def test_translated_replies_take_their_languages_voice(self, packs, monkeypatch):
+        """German has a translation, so replies are German, in the German voice."""
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "de")
+        importlib.reload(config)
+        assert config.REPLY_LANGUAGE == "de"
+        assert (
+            Path(config.PIPER_MODEL)
+            == packs / "de" / "piper" / "de_DE-thorsten-medium.onnx"
         )
 
     def test_models_dir_env_override(self, models, monkeypatch, tmp_path):

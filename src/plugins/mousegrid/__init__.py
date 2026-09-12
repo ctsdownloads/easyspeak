@@ -11,7 +11,11 @@ import logging
 import re
 import subprocess
 
+from easyspeak.core.i18n import translator
+
 logger = logging.getLogger(__name__)
+
+_ = translator(__file__)
 
 NAME = "mousegrid"
 DESCRIPTION = "Voice-controlled mouse grid"
@@ -272,7 +276,7 @@ def show_grid():
 
     if dbus_call("Show", screen_size[0], screen_size[1]):
         grid_active = True
-        core.speak("Grid")
+        core.speak(_("Grid"))
         logger.info("Grid shown (%sx%s)", screen_size[0], screen_size[1])
     else:
         logger.warning("Failed to show grid - is extension enabled?")
@@ -413,7 +417,7 @@ def nudge_grid(direction, count=1):
 def start_drag():
     """Press at the current cell center and reset the grid to full screen.
 
-    Leaves a drag in progress so a later [`end_drag`][plugins.00_mousegrid.end_drag]
+    Leaves a drag in progress so a later [`end_drag`][plugins.mousegrid.end_drag]
     releases at the new target. False if no grid is active.
     """
     global drag_start, grid_bounds
@@ -434,7 +438,7 @@ def start_drag():
 def end_drag():
     """Release a drag and close the grid.
 
-    Releases a drag started by [`start_drag`][plugins.00_mousegrid.start_drag].
+    Releases a drag started by [`start_drag`][plugins.mousegrid.start_drag].
     False if no drag is in progress or no grid is active.
     """
     global drag_start, grid_bounds, grid_active, last_bounds
@@ -473,7 +477,7 @@ def handle(cmd, core):
         grid_active = True
         dbus_call("Show", screen_size[0], screen_size[1])
         dbus_call("Update", *last_bounds)
-        core.speak("Grid")
+        core.speak(_("Grid"))
         logger.info("Grid reopened at last position")
         listen_for_grid_commands(core)
         return True
@@ -547,7 +551,7 @@ def _run_grid_mode(core):
             ]
         ):
             close_grid()
-            core.speak("Grid closed")
+            core.speak(_("Grid closed"))
             logger.info("Grid closed")
             return
 
@@ -556,11 +560,11 @@ def _run_grid_mode(core):
             start_drag()
             # "Holding", not "Marked": grid mode is still listening and "mark"
             # inside the reply would start a second drag.
-            core.speak("Holding")
+            core.speak(_("Holding"))
             continue
         if "drag" in cmd_lower and drag_start:
             end_drag()
-            core.speak("Dropped")
+            core.speak(_("Dropped"))
             return
 
         # === Scroll ===
@@ -568,7 +572,7 @@ def _run_grid_mode(core):
             direction = parse_direction(cmd_lower)
             if direction:
                 do_scroll(direction, parse_count(cmd_lower))
-                core.speak("Scrolled")
+                core.speak(_("Scrolled"))
                 return
             continue
 
@@ -577,21 +581,21 @@ def _run_grid_mode(core):
 
         if "double" in cmd_lower:
             do_click("double")
-            core.speak("Double clicked")
+            core.speak(_("Double clicked"))
             return
         if "middle" in cmd_lower:
             do_click("middle")
-            core.speak("Middle clicked")
+            core.speak(_("Middle clicked"))
             return
         if has_click and any(
             w in cmd_lower for w in ["right", "write", "rite", "wright"]
         ):
             do_click("right")
-            core.speak("Right clicked")
+            core.speak(_("Right clicked"))
             return
         if has_click:
             do_click("click")
-            core.speak("Clicked")
+            core.speak(_("Clicked"))
             return
 
         # === Nudge ===

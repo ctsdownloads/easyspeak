@@ -1,6 +1,11 @@
 """Base Plugin - Help and Exit."""
 
+from easyspeak.core.i18n import translator
+
+_ = translator(__file__)
+
 NAME = "base"
+PRIORITY = 100  # the catch-all for help and exit routes last
 DESCRIPTION = "Help and exit commands"
 
 COMMANDS = [
@@ -29,22 +34,22 @@ def handle(cmd, core):
 
     if cmd_lower in ["require wake word", "require the wake word"]:
         core.require_wake_word = True
-        core.speak("Modes now wait for the wake word.")
+        core.speak(_("Modes now wait for the wake word."))
         return True
 
     if cmd_lower in ["free listening", "stop requiring wake word"]:
         core.require_wake_word = False
-        core.speak("Modes now take commands on their own.")
+        core.speak(_("Modes now take commands on their own."))
         return True
 
     # Exit - but NOT if it's "quit tracking" etc
     if "tracking" not in cmd_lower:
         if cmd_lower in ["exit", "quit", "goodbye", "bye"]:
-            core.speak("Goodbye.")
+            core.speak(_("Goodbye."))
             return False  # Signal to exit
         # Also match "jarvis quit" etc
         if any(cmd_lower.endswith(x) for x in [" exit", " quit"]):
-            core.speak("Goodbye.")
+            core.speak(_("Goodbye."))
             return False
 
     # Help
@@ -69,4 +74,4 @@ def show_help(core):
             for cmd in plugin.COMMANDS:
                 print(f"  • {cmd}")  # noqa: T201
     print()  # noqa: T201
-    core.speak("Check the terminal for available commands.")
+    core.speak(_("Check the terminal for available commands."))

@@ -1,6 +1,9 @@
 # Writing plugins
 
-Drop a Python file in `plugins/` and it gets loaded automatically.
+Drop a Python file in `plugins/` and it gets loaded automatically. A plugin that
+speaks in the user's language is a package instead: a directory with an
+`__init__.py` holding the same code, plus a `locale/` directory of translations
+(see [Translations](#translations)).
 
 ```python
 NAME = "myplugin"
@@ -70,12 +73,41 @@ classDiagram
 The full surface is documented on the [`EasySpeak`][core.main.EasySpeak]
 class.
 
-## Loading order
+## Routing order
 
-Plugins load alphabetically. Use number prefixes to control order
-(`00_mousegrid.py` loads before `apps.py`), and the `zz_` prefix loads the base
-plugin last so it acts as the catch-all for help and exit. Files whose names
-start with `_` are skipped.
+A command is offered to the plugins in order of their `PRIORITY` (default 50,
+lower first, equal ones by name). The grid and head-tracking modes declare `0`
+and `1`, so their words reach them before a look-alike elsewhere, and the base
+plugin declares `100` to act as the catch-all for help and exit. Files and
+directories whose names start with `_` are skipped.
+
+## Translations
+
+Replies are written in English and spoken in the user's language where a
+translation exists. A plugin opts in with one line and wraps what it speaks:
+
+```python
+from easyspeak.core.i18n import translator
+
+_ = translator(__file__)
+
+
+def handle(cmd, core):
+    if "say hello" in cmd:
+        core.speak(_("Hello there!"))
+        return True
+    return None
+```
+
+Text with a value in it stays a template until it is looked up:
+`core.speak(_("Opening {app}.").format(app=app))`.
+
+The translations are gettext catalogs beside the code, one per language:
+`myplugin/locale/de/LC_MESSAGES/myplugin.po`, the domain being the package's
+name. `just translations de` extracts the wrapped strings and creates or
+refreshes every `.po` for German; then fill in the `msgstr` lines, in Poedit or
+any editor. A string without a translation is spoken in English. See
+[`core.i18n`][core.i18n].
 
 See the [Plugins API reference](reference/plugins.md) for the generated
 documentation of every bundled plugin.

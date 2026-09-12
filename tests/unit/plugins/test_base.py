@@ -1,16 +1,16 @@
-"""Tests for the zz_base plugin module."""
+"""Tests for the base plugin module."""
 
 from unittest.mock import Mock, patch
 
 import pytest
-from easyspeak.plugins import zz_base
+from easyspeak.plugins import base
 
 
 def test_setup(mock_core):
     """When setup is called with a core object then it stores the reference."""
-    zz_base.setup(mock_core)
+    base.setup(mock_core)
 
-    assert zz_base.core is mock_core
+    assert base.core is mock_core
 
 
 @pytest.mark.parametrize(
@@ -26,7 +26,7 @@ def test_setup(mock_core):
 )
 def test_handle_exit_commands(mock_core, command, expected_return):
     """When handle receives exit commands then it speaks goodbye and returns False."""
-    result = zz_base.handle(command, mock_core)
+    result = base.handle(command, mock_core)
 
     assert result == expected_return
     assert mock_core.speak.call_args.args[0] == "Goodbye."
@@ -43,7 +43,7 @@ def test_handle_exit_commands(mock_core, command, expected_return):
 )
 def test_handle_exit_commands_with_prefix(mock_core, command, expected_return):
     """When handle receives exit commands with prefix then it speaks goodbye and returns False."""
-    result = zz_base.handle(command, mock_core)
+    result = base.handle(command, mock_core)
 
     assert result == expected_return
     assert mock_core.speak.call_args.args[0] == "Goodbye."
@@ -61,7 +61,7 @@ def test_handle_exit_commands_with_prefix(mock_core, command, expected_return):
 )
 def test_handle_stop_tracking_commands_not_exit(mock_core, command):
     """When handle receives stop tracking commands then it does not exit."""
-    result = zz_base.handle(command, mock_core)
+    result = base.handle(command, mock_core)
 
     assert result is None
     assert not mock_core.speak.called
@@ -77,10 +77,10 @@ def test_handle_stop_tracking_commands_not_exit(mock_core, command):
         ["what can you do for me", True],
     ],
 )
-@patch.object(zz_base, "show_help")
+@patch.object(base, "show_help")
 def test_handle_help_commands(mock_show_help, mock_core, command, expected_return):
     """When handle receives help commands then it calls show_help and returns True."""
-    result = zz_base.handle(command, mock_core)
+    result = base.handle(command, mock_core)
 
     assert result == expected_return
     assert mock_show_help.call_args.args[0] == mock_core
@@ -99,7 +99,7 @@ def test_handle_help_commands(mock_show_help, mock_core, command, expected_retur
 )
 def test_handle_unrecognized_commands(mock_core, command):
     """When handle receives unrecognized commands then it returns None."""
-    result = zz_base.handle(command, mock_core)
+    result = base.handle(command, mock_core)
 
     assert result is None
     assert not mock_core.speak.called
@@ -122,7 +122,7 @@ def test_show_help_with_multiple_plugins(mock_print, mock_core):
 
     mock_core.plugins = [plugin1, plugin2, plugin3]
 
-    zz_base.show_help(mock_core)
+    base.show_help(mock_core)
 
     assert (
         mock_core.speak.call_args.args[0]
@@ -145,7 +145,7 @@ def test_show_help_with_no_plugins(mock_print, mock_core):
     """When show_help is called with no plugins then it prints header and footer."""
     mock_core.plugins = []
 
-    zz_base.show_help(mock_core)
+    base.show_help(mock_core)
 
     assert (
         mock_core.speak.call_args.args[0]
@@ -163,7 +163,7 @@ def test_show_help_with_plugins_without_commands_attribute(mock_print, mock_core
     plugin = Mock(spec=[])  # Mock with no attributes
     mock_core.plugins = [plugin]
 
-    zz_base.show_help(mock_core)
+    base.show_help(mock_core)
 
     assert (
         mock_core.speak.call_args.args[0]
@@ -187,5 +187,5 @@ def test_show_help_with_plugins_without_commands_attribute(mock_print, mock_core
 )
 def test_wake_word_requirement_toggle(command, expected, mock_core):
     """The requirement can be turned on and off by voice, in any mode."""
-    assert zz_base.handle(command, mock_core) is True
+    assert base.handle(command, mock_core) is True
     assert mock_core.require_wake_word is expected

@@ -1,5 +1,9 @@
 """Media Plugin - Playback controls via MPRIS."""
 
+from easyspeak.core.i18n import translator
+
+_ = translator(__file__)
+
 NAME = "media"
 DESCRIPTION = "Media playback controls"
 
@@ -47,10 +51,10 @@ FILLER = {"the", "a", "an", "my", "this", "that", "it", "please"}
 
 # What to say once the action has actually reached a player.
 FEEDBACK = {
-    "play": "Playing.",
-    "pause": "Paused.",
-    "next": "Next.",
-    "previous": "Previous.",
+    "play": _("Playing."),
+    "pause": _("Paused."),
+    "next": _("Next."),
+    "previous": _("Previous."),
 }
 
 core = None
@@ -148,7 +152,7 @@ def handle(cmd, core):
         return None  # Not handled
 
     if not media_control(action, core):
-        core.speak("No media player is running.")
+        core.speak(_("No media player is running."))
         return True
 
     core.speak(FEEDBACK[action])

@@ -79,10 +79,20 @@ HOTKEY_COMBO = "" if _hotkey.lower() in ("", "off", "none") else _hotkey
 # Whisper model. Commands stay English words wherever a plugin matches them.
 LANGUAGE = os.environ.get("EASYSPEAK_LANGUAGE", "en").strip().lower() or "en"
 
+
+def _translated(language):
+    """Whether the replies have a catalog for `language`, in the core or a plugin."""
+    src = Path(__file__).parent.parent
+    return any(src.glob(f"*/locale/{language}/LC_MESSAGES/*.po")) or any(
+        src.glob(f"plugins/*/locale/{language}/LC_MESSAGES/*.po")
+    )
+
+
 # The language the spoken replies are in, which is the language the voice must
-# be for, whatever the user dictates in: a German voice reads an English "Done"
-# with German phonemes. The replies are English text so far.
-REPLY_LANGUAGE = "en"
+# be for: a German voice reads an English "Done" with German phonemes. The
+# replies are written in English and spoken in the user's language where a
+# translation exists (see `core.i18n`).
+REPLY_LANGUAGE = LANGUAGE if LANGUAGE == "en" or _translated(LANGUAGE) else "en"
 
 
 # --- Models ---

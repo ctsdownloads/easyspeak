@@ -51,6 +51,7 @@ dependencies = [
   "numpy>=2.2.6",
   "onnxruntime>=1.23.2",
   "onnxruntime<1.24 ; python_full_version < '3.11'",
+  "polib>=1.2",
   "pyaudio>=0.2.14",
   "pyopen-wakeword>=1.1",
 ]
@@ -159,8 +160,6 @@ ignore = [
   "S310",    # https URLs to known registries (endoflife.date, GitHub, Hugging Face)
   "T201",    # build scripts report progress on the console
 ]
-"src/plugins/00_*.py" = ["N999"]    # numeric prefix sets plugin load order
-"src/plugins/zz_base.py" = ["N999"] # zz_ prefix loads the base plugin last
 "src/gnome@easyspeak.dev/__init__.py" = ["N999"] # folder is the extension UUID, not a module name
 "tests/**" = [
   "S101",    # asserts are the whole point of a test
@@ -185,6 +184,16 @@ packages = [
   "easyspeak",
   "easyspeak.core",
   "easyspeak.plugins",
+  "easyspeak.plugins.apps",
+  "easyspeak.plugins.base",
+  "easyspeak.plugins.browser",
+  "easyspeak.plugins.dictation",
+  "easyspeak.plugins.files",
+  "easyspeak.plugins.headtrack",
+  "easyspeak.plugins.media",
+  "easyspeak.plugins.mousegrid",
+  "easyspeak.plugins.sleep",
+  "easyspeak.plugins.system",
   "easyspeak.data",
   "easyspeak.gnome",
   "easyspeak.gnome.schemas",
@@ -195,6 +204,7 @@ packages = [
 "easyspeak.gnome" = "src/gnome@easyspeak.dev"
 
 [tool.setuptools.package-data]
+"*" = ["locale/*/LC_MESSAGES/*.po"]
 "easyspeak.data" = ["*"]
 "easyspeak.gnome" = [
   "extension.js",

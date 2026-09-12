@@ -6,6 +6,10 @@ the Quick Settings toggle — whichever the extension is showing, the one way ba
 since voice control is off until reactivated.
 """
 
+from easyspeak.core.i18n import translator
+
+_ = translator(__file__)
+
 NAME = "sleep"
 DESCRIPTION = "Deactivate (sleep) until reactivated from the tray or Quick Settings"
 
@@ -20,7 +24,7 @@ def handle(cmd, core):
     """Deactivate the assistant on a sleep phrase; return None otherwise."""
     cmd_lower = cmd.lower().strip()
     if any(phrase in cmd_lower for phrase in SLEEP_PHRASES):
-        core.speak("Voice control turned off.")
+        core.speak(_("Voice control turned off."))
         core.deactivate()
         return True
     return None

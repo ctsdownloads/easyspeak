@@ -3,7 +3,7 @@
 import sys
 import types
 
-from easyspeak.plugins import _atspi_insert as helper
+from easyspeak.plugins.dictation import _atspi_insert as helper
 
 
 class FakeState:

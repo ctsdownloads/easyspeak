@@ -2,6 +2,10 @@
 
 from pathlib import Path
 
+from easyspeak.core.i18n import translator
+
+_ = translator(__file__)
+
 NAME = "files"
 DESCRIPTION = "Folder navigation"
 
@@ -69,6 +73,6 @@ def handle(cmd, core):
 def _open(path, label, core):
     """Open path in the file manager and announce it, or report none is found."""
     if open_folder(path, core):
-        core.speak(f"Opening {label}.")
+        core.speak(_("Opening {label}.").format(label=label))
     else:
-        core.speak("No file manager found.")
+        core.speak(_("No file manager found."))

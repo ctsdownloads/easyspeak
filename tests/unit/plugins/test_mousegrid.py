@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-mousegrid_plugin = importlib.import_module("easyspeak.plugins.00_mousegrid")
+mousegrid_plugin = importlib.import_module("easyspeak.plugins.mousegrid")
 
 
 @pytest.fixture(autouse=True)

@@ -2,7 +2,7 @@
 
 import subprocess
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import numpy as np
 import pytest
@@ -148,10 +148,12 @@ class TestEasySpeakPlugins:
         mock_file = Mock()
         mock_file.name = "test_plugin.py"
         mock_file.stem = "test_plugin"
+        mock_file.suffix = ".py"
+        mock_file.is_dir.return_value = False
 
         with (
             patch.object(Path, "exists", return_value=True),
-            patch.object(Path, "glob", return_value=[mock_file]),
+            patch.object(Path, "iterdir", return_value=[mock_file]),
         ):
             easy.load_plugins()
 
@@ -175,10 +177,12 @@ class TestEasySpeakPlugins:
         mock_file = Mock()
         mock_file.name = "_test_plugin.py"
         mock_file.stem = "_test_plugin"
+        mock_file.suffix = ".py"
+        mock_file.is_dir.return_value = False
 
         with (
             patch.object(Path, "exists", return_value=True),
-            patch.object(Path, "glob", return_value=[mock_file]),
+            patch.object(Path, "iterdir", return_value=[mock_file]),
         ):
             easy.load_plugins()
 
@@ -200,10 +204,12 @@ class TestEasySpeakPlugins:
         mock_file = Mock()
         mock_file.name = "invalid_plugin.py"
         mock_file.stem = "invalid_plugin"
+        mock_file.suffix = ".py"
+        mock_file.is_dir.return_value = False
 
         with (
             patch.object(Path, "exists", return_value=True),
-            patch.object(Path, "glob", return_value=[mock_file]),
+            patch.object(Path, "iterdir", return_value=[mock_file]),
         ):
             easy.load_plugins()
 
@@ -226,10 +232,12 @@ class TestEasySpeakPlugins:
         mock_file = Mock()
         mock_file.name = "broken_plugin.py"
         mock_file.stem = "broken_plugin"
+        mock_file.suffix = ".py"
+        mock_file.is_dir.return_value = False
 
         with (
             patch.object(Path, "exists", return_value=True),
-            patch.object(Path, "glob", return_value=[mock_file]),
+            patch.object(Path, "iterdir", return_value=[mock_file]),
         ):
             easy.load_plugins()
 
@@ -247,17 +255,52 @@ class TestEasySpeakPlugins:
         loaded = {module.__name__.rsplit(".", 1)[-1] for module in easy.plugins}
 
         assert loaded == {
-            "00_eyetrack",
-            "00_mousegrid",
             "apps",
+            "base",
             "browser",
             "dictation",
             "files",
+            "headtrack",
             "media",
+            "mousegrid",
             "sleep",
             "system",
-            "zz_base",
         }
+
+    def test_load_plugins_routes_by_priority(self):
+        """Commands reach the modes first and the help/exit catch-all last."""
+        easy = EasySpeak()
+
+        easy.load_plugins()
+        names = [module.NAME for module in easy.plugins]
+
+        assert names[:2] == ["headtrack", "mousegrid"]
+        assert names[-1] == "base"
+        assert names[2:-1] == sorted(names[2:-1])
+
+    @patch("importlib.import_module")
+    @patch("sys.path")
+    def test_load_plugins_accepts_a_package(
+        self, mock_syspath, mock_import, mock_plugin_with_setup
+    ):
+        """A directory with an `__init__.py` is a plugin like a module is."""
+        easy = EasySpeak()
+        mock_import.return_value = mock_plugin_with_setup
+        package = MagicMock()
+        package.name = "packaged"
+        package.stem = "packaged"
+        package.suffix = ""
+        package.is_dir.return_value = True
+        package.__truediv__.return_value.is_file.return_value = True
+
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch.object(Path, "iterdir", return_value=[package]),
+        ):
+            easy.load_plugins()
+
+        mock_import.assert_called_once_with("plugins.packaged")
+        assert easy.plugins == [mock_plugin_with_setup]
 
     def test_get_all_commands_empty(self):
         """Test get_all_commands with no plugins."""

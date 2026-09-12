@@ -57,13 +57,13 @@ the module that reads each (linked to its API reference).
 | `EASYSPEAK_WHISPER_MODEL`        | an installed language pack's model     | faster-whisper model for transcription     |
 | `EASYSPEAK_SILENCE_THRESHOLD`    | measured at startup                    | Amplitude below which audio counts as quiet |
 
-`EASYSPEAK_LANGUAGE` is the language you dictate in; commands and spoken
-replies stay English. It picks which installed [language pack](packaging.md#language)
+`EASYSPEAK_LANGUAGE` is the language you dictate in, and the language of the
+spoken replies where they are translated (German is); commands stay English. It
+picks which installed [language pack](packaging.md#language)
 `EASYSPEAK_WHISPER_MODEL` defaults to; without one it falls back to `base.en`
 for English and to the multilingual `small` for any other language (a download,
-see `EASYSPEAK_OFFLINE`). The replies are read by the voice of their own
-language, so `EASYSPEAK_PIPER_MODEL` defaults to the English pack's voice, else
-`~/.local/share/piper/en_US-amy-medium.onnx`.
+see `EASYSPEAK_OFFLINE`). `EASYSPEAK_PIPER_MODEL` defaults to the voice of the
+pack the replies are spoken in, else `~/.local/share/piper/en_US-amy-medium.onnx`.
 
 `EASYSPEAK_SILENCE_THRESHOLD` is normally left alone. On startup EasySpeak
 listens to the room for a second and sets the threshold above whatever it

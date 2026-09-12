@@ -22,6 +22,7 @@ easyspeak/
 │   │   ├── cli.py             # CLI entry point: argument parsing + logging
 │   │   ├── config.py          # Tuning constants + Whisper model factory
 │   │   ├── gnome_extension.py # Installs/refreshes/enables the extension
+│   │   ├── i18n.py            # Spoken-reply translations (gettext .po)
 │   │   ├── log.py             # Logging setup
 │   │   ├── main.py            # EasySpeak class + main loop
 │   │   ├── mediakeys.py       # Replays multimedia keys via Mutter
@@ -42,18 +43,18 @@ easyspeak/
 │   │   ├── prefs.js           # Extension Settings dialog (autostart, Quick Settings)
 │   │   ├── screenshot.js      # Screen capture primitive (Wayland framebuffer grab)
 │   │   └── windows.js         # Window/workspace operations on the focused window
-│   └── plugins/
+│   └── plugins/               # one package each: __init__.py + locale/<lang>/LC_MESSAGES/<name>.po
 │       ├── __init__.py
-│       ├── 00_eyetrack.py     # Head tracking (experimental)
-│       ├── 00_mousegrid.py    # Grid overlay mouse control
-│       ├── apps.py            # Application launcher
-│       ├── browser.py         # Qutebrowser control + auto-config
-│       ├── dictation.py       # Voice-to-text + AT-SPI enablement
-│       ├── files.py           # Folder navigation
-│       ├── media.py           # Playback controls
-│       ├── sleep.py           # Voice deactivate
-│       ├── system.py          # Volume, brightness, DND
-│       └── zz_base.py         # Help and exit
+│       ├── apps/              # Application launcher
+│       ├── base/              # Help and exit (routes last)
+│       ├── browser/           # Qutebrowser control + auto-config
+│       ├── dictation/         # Voice-to-text + AT-SPI enablement
+│       ├── files/             # Folder navigation
+│       ├── headtrack/         # Head tracking (experimental)
+│       ├── media/             # Playback controls
+│       ├── mousegrid/         # Grid overlay mouse control
+│       ├── sleep/             # Voice deactivate
+│       └── system/            # Volume, brightness, DND
 ├── tests/
 │   ├── acceptance/            # Gherkin scenarios (pytest-bdd)
 │   ├── benchmarks/            # pytest-benchmark suites for bencher.dev
