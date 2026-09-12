@@ -88,6 +88,12 @@ def exit_phrases(vocabulary):
 
 
 VOCABULARY = load_vocabulary(LANGUAGE)
+# Commands reach the plugin transcribed as English, so the English words are
+# always accepted, alongside the active language's.
+ENGLISH = VOCABULARY if LANGUAGE == "en" else load_vocabulary("en")
+ENTER_PHRASES = frozenset(VOCABULARY["enter"]["say"]) | frozenset(
+    ENGLISH["enter"]["say"]
+)
 EXIT_VERBS = tuple(VOCABULARY["exit"]["verbs"])
 EXIT_NOUNS = tuple(VOCABULARY["exit"]["nouns"])
 EXIT_PHRASES = exit_phrases(VOCABULARY)
@@ -167,6 +173,11 @@ NO_FOCUS = "no_focus"
 BACKEND_ERROR = "backend_error"
 
 ATSPI_HELPER = str(Path(__file__).with_name("_atspi_insert.py"))
+
+
+def says(text, phrases):
+    """Whether `text` contains one of `phrases` as whole words."""
+    return any(re.search(rf"\b{re.escape(phrase)}\b", text) for phrase in phrases)
 
 
 def is_exit_phrase(text, phrases=None):
@@ -724,16 +735,18 @@ def run_push_to_talk(core, should_continue):
 
 
 def handle(cmd, core):
-    """Enter dictation mode on a whole-word "note"/"notes"; return None otherwise.
+    """Enter dictation mode on the entry word, "notes" or the active language's.
 
-    Matching whole words (not substrings) keeps unrelated words like "notebook" or
-    "noted" from triggering it. While in dictation mode core drives the listening
-    (see [`listen_modal`][core.main.EasySpeak.listen_modal]), transcribing speech and
-    inserting it into the focused field until "stop notes" is heard — or until the
-    mode ends on its own, so an open microphone can't be left dictating unattended.
+    The words come from the vocabulary tables, matched whole so "notebook" or
+    "noted" do not trigger it, and a command that also names leaving ("stop
+    notes") is not an entry. While in dictation mode core drives the listening
+    (see [`listen_modal`][core.main.EasySpeak.listen_modal]), transcribing speech
+    and inserting it into the focused field until the exit phrase is heard — or
+    until the mode ends on its own, so an open microphone can't be left dictating
+    unattended.
     """
-    words = cmd.split()
-    if ("notes" in words or "note" in words) and "stop" not in words:
+    leaving = set(EXIT_VERBS) | set(ENGLISH["exit"]["verbs"])
+    if says(cmd, ENTER_PHRASES) and not set(cmd.split()) & leaving:
         core.speak(_("Dictation"))
 
         logger.info("🎙️ Dictation mode - say '%s' to end", VOCABULARY["exit"]["say"])

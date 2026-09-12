@@ -2,6 +2,11 @@
 # transcripción en minúsculas de Whisper, así que las confusiones frecuentes
 # también van aquí.
 
+# Dicho como comando para empezar el dictado (Whisper escucha los comandos en
+# inglés, de ahí también las grafías que salen).
+[enter]
+say = ["dictado", "dictar", "notas", "dictato"]
+
 [exit]
 say = "fin del dictado"
 verbs = ["fin", "parar", "para", "stop", "terminar", "termina", "cerrar", "cierra", "salir"]

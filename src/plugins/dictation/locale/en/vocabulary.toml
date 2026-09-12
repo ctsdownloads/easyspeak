@@ -1,6 +1,10 @@
 # What to say inside dictation, in English. Phrases are matched against
 # Whisper's lowercased transcript, so common mishearings belong here too.
 
+# Said as a command to start dictating.
+[enter]
+say = ["notes", "note"]
+
 [exit]
 say = "stop notes"
 verbs = ["stop", "close", "closed", "end", "exit", "done", "finish", "quit"]

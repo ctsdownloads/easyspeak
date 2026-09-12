@@ -129,8 +129,9 @@ text field focused. In the browser, use `numbers` and pick the hint on the field
 first.
 
 The words below are the English ones. When you dictate in another language
-(`EASYSPEAK_LANGUAGE`), the control words are that language's: "Komma", "neue
-Zeile", "Notizen beenden" in German, and so on. Each language's words are the
+(`EASYSPEAK_LANGUAGE`), the control words are that language's: "Diktat" to
+start, "Komma", "neue Zeile", "Notizen beenden" in German, and so on; the
+English words keep working too. Each language's words are the
 table `locale/<language>/vocabulary.toml` in the dictation plugin, mishearings
 included, so they can be tuned without touching code.
 

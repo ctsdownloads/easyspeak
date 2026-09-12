@@ -361,6 +361,50 @@ def test_handle_enters_dictation_on_note_word(
     ]
 
 
+def german_entry(monkeypatch):
+    """Make the plugin listen for the German entry word, English still accepted."""
+    german = dictation.load_vocabulary("de")
+    monkeypatch.setattr(
+        dictation,
+        "ENTER_PHRASES",
+        frozenset(german["enter"]["say"])
+        | frozenset(dictation.ENGLISH["enter"]["say"]),
+    )
+    monkeypatch.setattr(dictation, "EXIT_VERBS", tuple(german["exit"]["verbs"]))
+
+
+@pytest.mark.parametrize("command", ["diktat", "notizen bitte", "notes"])
+@patch("easyspeak.plugins.dictation.insert_text")
+def test_handle_enters_dictation_in_the_active_language(
+    mock_insert, command, mock_core_with_audio, monkeypatch
+):
+    """With German active, "Diktat" starts dictation, and so does "notes" still."""
+    german_entry(monkeypatch)
+    mock_core_with_audio.transcribe = Mock(return_value="stop notes")
+
+    assert dictation.handle(command, mock_core_with_audio) is True
+
+
+@pytest.mark.parametrize("command", ["diktat beenden", "stop diktat", "diktator"])
+@patch("easyspeak.plugins.dictation.insert_text")
+def test_handle_ignores_leaving_and_lookalikes_in_the_active_language(
+    mock_insert, command, mock_core, monkeypatch
+):
+    """Naming the way out, or a word merely containing the entry word, is no entry."""
+    german_entry(monkeypatch)
+
+    assert dictation.handle(command, mock_core) is None
+    mock_core.speak.assert_not_called()
+
+
+@patch("easyspeak.plugins.dictation.insert_text")
+def test_handle_only_listens_for_the_active_language_and_english(
+    mock_insert, mock_core
+):
+    """With English active, a German entry word is an ordinary command."""
+    assert dictation.handle("diktat", mock_core) is None
+
+
 @patch("easyspeak.plugins.dictation.insert_text", return_value=True)
 @patch("easyspeak.plugins.dictation.format_text", return_value=".")
 def test_handle_dictation_mode_no_space_before_punctuation(
@@ -1444,6 +1488,7 @@ def test_every_shipped_vocabulary_is_complete(language):
     """Each language names every key, counts to ten, and inserts each symbol."""
     vocabulary = dictation.load_vocabulary(language)
 
+    assert vocabulary["enter"]["say"]
     assert vocabulary["exit"]["say"]
     assert vocabulary["exit"]["verbs"] and vocabulary["exit"]["nouns"]
     assert vocabulary["undo"]["phrases"]

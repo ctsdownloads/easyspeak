@@ -2,6 +2,11 @@
 # con la trascrizione in minuscolo di Whisper, quindi ci vanno anche gli errori
 # di ascolto più comuni.
 
+# Detto come comando per iniziare la dettatura (Whisper ascolta i comandi in
+# inglese, quindi anche le grafie che ne risultano).
+[enter]
+say = ["dettatura", "dettare", "appunti", "detattura", "dictatura"]
+
 [exit]
 say = "fine dettatura"
 verbs = ["fine", "chiudi", "termina", "stop", "basta", "esci", "fermati"]
