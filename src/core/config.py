@@ -74,41 +74,42 @@ HOTKEY_COMBO = "" if _hotkey.lower() in ("", "off", "none") else _hotkey
 
 
 # --- Language ---
-# The language the user speaks. Commands are English words wherever a plugin
-# matches them, so this is the language of dictation and of the voice that
-# answers -- it picks which installed language pack's models are used.
+# The language the user dictates in. Commands stay English words wherever a
+# plugin matches them. Also selects which installed language pack's models to use.
 LANGUAGE = os.environ.get("EASYSPEAK_LANGUAGE", "en").strip().lower() or "en"
 
 
 # --- Models ---
-def _models_dir():
-    """Return the models directory a language pack installs beside the venv."""
-    return Path(sys.prefix).parent / "models"
+# The .deb/.rpm ship the models and `piper` beside the venv, so these defaults
+# locate them from our interpreter; pip/source installs fall back to a download.
+MODELS_DIR = Path(sys.prefix).parent / "models"
 
 
 def _bundled_voice(language, *, default):
-    """Return the installed Piper voice for `language`, or `default` if none is.
+    """Return an installed Piper voice, or `default` if there is none.
 
     Piper names every voice `<language>_<REGION>-<name>-<quality>.onnx`, so the
-    language code is the file's prefix; with several voices installed for one
-    language the first by name wins.
+    prefix picks a voice for `language`. Failing that, any installed voice beats
+    none: the spoken replies are English text either way.
     """
-    voices = sorted(_models_dir().glob(f"piper/{language}_*.onnx"))
-    return str(voices[0]) if voices else default
+    voices = sorted(MODELS_DIR.glob("piper/*.onnx"))
+    own = [v for v in voices if v.name.startswith(f"{language}_")]
+    return str((own or voices)[0]) if voices else default
 
 
 def _bundled_whisper(language, *, default):
-    """Return the installed Whisper model for `language`, or `default` if none is.
+    """Return an installed Whisper model for `language`, or `default` if none is.
 
     Model directories carry no language code, but faster-whisper's `.en` suffix
-    marks an English-only model, which cannot serve any other language.
+    marks an English-only model: the one to prefer for English, and no use for
+    any other language.
     """
-    models = sorted(p for p in _models_dir().glob("whisper/*") if p.is_dir())
-    english_only = [p for p in models if p.name.endswith(".en")]
+    models = sorted(MODELS_DIR.glob("whisper/*"))
+    english_only = [m for m in models if m.name.endswith(".en")]
     if language == "en":
         usable = english_only or models
     else:
-        usable = [p for p in models if p not in english_only]
+        usable = [m for m in models if m not in english_only]
     return str(usable[0]) if usable else default
 
 
@@ -118,8 +119,6 @@ def _bundled_bin(name, *, default):
     return str(exe) if exe.exists() else default
 
 
-# The .deb/.rpm ship the models and `piper` beside the venv, so these defaults
-# locate them from our interpreter; pip/source installs fall back to a download.
 PIPER_MODEL = os.environ.get("EASYSPEAK_PIPER_MODEL") or _bundled_voice(
     LANGUAGE,
     default=str(Path("~/.local/share/piper/en_US-amy-medium.onnx").expanduser()),

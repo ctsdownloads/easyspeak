@@ -69,11 +69,12 @@ The default `easyspeak-lang-en` pack is **US English** — Whisper `base.en`
 built into the app (it ships inside the pyopen-wakeword wheel), so it stays English
 regardless of language pack.
 
-An installed pack is picked up automatically for the language it serves — a Piper
-voice by its `<language>_` filename prefix, a Whisper model by not being one of the
-English-only `.en` ones. To use a language we ship no package for, install/drop its
-models and point these environment variables at them (an explicit value always wins;
-set them in a systemd user override or your shell profile):
+`EASYSPEAK_LANGUAGE` (default `en`) is the language you dictate in, and it picks
+the installed pack's models: a Piper voice by its `<language>_` filename prefix, a
+Whisper model by not being one of the English-only `.en` ones. To use a language we
+ship no package for, install/drop its models and point these environment variables
+at them (an explicit value always wins; set them in a systemd user override or your
+shell profile):
 
 - `EASYSPEAK_WHISPER_MODEL` — a multilingual faster-whisper model name (e.g. `base`,
   `small`) or a local model directory. The English-only `*.en` models can't

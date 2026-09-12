@@ -159,21 +159,6 @@ def test_whisper_compute_type_env_override(monkeypatch):
     assert config.WHISPER_COMPUTE_TYPE == "float16"
 
 
-def test_bundled_model_found(monkeypatch, tmp_path):
-    """A model present beside the venv (<prefix>/../models/...) is used."""
-    (tmp_path / "models" / "whisper" / "base.en").mkdir(parents=True)
-    monkeypatch.setattr(config.sys, "prefix", str(tmp_path / "venv"))
-    assert config._bundled_whisper("en", default="base.en") == str(
-        tmp_path / "models" / "whisper" / "base.en"
-    )
-
-
-def test_bundled_model_missing_falls_back(monkeypatch, tmp_path):
-    """With no bundled tree, the default (download name / path) is kept."""
-    monkeypatch.setattr(config.sys, "prefix", str(tmp_path / "venv"))
-    assert config._bundled_whisper("en", default="base.en") == "base.en"
-
-
 def test_bundled_bin_found(monkeypatch, tmp_path):
     """A binary present next to the interpreter is used by absolute path."""
     venv_bin = tmp_path / "venv" / "bin"
@@ -220,8 +205,15 @@ def test_hotkey_disable_values(monkeypatch, value):
     assert config.HOTKEY_COMBO == ""
 
 
+def install_pack(models, whisper, voice):
+    """Fake a language pack's models: a Whisper model directory and a Piper voice."""
+    (models / "whisper" / whisper).mkdir(parents=True, exist_ok=True)
+    (models / "piper").mkdir(exist_ok=True)
+    (models / "piper" / f"{voice}.onnx").touch()
+
+
 class TestLanguagePacks:
-    """Which installed models a language pack's code selects.
+    """Which installed models `EASYSPEAK_LANGUAGE` selects.
 
     A pack drops its models beside the venv, so these fake that layout under a
     temporary `sys.prefix` and reload the module that reads it.
@@ -229,16 +221,17 @@ class TestLanguagePacks:
 
     @pytest.fixture
     def models(self, tmp_path, monkeypatch):
-        """Install fake packs beside a temporary venv; return its models dir."""
-        models = tmp_path / "models"
-        (models / "whisper" / "base.en").mkdir(parents=True)
-        (models / "whisper" / "small").mkdir()
-        (models / "piper").mkdir()
-        (models / "piper" / "en_US-amy-medium.onnx").touch()
-        (models / "piper" / "de_DE-thorsten-medium.onnx").touch()
+        """Point the module at a temporary venv; return the models dir beside it."""
         monkeypatch.setattr(config.sys, "prefix", str(tmp_path / "venv"))
         monkeypatch.delenv("EASYSPEAK_WHISPER_MODEL", raising=False)
         monkeypatch.delenv("EASYSPEAK_PIPER_MODEL", raising=False)
+        return tmp_path / "models"
+
+    @pytest.fixture
+    def packs(self, models):
+        """Install an English and a German pack side by side."""
+        install_pack(models, "base.en", "en_US-amy-medium")
+        install_pack(models, "small", "de_DE-thorsten-medium")
         return models
 
     def test_defaults_to_english(self, monkeypatch):
@@ -247,25 +240,43 @@ class TestLanguagePacks:
         importlib.reload(config)
         assert config.LANGUAGE == "en"
 
-    def test_english_prefers_the_english_only_model(self, models, monkeypatch):
+    def test_english_prefers_the_english_only_model(self, packs, monkeypatch):
         """`base.en` is faster than the multilingual model that sits beside it."""
         monkeypatch.setenv("EASYSPEAK_LANGUAGE", "en")
         importlib.reload(config)
-        assert Path(config.WHISPER_MODEL) == models / "whisper" / "base.en"
-        assert Path(config.PIPER_MODEL) == models / "piper" / "en_US-amy-medium.onnx"
+        assert Path(config.WHISPER_MODEL) == packs / "whisper" / "base.en"
+        assert Path(config.PIPER_MODEL) == packs / "piper" / "en_US-amy-medium.onnx"
 
-    def test_german_skips_the_english_only_model(self, models, monkeypatch):
+    def test_german_skips_the_english_only_model(self, packs, monkeypatch):
         """A `.en` model cannot transcribe German, however it got installed."""
         monkeypatch.setenv("EASYSPEAK_LANGUAGE", "de")
         importlib.reload(config)
-        assert Path(config.WHISPER_MODEL) == models / "whisper" / "small"
+        assert Path(config.WHISPER_MODEL) == packs / "whisper" / "small"
         assert (
-            Path(config.PIPER_MODEL) == models / "piper" / "de_DE-thorsten-medium.onnx"
+            Path(config.PIPER_MODEL) == packs / "piper" / "de_DE-thorsten-medium.onnx"
         )
 
-    def test_falls_back_to_a_multilingual_download(self, monkeypatch):
-        """No pack installed: the name faster-whisper would fetch, not `base.en`."""
-        monkeypatch.delenv("EASYSPEAK_WHISPER_MODEL", raising=False)
+    def test_without_its_pack_a_language_borrows_the_voice(self, models, monkeypatch):
+        """Only the English pack installed: Whisper needs a download, the voice not.
+
+        Any installed voice beats none, since the replies it speaks are English.
+        """
+        install_pack(models, "base.en", "en_US-amy-medium")
         monkeypatch.setenv("EASYSPEAK_LANGUAGE", "de")
         importlib.reload(config)
         assert config.WHISPER_MODEL == "small"
+        assert Path(config.PIPER_MODEL) == models / "piper" / "en_US-amy-medium.onnx"
+
+    @pytest.mark.parametrize(
+        ("language", "whisper"), [("en", "base.en"), ("de", "small")]
+    )
+    def test_without_any_pack_falls_back_to_downloads(
+        self, models, monkeypatch, language, whisper
+    ):
+        """No pack installed: the name faster-whisper fetches, the dev voice path."""
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", language)
+        importlib.reload(config)
+        assert (config.WHISPER_MODEL, Path(config.PIPER_MODEL)) == (
+            whisper,
+            Path.home() / ".local/share/piper/en_US-amy-medium.onnx",
+        )
