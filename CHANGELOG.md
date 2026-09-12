@@ -5,6 +5,60 @@ canonical, GitHub-independent record of releases. It is updated once per
 release. The format loosely follows [Keep a Changelog](https://keepachangelog.com/),
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.9.0 · Speaking Your Language · 2026-09-12
+
+**Dictation in Other Languages, Per-Language Packs, and Voice Control Proven on
+a Real Desktop**
+
+`EASYSPEAK_LANGUAGE` sets the language you dictate in — commands stay English
+words — and picks the language pack installed for it. Each pack now lives under
+its own `/opt/easyspeak/models/<language>`, so several can sit side by side, and
+German is the first beyond English: `easyspeak-lang-de` pairs the multilingual
+Whisper `small` with the Piper `thorsten` voice. This release needs
+`easyspeak-lang-en` 1.1.0 or newer, as the 1.0.0 pack installs the old tree.
+Translating the dictation control words (`comma`, `stop notes`, …) is still
+ahead.
+
+The bulk of the work between the two releases, though, is a dozen fixes from
+running EasySpeak on a real GNOME/Wayland desktop rather than reading the
+source: every mode's microphone loop now runs from the core, so the tray and
+the idle timeout keep working inside grid, browser and dictation modes; command
+words match as whole words, so "upgrade" no longer opens the grid; dictation
+learns `backspace`, `scratch that` and keystrokes such as enter, tab, escape and
+the arrows; the browser gets voice toggles for GPU rendering and ad blocking,
+and detects ad blocking by asking qutebrowser itself; and an opt-in `require
+wake word` keeps a video playing through the speakers from being transcribed as
+commands. wl-clipboard becomes a hard dependency, the Nix dev shell supplies
+every tool the code invokes, and line coverage is back at 100%.
+
+### What's Changed
+
+- Fix benchmark job by allowing Whisper model downloads by @bittner in [#134](https://github.com/ctsdownloads/easyspeak/pull/134)
+- Fix voice control breaking down in practice by @ctsdownloads in [#135](https://github.com/ctsdownloads/easyspeak/pull/135)
+- fix(clipboard): drop the xclip fallback and require wl-clipboard by @ctsdownloads in [#136](https://github.com/ctsdownloads/easyspeak/pull/136)
+- refactor(browser): hold session state on core, not module globals by @ctsdownloads in [#137](https://github.com/ctsdownloads/easyspeak/pull/137)
+- fix(dictation): match command words as whole words by @ctsdownloads in [#138](https://github.com/ctsdownloads/easyspeak/pull/138)
+- fix: whole-word grid triggers, and scroll past overflow-hidden by @ctsdownloads in [#139](https://github.com/ctsdownloads/easyspeak/pull/139)
+- chore: strip explanatory comments by @ctsdownloads in [#140](https://github.com/ctsdownloads/easyspeak/pull/140)
+- fix(browser): stop hint mode hearing its own prompt by @ctsdownloads in [#141](https://github.com/ctsdownloads/easyspeak/pull/141)
+- feat(dictation): backspace and scratch that by @ctsdownloads in [#142](https://github.com/ctsdownloads/easyspeak/pull/142)
+- fix(dictation): backspace no longer cancels scratch that by @ctsdownloads in [#143](https://github.com/ctsdownloads/easyspeak/pull/143)
+- feat(dictation): send enter, tab, escape and arrow keys by @ctsdownloads in [#144](https://github.com/ctsdownloads/easyspeak/pull/144)
+- feat: keystroke commands in dictation and browser mode by @ctsdownloads in [#145](https://github.com/ctsdownloads/easyspeak/pull/145)
+- feat(browser): voice toggles for rendering and ad blocking by @ctsdownloads in [#146](https://github.com/ctsdownloads/easyspeak/pull/146)
+- feat: option to require the wake word inside modes by @ctsdownloads in [#147](https://github.com/ctsdownloads/easyspeak/pull/147)
+- fix: wait for the real wake word in modes, not a text prefix by @ctsdownloads in [#148](https://github.com/ctsdownloads/easyspeak/pull/148)
+- fix(dictation): do not ask for the wake word before every sentence by @ctsdownloads in [#149](https://github.com/ctsdownloads/easyspeak/pull/149)
+- fix(nix): supply the runtime tools the code actually invokes by @ctsdownloads in [#150](https://github.com/ctsdownloads/easyspeak/pull/150)
+- Restore full line coverage of the voice-control paths by @bittner in [#151](https://github.com/ctsdownloads/easyspeak/pull/151)
+- Detect ad blocking by asking qutebrowser, not a stray python3 by @bittner in [#152](https://github.com/ctsdownloads/easyspeak/pull/152)
+- Support languages other than English by @bittner in [#156](https://github.com/ctsdownloads/easyspeak/pull/156)
+- Adding environment variable for customizing the language of the Whisper model by @SolanumForte in [#154](https://github.com/ctsdownloads/easyspeak/pull/154)
+- Give each language pack its own models directory by @bittner in [#157](https://github.com/ctsdownloads/easyspeak/pull/157)
+- Add the German language pack by @bittner in [#158](https://github.com/ctsdownloads/easyspeak/pull/158)
+
+**Full Changelog**: [`0.8.0...0.9.0`](https://github.com/ctsdownloads/easyspeak/compare/0.8.0...0.9.0)
+
 ## 0.8.0 · Voices on Their Own · 2026-07-04
 
 **Independently Versioned Language Packs and Verifiable, Pinned Model Downloads**
