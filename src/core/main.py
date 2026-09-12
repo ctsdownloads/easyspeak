@@ -21,6 +21,7 @@ from .config import (
     COMMAND_PROMPT,
     FOLLOWUP_IDLE_ROUNDS,
     HOTKEY_COMBO,
+    LANGUAGE,
     MAX_RECORD_SECONDS,
     MISUNDERSTAND_GRACE,
     REQUIRE_WAKE_WORD,
@@ -788,9 +789,10 @@ class EasySpeak:
         self.wakeword = WakeWordModel()
 
         logger.info(
-            "Loading Whisper (%s, %s, cpu_threads=%s)...",
+            "Loading Whisper (%s, %s, language=%s, cpu_threads=%s)...",
             WHISPER_MODEL,
             WHISPER_COMPUTE_TYPE,
+            LANGUAGE,
             WHISPER_CPU_THREADS or "auto",
         )
         try:
