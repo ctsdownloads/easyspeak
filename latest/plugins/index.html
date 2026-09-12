@@ -539,10 +539,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#loading-order" class="md-nav__link">
+  <a href="#routing-order" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Loading order
+        Routing order
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#translations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Translations
       
     </span>
   </a>
@@ -856,10 +867,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#loading-order" class="md-nav__link">
+  <a href="#routing-order" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Loading order
+        Routing order
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#translations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Translations
       
     </span>
   </a>
@@ -887,7 +909,10 @@
 
 
 <h1 id="writing-plugins">Writing plugins<a class="headerlink" href="#writing-plugins" title="Permanent link">&para;</a></h1>
-<p>Drop a Python file in <code>plugins/</code> and it gets loaded automatically.</p>
+<p>Drop a Python file in <code>plugins/</code> and it gets loaded automatically. A plugin that
+speaks in the user's language is a package instead: a directory with an
+<code>__init__.py</code> holding the same code, plus a <code>locale/</code> directory of translations
+(see <a href="#translations">Translations</a>).</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">NAME</span> <span class="o">=</span> <span class="s2">"myplugin"</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">DESCRIPTION</span> <span class="o">=</span> <span class="s2">"What it does"</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
@@ -973,11 +998,34 @@ There is no base class to subclass — plugins follow a duck-typed protocol:</p>
 </table>
 <p>The full surface is documented on the <a class="autorefs autorefs-internal" title="            EasySpeak" href="../reference/core/#core.main.EasySpeak"><code>EasySpeak</code></a>
 class.</p>
-<h2 id="loading-order">Loading order<a class="headerlink" href="#loading-order" title="Permanent link">&para;</a></h2>
-<p>Plugins load alphabetically. Use number prefixes to control order
-(<code>00_mousegrid.py</code> loads before <code>apps.py</code>), and the <code>zz_</code> prefix loads the base
-plugin last so it acts as the catch-all for help and exit. Files whose names
-start with <code>_</code> are skipped.</p>
+<h2 id="routing-order">Routing order<a class="headerlink" href="#routing-order" title="Permanent link">&para;</a></h2>
+<p>A command is offered to the plugins in order of their <code>PRIORITY</code> (default 50,
+lower first, equal ones by name). The grid and head-tracking modes declare <code>0</code>
+and <code>1</code>, so their words reach them before a look-alike elsewhere, and the base
+plugin declares <code>100</code> to act as the catch-all for help and exit. Files and
+directories whose names start with <code>_</code> are skipped.</p>
+<h2 id="translations">Translations<a class="headerlink" href="#translations" title="Permanent link">&para;</a></h2>
+<p>Replies are written in English and spoken in the user's language where a
+translation exists. A plugin opts in with one line and wraps what it speaks:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">easyspeak.core.i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">translator</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">_</span> <span class="o">=</span> <span class="n">translator</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="k">if</span> <span class="s2">"say hello"</span> <span class="ow">in</span> <span class="n">cmd</span><span class="p">:</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Hello there!"</span><span class="p">))</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="k">return</span> <span class="kc">None</span>
+</code></pre></div>
+<p>Text with a value in it stays a template until it is looked up:
+<code>core.speak(_("Opening {app}.").format(app=app))</code>.</p>
+<p>The translations are gettext catalogs beside the code, one per language:
+<code>myplugin/locale/de/LC_MESSAGES/myplugin.po</code>, the domain being the package's
+name. <code>just translations de</code> extracts the wrapped strings and creates or
+refreshes every <code>.po</code> for German; then fill in the <code>msgstr</code> lines, in Poedit or
+any editor. A string without a translation is spoken in English. See
+<a class="autorefs autorefs-internal" title="            core.i18n" href="../reference/core/#core.i18n"><code>core.i18n</code></a>.</p>
 <p>See the <a href="../reference/plugins/">Plugins API reference</a> for the generated
 documentation of every bundled plugin.</p>
 
