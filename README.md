@@ -51,7 +51,7 @@ You also need [Piper TTS](https://easyspeak.dev/latest/installation/#3-piper-tts
 See the **[Installation guide](https://easyspeak.dev/latest/installation/)** for the venv-based path, head tracking, and full details.
 
 Prefer prebuilt packages? Grab the `easyspeak` app `.deb`/`.rpm` **plus a language
-pack** (e.g. `easyspeak-lang-en`) from the
+pack** (`easyspeak-lang-en`; German, Italian, French and Spanish packs exist too) from the
 [Releases page](https://github.com/ctsdownloads/easyspeak/releases) and install them
 together — a self-contained, offline install (Python runtime, `piper`, GNOME
 extension, and speech models). See the

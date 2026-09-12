@@ -42,24 +42,25 @@ the module that reads each (linked to its API reference).
 
 ### [`core.config`][core.config]
 
-| Variable                         | Default                                | Effect                                     |
-| -------------------------------- | -------------------------------------- | ------------------------------------------ |
-| `EASYSPEAK_HOTKEY`               | `ctrl+shift`                           | Keys held to dictate without the wake word |
-| `EASYSPEAK_LANGUAGE`             | `en`                                   | Language you dictate in                    |
-| `EASYSPEAK_MODELS_DIR`           | `models/` beside the venv              | Where language packs are installed         |
-| `EASYSPEAK_OFFLINE`              | `strict`                               | Stay offline; `relaxed` downloads models   |
-| `EASYSPEAK_PIPER_BIN`            | `piper`                                | Piper TTS binary                           |
-| `EASYSPEAK_REQUIRE_WAKE_WORD`    | unset                                  | Modes wait for the wake word each command  |
-| `EASYSPEAK_PIPER_MODEL`          | an installed language pack's voice     | Piper voice `.onnx` for speech output      |
-| `EASYSPEAK_SOUNDS_DIR`           | `/usr/share/sounds/freedesktop/stereo` | Directory of the wake chime and error bell |
-| `EASYSPEAK_WHISPER_COMPUTE_TYPE` | `int8`                                 | CTranslate2 compute type                   |
-| `EASYSPEAK_WHISPER_CPU_THREADS`  | `0`                                    | CPU threads for transcription (`0` = auto) |
-| `EASYSPEAK_WHISPER_MODEL`        | an installed language pack's model     | faster-whisper model for transcription     |
+| Variable                         | Default                                | Effect                                      |
+| -------------------------------- | -------------------------------------- | ------------------------------------------- |
+| `EASYSPEAK_HOTKEY`               | `ctrl+shift`                           | Keys held to dictate without the wake word  |
+| `EASYSPEAK_LANGUAGE`             | `en`                                   | Language you dictate in and are answered in |
+| `EASYSPEAK_MODELS_DIR`           | `models/` beside the venv              | Where language packs are installed          |
+| `EASYSPEAK_OFFLINE`              | `strict`                               | Stay offline; `relaxed` downloads models    |
+| `EASYSPEAK_PIPER_BIN`            | `piper`                                | Piper TTS binary                            |
+| `EASYSPEAK_REQUIRE_WAKE_WORD`    | unset                                  | Modes wait for the wake word each command   |
+| `EASYSPEAK_PIPER_MODEL`          | an installed language pack's voice     | Piper voice `.onnx` for speech output       |
+| `EASYSPEAK_SOUNDS_DIR`           | `/usr/share/sounds/freedesktop/stereo` | Directory of the wake chime and error bell  |
+| `EASYSPEAK_WHISPER_COMPUTE_TYPE` | `int8`                                 | CTranslate2 compute type                    |
+| `EASYSPEAK_WHISPER_CPU_THREADS`  | `0`                                    | CPU threads for transcription (`0` = auto)  |
+| `EASYSPEAK_WHISPER_MODEL`        | an installed language pack's model     | faster-whisper model for transcription      |
 | `EASYSPEAK_SILENCE_THRESHOLD`    | measured at startup                    | Amplitude below which audio counts as quiet |
 
 `EASYSPEAK_LANGUAGE` is the language you dictate in, and the language of the
-spoken replies where they are translated (German is); commands stay English. It
-picks which installed [language pack](packaging.md#language)
+spoken replies where they are translated (German, Italian, French and Spanish
+are) and that language's pack is installed; commands stay English. It picks which installed
+[language pack](packaging.md#language)
 `EASYSPEAK_WHISPER_MODEL` defaults to; without one it falls back to `base.en`
 for English and to the multilingual `small` for any other language (a download,
 see `EASYSPEAK_OFFLINE`). `EASYSPEAK_PIPER_MODEL` defaults to the voice of the

@@ -29,6 +29,12 @@ version numbers are independent and need not match:
     sudo dnf install ./easyspeak-*.x86_64.rpm ./easyspeak-lang-en-*.noarch.rpm
     ```
 
+Besides English there are German, Italian, French and Spanish packs
+(`easyspeak-lang-de`, `-it`, `-fr`, `-es`). Install the one for the language you
+speak and set `EASYSPEAK_LANGUAGE` to its code, see [Usage](usage.md#configuration);
+you dictate in that language and EasySpeak answers in it, while the commands stay
+English words.
+
 This bundles the Python runtime, Piper, the GNOME Shell extension, and the speech
 models — no `pip`/`uv` step and no compiler. **Log out and back in once** after
 the first launch so GNOME loads the bundled extension. See the

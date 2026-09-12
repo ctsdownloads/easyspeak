@@ -247,6 +247,30 @@ class TestEasySpeakPlugins:
         captured = readlog()
         assert "Failed to load broken_plugin.py" in captured.out
 
+    @patch("importlib.import_module")
+    @patch("sys.path")
+    def test_load_plugins_setup_failure(
+        self, mock_syspath, mock_import, mock_plugin_with_setup, readlog
+    ):
+        """A plugin whose setup raises is skipped, not fatal."""
+        easy = EasySpeak()
+        mock_plugin_with_setup.setup.side_effect = RuntimeError("no display")
+        mock_import.return_value = mock_plugin_with_setup
+        mock_file = Mock()
+        mock_file.name = "test_plugin.py"
+        mock_file.stem = "test_plugin"
+        mock_file.suffix = ".py"
+        mock_file.is_dir.return_value = False
+
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch.object(Path, "iterdir", return_value=[mock_file]),
+        ):
+            easy.load_plugins()
+
+        assert easy.plugins == []
+        assert "Failed to load TestPlugin: no display" in readlog().out
+
     def test_load_plugins_loads_all_shipped_plugins(self):
         """All shipped plugins are discovered against the real filesystem layout."""
         easy = EasySpeak()
