@@ -1,0 +1,149 @@
+# Was man beim Diktieren sagt, auf Deutsch. Die Wörter werden mit Whispers
+# kleingeschriebener Abschrift verglichen, häufige Verhörer gehören also dazu.
+
+[exit]
+say = "Notizen beenden"
+verbs = ["beenden", "beende", "stopp", "stop", "stoppen", "schließen", "schließe", "ende", "fertig", "aus"]
+nouns = ["notizen", "notiz", "diktat", "diktieren"]
+
+[undo]
+phrases = ["das streichen", "streich das", "das löschen", "rückgängig"]
+
+[keystrokes]
+prefix = ["drücke", "drück", "taste"]
+
+[keystrokes.names]
+enter = ["enter", "eingabe", "eingabetaste", "return"]
+tab = ["tab", "tabulator"]
+escape = ["escape", "esc"]
+backspace = ["rücktaste", "backspace", "löschen", "entfernen"]
+up = ["hoch", "nach oben", "rauf"]
+down = ["runter", "nach unten"]
+left = ["links", "nach links"]
+right = ["rechts", "nach rechts"]
+home = ["pos eins", "zeilenanfang", "anfang"]
+end = ["zeilenende", "ende"]
+"page up" = ["bild hoch", "seite hoch", "bild auf"]
+"page down" = ["bild runter", "seite runter", "bild ab"]
+
+[counts]
+eins = 1
+ein = 1
+eine = 1
+zwei = 2
+drei = 3
+vier = 4
+"fünf" = 5
+sechs = 6
+sieben = 7
+acht = 8
+neun = 9
+zehn = 10
+
+[[replace]]
+say = ["leerzeichen"]
+insert = " "
+
+[[replace]]
+say = ["neuer satz", "nächster satz"]
+insert = ". "
+
+[[replace]]
+say = ["neuer absatz", "nächster absatz", "absatz"]
+insert = "\n\n"
+
+[[replace]]
+say = ["neue zeile", "nächste zeile", "zeilenumbruch"]
+insert = "\n"
+
+[[replace]]
+say = ["komma", "koma"]
+insert = ", "
+
+[[replace]]
+say = ["punkt"]
+insert = ". "
+
+[[replace]]
+say = ["fragezeichen"]
+insert = "? "
+
+[[replace]]
+say = ["ausrufezeichen", "ausrufungszeichen"]
+insert = "! "
+
+[[replace]]
+say = ["semikolon", "strichpunkt"]
+insert = "; "
+
+[[replace]]
+say = ["doppelpunkt"]
+insert = ": "
+
+[[replace]]
+say = ["gedankenstrich"]
+insert = " - "
+
+[[replace]]
+say = ["bindestrich"]
+insert = "-"
+
+[[replace]]
+say = ["apostroph"]
+insert = "'"
+
+[[replace]]
+say = ["anführungszeichen auf", "anführungszeichen unten"]
+insert = ' "'
+
+[[replace]]
+say = ["anführungszeichen zu", "anführungszeichen oben"]
+insert = '" '
+
+[[replace]]
+say = ["anführungszeichen"]
+insert = '"'
+
+[[replace]]
+say = ["klammer auf"]
+insert = " ("
+
+[[replace]]
+say = ["klammer zu"]
+insert = ") "
+
+[[replace]]
+say = ["at-zeichen", "at zeichen", "klammeraffe"]
+insert = "@"
+
+[[replace]]
+say = ["und-zeichen", "und zeichen", "kaufmännisches und"]
+insert = "&"
+
+[[replace]]
+say = ["dollarzeichen", "dollar"]
+insert = "$"
+
+[[replace]]
+say = ["prozentzeichen", "prozent"]
+insert = "%"
+
+[[replace]]
+say = ["raute", "hashtag", "doppelkreuz"]
+insert = "#"
+
+[[replace]]
+say = ["sternchen", "stern"]
+insert = "*"
+
+[[replace]]
+say = ["unterstrich"]
+insert = "_"
+
+[[replace]]
+say = ["schrägstrich"]
+insert = "/"
+
+[[replace]]
+say = ["backslash", "umgekehrter schrägstrich"]
+insert = "\\"

@@ -14,6 +14,7 @@ echo "The wheel ships the core module and the plugins"
 has core
 has plugins
 has locale/de/LC_MESSAGES/dictation.po
+has locale/de/vocabulary.toml
 
 echo "The wheel ships the launcher data and the GNOME extension"
 has easyspeak.desktop

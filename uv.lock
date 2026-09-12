@@ -835,6 +835,7 @@ dependencies = [
     { name = "polib" },
     { name = "pyaudio" },
     { name = "pyopen-wakeword" },
+    { name = "tomli", marker = "python_full_version < '3.11'" },
 ]
 
 [package.optional-dependencies]
@@ -897,6 +898,7 @@ requires-dist = [
     { name = "pytest-bdd", marker = "extra == 'acceptance'", specifier = ">=7" },
     { name = "pytest-benchmark", marker = "extra == 'benchmark'", specifier = ">=5" },
     { name = "sixdrepnet", marker = "extra == 'head-tracking'", specifier = ">=0.1.6" },
+    { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2" },
     { name = "types-pyaudio", marker = "extra == 'mypy'", specifier = ">=0.2.16.20250801" },
 ]
 provides-extras = ["acceptance", "benchmark", "bundle", "docs", "head-tracking", "integration", "mypy", "unittest"]

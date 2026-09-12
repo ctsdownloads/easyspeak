@@ -83,6 +83,19 @@ directories whose names start with `_` are skipped.
 
 ## Translations
 
+A plugin has two kinds of language-specific text, kept in two kinds of file
+under its `locale/<language>/` directory:
+
+- **What it says** — the spoken replies — is a gettext catalog,
+  `LC_MESSAGES/<plugin>.po`: one English string, one translation, the tooling
+  translators know.
+- **What it listens for** — phrases with several ways of saying each,
+  mishearings included, mapped to an action — is a `vocabulary.toml` table.
+  That is recognition data tuned by testing, not a translation, so it is data
+  the plugin reads rather than strings in its code. The dictation plugin's
+  table is the model: its exit phrases, key names, counts and spoken
+  punctuation live there, one file per language, English included.
+
 Replies are written in English and spoken in the user's language where a
 translation exists. A plugin opts in with one line and wraps what it speaks:
 

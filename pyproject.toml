@@ -54,6 +54,7 @@ dependencies = [
   "polib>=1.2",
   "pyaudio>=0.2.14",
   "pyopen-wakeword>=1.1",
+  "tomli>=2 ; python_version < '3.11'",
 ]
 # Not listed above: the "About" window (core.about) needs PyGObject + the GTK4
 # and libadwaita typelibs. On Linux those are system packages (PyGObject's own
@@ -106,7 +107,7 @@ easyspeak = "easyspeak.core.cli:run"
 "Source Code" = "https://github.com/ctsdownloads/easyspeak"
 
 [tool.coverage.report]
-exclude_also = ["if __name__ == .__main__.:"]
+exclude_also = ["if __name__ == .__main__.:", "if sys.version_info < .3, 11.:"]
 fail_under = 99
 show_missing = true
 
@@ -204,7 +205,7 @@ packages = [
 "easyspeak.gnome" = "src/gnome@easyspeak.dev"
 
 [tool.setuptools.package-data]
-"*" = ["locale/*/LC_MESSAGES/*.po"]
+"*" = ["locale/*/LC_MESSAGES/*.po", "locale/*/vocabulary.toml"]
 "easyspeak.data" = ["*"]
 "easyspeak.gnome" = [
   "extension.js",

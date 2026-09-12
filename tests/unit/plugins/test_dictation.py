@@ -1434,3 +1434,132 @@ def test_a_keystroke_does_not_end_the_dictation_session(mock_press, mock_core):
 
     assert dictation._dictation_session(mock_core) is True
     assert mock_core.speak.call_args.args[0] == "Done"
+
+
+# --- Control words per language -----------------------------------------------
+
+
+@pytest.mark.parametrize("language", ["en", "de", "it", "fr", "es"])
+def test_every_shipped_vocabulary_is_complete(language):
+    """Each language names every key, counts to ten, and inserts each symbol."""
+    vocabulary = dictation.load_vocabulary(language)
+
+    assert vocabulary["exit"]["say"]
+    assert vocabulary["exit"]["verbs"] and vocabulary["exit"]["nouns"]
+    assert vocabulary["undo"]["phrases"]
+    assert set(vocabulary["keystrokes"]["names"]) == set(mediakeys.KEYS)
+    assert all(
+        len(name.split()) <= 3
+        for names in vocabulary["keystrokes"]["names"].values()
+        for name in names
+    )
+    assert set(vocabulary["counts"].values()) == set(range(1, 11))
+    inserts = [entry["insert"] for entry in vocabulary["replace"]]
+    assert set(inserts) >= {
+        ", ",
+        ". ",
+        "? ",
+        "! ",
+        "; ",
+        ": ",
+        "\n",
+        "\n\n",
+        " ",
+        "@",
+        "%",
+        "#",
+    }
+    assert all(entry["say"] for entry in vocabulary["replace"])
+
+
+def test_vocabulary_falls_back_to_english():
+    """A dictation language without a table gets the English words."""
+    assert dictation.load_vocabulary("xx") == dictation.load_vocabulary("en")
+
+
+def test_vocabulary_without_the_english_table_is_an_error(tmp_path):
+    """The English table is the floor every language falls back to."""
+    with pytest.raises(FileNotFoundError, match="English"):
+        dictation.load_vocabulary("de", locale_dir=tmp_path)
+
+
+def test_english_prompt_names_the_spoken_punctuation():
+    """The Whisper prompt is the table's punctuation, first way of saying each."""
+    assert dictation.DICTATION_PROMPT.startswith(
+        "space, new sentence, new paragraph, new line, comma, period"
+    )
+    assert dictation.DICTATION_PROMPT.endswith("backslash, stop notes")
+    assert "scratch that" not in dictation.DICTATION_PROMPT
+
+
+@pytest.mark.parametrize(
+    ["spoken", "expected"],
+    [
+        ("hallo komma welt punkt", "Hallo, welt."),
+        ("hallo fragezeichen", "Hallo?"),
+        ("erster satz neuer satz zweiter satz", "Erster satz. Zweiter satz"),
+        ("eins neue zeile zwei", "Eins\nzwei"),
+        ("preis in prozent", "Preis in%"),
+        ("mail at-zeichen firma", "Mail@firma"),
+        ("hallo eingabe welt", "Hallo eingabe welt"),
+    ],
+)
+def test_format_text_in_german(spoken, expected):
+    """German spoken punctuation from the German table; keys stay words."""
+    vocabulary = dictation.load_vocabulary("de")
+
+    assert dictation.format_text(spoken, vocabulary) == expected
+
+
+@pytest.mark.parametrize(
+    ["language", "spoken"],
+    [
+        ("de", "notizen beenden"),
+        ("de", "stopp diktat"),
+        ("it", "fine dettatura"),
+        ("fr", "fin de la dictée"),
+        ("es", "fin del dictado"),
+    ],
+)
+def test_exit_phrases_in_every_language(language, spoken):
+    """The canonical way to leave dictation is recognised, whatever the word order."""
+    phrases = dictation.exit_phrases(dictation.load_vocabulary(language))
+
+    assert dictation.is_exit_phrase(spoken, phrases) is True
+
+
+def test_german_keystrokes_through_the_shared_parser():
+    """A German key name, prefix and count reach the same keycodes."""
+    vocabulary = dictation.load_vocabulary("de")
+    names = {
+        spoken: key
+        for key, spoken_names in vocabulary["keystrokes"]["names"].items()
+        for spoken in spoken_names
+    }
+    counts = vocabulary["counts"]
+    prefixes = tuple(vocabulary["keystrokes"]["prefix"])
+
+    assert mediakeys.parse_key_request(
+        ["drücke", "nach", "unten", "fünf"],
+        dictation.BARE_KEYS,
+        names=names,
+        counts=counts,
+        prefixes=prefixes,
+    ) == (mediakeys.KEYS["down"], 5)
+    assert mediakeys.parse_key_request(
+        ["rücktaste"],
+        dictation.BARE_KEYS,
+        names=names,
+        counts=counts,
+        prefixes=prefixes,
+    ) == (mediakeys.KEYS["backspace"], 1)
+    assert (
+        mediakeys.parse_key_request(
+            ["runter"],
+            dictation.BARE_KEYS,
+            names=names,
+            counts=counts,
+            prefixes=prefixes,
+        )
+        is None
+    )

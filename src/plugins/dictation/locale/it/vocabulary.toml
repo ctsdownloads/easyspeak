@@ -1,0 +1,149 @@
+# Cosa dire durante la dettatura, in italiano. Le parole vengono confrontate
+# con la trascrizione in minuscolo di Whisper, quindi ci vanno anche gli errori
+# di ascolto più comuni.
+
+[exit]
+say = "fine dettatura"
+verbs = ["fine", "chiudi", "termina", "stop", "basta", "esci", "fermati"]
+nouns = ["dettatura", "note", "nota", "appunti"]
+
+[undo]
+phrases = ["cancella quello", "cancella questo", "annulla", "annulla quello"]
+
+[keystrokes]
+prefix = ["premi", "tasto"]
+
+[keystrokes.names]
+enter = ["invio", "enter"]
+tab = ["tab", "tabulazione"]
+escape = ["escape", "esc"]
+backspace = ["backspace", "cancella", "canc"]
+up = ["su", "sopra"]
+down = ["giù", "sotto"]
+left = ["sinistra"]
+right = ["destra"]
+home = ["inizio", "inizio riga"]
+end = ["fine riga", "fine"]
+"page up" = ["pagina su"]
+"page down" = ["pagina giù"]
+
+[counts]
+uno = 1
+una = 1
+due = 2
+tre = 3
+quattro = 4
+cinque = 5
+sei = 6
+sette = 7
+otto = 8
+nove = 9
+dieci = 10
+
+[[replace]]
+say = ["spazio"]
+insert = " "
+
+[[replace]]
+say = ["nuova frase", "frase nuova"]
+insert = ". "
+
+[[replace]]
+say = ["nuovo paragrafo", "paragrafo nuovo"]
+insert = "\n\n"
+
+[[replace]]
+say = ["nuova riga", "a capo", "riga nuova"]
+insert = "\n"
+
+[[replace]]
+say = ["virgola"]
+insert = ", "
+
+[[replace]]
+say = ["punto"]
+insert = ". "
+
+[[replace]]
+say = ["punto interrogativo", "punto di domanda"]
+insert = "? "
+
+[[replace]]
+say = ["punto esclamativo"]
+insert = "! "
+
+[[replace]]
+say = ["punto e virgola"]
+insert = "; "
+
+[[replace]]
+say = ["due punti"]
+insert = ": "
+
+[[replace]]
+say = ["trattino lungo", "lineetta"]
+insert = " - "
+
+[[replace]]
+say = ["trattino"]
+insert = "-"
+
+[[replace]]
+say = ["apostrofo"]
+insert = "'"
+
+[[replace]]
+say = ["apri virgolette", "aperte virgolette"]
+insert = ' "'
+
+[[replace]]
+say = ["chiudi virgolette", "chiuse virgolette"]
+insert = '" '
+
+[[replace]]
+say = ["virgolette"]
+insert = '"'
+
+[[replace]]
+say = ["apri parentesi", "aperta parentesi"]
+insert = " ("
+
+[[replace]]
+say = ["chiudi parentesi", "chiusa parentesi"]
+insert = ") "
+
+[[replace]]
+say = ["chiocciola"]
+insert = "@"
+
+[[replace]]
+say = ["e commerciale"]
+insert = "&"
+
+[[replace]]
+say = ["dollaro"]
+insert = "$"
+
+[[replace]]
+say = ["percento", "per cento"]
+insert = "%"
+
+[[replace]]
+say = ["cancelletto", "hashtag"]
+insert = "#"
+
+[[replace]]
+say = ["asterisco"]
+insert = "*"
+
+[[replace]]
+say = ["trattino basso", "underscore"]
+insert = "_"
+
+[[replace]]
+say = ["barra", "slash"]
+insert = "/"
+
+[[replace]]
+say = ["barra rovesciata", "backslash"]
+insert = "\\"

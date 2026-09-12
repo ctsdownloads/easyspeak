@@ -1,0 +1,149 @@
+# Ce que l'on dit pendant la dictée, en français. Les mots sont comparés à la
+# transcription en minuscules de Whisper, les confusions fréquentes en font
+# donc partie.
+
+[exit]
+say = "fin de la dictée"
+verbs = ["fin", "arrêter", "arrête", "stop", "terminer", "termine", "fermer", "ferme", "quitter"]
+nouns = ["de la dictée", "dictée", "notes", "note"]
+
+[undo]
+phrases = ["efface ça", "effacer ça", "annule ça", "annuler"]
+
+[keystrokes]
+prefix = ["appuie", "appuyer", "touche"]
+
+[keystrokes.names]
+enter = ["entrée", "entrer"]
+tab = ["tab", "tabulation"]
+escape = ["échap", "escape"]
+backspace = ["retour arrière", "effacer", "supprimer"]
+up = ["haut"]
+down = ["bas"]
+left = ["gauche"]
+right = ["droite"]
+home = ["début", "début de ligne"]
+end = ["fin de ligne", "fin"]
+"page up" = ["page précédente", "page haut"]
+"page down" = ["page suivante", "page bas"]
+
+[counts]
+un = 1
+une = 1
+deux = 2
+trois = 3
+quatre = 4
+cinq = 5
+six = 6
+sept = 7
+huit = 8
+neuf = 9
+dix = 10
+
+[[replace]]
+say = ["espace"]
+insert = " "
+
+[[replace]]
+say = ["nouvelle phrase"]
+insert = ". "
+
+[[replace]]
+say = ["nouveau paragraphe"]
+insert = "\n\n"
+
+[[replace]]
+say = ["nouvelle ligne", "à la ligne", "retour à la ligne"]
+insert = "\n"
+
+[[replace]]
+say = ["virgule"]
+insert = ", "
+
+[[replace]]
+say = ["point"]
+insert = ". "
+
+[[replace]]
+say = ["point d'interrogation"]
+insert = "? "
+
+[[replace]]
+say = ["point d'exclamation"]
+insert = "! "
+
+[[replace]]
+say = ["point virgule", "point-virgule"]
+insert = "; "
+
+[[replace]]
+say = ["deux points"]
+insert = ": "
+
+[[replace]]
+say = ["tiret"]
+insert = " - "
+
+[[replace]]
+say = ["trait d'union"]
+insert = "-"
+
+[[replace]]
+say = ["apostrophe"]
+insert = "'"
+
+[[replace]]
+say = ["ouvrir les guillemets", "ouvrez les guillemets"]
+insert = ' "'
+
+[[replace]]
+say = ["fermer les guillemets", "fermez les guillemets"]
+insert = '" '
+
+[[replace]]
+say = ["guillemets", "guillemet"]
+insert = '"'
+
+[[replace]]
+say = ["ouvrir la parenthèse", "parenthèse ouvrante"]
+insert = " ("
+
+[[replace]]
+say = ["fermer la parenthèse", "parenthèse fermante"]
+insert = ") "
+
+[[replace]]
+say = ["arobase", "arrobase"]
+insert = "@"
+
+[[replace]]
+say = ["esperluette"]
+insert = "&"
+
+[[replace]]
+say = ["dollar"]
+insert = "$"
+
+[[replace]]
+say = ["pour cent", "pourcent"]
+insert = "%"
+
+[[replace]]
+say = ["dièse", "hashtag"]
+insert = "#"
+
+[[replace]]
+say = ["astérisque"]
+insert = "*"
+
+[[replace]]
+say = ["tiret bas", "underscore"]
+insert = "_"
+
+[[replace]]
+say = ["barre oblique", "slash"]
+insert = "/"
+
+[[replace]]
+say = ["barre oblique inversée", "antislash", "backslash"]
+insert = "\\"

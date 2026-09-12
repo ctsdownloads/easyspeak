@@ -107,34 +107,42 @@ SPOKEN_COUNTS = {
     "ten": 10,
 }
 
+# Spoken key name -> key in KEYS, the English vocabulary.
+KEY_NAMES = {**{name: name for name in KEYS}, **KEY_ALIASES}
+PRESS_PREFIXES = ("press",)
+
 MAX_KEY_REPEATS = 200
 
 
-def parse_key_request(words, bare_allowed):
+def parse_key_request(words, bare_allowed, *, names=None, counts=None, prefixes=None):
     """Return (keycode, repeats) for a spoken keystroke command, else None.
 
-    Accepts an optional "press" prefix, one- or two-word key names, and a trailing
+    Accepts an optional "press" prefix, key names of up to three words, and a trailing
     count as digits or a number word. `bare_allowed` names the keys a caller will
     accept without the prefix; every other key needs it, so that words already
-    meaning something else in that mode are left alone.
+    meaning something else in that mode are left alone. The vocabulary is English
+    unless `names` (spoken name -> key in `KEYS`), `counts` (number word -> int)
+    and `prefixes` say otherwise, as dictation does for the user's language.
     """
-    explicit = bool(words) and words[0] == "press"
+    names = KEY_NAMES if names is None else names
+    counts = SPOKEN_COUNTS if counts is None else counts
+    prefixes = PRESS_PREFIXES if prefixes is None else prefixes
+    explicit = bool(words) and words[0] in prefixes
     if explicit:
         words = words[1:]
     if not words:
         return None
 
-    for length in (2, 1):
-        name = " ".join(words[:length])
-        name = KEY_ALIASES.get(name, name)
-        if name not in KEYS or (not explicit and name not in bare_allowed):
+    for length in (3, 2, 1):
+        name = names.get(" ".join(words[:length]))
+        if name is None or (not explicit and name not in bare_allowed):
             continue
         tail = words[length:]
         if not tail:
             return KEYS[name], 1
         if len(tail) > 1:
             return None
-        count = int(tail[0]) if tail[0].isdigit() else SPOKEN_COUNTS.get(tail[0])
+        count = int(tail[0]) if tail[0].isdigit() else counts.get(tail[0])
         if count is None:
             return None
         return KEYS[name], min(count, MAX_KEY_REPEATS)

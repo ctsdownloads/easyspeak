@@ -1,0 +1,150 @@
+# Qué decir durante el dictado, en español. Las palabras se comparan con la
+# transcripción en minúsculas de Whisper, así que las confusiones frecuentes
+# también van aquí.
+
+[exit]
+say = "fin del dictado"
+verbs = ["fin", "parar", "para", "stop", "terminar", "termina", "cerrar", "cierra", "salir"]
+nouns = ["del dictado", "dictado", "notas", "nota"]
+
+[undo]
+phrases = ["borra eso", "borrar eso", "quita eso", "deshacer"]
+
+[keystrokes]
+prefix = ["pulsa", "pulsar", "presiona", "tecla"]
+
+[keystrokes.names]
+enter = ["intro", "enter", "entrar"]
+tab = ["tab", "tabulador"]
+escape = ["escape", "esc"]
+backspace = ["retroceso", "borrar", "suprimir"]
+up = ["arriba"]
+down = ["abajo"]
+left = ["izquierda"]
+right = ["derecha"]
+home = ["inicio", "inicio de línea"]
+end = ["fin de línea", "fin"]
+"page up" = ["página arriba", "retroceder página"]
+"page down" = ["página abajo", "avanzar página"]
+
+[counts]
+uno = 1
+una = 1
+un = 1
+dos = 2
+tres = 3
+cuatro = 4
+cinco = 5
+seis = 6
+siete = 7
+ocho = 8
+nueve = 9
+diez = 10
+
+[[replace]]
+say = ["espacio"]
+insert = " "
+
+[[replace]]
+say = ["nueva frase", "nueva oración"]
+insert = ". "
+
+[[replace]]
+say = ["nuevo párrafo"]
+insert = "\n\n"
+
+[[replace]]
+say = ["nueva línea", "salto de línea"]
+insert = "\n"
+
+[[replace]]
+say = ["coma"]
+insert = ", "
+
+[[replace]]
+say = ["punto"]
+insert = ". "
+
+[[replace]]
+say = ["signo de interrogación", "interrogación"]
+insert = "? "
+
+[[replace]]
+say = ["signo de exclamación", "exclamación"]
+insert = "! "
+
+[[replace]]
+say = ["punto y coma"]
+insert = "; "
+
+[[replace]]
+say = ["dos puntos"]
+insert = ": "
+
+[[replace]]
+say = ["raya", "guion largo"]
+insert = " - "
+
+[[replace]]
+say = ["guion"]
+insert = "-"
+
+[[replace]]
+say = ["apóstrofo"]
+insert = "'"
+
+[[replace]]
+say = ["abrir comillas", "abre comillas"]
+insert = ' "'
+
+[[replace]]
+say = ["cerrar comillas", "cierra comillas"]
+insert = '" '
+
+[[replace]]
+say = ["comillas"]
+insert = '"'
+
+[[replace]]
+say = ["abrir paréntesis", "abre paréntesis"]
+insert = " ("
+
+[[replace]]
+say = ["cerrar paréntesis", "cierra paréntesis"]
+insert = ") "
+
+[[replace]]
+say = ["arroba"]
+insert = "@"
+
+[[replace]]
+say = ["y comercial"]
+insert = "&"
+
+[[replace]]
+say = ["signo de dólar", "dólar"]
+insert = "$"
+
+[[replace]]
+say = ["por ciento", "porcentaje"]
+insert = "%"
+
+[[replace]]
+say = ["almohadilla", "numeral", "hashtag"]
+insert = "#"
+
+[[replace]]
+say = ["asterisco"]
+insert = "*"
+
+[[replace]]
+say = ["guion bajo"]
+insert = "_"
+
+[[replace]]
+say = ["barra"]
+insert = "/"
+
+[[replace]]
+say = ["barra invertida"]
+insert = "\\"

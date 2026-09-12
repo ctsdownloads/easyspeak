@@ -1,0 +1,148 @@
+# What to say inside dictation, in English. Phrases are matched against
+# Whisper's lowercased transcript, so common mishearings belong here too.
+
+[exit]
+say = "stop notes"
+verbs = ["stop", "close", "closed", "end", "exit", "done", "finish", "quit"]
+nouns = ["notes", "note", "nots", "nurts", "nuts", "knots", "notice"]
+
+[undo]
+phrases = ["scratch that", "scratch this", "undo that", "undo this"]
+
+[keystrokes]
+prefix = ["press"]
+
+[keystrokes.names]
+enter = ["enter", "return"]
+tab = ["tab"]
+escape = ["escape", "escape key"]
+backspace = ["backspace", "delete"]
+up = ["up"]
+down = ["down"]
+left = ["left"]
+right = ["right"]
+home = ["home"]
+end = ["end"]
+"page up" = ["page up"]
+"page down" = ["page down"]
+
+[counts]
+one = 1
+two = 2
+three = 3
+four = 4
+five = 5
+six = 6
+seven = 7
+eight = 8
+nine = 9
+ten = 10
+
+# Spoken punctuation and symbols, in the order they are applied.
+[[replace]]
+say = ["space"]
+insert = " "
+
+[[replace]]
+say = ["new sentence", "next sentence"]
+insert = ". "
+
+[[replace]]
+say = ["new paragraph", "next paragraph", "new para"]
+insert = "\n\n"
+
+[[replace]]
+say = ["new line", "newline", "you line", "line break"]
+insert = "\n"
+
+[[replace]]
+say = ["comma", "karma", "kama", "carma", "calm a", "calm him", "calm up", "come a", "coma", "calmer"]
+insert = ", "
+
+[[replace]]
+say = ["period", "full stop"]
+insert = ". "
+
+[[replace]]
+say = ["question mark"]
+insert = "? "
+
+[[replace]]
+say = ["exclamation mark", "exclamation point"]
+insert = "! "
+
+[[replace]]
+say = ["semicolon", "semi colon"]
+insert = "; "
+
+[[replace]]
+say = ["colon"]
+insert = ": "
+
+[[replace]]
+say = ["dash"]
+insert = " - "
+
+[[replace]]
+say = ["hyphen"]
+insert = "-"
+
+[[replace]]
+say = ["apostrophe"]
+insert = "'"
+
+[[replace]]
+say = ["open quote"]
+insert = ' "'
+
+[[replace]]
+say = ["close quote"]
+insert = '" '
+
+[[replace]]
+say = ["quote"]
+insert = '"'
+
+[[replace]]
+say = ["open paren"]
+insert = " ("
+
+[[replace]]
+say = ["close paren"]
+insert = ") "
+
+[[replace]]
+say = ["at sign"]
+insert = "@"
+
+[[replace]]
+say = ["ampersand"]
+insert = "&"
+
+[[replace]]
+say = ["dollar sign"]
+insert = "$"
+
+[[replace]]
+say = ["percent sign", "percent"]
+insert = "%"
+
+[[replace]]
+say = ["hashtag", "hash"]
+insert = "#"
+
+[[replace]]
+say = ["asterisk", "star"]
+insert = "*"
+
+[[replace]]
+say = ["underscore"]
+insert = "_"
+
+[[replace]]
+say = ["slash"]
+insert = "/"
+
+[[replace]]
+say = ["backslash"]
+insert = "\\"

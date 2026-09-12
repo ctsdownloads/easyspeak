@@ -7,11 +7,17 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import threading
 import time
 from pathlib import Path
 
 from easyspeak.core import mediakeys
+
+if sys.version_info < (3, 11):
+    import tomli as tomllib
+else:
+    import tomllib
 from easyspeak.core.config import LANGUAGE
 from easyspeak.core.i18n import translator
 
@@ -36,12 +42,69 @@ COMMANDS = [
 
 core = None
 
-# Prompt to bias Whisper toward recognizing punctuation commands
-DICTATION_PROMPT = (
-    "comma, period, new sentence, new paragraph, new line, question mark, "
-    "exclamation mark, colon, semicolon, stop notes, backspace, scratch that, "
-    "enter, tab, escape, space, apostrophe, quote, dash, hyphen, at sign, "
-    "hashtag, percent"
+
+def load_vocabulary(language, locale_dir=None):
+    """Return the words spoken inside dictation in `language`.
+
+    They are the table `locale/<language>/vocabulary.toml` beside the reply
+    catalog: how to leave dictation, undo, press keys, count, and every spoken
+    punctuation mark with the text it inserts. What the app listens for is a
+    table like this; what it says is the gettext catalog next to it. A language
+    without a table gets the English one.
+    """
+    locale_dir = (
+        Path(__file__).with_name("locale") if locale_dir is None else locale_dir
+    )
+    for code in (language, "en"):
+        table = locale_dir / code / "vocabulary.toml"
+        if table.is_file():
+            with table.open("rb") as f:
+                return tomllib.load(f)
+    msg = "the English dictation vocabulary is missing"
+    raise FileNotFoundError(msg)
+
+
+def compile_replacements(vocabulary):
+    """Return the spoken punctuation of `vocabulary` as (pattern, text) pairs."""
+    return [
+        (
+            re.compile(rf"\s*,?\s*\b{re.escape(phrase)}\b\s*", re.IGNORECASE),
+            entry["insert"],
+        )
+        for entry in vocabulary["replace"]
+        for phrase in entry["say"]
+    ]
+
+
+def exit_phrases(vocabulary):
+    """Return every way `vocabulary` lets a dictated utterance leave dictation."""
+    exit_words = vocabulary["exit"]
+    return frozenset(
+        phrase
+        for verb in exit_words["verbs"]
+        for noun in exit_words["nouns"]
+        for phrase in (f"{verb} {noun}", f"{noun} {verb}", f"{verb}{noun}")
+    )
+
+
+VOCABULARY = load_vocabulary(LANGUAGE)
+EXIT_VERBS = tuple(VOCABULARY["exit"]["verbs"])
+EXIT_NOUNS = tuple(VOCABULARY["exit"]["nouns"])
+EXIT_PHRASES = exit_phrases(VOCABULARY)
+UNDO_PHRASES = frozenset(VOCABULARY["undo"]["phrases"])
+KEY_PREFIXES = tuple(VOCABULARY["keystrokes"]["prefix"])
+KEY_NAMES = {
+    spoken: key
+    for key, spoken_names in VOCABULARY["keystrokes"]["names"].items()
+    for spoken in spoken_names
+}
+COUNTS = dict(VOCABULARY["counts"])
+REPLACEMENTS = compile_replacements(VOCABULARY)
+
+# Biases Whisper towards the spoken punctuation, the first way of saying each,
+# and the way out. Kept short: every word costs decoding time on each utterance.
+DICTATION_PROMPT = ", ".join(
+    [entry["say"][0] for entry in VOCABULARY["replace"]] + [VOCABULARY["exit"]["say"]]
 )
 
 
@@ -106,24 +169,10 @@ BACKEND_ERROR = "backend_error"
 ATSPI_HELPER = str(Path(__file__).with_name("_atspi_insert.py"))
 
 
-EXIT_VERBS = ("stop", "close", "closed", "end", "exit", "done", "finish", "quit")
-EXIT_NOUNS = (
-    "notes",
-    "note",
-    "nots",
-    "nurts",
-    "nuts",
-    "knots",
-    "notice",
-)
-EXIT_PHRASES = frozenset(
-    f"{verb} {noun}" for verb in EXIT_VERBS for noun in EXIT_NOUNS
-) | frozenset(f"{verb}{noun}" for verb in EXIT_VERBS for noun in EXIT_NOUNS)
-
-
-def is_exit_phrase(text):
+def is_exit_phrase(text, phrases=None):
     """Whether a dictated utterance asks to leave dictation mode."""
-    return any(phrase in text for phrase in EXIT_PHRASES)
+    phrases = EXIT_PHRASES if phrases is None else phrases
+    return any(phrase in text for phrase in phrases)
 
 
 # --- Insertion ---------------------------------------------------------------
@@ -541,74 +590,26 @@ def insert_via_atspi(text):
     return NO_FOCUS
 
 
-def format_text(text):
-    """Convert spoken punctuation to actual punctuation."""
+def format_text(text, vocabulary=None):
+    """Convert spoken punctuation to actual punctuation.
+
+    The spoken words come from the dictation language's vocabulary table; pass
+    `vocabulary` to format for another language.
+    """
     text = text.strip()
 
     # Strip ALL punctuation Whisper auto-adds; only explicit commands add it back
     text = re.sub(r"[.,!?;:]+", "", text)
     text = text.strip()
 
-    # Punctuation replacements - order matters!
-    replacements = [
-        # Editing commands
-        (r"\s*\bspace\b\s*", " "),
-        # Sentence breaks - add space after
-        (r"\s*,?\s*\bnew sentence\b\s*", ". "),
-        (r"\s*,?\s*\bnext sentence\b\s*", ". "),
-        (r"\s*,?\s*\bnew paragraph\b\s*", "\n\n"),
-        (r"\s*,?\s*\bnext paragraph\b\s*", "\n\n"),
-        (r"\s*,?\s*\bnew para\b\s*", "\n\n"),
-        (r"\s*,?\s*\bnew line\b\s*", "\n"),
-        (r"\s*,?\s*\bnewline\b\s*", "\n"),
-        (r"\s*,?\s*\byou line\b\s*", "\n"),
-        (r"\s*,?\s*\bline break\b\s*", "\n"),
-        # Punctuation - include common mishearings
-        (r"\s*,?\s*\bcomma\b\s*", ", "),
-        (r"\s*,?\s*\bkarma\b\s*", ", "),
-        (r"\s*,?\s*\bkama\b\s*", ", "),
-        (r"\s*,?\s*\bcarma\b\s*", ", "),
-        (r"\s*,?\s*\bcalm a\b\s*", ", "),
-        (r"\s*,?\s*\bcalm him\b\s*", ", "),
-        (r"\s*,?\s*\bcalm up\b\s*", ", "),
-        (r"\s*,?\s*\bcome a\b\s*", ", "),
-        (r"\s*,?\s*\bcoma\b\s*", ", "),
-        (r"\s*,?\s*\bcalmer\b\s*", ", "),
-        (r",\s*\.", ","),  # Fix comma followed by period
-        (r"\s*,?\s*\bperiod\b\s*", ". "),
-        (r"\s*,?\s*\bfull stop\b\s*", ". "),
-        (r"\s*,?\s*\.\s*\.+", "."),  # Multiple periods to one
-        (r"\s*,?\s*\bquestion mark\b\s*", "? "),
-        (r"\s*,?\s*\bexclamation mark\b\s*", "! "),
-        (r"\s*,?\s*\bexclamation point\b\s*", "! "),
-        (r"\s*,?\s*\bsemicolon\b\s*", "; "),
-        (r"\s*,?\s*\bsemi colon\b\s*", "; "),
-        (r"\s*,?\s*\bcolon\b\s*", ": "),
-        (r"\s*,?\s*\bdash\b\s*", " - "),
-        (r"\s*,?\s*\bhyphen\b\s*", "-"),
-        (r"\s*,?\s*\bapostrophe\b\s*", "'"),
-        (r"\s*,?\s*\bopen quote\b\s*", ' "'),
-        (r"\s*,?\s*\bclose quote\b\s*", '" '),
-        (r"\s*,?\s*\bquote\b\s*", '"'),
-        (r"\s*,?\s*\bopen paren\b\s*", " ("),
-        (r"\s*,?\s*\bclose paren\b\s*", ") "),
-        # Common words/symbols
-        (r"\s*,?\s*\bat sign\b\s*", "@"),
-        (r"\s*,?\s*\bampersand\b\s*", "&"),
-        (r"\s*,?\s*\bdollar sign\b\s*", "$"),
-        (r"\s*,?\s*\bpercent sign\b\s*", "%"),
-        (r"\s*,?\s*\bpercent\b\s*", "%"),
-        (r"\s*,?\s*\bhashtag\b\s*", "#"),
-        (r"\s*,?\s*\bhash\b\s*", "#"),
-        (r"\s*,?\s*\basterisk\b\s*", "*"),
-        (r"\s*,?\s*\bstar\b\s*", "*"),
-        (r"\s*,?\s*\bunderscore\b\s*", "_"),
-        (r"\s*,?\s*\bslash\b\s*", "/"),
-        (r"\s*,?\s*\bbackslash\b\s*", "\\\\"),
-    ]
+    replacements = (
+        REPLACEMENTS if vocabulary is None else compile_replacements(vocabulary)
+    )
+    for pattern, insert in replacements:
+        text = pattern.sub(lambda _match, insert=insert: insert, text)
 
-    for pattern, replacement in replacements:
-        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+    # A comma right before a period is Whisper's, not the speaker's.
+    text = re.sub(r",\s*\.", ",", text)
 
     # Capitalize after sentence endings
     def capitalize_after(match):
@@ -630,8 +631,6 @@ def format_text(text):
     return text.strip()
 
 
-UNDO_PHRASES = frozenset({"scratch that", "scratch this", "undo that", "undo this"})
-
 # Bare "up" or "right" is ordinary speech, so the arrows need "press" in front.
 BARE_KEYS = frozenset(mediakeys.KEYS) - {"up", "down", "left", "right"}
 
@@ -642,7 +641,9 @@ def _handle_keystroke(core, text):
     A backspace shortens what "scratch that" still has to remove rather than
     discarding it, so the two can be used in either order on one utterance.
     """
-    request = mediakeys.parse_key_request(text.split(), BARE_KEYS)
+    request = mediakeys.parse_key_request(
+        text.split(), BARE_KEYS, names=KEY_NAMES, counts=COUNTS, prefixes=KEY_PREFIXES
+    )
     scratching = request is None and text in UNDO_PHRASES
     if scratching:
         pending = core.dictation_last_length
@@ -735,7 +736,7 @@ def handle(cmd, core):
     if ("notes" in words or "note" in words) and "stop" not in words:
         core.speak(_("Dictation"))
 
-        logger.info("🎙️ Dictation mode - say 'stop notes' to end")
+        logger.info("🎙️ Dictation mode - say '%s' to end", VOCABULARY["exit"]["say"])
 
         try:
             return _dictation_session(core)
