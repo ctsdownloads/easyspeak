@@ -71,8 +71,9 @@ built into the app (it ships inside the pyopen-wakeword wheel), so it stays Engl
 regardless of language pack.
 
 `easyspeak-lang-de` is **German** — the multilingual Whisper `small` and Piper
-`de_DE-thorsten-medium`. Commands stay English words; the pack gives you German
-dictation and a German voice.
+`de_DE-thorsten-medium`. Commands and spoken replies stay English, so the pack
+gives you German dictation, and the replies are read by the English pack's voice:
+install both. The German voice takes over once the replies are translated.
 
 `EASYSPEAK_LANGUAGE` (default `en`) is the language you dictate in, and it picks
 the pack installed under `/opt/easyspeak/models/<language>`. To use a language we

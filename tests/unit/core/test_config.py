@@ -243,20 +243,23 @@ class TestLanguagePacks:
         assert config.LANGUAGE == "en"
 
     @pytest.mark.parametrize(
-        ("language", "whisper", "voice"),
-        [
-            ("en", "base.en", "en_US-amy-medium.onnx"),
-            ("de", "small", "de_DE-thorsten-medium.onnx"),
-        ],
+        ("language", "whisper"), [("en", "base.en"), ("de", "small")]
     )
-    def test_uses_the_pack_of_the_language(
-        self, packs, monkeypatch, language, whisper, voice
+    def test_listens_with_the_pack_of_the_language(
+        self, packs, monkeypatch, language, whisper
     ):
-        """Each language's models come from its own pack directory."""
+        """Each language's Whisper model comes from its own pack directory."""
         monkeypatch.setenv("EASYSPEAK_LANGUAGE", language)
         importlib.reload(config)
         assert Path(config.WHISPER_MODEL) == packs / language / "whisper" / whisper
-        assert Path(config.PIPER_MODEL) == packs / language / "piper" / voice
+
+    def test_replies_with_the_voice_of_their_own_language(self, packs, monkeypatch):
+        """The replies are English, so their voice is the English pack's."""
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "de")
+        importlib.reload(config)
+        assert (
+            Path(config.PIPER_MODEL) == packs / "en" / "piper" / "en_US-amy-medium.onnx"
+        )
 
     def test_models_dir_env_override(self, models, monkeypatch, tmp_path):
         """`EASYSPEAK_MODELS_DIR` finds packs installed anywhere else."""

@@ -75,9 +75,14 @@ HOTKEY_COMBO = "" if _hotkey.lower() in ("", "off", "none") else _hotkey
 
 
 # --- Language ---
-# The language the user dictates in. Commands stay English words wherever a
-# plugin matches them. Also selects which installed language pack's models to use.
+# The language the user dictates in; it selects the installed language pack's
+# Whisper model. Commands stay English words wherever a plugin matches them.
 LANGUAGE = os.environ.get("EASYSPEAK_LANGUAGE", "en").strip().lower() or "en"
+
+# The language the spoken replies are in, which is the language the voice must
+# be for, whatever the user dictates in: a German voice reads an English "Done"
+# with German phonemes. The replies are English text so far.
+REPLY_LANGUAGE = "en"
 
 
 # --- Models ---
@@ -106,7 +111,7 @@ def _bundled_bin(name, *, default):
 
 
 PIPER_MODEL = os.environ.get("EASYSPEAK_PIPER_MODEL") or _bundled_model(
-    LANGUAGE,
+    REPLY_LANGUAGE,
     "piper",
     "*.onnx",
     default=str(Path("~/.local/share/piper/en_US-amy-medium.onnx").expanduser()),

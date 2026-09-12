@@ -45,7 +45,7 @@ the module that reads each (linked to its API reference).
 | Variable                         | Default                                | Effect                                     |
 | -------------------------------- | -------------------------------------- | ------------------------------------------ |
 | `EASYSPEAK_HOTKEY`               | `ctrl+shift`                           | Keys held to dictate without the wake word |
-| `EASYSPEAK_LANGUAGE`             | `en`                                   | Language of dictation and spoken replies   |
+| `EASYSPEAK_LANGUAGE`             | `en`                                   | Language you dictate in                    |
 | `EASYSPEAK_MODELS_DIR`           | `models/` beside the venv              | Where language packs are installed         |
 | `EASYSPEAK_OFFLINE`              | `strict`                               | Stay offline; `relaxed` downloads models   |
 | `EASYSPEAK_PIPER_BIN`            | `piper`                                | Piper TTS binary                           |
@@ -57,11 +57,12 @@ the module that reads each (linked to its API reference).
 | `EASYSPEAK_WHISPER_MODEL`        | an installed language pack's model     | faster-whisper model for transcription     |
 | `EASYSPEAK_SILENCE_THRESHOLD`    | measured at startup                    | Amplitude below which audio counts as quiet |
 
-`EASYSPEAK_LANGUAGE` is the language you dictate in; commands stay English. It
-also picks which installed [language pack](packaging.md#language) the two model
-defaults come from. Without a pack for it, `EASYSPEAK_WHISPER_MODEL` falls back
-to `base.en` for English and to the multilingual `small` for any other language
-(a download, see `EASYSPEAK_OFFLINE`), and `EASYSPEAK_PIPER_MODEL` to
+`EASYSPEAK_LANGUAGE` is the language you dictate in; commands and spoken
+replies stay English. It picks which installed [language pack](packaging.md#language)
+`EASYSPEAK_WHISPER_MODEL` defaults to; without one it falls back to `base.en`
+for English and to the multilingual `small` for any other language (a download,
+see `EASYSPEAK_OFFLINE`). The replies are read by the voice of their own
+language, so `EASYSPEAK_PIPER_MODEL` defaults to the English pack's voice, else
 `~/.local/share/piper/en_US-amy-medium.onnx`.
 
 `EASYSPEAK_SILENCE_THRESHOLD` is normally left alone. On startup EasySpeak
