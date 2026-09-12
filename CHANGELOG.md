@@ -5,6 +5,47 @@ canonical, GitHub-independent record of releases. It is updated once per
 release. The format loosely follows [Keep a Changelog](https://keepachangelog.com/),
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.10.0 · Answers in Your Language · 2026-09-12
+
+**Spoken Replies in German, Italian, French and Spanish, a Language Pack for
+Each, and Plugins as Packages**
+
+EasySpeak now answers in the language it is spoken to. `EASYSPEAK_LANGUAGE=de`,
+`it`, `fr` or `es` with the matching language pack gives dictation, spoken
+replies and the voice in that language; commands stay English words, as do the
+dictation control words for now. The replies are gettext catalogs beside the
+code that speaks them, one per plugin, with per-string fallback to English, and
+the voice follows the language of the replies — so a language without a
+translation, or without its voice pack installed, gets English replies in the
+English voice rather than a voice reading the wrong language. Italian, French
+and Spanish packs join the German one; a further language is a `pins.toml`
+entry, an nfpm file and eleven `.po` files, and `just translations <lang>` and
+`just check-translations` keep the catalogs in step with the code.
+
+Underneath, plugins are Python packages now, each carrying its own `locale/`,
+and route by an explicit `PRIORITY` instead of numeric filename prefixes; a
+plain module still loads. `EASYSPEAK_MODELS_DIR` says where language packs are
+installed, which the Nix dev shell uses to link packs in on demand
+(`easyspeak-lang de it`) instead of fetching every language up front. As since
+0.9.0, this release needs packs on the per-language layout: `easyspeak-lang-en`
+1.1.0 or newer.
+
+### What's Changed
+
+- Complete the 0.9.0 changelog entry by @bittner in [#160](https://github.com/ctsdownloads/easyspeak/pull/160)
+- Build every language pack into the Nix dev shell by @bittner in [#161](https://github.com/ctsdownloads/easyspeak/pull/161)
+- Read the replies with the voice of their own language by @bittner in [#162](https://github.com/ctsdownloads/easyspeak/pull/162)
+- Speak the replies in the user's language, German first by @bittner in [#164](https://github.com/ctsdownloads/easyspeak/pull/164)
+- Add the Italian language pack and Italian replies by @bittner in [#165](https://github.com/ctsdownloads/easyspeak/pull/165)
+- Add the French language pack and French replies by @bittner in [#166](https://github.com/ctsdownloads/easyspeak/pull/166)
+- Add the Spanish language pack and Spanish replies by @bittner in [#167](https://github.com/ctsdownloads/easyspeak/pull/167)
+- Tidy up before the next release by @bittner in [#168](https://github.com/ctsdownloads/easyspeak/pull/168)
+- Answer in English when the language's voice is not installed by @bittner in [#171](https://github.com/ctsdownloads/easyspeak/pull/171)
+- Fetch language packs on demand in the Nix dev shell by @bittner in [#170](https://github.com/ctsdownloads/easyspeak/pull/170)
+- Check that the reply catalogs keep up with the code by @bittner in [#169](https://github.com/ctsdownloads/easyspeak/pull/169)
+
+**Full Changelog**: [`0.9.0...0.10.0`](https://github.com/ctsdownloads/easyspeak/compare/0.9.0...0.10.0)
+
 ## 0.9.0 · Speaking Your Language · 2026-09-12
 
 **Dictation in Other Languages, Per-Language Packs, and Voice Control Proven on
