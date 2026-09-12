@@ -83,28 +83,37 @@
         # EASYSPEAK_SOUNDS_DIR (commonEnv) redirects to the Nix store one.
         soundsNixDir = "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo";
 
-        # Piper voice, fetched at build time from the revision pinned in
-        # pins.toml. Piper wants the .onnx and .onnx.json side by side, so
-        # linkFarm them and point EASYSPEAK_PIPER_MODEL at the .onnx.
-        piperPin = (builtins.fromTOML (builtins.readFile ./pins.toml)).lang.en.piper;
-        piperBaseUrl = "https://huggingface.co/${piperPin.repo}/resolve/${piperPin.revision}/${piperPin.path}";
-        piperVoice = pkgs.linkFarm "piper-voice-${piperPin.voice}" [
-          {
-            name = "${piperPin.voice}.onnx";
+        # Every language pack in pins.toml, laid out as the .deb/.rpm install
+        # them (models/<code>/whisper/<model>/... and models/<code>/piper/...),
+        # each file fetched at build time from its pinned revision and verified
+        # against its pinned checksum. EASYSPEAK_MODELS_DIR points the app at
+        # the tree, so EASYSPEAK_LANGUAGE selects a pack exactly as it does with
+        # the packages installed.
+        langPins = (builtins.fromTOML (builtins.readFile ./pins.toml)).lang;
+        packFiles =
+          code: lang:
+          let
+            hf = "https://huggingface.co";
+            whisper = lang.whisper;
+            piper = lang.piper;
+          in
+          pkgs.lib.mapAttrsToList (file: sha256: {
+            name = "${code}/whisper/${whisper.model}/${file}";
             path = pkgs.fetchurl {
-              url = "${piperBaseUrl}/${piperPin.voice}.onnx";
-              sha256 = piperPin.files."${piperPin.voice}.onnx";
+              url = "${hf}/${whisper.repo}/resolve/${whisper.revision}/${file}";
+              inherit sha256;
             };
-          }
-          {
-            name = "${piperPin.voice}.onnx.json";
+          }) whisper.files
+          ++ pkgs.lib.mapAttrsToList (file: sha256: {
+            name = "${code}/piper/${file}";
             path = pkgs.fetchurl {
-              url = "${piperBaseUrl}/${piperPin.voice}.onnx.json";
-              sha256 = piperPin.files."${piperPin.voice}.onnx.json";
+              url = "${hf}/${piper.repo}/resolve/${piper.revision}/${piper.path}/${file}";
+              inherit sha256;
             };
-          }
-        ];
-        piperModelPath = "${piperVoice}/${piperPin.voice}.onnx";
+          }) piper.files;
+        languagePacks = pkgs.linkFarm "easyspeak-language-packs" (
+          pkgs.lib.concatLists (pkgs.lib.mapAttrsToList packFiles langPins)
+        );
 
         # Env shared by the `nix run` wrapper and the dev shell, so `uv run
         # easyspeak` behaves identically in both; `:-`/`:+` defaulting lets a
@@ -118,7 +127,7 @@
           export CPPFLAGS="-I${portaudio}/include ''${CPPFLAGS:-}"
           export EASYSPEAK_ATSPI_PYTHON='${atspiPython}/bin/python3'
           export EASYSPEAK_OFFLINE="''${EASYSPEAK_OFFLINE:-relaxed}"
-          export EASYSPEAK_PIPER_MODEL="''${EASYSPEAK_PIPER_MODEL:-${piperModelPath}}"
+          export EASYSPEAK_MODELS_DIR="''${EASYSPEAK_MODELS_DIR:-${languagePacks}}"
           export EASYSPEAK_SOUNDS_DIR="''${EASYSPEAK_SOUNDS_DIR:-${soundsNixDir}}"
           export GI_TYPELIB_PATH='${giTypelibPath}'":''${GI_TYPELIB_PATH:-}"
           export LD_LIBRARY_PATH='${lib.makeLibraryPath runtimeLibs}'":''${LD_LIBRARY_PATH:-}"
@@ -199,6 +208,7 @@
             ${commonEnv}
             echo "EasySpeak dev shell — Python $(python --version 2>&1 | awk '{print $2}'), uv $(uv --version | awk '{print $2}')"
             echo "Run:  uv run [--extra head-tracking] easyspeak"
+            echo "      EASYSPEAK_LANGUAGE=de uv run easyspeak"
             echo "      just --list"
           '';
         };

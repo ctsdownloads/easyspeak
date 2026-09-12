@@ -46,6 +46,7 @@ the module that reads each (linked to its API reference).
 | -------------------------------- | -------------------------------------- | ------------------------------------------ |
 | `EASYSPEAK_HOTKEY`               | `ctrl+shift`                           | Keys held to dictate without the wake word |
 | `EASYSPEAK_LANGUAGE`             | `en`                                   | Language of dictation and spoken replies   |
+| `EASYSPEAK_MODELS_DIR`           | `models/` beside the venv              | Where language packs are installed         |
 | `EASYSPEAK_OFFLINE`              | `strict`                               | Stay offline; `relaxed` downloads models   |
 | `EASYSPEAK_PIPER_BIN`            | `piper`                                | Piper TTS binary                           |
 | `EASYSPEAK_REQUIRE_WAKE_WORD`    | unset                                  | Modes wait for the wake word each command  |

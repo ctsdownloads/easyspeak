@@ -37,8 +37,8 @@ hold-to-dictate setup.
 
 ## NixOS
 
-The flake carries the runtime tools, the Piper voice and the sound theme, so
-there is no system-package step:
+The flake carries the runtime tools, every language pack and the sound theme,
+so there is no system-package step:
 
 ```bash
 nix run github:ctsdownloads/easyspeak

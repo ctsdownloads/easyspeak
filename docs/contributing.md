@@ -74,6 +74,9 @@ nix develop
 nix run
 ```
 
+Every language pack in `pins.toml` is built into the shell, so a language is a
+matter of `EASYSPEAK_LANGUAGE=de uv run easyspeak`.
+
 To run directly off GitHub, with no clone required:
 
 ```console

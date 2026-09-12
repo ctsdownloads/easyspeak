@@ -7,6 +7,7 @@ honor an `EASYSPEAK_*` environment variable:
 
 - `EASYSPEAK_HOTKEY`
 - `EASYSPEAK_LANGUAGE`
+- `EASYSPEAK_MODELS_DIR`
 - `EASYSPEAK_OFFLINE`
 - `EASYSPEAK_PIPER_BIN`
 - `EASYSPEAK_PIPER_MODEL`
@@ -83,7 +84,9 @@ LANGUAGE = os.environ.get("EASYSPEAK_LANGUAGE", "en").strip().lower() or "en"
 # The .deb/.rpm ship the models and `piper` beside the venv, so these defaults
 # locate them from our interpreter; pip/source installs fall back to a download.
 # A language pack installs its models under `models/<language>/`.
-MODELS_DIR = Path(sys.prefix).parent / "models"
+MODELS_DIR = Path(
+    os.environ.get("EASYSPEAK_MODELS_DIR") or Path(sys.prefix).parent / "models"
+)
 
 
 def _bundled_model(language, kind, pattern, *, default):

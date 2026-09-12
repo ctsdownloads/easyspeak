@@ -25,6 +25,7 @@ def _restore_config(monkeypatch):
         "EASYSPEAK_PIPER_BIN",
         "EASYSPEAK_HOTKEY",
         "EASYSPEAK_LANGUAGE",
+        "EASYSPEAK_MODELS_DIR",
         "EASYSPEAK_OFFLINE",
     ]:
         monkeypatch.delenv(var, raising=False)
@@ -223,6 +224,7 @@ class TestLanguagePacks:
     def models(self, tmp_path, monkeypatch):
         """Point the module at a temporary venv; return the models dir beside it."""
         monkeypatch.setattr(config.sys, "prefix", str(tmp_path / "venv"))
+        monkeypatch.delenv("EASYSPEAK_MODELS_DIR", raising=False)
         monkeypatch.delenv("EASYSPEAK_WHISPER_MODEL", raising=False)
         monkeypatch.delenv("EASYSPEAK_PIPER_MODEL", raising=False)
         return tmp_path / "models"
@@ -255,6 +257,15 @@ class TestLanguagePacks:
         importlib.reload(config)
         assert Path(config.WHISPER_MODEL) == packs / language / "whisper" / whisper
         assert Path(config.PIPER_MODEL) == packs / language / "piper" / voice
+
+    def test_models_dir_env_override(self, models, monkeypatch, tmp_path):
+        """`EASYSPEAK_MODELS_DIR` finds packs installed anywhere else."""
+        elsewhere = tmp_path / "elsewhere"
+        install_pack(elsewhere, "de", "small", "de_DE-thorsten-medium")
+        monkeypatch.setenv("EASYSPEAK_MODELS_DIR", str(elsewhere))
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "de")
+        importlib.reload(config)
+        assert Path(config.WHISPER_MODEL) == elsewhere / "de" / "whisper" / "small"
 
     @pytest.mark.parametrize(
         ("language", "whisper"), [("en", "base.en"), ("de", "small")]
