@@ -1076,7 +1076,9 @@ the module that reads each (linked to its API reference).</p>
 </table>
 <p><code>EASYSPEAK_LANGUAGE</code> is the language you dictate in, and the language of the
 spoken replies where they are translated (German, Italian, French and Spanish
-are) and that language's pack is installed; commands stay English. It picks which installed
+are) and that language's pack is installed; commands stay English. Where the
+replies fall back to English, or the code is not one Whisper knows, a warning at
+startup says so. It picks which installed
 <a href="../packaging/#language">language pack</a>
 <code>EASYSPEAK_WHISPER_MODEL</code> defaults to; without one it falls back to <code>base.en</code>
 for English and to the multilingual <code>small</code> for any other language (a download,
