@@ -218,7 +218,7 @@ translations lang:
     for package in src/core src/plugins/*/; do
         package="${package%/}"
         domain=$(basename "$package")
-        uvx --from babel pybabel -q extract --no-location --sort-output --project EasySpeak --version '' --copyright-holder 'EasySpeak contributors' --msgid-bugs-address https://github.com/ctsdownloads/easyspeak/issues -o "$pot" "$package"
+        uvx --from babel pybabel -q extract --no-location --sort-output --project EasySpeak --copyright-holder 'EasySpeak contributors' --msgid-bugs-address https://github.com/ctsdownloads/easyspeak/issues -o "$pot" "$package"
         grep -q '^msgid "[^"]' "$pot" || continue
         po="$package/locale/{{ lang }}/LC_MESSAGES/$domain.po"
         if [ -f "$po" ]; then
@@ -226,6 +226,7 @@ translations lang:
         else
             mkdir -p "$(dirname "$po")"
             uvx --from babel pybabel -q init -i "$pot" -o "$po" -l {{ lang }}
+            sed -i 's/^"Project-Id-Version: EasySpeak VERSION/"Project-Id-Version: EasySpeak/' "$po"
         fi
         echo "$po"
     done

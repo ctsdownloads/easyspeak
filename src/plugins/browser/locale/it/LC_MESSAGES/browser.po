@@ -1,0 +1,79 @@
+# Italian translations for EasySpeak.
+# Copyright (C) 2026 EasySpeak contributors
+# This file is distributed under the same license as the EasySpeak project.
+msgid ""
+msgstr ""
+"Project-Id-Version: EasySpeak\n"
+"Report-Msgid-Bugs-To: https://github.com/ctsdownloads/easyspeak/issues\n"
+"POT-Creation-Date: 2026-09-12 18:51+0200\n"
+"PO-Revision-Date: 2026-09-12 18:51+0200\n"
+"Last-Translator: EasySpeak contributors\n"
+"Language-Team: Italian\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "Ad blocking off"
+msgstr "Blocco pubblicità disattivato"
+
+msgid "Ad blocking on"
+msgstr "Blocco pubblicità attivato"
+
+msgid "Browser"
+msgstr "Browser"
+
+msgid "Closing browser."
+msgstr "Chiudo il browser."
+
+msgid "Could not write the browser config."
+msgstr "Impossibile scrivere la configurazione del browser."
+
+msgid "Hardware rendering on"
+msgstr "Rendering hardware attivato"
+
+msgid "Hints closed"
+msgstr "Suggerimenti chiusi"
+
+msgid "Keystrokes need GNOME."
+msgstr "I tasti richiedono GNOME."
+
+msgid "Left the browser"
+msgstr "Uscito dal browser"
+
+msgid "No hints on this page"
+msgstr "Nessun suggerimento in questa pagina"
+
+#, python-brace-format
+msgid "Opening {site}."
+msgstr "Apro {site}."
+
+#, python-brace-format
+msgid "Opening {url}."
+msgstr "Apro {url}."
+
+msgid "Ready"
+msgstr "Pronto"
+
+msgid "Reloading"
+msgstr "Ricarico"
+
+#, python-brace-format
+msgid "Saved as {name}."
+msgstr "Salvato come {name}."
+
+#, python-brace-format
+msgid "Searching for {query}."
+msgstr "Cerco {query}."
+
+msgid "Software rendering on"
+msgstr "Rendering software attivato"
+
+msgid "The browser isn't running."
+msgstr "Il browser non è in esecuzione."
+
+#, python-brace-format
+msgid "{spoken}. Restarting the browser."
+msgstr "{spoken}. Riavvio il browser."

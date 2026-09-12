@@ -72,6 +72,7 @@ regardless of language pack.
 
 `easyspeak-lang-de` is **German** — the multilingual Whisper `small` and Piper
 `de_DE-thorsten-medium`: German dictation and German replies in the German voice.
+`easyspeak-lang-it` is **Italian** the same way, with Piper `it_IT-paola-medium`.
 Commands stay English words.
 
 `EASYSPEAK_LANGUAGE` (default `en`) is the language you dictate in, and it picks
