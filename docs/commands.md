@@ -176,7 +176,7 @@ bare "up" or "right" is ordinary dictated speech.
 | open [app] | Launch application |
 | close [app] | Close application |
 
-Default apps live in [`plugins/apps.py`](https://github.com/ctsdownloads/easyspeak/blob/HEAD/src/plugins/apps.py)
+Default apps live in [`plugins/apps`](https://github.com/ctsdownloads/easyspeak/blob/HEAD/src/plugins/apps/__init__.py)
 (edit to match your system): firefox, steam, spotify, calculator, settings,
 terminal, browser, music player, and more. Some accept spoken aliases —
 e.g. "open music app" works the same as "open music player".
