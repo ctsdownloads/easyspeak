@@ -1012,6 +1012,11 @@ the module that reads each (linked to its API reference).</p>
 <td>Keys held to dictate without the wake word</td>
 </tr>
 <tr>
+<td><code>EASYSPEAK_LANGUAGE</code></td>
+<td><code>en</code></td>
+<td>Language of dictation and spoken replies</td>
+</tr>
+<tr>
 <td><code>EASYSPEAK_OFFLINE</code></td>
 <td><code>strict</code></td>
 <td>Stay offline; <code>relaxed</code> downloads models</td>
@@ -1028,7 +1033,7 @@ the module that reads each (linked to its API reference).</p>
 </tr>
 <tr>
 <td><code>EASYSPEAK_PIPER_MODEL</code></td>
-<td>bundled Amy voice</td>
+<td>an installed language pack's voice</td>
 <td>Piper voice <code>.onnx</code> for speech output</td>
 </tr>
 <tr>
@@ -1048,7 +1053,7 @@ the module that reads each (linked to its API reference).</p>
 </tr>
 <tr>
 <td><code>EASYSPEAK_WHISPER_MODEL</code></td>
-<td><code>base.en</code></td>
+<td>an installed language pack's model</td>
 <td>faster-whisper model for transcription</td>
 </tr>
 <tr>
@@ -1058,6 +1063,12 @@ the module that reads each (linked to its API reference).</p>
 </tr>
 </tbody>
 </table>
+<p><code>EASYSPEAK_LANGUAGE</code> is the language you dictate in; commands stay English. It
+also picks which installed <a href="../packaging/#language">language pack</a> the two model
+defaults come from. Without a pack for it, <code>EASYSPEAK_WHISPER_MODEL</code> falls back
+to <code>base.en</code> for English and to the multilingual <code>small</code> for any other language
+(a download, see <code>EASYSPEAK_OFFLINE</code>), and <code>EASYSPEAK_PIPER_MODEL</code> to any other
+installed voice, else <code>~/.local/share/piper/en_US-amy-medium.onnx</code>.</p>
 <p><code>EASYSPEAK_SILENCE_THRESHOLD</code> is normally left alone. On startup EasySpeak
 listens to the room for a second and sets the threshold above whatever it
 measures — a fixed value assumes a quiet room, and where the ambient level sits

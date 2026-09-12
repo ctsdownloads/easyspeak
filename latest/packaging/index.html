@@ -1089,10 +1089,12 @@ access) and log back in:</p>
 (recognition) and Piper <code>en_US-amy-medium</code> (feedback). The <code>hey_jarvis</code> wake word is
 built into the app (it ships inside the pyopen-wakeword wheel), so it stays English
 regardless of language pack.</p>
-<p>When present, the English pack is wired up automatically. To use another language —
-<strong>whether or not we provide a package for it</strong> — install/drop its models and point
-these environment variables at them (an explicit value always wins; set them in a
-systemd user override or your shell profile):</p>
+<p><code>EASYSPEAK_LANGUAGE</code> (default <code>en</code>) is the language you dictate in, and it picks
+the installed pack's models: a Piper voice by its <code>&lt;language&gt;_</code> filename prefix, a
+Whisper model by not being one of the English-only <code>.en</code> ones. To use a language we
+ship no package for, install/drop its models and point these environment variables
+at them (an explicit value always wins; set them in a systemd user override or your
+shell profile):</p>
 <ul>
 <li><code>EASYSPEAK_WHISPER_MODEL</code> — a multilingual faster-whisper model name (e.g. <code>base</code>,
   <code>small</code>) or a local model directory. The English-only <code>*.en</code> models can't
