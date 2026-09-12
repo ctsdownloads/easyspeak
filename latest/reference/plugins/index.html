@@ -3777,7 +3777,7 @@ appear regardless of the configured log verbosity.</p>
 <a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">    request (the spoken reply tells the user to read the terminal), so it must</span>
 <a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">    appear regardless of the configured log verbosity.</span>
 <a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">    """</span>
-<a id="__codelineno-0-70" name="__codelineno-0-70"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== Available Commands ==="</span><span class="p">)</span>  <span class="c1"># noqa: T201</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== "</span> <span class="o">+</span> <span class="n">_</span><span class="p">(</span><span class="s2">"Available Commands"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" ==="</span><span class="p">)</span>  <span class="c1"># noqa: T201</span>
 <a id="__codelineno-0-71" name="__codelineno-0-71"></a>    <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">core</span><span class="o">.</span><span class="n">plugins</span><span class="p">:</span>
 <a id="__codelineno-0-72" name="__codelineno-0-72"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="s2">"COMMANDS"</span><span class="p">):</span>
 <a id="__codelineno-0-73" name="__codelineno-0-73"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="n">plugin</span><span class="o">.</span><span class="n">NAME</span><span class="si">}</span><span class="s2">:"</span><span class="p">)</span>  <span class="c1"># noqa: T201</span>
@@ -4727,13 +4727,13 @@ command that did nothing at all sounded like it had worked.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/files/__init__.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-35">35</a></span>
-<span class="normal"><a href="#__codelineno-0-36">36</a></span>
-<span class="normal"><a href="#__codelineno-0-37">37</a></span>
-<span class="normal"><a href="#__codelineno-0-38">38</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
-<a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="w">    </span><span class="sd">"""Store the core reference for use by the plugin's handlers."""</span>
-<a id="__codelineno-0-37" name="__codelineno-0-37"></a>    <span class="k">global</span> <span class="n">core</span>
-<a id="__codelineno-0-38" name="__codelineno-0-38"></a>    <span class="n">core</span> <span class="o">=</span> <span class="n">c</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-38">38</a></span>
+<span class="normal"><a href="#__codelineno-0-39">39</a></span>
+<span class="normal"><a href="#__codelineno-0-40">40</a></span>
+<span class="normal"><a href="#__codelineno-0-41">41</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="w">    </span><span class="sd">"""Store the core reference for use by the plugin's handlers."""</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a>    <span class="k">global</span> <span class="n">core</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41"></a>    <span class="n">core</span> <span class="o">=</span> <span class="n">c</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4762,10 +4762,7 @@ paths.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/files/__init__.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-41">41</a></span>
-<span class="normal"><a href="#__codelineno-0-42">42</a></span>
-<span class="normal"><a href="#__codelineno-0-43">43</a></span>
-<span class="normal"><a href="#__codelineno-0-44">44</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-44">44</a></span>
 <span class="normal"><a href="#__codelineno-0-45">45</a></span>
 <span class="normal"><a href="#__codelineno-0-46">46</a></span>
 <span class="normal"><a href="#__codelineno-0-47">47</a></span>
@@ -4774,19 +4771,22 @@ paths.</p>
 <span class="normal"><a href="#__codelineno-0-50">50</a></span>
 <span class="normal"><a href="#__codelineno-0-51">51</a></span>
 <span class="normal"><a href="#__codelineno-0-52">52</a></span>
-<span class="normal"><a href="#__codelineno-0-53">53</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="k">def</span><span class="w"> </span><span class="nf">open_folder</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
-<a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="w">    </span><span class="sd">"""Open a folder in the user's default file manager; False if unavailable.</span>
-<a id="__codelineno-0-43" name="__codelineno-0-43"></a>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">    Delegates to xdg-open so whichever file manager the desktop is configured</span>
-<a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">    for is honoured, rather than hardcoding one. Launched with a clean</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">    environment (see core.host_run) so it doesn't inherit EasySpeak's library</span>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">    paths.</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">    """</span>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a>    <span class="n">expanded</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
-<a id="__codelineno-0-50" name="__codelineno-0-50"></a>    <span class="k">if</span> <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">"which"</span><span class="p">,</span> <span class="s2">"xdg-open"</span><span class="p">])</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-<a id="__codelineno-0-51" name="__codelineno-0-51"></a>        <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-52" name="__codelineno-0-52"></a>    <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">"xdg-open"</span><span class="p">,</span> <span class="n">expanded</span><span class="p">],</span> <span class="n">background</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">clean_env</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-0-53" name="__codelineno-0-53"></a>    <span class="k">return</span> <span class="kc">True</span>
+<span class="normal"><a href="#__codelineno-0-53">53</a></span>
+<span class="normal"><a href="#__codelineno-0-54">54</a></span>
+<span class="normal"><a href="#__codelineno-0-55">55</a></span>
+<span class="normal"><a href="#__codelineno-0-56">56</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="k">def</span><span class="w"> </span><span class="nf">open_folder</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="w">    </span><span class="sd">"""Open a folder in the user's default file manager; False if unavailable.</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">    Delegates to xdg-open so whichever file manager the desktop is configured</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">    for is honoured, rather than hardcoding one. Launched with a clean</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="sd">    environment (see core.host_run) so it doesn't inherit EasySpeak's library</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">    paths.</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">    """</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a>    <span class="n">expanded</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53"></a>    <span class="k">if</span> <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">"which"</span><span class="p">,</span> <span class="s2">"xdg-open"</span><span class="p">])</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54"></a>        <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55"></a>    <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">"xdg-open"</span><span class="p">,</span> <span class="n">expanded</span><span class="p">],</span> <span class="n">background</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">clean_env</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56"></a>    <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4811,10 +4811,7 @@ paths.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/files/__init__.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-56">56</a></span>
-<span class="normal"><a href="#__codelineno-0-57">57</a></span>
-<span class="normal"><a href="#__codelineno-0-58">58</a></span>
-<span class="normal"><a href="#__codelineno-0-59">59</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-59">59</a></span>
 <span class="normal"><a href="#__codelineno-0-60">60</a></span>
 <span class="normal"><a href="#__codelineno-0-61">61</a></span>
 <span class="normal"><a href="#__codelineno-0-62">62</a></span>
@@ -4825,21 +4822,24 @@ paths.</p>
 <span class="normal"><a href="#__codelineno-0-67">67</a></span>
 <span class="normal"><a href="#__codelineno-0-68">68</a></span>
 <span class="normal"><a href="#__codelineno-0-69">69</a></span>
-<span class="normal"><a href="#__codelineno-0-70">70</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
-<a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="w">    </span><span class="sd">"""Open a named folder, or the file manager itself; None if neither matched."""</span>
-<a id="__codelineno-0-58" name="__codelineno-0-58"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">verb</span> <span class="ow">in</span> <span class="n">cmd</span> <span class="k">for</span> <span class="n">verb</span> <span class="ow">in</span> <span class="n">OPEN_VERBS</span><span class="p">):</span>
-<a id="__codelineno-0-59" name="__codelineno-0-59"></a>        <span class="k">return</span> <span class="kc">None</span>
-<a id="__codelineno-0-60" name="__codelineno-0-60"></a>
-<a id="__codelineno-0-61" name="__codelineno-0-61"></a>    <span class="k">for</span> <span class="n">folder</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">FOLDERS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<a id="__codelineno-0-62" name="__codelineno-0-62"></a>        <span class="k">if</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">cmd</span><span class="p">:</span>
-<a id="__codelineno-0-63" name="__codelineno-0-63"></a>            <span class="n">_open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-64" name="__codelineno-0-64"></a>            <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-65" name="__codelineno-0-65"></a>
-<a id="__codelineno-0-66" name="__codelineno-0-66"></a>    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">phrase</span> <span class="ow">in</span> <span class="n">cmd</span> <span class="k">for</span> <span class="n">phrase</span> <span class="ow">in</span> <span class="n">FILE_MANAGER_PHRASES</span><span class="p">):</span>
-<a id="__codelineno-0-67" name="__codelineno-0-67"></a>        <span class="n">_open</span><span class="p">(</span><span class="s2">"~"</span><span class="p">,</span> <span class="s2">"files"</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-68" name="__codelineno-0-68"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-69" name="__codelineno-0-69"></a>
-<a id="__codelineno-0-70" name="__codelineno-0-70"></a>    <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Not handled</span>
+<span class="normal"><a href="#__codelineno-0-70">70</a></span>
+<span class="normal"><a href="#__codelineno-0-71">71</a></span>
+<span class="normal"><a href="#__codelineno-0-72">72</a></span>
+<span class="normal"><a href="#__codelineno-0-73">73</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a><span class="w">    </span><span class="sd">"""Open a named folder, or the file manager itself; None if neither matched."""</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">verb</span> <span class="ow">in</span> <span class="n">cmd</span> <span class="k">for</span> <span class="n">verb</span> <span class="ow">in</span> <span class="n">OPEN_VERBS</span><span class="p">):</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62"></a>        <span class="k">return</span> <span class="kc">None</span>
+<a id="__codelineno-0-63" name="__codelineno-0-63"></a>
+<a id="__codelineno-0-64" name="__codelineno-0-64"></a>    <span class="k">for</span> <span class="n">folder</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">FOLDERS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-0-65" name="__codelineno-0-65"></a>        <span class="k">if</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">cmd</span><span class="p">:</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66"></a>            <span class="n">_open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-67" name="__codelineno-0-67"></a>            <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-68" name="__codelineno-0-68"></a>
+<a id="__codelineno-0-69" name="__codelineno-0-69"></a>    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">phrase</span> <span class="ow">in</span> <span class="n">cmd</span> <span class="k">for</span> <span class="n">phrase</span> <span class="ow">in</span> <span class="n">FILE_MANAGER_PHRASES</span><span class="p">):</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70"></a>        <span class="n">_open</span><span class="p">(</span><span class="s2">"~"</span><span class="p">,</span> <span class="s2">"files"</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72"></a>
+<a id="__codelineno-0-73" name="__codelineno-0-73"></a>    <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Not handled</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
