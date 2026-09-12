@@ -1026,10 +1026,13 @@ application directly:</p>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="go">nix run</span>
 </code></pre></div>
-<p>Every language pack in <code>pins.toml</code> is built into the shell, so a language is a
-matter of <code>EASYSPEAK_LANGUAGE=de uv run easyspeak</code>.</p>
+<p>The shell carries the English language pack. The others in <code>pins.toml</code> are
+fetched on demand, one command per language, and stay cached in the Nix store:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="go">easyspeak-lang de it</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="go">EASYSPEAK_LANGUAGE=de uv run easyspeak</span>
+</code></pre></div>
 <p>To run directly off GitHub, with no clone required:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="go">nix run github:ctsdownloads/easyspeak</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="go">nix run github:ctsdownloads/easyspeak</span>
 </code></pre></div>
 <h2 id="packaging-version-numbers">Packaging &amp; Version Numbers<a class="headerlink" href="#packaging-version-numbers" title="Permanent link">&para;</a></h2>
 <p>The packaging configuration is in <code>pyproject.toml</code>, supported by
