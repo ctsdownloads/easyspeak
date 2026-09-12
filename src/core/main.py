@@ -22,6 +22,7 @@ from .config import (
     FOLLOWUP_IDLE_ROUNDS,
     HOTKEY_COMBO,
     LANGUAGE,
+    LANGUAGE_WARNINGS,
     MAX_RECORD_SECONDS,
     MISUNDERSTAND_GRACE,
     REQUIRE_WAKE_WORD,
@@ -823,6 +824,8 @@ class EasySpeak:
         except RuntimeError as exc:
             logger.error("Cannot start EasySpeak: %s", exc)  # noqa: TRY400
             raise SystemExit(1) from exc
+        for warning in LANGUAGE_WARNINGS:
+            logger.warning(warning)
 
         ensure_extension()
 

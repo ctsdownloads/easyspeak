@@ -242,6 +242,42 @@ class TestLanguagePacks:
         importlib.reload(config)
         assert config.LANGUAGE == "en"
 
+    def test_unknown_code_is_reported_and_english_used(self, monkeypatch):
+        """A code Whisper does not know would crash the first dictation; say so."""
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "xyz")
+        importlib.reload(config)
+        assert config.LANGUAGE == "en"
+        assert config.LANGUAGE_WARNINGS == [
+            "EASYSPEAK_LANGUAGE='xyz' is not a language code Whisper knows; using English"
+        ]
+
+    def test_untranslated_language_is_reported(self, packs, monkeypatch):
+        """Portuguese dictation with English replies: the user is told why."""
+        install_pack(packs, "pt", "small", "pt_PT-tugao-medium")
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "pt")
+        importlib.reload(config)
+        assert config.REPLY_LANGUAGE == "en"
+        assert config.LANGUAGE_WARNINGS == [
+            "Dictation in 'pt', replies in English (no 'pt' translation)"
+        ]
+
+    def test_missing_voice_pack_is_reported(self, packs, monkeypatch):
+        """Italian is translated, but without its pack the user is told why."""
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "it")
+        importlib.reload(config)
+        assert config.REPLY_LANGUAGE == "en"
+        assert config.LANGUAGE_WARNINGS == [
+            "Dictation in 'it', replies in English (no 'it' language pack)"
+        ]
+
+    def test_both_reasons_in_one_warning(self, packs, monkeypatch):
+        """Neither translation nor pack: one line, both reasons."""
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "pt")
+        importlib.reload(config)
+        assert config.LANGUAGE_WARNINGS == [
+            "Dictation in 'pt', replies in English (no 'pt' translation, no 'pt' language pack)"
+        ]
+
     @pytest.mark.parametrize(
         ("language", "whisper"), [("en", "base.en"), ("de", "small")]
     )
@@ -255,8 +291,8 @@ class TestLanguagePacks:
 
     def test_replies_with_the_voice_of_their_own_language(self, packs, monkeypatch):
         """A language with a pack but no translation gets English replies, in its voice."""
-        install_pack(packs, "xx", "small", "xx_XX-nobody-medium")
-        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "xx")
+        install_pack(packs, "nl", "small", "nl_NL-mls-medium")
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "nl")
         importlib.reload(config)
         assert config.REPLY_LANGUAGE == "en"
         assert (

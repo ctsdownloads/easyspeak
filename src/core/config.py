@@ -30,6 +30,10 @@ from pathlib import Path
 
 from faster_whisper import WhisperModel
 
+# The codes faster-whisper's `transcribe()` accepts; validated here, at startup,
+# rather than at the first dictation.
+from faster_whisper.tokenizer import _LANGUAGE_CODES as LANGUAGE_CODES
+
 logger = logging.getLogger(__name__)
 
 # --- Network policy ---
@@ -75,9 +79,30 @@ HOTKEY_COMBO = "" if _hotkey.lower() in ("", "off", "none") else _hotkey
 
 
 # --- Language ---
-# The language the user dictates in; it selects the installed language pack's
-# Whisper model. Commands stay English words wherever a plugin matches them.
-LANGUAGE = os.environ.get("EASYSPEAK_LANGUAGE", "en").strip().lower() or "en"
+# What the daemon should tell the user about the language setting, right after
+# its "Loading Whisper (..., language=...)" line, so the two are read together.
+LANGUAGE_WARNINGS: list[str] = []
+
+
+def _language():
+    """Return the language the user dictates in, English unless a valid code is set.
+
+    `EASYSPEAK_LANGUAGE` (and the `--language` option, which sets it) selects the
+    installed language pack's Whisper model, the reply catalog and the voice.
+    Commands stay English words wherever a plugin matches them. A code Whisper
+    does not know is reported and English used.
+    """
+    code = os.environ.get("EASYSPEAK_LANGUAGE", "en").strip().lower() or "en"
+    if code not in LANGUAGE_CODES:
+        LANGUAGE_WARNINGS.append(
+            f"EASYSPEAK_LANGUAGE={code!r} is not a language code Whisper knows; "
+            "using English"
+        )
+        return "en"
+    return code
+
+
+LANGUAGE = _language()
 
 
 # --- Models ---
@@ -128,6 +153,18 @@ REPLY_LANGUAGE = (
     if LANGUAGE == "en" or (_translated(LANGUAGE) and _voiced(LANGUAGE))
     else "en"
 )
+if REPLY_LANGUAGE != LANGUAGE:
+    _missing = [
+        f"no {LANGUAGE!r} {what}"
+        for what, missing in (
+            ("translation", not _translated(LANGUAGE)),
+            ("language pack", not _voiced(LANGUAGE)),
+        )
+        if missing
+    ]
+    LANGUAGE_WARNINGS.append(
+        f"Dictation in {LANGUAGE!r}, replies in English ({', '.join(_missing)})"
+    )
 
 
 PIPER_MODEL = os.environ.get("EASYSPEAK_PIPER_MODEL") or _bundled_model(

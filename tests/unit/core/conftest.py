@@ -10,6 +10,10 @@ import pytest
 # model or GPU. Assign directly (not setdefault) to override a real install too.
 for _name in ("pyaudio", "pyopen_wakeword", "faster_whisper"):
     sys.modules[_name] = MagicMock()
+# The config validates EASYSPEAK_LANGUAGE against faster-whisper's language codes.
+sys.modules["faster_whisper.tokenizer"] = MagicMock(
+    _LANGUAGE_CODES=("en", "de", "it", "fr", "es", "pt", "nl")
+)
 
 
 from easyspeak.core import main as main_module  # noqa: E402

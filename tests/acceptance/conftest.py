@@ -17,3 +17,6 @@ from unittest.mock import MagicMock
 sys.modules["pyaudio"] = MagicMock()
 sys.modules["pyopen_wakeword"] = MagicMock()
 sys.modules["faster_whisper"] = MagicMock()
+sys.modules["faster_whisper.tokenizer"] = MagicMock(
+    _LANGUAGE_CODES=("en", "de", "it", "fr", "es", "pt", "nl")
+)
