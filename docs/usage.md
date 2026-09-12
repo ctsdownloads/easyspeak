@@ -60,8 +60,8 @@ the module that reads each (linked to its API reference).
 also picks which installed [language pack](packaging.md#language) the two model
 defaults come from. Without a pack for it, `EASYSPEAK_WHISPER_MODEL` falls back
 to `base.en` for English and to the multilingual `small` for any other language
-(a download, see `EASYSPEAK_OFFLINE`), and `EASYSPEAK_PIPER_MODEL` to any other
-installed voice, else `~/.local/share/piper/en_US-amy-medium.onnx`.
+(a download, see `EASYSPEAK_OFFLINE`), and `EASYSPEAK_PIPER_MODEL` to
+`~/.local/share/piper/en_US-amy-medium.onnx`.
 
 `EASYSPEAK_SILENCE_THRESHOLD` is normally left alone. On startup EasySpeak
 listens to the room for a second and sets the threshold above whatever it

@@ -10,7 +10,8 @@ EasySpeak ships **distro `.deb` and `.rpm` packages**, split into two:
   declared as dependencies.
 - **`easyspeak-lang-en`** (noarch) — English speech data: the Whisper `base.en`
   recognition model and the Piper `en_US-amy-medium` voice, under
-  `/opt/easyspeak/models`. More languages ship as `easyspeak-lang-*` packages.
+  `/opt/easyspeak/models/en`. More languages ship as `easyspeak-lang-*` packages,
+  each under its own `/opt/easyspeak/models/<language>`.
 
 Splitting keeps the app small and lets you pick (or add) languages independently
 without re-downloading the runtime. See [Language](#language).
@@ -70,8 +71,7 @@ built into the app (it ships inside the pyopen-wakeword wheel), so it stays Engl
 regardless of language pack.
 
 `EASYSPEAK_LANGUAGE` (default `en`) is the language you dictate in, and it picks
-the installed pack's models: a Piper voice by its `<language>_` filename prefix, a
-Whisper model by not being one of the English-only `.en` ones. To use a language we
+the pack installed under `/opt/easyspeak/models/<language>`. To use a language we
 ship no package for, install/drop its models and point these environment variables
 at them (an explicit value always wins; set them in a systemd user override or your
 shell profile):

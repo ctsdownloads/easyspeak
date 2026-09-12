@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Stage the speech models for one EasySpeak language pack into a tree that mirrors
-# the install layout (/opt/easyspeak/models/...), for nfpm to package as
+# the install layout (/opt/easyspeak/models/<code>/...), for nfpm to package as
 # easyspeak-lang-<code> (a noarch data package). No app build needed.
 #
 #   packaging/stage-lang.sh <code>     e.g. `en`
@@ -36,7 +36,7 @@ PY
 eval "$MODEL_VARS"
 
 STAGE="$REPO_ROOT/dist/stage-lang-$CODE"
-MODELS="$STAGE/opt/easyspeak/models"
+MODELS="$STAGE/opt/easyspeak/models/$CODE"
 rm -rf "$STAGE"
 mkdir -p "$MODELS/whisper" "$MODELS/piper"
 

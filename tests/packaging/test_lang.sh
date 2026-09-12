@@ -31,8 +31,8 @@ check() {
 
     echo "[$code] ships the Whisper model and the Piper voice"
     for files in "$(dpkg-deb --contents "$deb")" "$(rpm --query --list --package "$rpm" 2>/dev/null)"; do
-        grep -q /opt/easyspeak/models/whisper/ <<<"$files" || { echo "  [$code] MISSING whisper" >&2; exit 1; }
-        grep -q /opt/easyspeak/models/piper/ <<<"$files" || { echo "  [$code] MISSING piper" >&2; exit 1; }
+        grep -q "/opt/easyspeak/models/$code/whisper/" <<<"$files" || { echo "  [$code] MISSING whisper" >&2; exit 1; }
+        grep -q "/opt/easyspeak/models/$code/piper/" <<<"$files" || { echo "  [$code] MISSING piper" >&2; exit 1; }
     done
 }
 

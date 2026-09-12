@@ -205,11 +205,11 @@ def test_hotkey_disable_values(monkeypatch, value):
     assert config.HOTKEY_COMBO == ""
 
 
-def install_pack(models, whisper, voice):
-    """Fake a language pack's models: a Whisper model directory and a Piper voice."""
-    (models / "whisper" / whisper).mkdir(parents=True, exist_ok=True)
-    (models / "piper").mkdir(exist_ok=True)
-    (models / "piper" / f"{voice}.onnx").touch()
+def install_pack(models, code, whisper, voice):
+    """Fake a language pack: a Whisper model directory and a Piper voice."""
+    (models / code / "whisper" / whisper).mkdir(parents=True)
+    (models / code / "piper").mkdir()
+    (models / code / "piper" / f"{voice}.onnx").touch()
 
 
 class TestLanguagePacks:
@@ -230,8 +230,8 @@ class TestLanguagePacks:
     @pytest.fixture
     def packs(self, models):
         """Install an English and a German pack side by side."""
-        install_pack(models, "base.en", "en_US-amy-medium")
-        install_pack(models, "small", "de_DE-thorsten-medium")
+        install_pack(models, "en", "base.en", "en_US-amy-medium")
+        install_pack(models, "de", "small", "de_DE-thorsten-medium")
         return models
 
     def test_defaults_to_english(self, monkeypatch):
@@ -240,40 +240,30 @@ class TestLanguagePacks:
         importlib.reload(config)
         assert config.LANGUAGE == "en"
 
-    def test_english_prefers_the_english_only_model(self, packs, monkeypatch):
-        """`base.en` is faster than the multilingual model that sits beside it."""
-        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "en")
+    @pytest.mark.parametrize(
+        ("language", "whisper", "voice"),
+        [
+            ("en", "base.en", "en_US-amy-medium.onnx"),
+            ("de", "small", "de_DE-thorsten-medium.onnx"),
+        ],
+    )
+    def test_uses_the_pack_of_the_language(
+        self, packs, monkeypatch, language, whisper, voice
+    ):
+        """Each language's models come from its own pack directory."""
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", language)
         importlib.reload(config)
-        assert Path(config.WHISPER_MODEL) == packs / "whisper" / "base.en"
-        assert Path(config.PIPER_MODEL) == packs / "piper" / "en_US-amy-medium.onnx"
-
-    def test_german_skips_the_english_only_model(self, packs, monkeypatch):
-        """A `.en` model cannot transcribe German, however it got installed."""
-        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "de")
-        importlib.reload(config)
-        assert Path(config.WHISPER_MODEL) == packs / "whisper" / "small"
-        assert (
-            Path(config.PIPER_MODEL) == packs / "piper" / "de_DE-thorsten-medium.onnx"
-        )
-
-    def test_without_its_pack_a_language_borrows_the_voice(self, models, monkeypatch):
-        """Only the English pack installed: Whisper needs a download, the voice not.
-
-        Any installed voice beats none, since the replies it speaks are English.
-        """
-        install_pack(models, "base.en", "en_US-amy-medium")
-        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "de")
-        importlib.reload(config)
-        assert config.WHISPER_MODEL == "small"
-        assert Path(config.PIPER_MODEL) == models / "piper" / "en_US-amy-medium.onnx"
+        assert Path(config.WHISPER_MODEL) == packs / language / "whisper" / whisper
+        assert Path(config.PIPER_MODEL) == packs / language / "piper" / voice
 
     @pytest.mark.parametrize(
         ("language", "whisper"), [("en", "base.en"), ("de", "small")]
     )
-    def test_without_any_pack_falls_back_to_downloads(
+    def test_without_its_pack_falls_back_to_downloads(
         self, models, monkeypatch, language, whisper
     ):
-        """No pack installed: the name faster-whisper fetches, the dev voice path."""
+        """Another language's pack does not count: the download name and the dev voice path."""
+        install_pack(models, "fr", "small", "fr_FR-siwis-medium")
         monkeypatch.setenv("EASYSPEAK_LANGUAGE", language)
         importlib.reload(config)
         assert (config.WHISPER_MODEL, Path(config.PIPER_MODEL)) == (

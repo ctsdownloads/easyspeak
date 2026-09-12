@@ -13,8 +13,8 @@ maintainer: Matt Hartley <matt@matthartley.com>
 description: |
   English speech models for EasySpeak: the Whisper base.en recognition model
   (Systran/faster-whisper-base.en) and the Piper en_US-amy-medium voice
-  (rhasspy/piper-voices). Installed under /opt/easyspeak/models; see each source
-  for its model license.
+  (rhasspy/piper-voices). Installed under /opt/easyspeak/models/en; see each
+  source for its model license.
 vendor: EasySpeak
 homepage: https://github.com/ctsdownloads/easyspeak
 
@@ -22,5 +22,5 @@ provides:
 - easyspeak-language
 
 contents:
-- src: ./dist/stage-lang-en/opt/easyspeak/models
-  dst: /opt/easyspeak/models
+- src: ./dist/stage-lang-en/opt/easyspeak/models/en
+  dst: /opt/easyspeak/models/en
