@@ -235,7 +235,7 @@
             ${commonEnv}
             echo "EasySpeak dev shell — Python $(python --version 2>&1 | awk '{print $2}'), uv $(uv --version | awk '{print $2}')"
             echo "Run:  uv run [--extra head-tracking] easyspeak"
-            echo "      easyspeak-lang de && EASYSPEAK_LANGUAGE=de uv run easyspeak"
+            echo "      easyspeak-lang de && uv run easyspeak --language de"
             echo "      just --list"
           '';
         };
