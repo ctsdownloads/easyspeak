@@ -985,9 +985,15 @@ wake word each time.</p>
 <td></td>
 <td>Print the file content that would be configured and exit</td>
 </tr>
+<tr>
+<td><code>--language CODE</code></td>
+<td></td>
+<td>Language to dictate and be answered in; or <code>EASYSPEAK_LANGUAGE</code></td>
+</tr>
 </tbody>
 </table>
-<p>For <code>--configure</code>/<code>--preview</code>, each <code>ITEM</code> is one of <code>extension</code>, <code>service</code>,
+<p><code>--language</code> is the command-line form of <code>EASYSPEAK_LANGUAGE</code> (see below) and
+overrides it. For <code>--configure</code>/<code>--preview</code>, each <code>ITEM</code> is one of <code>extension</code>, <code>service</code>,
 <code>autostart</code>, or <code>desktop</code>. Verbosity can also be set with the
 <code>EASYSPEAK_LOG_LEVEL</code> environment variable (e.g. <code>DEBUG</code>, <code>INFO</code>, <code>WARNING</code>),
 but the command-line flags take precedence.</p>
