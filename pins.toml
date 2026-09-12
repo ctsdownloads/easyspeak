@@ -94,3 +94,27 @@ path = "it/it_IT/paola/medium"
 [lang.it.piper.files]
 "it_IT-paola-medium.onnx" = "6fc918b5a0ea6137382833dddfa567bffbe6a5060c02043c87192ee59c04210c"
 "it_IT-paola-medium.onnx.json" = "aea19c0a7fce29fbc359b93f10e7902854401e4c95ae2ea328ae516b15d296cf"
+
+[lang.fr]
+version = "1.0.0"
+
+[lang.fr.whisper]
+model = "small"
+repo = "Systran/faster-whisper-small"
+revision = "536b0662742c02347bc0e980a01041f333bce120"
+
+[lang.fr.whisper.files]
+"config.json" = "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828"
+"model.bin" = "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671"
+"tokenizer.json" = "fb7b63191e9bb045082c79fd742a3106a12c99513ab30df4a0d47fa6cb6fd0ab"
+"vocabulary.txt" = "34ce3fe1c5041027b3f8d42912270993f986dbc4bb34cf27f951e34a1e453913"
+
+[lang.fr.piper]
+voice = "fr_FR-siwis-medium"
+repo = "rhasspy/piper-voices"
+revision = "v1.0.0"
+path = "fr/fr_FR/siwis/medium"
+
+[lang.fr.piper.files]
+"fr_FR-siwis-medium.onnx" = "641d1ab097da2b81128c076810edb052b385decc8be3381814802a64a73baf99"
+"fr_FR-siwis-medium.onnx.json" = "39479916c2db192b5ac9764daddd0c744d83e023ad890c6976c0633ae4df8959"

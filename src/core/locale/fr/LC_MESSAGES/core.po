@@ -1,0 +1,44 @@
+# French translations for EasySpeak.
+# Copyright (C) 2026 EasySpeak contributors
+# This file is distributed under the same license as the EasySpeak project.
+msgid ""
+msgstr ""
+"Project-Id-Version: EasySpeak\n"
+"Report-Msgid-Bugs-To: https://github.com/ctsdownloads/easyspeak/issues\n"
+"POT-Creation-Date: 2026-09-12 19:14+0200\n"
+"PO-Revision-Date: 2026-09-12 19:14+0200\n"
+"Last-Translator: EasySpeak contributors\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "I couldn't turn voice control off, so I'll keep listening."
+msgstr ""
+"Je n'ai pas pu désactiver la commande vocale, je continue donc d'écouter."
+
+msgid "I didn't hear anything."
+msgstr "Je n'ai rien entendu."
+
+msgid "I didn't understand."
+msgstr "Je n'ai pas compris."
+
+#, python-brace-format
+msgid "Leaving {label}. Say {wake_word_spoken} to continue."
+msgstr "Je quitte {label}. Dites {wake_word_spoken} pour continuer."
+
+#, python-brace-format
+msgid "Sorry, I couldn't open the {what}."
+msgstr "Désolé, je n'ai pas pu ouvrir {what}."
+
+msgid "Sorry, I didn't understand."
+msgstr "Désolé, je n'ai pas compris."
+
+msgid "Voice control turned off."
+msgstr "Commande vocale désactivée."
+
+msgid "Welcome! I'm ready."
+msgstr "Bienvenue ! Je suis prêt."

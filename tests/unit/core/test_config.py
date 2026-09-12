@@ -255,8 +255,8 @@ class TestLanguagePacks:
 
     def test_replies_with_the_voice_of_their_own_language(self, packs, monkeypatch):
         """Replies in a language without a translation are English, in its voice."""
-        install_pack(packs, "fr", "small", "fr_FR-siwis-medium")
-        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "fr")
+        install_pack(packs, "es", "small", "es_ES-davefx-medium")
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "es")
         importlib.reload(config)
         assert config.REPLY_LANGUAGE == "en"
         assert (
