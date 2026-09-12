@@ -74,8 +74,13 @@ nix develop
 nix run
 ```
 
-Every language pack in `pins.toml` is built into the shell, so a language is a
-matter of `EASYSPEAK_LANGUAGE=de uv run easyspeak`.
+The shell carries the English language pack. The others in `pins.toml` are
+fetched on demand, one command per language, and stay cached in the Nix store:
+
+```console
+easyspeak-lang de it
+EASYSPEAK_LANGUAGE=de uv run easyspeak
+```
 
 To run directly off GitHub, with no clone required:
 

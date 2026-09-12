@@ -83,37 +83,54 @@
         # EASYSPEAK_SOUNDS_DIR (commonEnv) redirects to the Nix store one.
         soundsNixDir = "${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo";
 
-        # Every language pack in pins.toml, laid out as the .deb/.rpm install
-        # them (models/<code>/whisper/<model>/... and models/<code>/piper/...),
-        # each file fetched at build time from its pinned revision and verified
-        # against its pinned checksum. EASYSPEAK_MODELS_DIR points the app at
-        # the tree, so EASYSPEAK_LANGUAGE selects a pack exactly as it does with
-        # the packages installed.
+        # One derivation per language pack in pins.toml, laid out as the
+        # .deb/.rpm install it (whisper/<model>/... and piper/...), each file
+        # fetched at build time from its pinned revision and verified against
+        # its pinned checksum. The English pack is linked into a models
+        # directory under XDG_STATE_HOME that EASYSPEAK_MODELS_DIR points at;
+        # `easyspeak-lang <code>...` links the others in on demand, so
+        # EASYSPEAK_LANGUAGE selects a pack exactly as it does with the
+        # packages installed, without fetching every language up front.
         langPins = (builtins.fromTOML (builtins.readFile ./pins.toml)).lang;
-        packFiles =
+        languagePack =
           code: lang:
           let
             hf = "https://huggingface.co";
             whisper = lang.whisper;
             piper = lang.piper;
           in
-          pkgs.lib.mapAttrsToList (file: sha256: {
-            name = "${code}/whisper/${whisper.model}/${file}";
-            path = pkgs.fetchurl {
-              url = "${hf}/${whisper.repo}/resolve/${whisper.revision}/${file}";
-              inherit sha256;
-            };
-          }) whisper.files
-          ++ pkgs.lib.mapAttrsToList (file: sha256: {
-            name = "${code}/piper/${file}";
-            path = pkgs.fetchurl {
-              url = "${hf}/${piper.repo}/resolve/${piper.revision}/${piper.path}/${file}";
-              inherit sha256;
-            };
-          }) piper.files;
-        languagePacks = pkgs.linkFarm "easyspeak-language-packs" (
-          pkgs.lib.concatLists (pkgs.lib.mapAttrsToList packFiles langPins)
-        );
+          pkgs.linkFarm "easyspeak-lang-${code}" (
+            pkgs.lib.mapAttrsToList (file: sha256: {
+              name = "whisper/${whisper.model}/${file}";
+              path = pkgs.fetchurl {
+                url = "${hf}/${whisper.repo}/resolve/${whisper.revision}/${file}";
+                inherit sha256;
+              };
+            }) whisper.files
+            ++ pkgs.lib.mapAttrsToList (file: sha256: {
+              name = "piper/${file}";
+              path = pkgs.fetchurl {
+                url = "${hf}/${piper.repo}/resolve/${piper.revision}/${piper.path}/${file}";
+                inherit sha256;
+              };
+            }) piper.files
+          );
+        languagePacks = pkgs.lib.mapAttrs languagePack langPins;
+        modelsDir = ''"''${EASYSPEAK_MODELS_DIR:-''${XDG_STATE_HOME:-$HOME/.local/state}/easyspeak/models}"'';
+
+        easyspeakLang = pkgs.writeShellApplication {
+          name = "easyspeak-lang";
+          text = ''
+            # Fetch language packs on demand, e.g. `easyspeak-lang de it`.
+            [ $# -gt 0 ] || { echo "usage: easyspeak-lang <language-code>..." >&2; exit 2; }
+            models_dir=${modelsDir}
+            mkdir -p "$models_dir"
+            for code in "$@"; do
+              nix build '${self}'"#lang-$code" --out-link "$models_dir/$code"
+              echo "$code: $models_dir/$code"
+            done
+          '';
+        };
 
         # Env shared by the `nix run` wrapper and the dev shell, so `uv run
         # easyspeak` behaves identically in both; `:-`/`:+` defaulting lets a
@@ -127,7 +144,9 @@
           export CPPFLAGS="-I${portaudio}/include ''${CPPFLAGS:-}"
           export EASYSPEAK_ATSPI_PYTHON='${atspiPython}/bin/python3'
           export EASYSPEAK_OFFLINE="''${EASYSPEAK_OFFLINE:-relaxed}"
-          export EASYSPEAK_MODELS_DIR="''${EASYSPEAK_MODELS_DIR:-${languagePacks}}"
+          export EASYSPEAK_MODELS_DIR=${modelsDir}
+          mkdir -p "$EASYSPEAK_MODELS_DIR"
+          ln -sfn '${languagePacks.en}' "$EASYSPEAK_MODELS_DIR/en"
           export EASYSPEAK_SOUNDS_DIR="''${EASYSPEAK_SOUNDS_DIR:-${soundsNixDir}}"
           export GI_TYPELIB_PATH='${giTypelibPath}'":''${GI_TYPELIB_PATH:-}"
           export LD_LIBRARY_PATH='${lib.makeLibraryPath runtimeLibs}'":''${LD_LIBRARY_PATH:-}"
@@ -144,6 +163,7 @@
             uv
             coreutils
             gnused
+            easyspeakLang
           ]
           ++ runtimeTools
           ++ buildTools;
@@ -175,12 +195,18 @@
         packages = {
           default = easyspeak;
           easyspeak = easyspeak;
-        };
+          easyspeak-lang = easyspeakLang;
+        }
+        // pkgs.lib.mapAttrs' (code: pack: pkgs.lib.nameValuePair "lang-${code}" pack) languagePacks;
 
         apps = {
           default = {
             type = "app";
             program = "${easyspeak}/bin/easyspeak";
+          };
+          lang = {
+            type = "app";
+            program = "${easyspeakLang}/bin/easyspeak-lang";
           };
         };
 
@@ -189,6 +215,7 @@
             python
             uv
             just
+            easyspeakLang # fetch a language pack on demand (see `easyspeak-lang`)
             eslint # JS linter for the GNOME Shell extension (see `just lint-js`)
             nodejs # `node --test` for the extension's JS helpers (see `just test-js`)
             desktop-file-utils # desktop-file-validate for the launcher (see `just check-desktop-integration`)
@@ -208,7 +235,7 @@
             ${commonEnv}
             echo "EasySpeak dev shell — Python $(python --version 2>&1 | awk '{print $2}'), uv $(uv --version | awk '{print $2}')"
             echo "Run:  uv run [--extra head-tracking] easyspeak"
-            echo "      EASYSPEAK_LANGUAGE=de uv run easyspeak"
+            echo "      easyspeak-lang de && EASYSPEAK_LANGUAGE=de uv run easyspeak"
             echo "      just --list"
           '';
         };

@@ -37,11 +37,18 @@ hold-to-dictate setup.
 
 ## NixOS
 
-The flake carries the runtime tools, every language pack and the sound theme,
-so there is no system-package step:
+The flake carries the runtime tools, the English language pack and the sound
+theme, so there is no system-package step:
 
 ```bash
 nix run github:ctsdownloads/easyspeak
+```
+
+Another language is one more command, then `EASYSPEAK_LANGUAGE=de` (or `it`,
+`fr`, `es`) when running:
+
+```bash
+nix run github:ctsdownloads/easyspeak#lang -- de
 ```
 
 Log out and back in once after the first launch so GNOME loads the bundled
