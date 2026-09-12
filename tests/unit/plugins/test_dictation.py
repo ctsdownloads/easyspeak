@@ -380,6 +380,19 @@ def test_handle_dictation_mode_no_space_before_punctuation(
     assert mock_insert.call_args.args == (".",)
 
 
+@patch("easyspeak.plugins.dictation.insert_text", return_value=True)
+def test_handle_dictation_mode_transcribes_in_the_users_language(
+    mock_insert, mock_core_with_audio, monkeypatch
+):
+    """The modal session dictates in `LANGUAGE`; core defaults to English."""
+    monkeypatch.setattr(dictation, "LANGUAGE", "de")
+    mock_core_with_audio.transcribe = Mock(return_value="stop notes")
+
+    dictation.handle("notes", mock_core_with_audio)
+
+    assert mock_core_with_audio.listen_modal.call_args.kwargs["language"] == "de"
+
+
 @patch("easyspeak.plugins.dictation.insert_text", return_value=dictation.NO_FOCUS)
 @patch("easyspeak.plugins.dictation.format_text", return_value="Hello")
 def test_handle_dictation_mode_no_focus(mock_format, mock_insert, mock_core_with_audio):
@@ -504,6 +517,23 @@ def test_run_push_to_talk_inserts_until_released(mock_format, mock_insert):
     # The capture is gated on the held state so a release can cut it short.
     assert core.wait_for_speech.call_args.kwargs["should_continue"] is not None
     assert core.record_until_silence.call_args.kwargs["should_continue"] is not None
+
+
+@patch("easyspeak.plugins.dictation.insert_text", return_value=dictation.INSERTED)
+@patch("easyspeak.plugins.dictation.format_text", return_value="Hallo")
+def test_run_push_to_talk_transcribes_in_the_users_language(
+    mock_format, mock_insert, monkeypatch
+):
+    """Push-to-talk dictates in `LANGUAGE` too; core defaults to English."""
+    monkeypatch.setattr(dictation, "LANGUAGE", "de")
+    core = Mock()
+    core.wait_for_speech = Mock(return_value=b"audio1")
+    core.record_until_silence = Mock(return_value=b"audio2")
+    core.transcribe = Mock(return_value="hallo")
+
+    dictation.run_push_to_talk(core, _holds(1))
+
+    assert core.transcribe.call_args.kwargs["language"] == "de"
 
 
 @patch("easyspeak.plugins.dictation.insert_text")
