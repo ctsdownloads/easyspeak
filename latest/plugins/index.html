@@ -1005,6 +1005,19 @@ and <code>1</code>, so their words reach them before a look-alike elsewhere, and
 plugin declares <code>100</code> to act as the catch-all for help and exit. Files and
 directories whose names start with <code>_</code> are skipped.</p>
 <h2 id="translations">Translations<a class="headerlink" href="#translations" title="Permanent link">&para;</a></h2>
+<p>A plugin has two kinds of language-specific text, kept in two kinds of file
+under its <code>locale/&lt;language&gt;/</code> directory:</p>
+<ul>
+<li><strong>What it says</strong> — the spoken replies — is a gettext catalog,
+  <code>LC_MESSAGES/&lt;plugin&gt;.po</code>: one English string, one translation, the tooling
+  translators know.</li>
+<li><strong>What it listens for</strong> — phrases with several ways of saying each,
+  mishearings included, mapped to an action — is a <code>vocabulary.toml</code> table.
+  That is recognition data tuned by testing, not a translation, so it is data
+  the plugin reads rather than strings in its code. The dictation plugin's
+  table is the model: its exit phrases, key names, counts and spoken
+  punctuation live there, one file per language, English included.</li>
+</ul>
 <p>Replies are written in English and spoken in the user's language where a
 translation exists. A plugin opts in with one line and wraps what it speaks:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">easyspeak.core.i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">translator</span>
