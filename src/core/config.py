@@ -80,21 +80,6 @@ HOTKEY_COMBO = "" if _hotkey.lower() in ("", "off", "none") else _hotkey
 LANGUAGE = os.environ.get("EASYSPEAK_LANGUAGE", "en").strip().lower() or "en"
 
 
-def _translated(language):
-    """Whether the replies have a catalog for `language`, in the core or a plugin."""
-    src = Path(__file__).parent.parent
-    return any(src.glob(f"*/locale/{language}/LC_MESSAGES/*.po")) or any(
-        src.glob(f"plugins/*/locale/{language}/LC_MESSAGES/*.po")
-    )
-
-
-# The language the spoken replies are in, which is the language the voice must
-# be for: a German voice reads an English "Done" with German phonemes. The
-# replies are written in English and spoken in the user's language where a
-# translation exists (see `core.i18n`).
-REPLY_LANGUAGE = LANGUAGE if LANGUAGE == "en" or _translated(LANGUAGE) else "en"
-
-
 # --- Models ---
 # The .deb/.rpm ship the models and `piper` beside the venv, so these defaults
 # locate them from our interpreter; pip/source installs fall back to a download.
@@ -118,6 +103,31 @@ def _bundled_bin(name, *, default):
     """Return a binary path in this venv's `bin/`, or `default` if absent."""
     exe = Path(sys.executable).with_name(name)
     return str(exe) if exe.exists() else default
+
+
+def _translated(language):
+    """Whether the replies have a catalog for `language`, in the core or a plugin."""
+    src = Path(__file__).parent.parent
+    return any(src.glob(f"*/locale/{language}/LC_MESSAGES/*.po")) or any(
+        src.glob(f"plugins/*/locale/{language}/LC_MESSAGES/*.po")
+    )
+
+
+def _voiced(language):
+    """Whether a language pack with a Piper voice for `language` is installed."""
+    return _bundled_model(language, "piper", "*.onnx", default=None) is not None
+
+
+# The language the spoken replies are in, which is the language the voice must
+# be for: a German voice reads an English "Done" with German phonemes, and an
+# English voice reads a German one no better. The replies are written in
+# English and spoken in the user's language where a translation and that
+# language's voice both exist (see `core.i18n`).
+REPLY_LANGUAGE = (
+    LANGUAGE
+    if LANGUAGE == "en" or (_translated(LANGUAGE) and _voiced(LANGUAGE))
+    else "en"
+)
 
 
 PIPER_MODEL = os.environ.get("EASYSPEAK_PIPER_MODEL") or _bundled_model(

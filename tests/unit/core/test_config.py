@@ -263,6 +263,15 @@ class TestLanguagePacks:
             Path(config.PIPER_MODEL) == packs / "en" / "piper" / "en_US-amy-medium.onnx"
         )
 
+    def test_translated_replies_need_their_languages_voice(self, packs, monkeypatch):
+        """Italian is translated, but without its pack the replies stay English."""
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "it")
+        importlib.reload(config)
+        assert config.REPLY_LANGUAGE == "en"
+        assert (
+            Path(config.PIPER_MODEL) == packs / "en" / "piper" / "en_US-amy-medium.onnx"
+        )
+
     def test_translated_replies_take_their_languages_voice(self, packs, monkeypatch):
         """German has a translation, so replies are German, in the German voice."""
         monkeypatch.setenv("EASYSPEAK_LANGUAGE", "de")
