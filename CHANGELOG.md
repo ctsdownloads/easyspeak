@@ -33,6 +33,8 @@ every tool the code invokes, and line coverage is back at 100%.
 
 ### What's Changed
 
+- docs: Update installation instructions by @bittner in [#131](https://github.com/ctsdownloads/easyspeak/pull/131)
+- Add a CLI option to print version information by @bittner in [#132](https://github.com/ctsdownloads/easyspeak/pull/132)
 - Fix benchmark job by allowing Whisper model downloads by @bittner in [#134](https://github.com/ctsdownloads/easyspeak/pull/134)
 - Fix voice control breaking down in practice by @ctsdownloads in [#135](https://github.com/ctsdownloads/easyspeak/pull/135)
 - fix(clipboard): drop the xclip fallback and require wl-clipboard by @ctsdownloads in [#136](https://github.com/ctsdownloads/easyspeak/pull/136)
@@ -56,6 +58,10 @@ every tool the code invokes, and line coverage is back at 100%.
 - Adding environment variable for customizing the language of the Whisper model by @SolanumForte in [#154](https://github.com/ctsdownloads/easyspeak/pull/154)
 - Give each language pack its own models directory by @bittner in [#157](https://github.com/ctsdownloads/easyspeak/pull/157)
 - Add the German language pack by @bittner in [#158](https://github.com/ctsdownloads/easyspeak/pull/158)
+
+### New Contributors
+
+- @SolanumForte made their first contribution in [#154](https://github.com/ctsdownloads/easyspeak/pull/154)
 
 **Full Changelog**: [`0.8.0...0.9.0`](https://github.com/ctsdownloads/easyspeak/compare/0.8.0...0.9.0)
 
