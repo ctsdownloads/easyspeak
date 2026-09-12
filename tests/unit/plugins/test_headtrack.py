@@ -1,4 +1,4 @@
-"""Tests for the eyetrack (head tracking) plugin module."""
+"""Tests for the headtrack plugin module."""
 
 import importlib
 import time
@@ -6,32 +6,32 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-eyetrack_plugin = importlib.import_module("easyspeak.plugins.headtrack")
+headtrack = importlib.import_module("easyspeak.plugins.headtrack")
 
 
 @pytest.fixture(autouse=True)
-def reset_eyetrack_state():
-    """Reset eyetrack plugin global state before and after each test."""
+def reset_headtrack_state():
+    """Reset headtrack plugin global state before and after each test."""
     # Reset to clean state before test
-    eyetrack_plugin.tracking_active = False
-    eyetrack_plugin.frozen = False
-    eyetrack_plugin.stop_event.clear()
+    headtrack.tracking_active = False
+    headtrack.frozen = False
+    headtrack.stop_event.clear()
 
     yield
 
     # Cleanup after test
-    eyetrack_plugin.tracking_active = False
-    eyetrack_plugin.frozen = False
-    eyetrack_plugin.stop_event.set()
-    if eyetrack_plugin.tracking_thread is not None:
+    headtrack.tracking_active = False
+    headtrack.frozen = False
+    headtrack.stop_event.set()
+    if headtrack.tracking_thread is not None:
         time.sleep(0.1)  # Give thread time to stop
 
 
 def test_setup(mock_core):
     """When setup is called with a core object then it stores the reference."""
-    eyetrack_plugin.setup(mock_core)
+    headtrack.setup(mock_core)
 
-    assert eyetrack_plugin.core is mock_core
+    assert headtrack.core is mock_core
 
 
 @patch("subprocess.run", return_value=Mock(returncode=0, stdout="", stderr=""))
@@ -39,7 +39,7 @@ def test_host_run(mock_subprocess_run):
     """When host_run is called then it executes subprocess with capture_output and text."""
     cmd = ["test", "command"]
 
-    result = eyetrack_plugin.host_run(cmd)
+    result = headtrack.host_run(cmd)
 
     assert mock_subprocess_run.call_args.args[0] == cmd
     assert mock_subprocess_run.call_args.kwargs["capture_output"] is True
@@ -57,12 +57,12 @@ def test_host_run(mock_subprocess_run):
         ("MoveTo", [100, 200], 1, False),
     ],
 )
-@patch.object(eyetrack_plugin, "host_run")
+@patch.object(headtrack, "host_run")
 def test_dbus_call(mock_host_run, method, args, expected_returncode, expected_result):
     """When dbus_call is invoked then it constructs gdbus command and returns success status."""
     mock_host_run.return_value = Mock(returncode=expected_returncode)
 
-    result = eyetrack_plugin.dbus_call(method, *args)
+    result = headtrack.dbus_call(method, *args)
 
     assert result == expected_result
     call_args = mock_host_run.call_args.args[0]
@@ -88,12 +88,12 @@ def test_dbus_call(mock_host_run, method, args, expected_returncode, expected_re
         ("", (1920, 1080)),
     ],
 )
-@patch.object(eyetrack_plugin, "host_run")
+@patch.object(headtrack, "host_run")
 def test_get_screen_size(mock_host_run, stdout, expected_size):
     """When get_screen_size is called then it parses screen dimensions from gdbus output."""
     mock_host_run.return_value = Mock(returncode=0, stdout=stdout)
 
-    result = eyetrack_plugin.get_screen_size()
+    result = headtrack.get_screen_size()
 
     assert result == expected_size
     call_args = mock_host_run.call_args.args[0]
@@ -103,61 +103,61 @@ def test_get_screen_size(mock_host_run, stdout, expected_size):
     assert call_args[8] == "org.easyspeak.Desktop.GetScreenSize"
 
 
-@patch.object(eyetrack_plugin, "host_run", return_value=Mock(returncode=1, stdout=""))
+@patch.object(headtrack, "host_run", return_value=Mock(returncode=1, stdout=""))
 def test_get_screen_size_with_failure(mock_host_run):
     """When get_screen_size fails then it returns default dimensions."""
-    result = eyetrack_plugin.get_screen_size()
+    result = headtrack.get_screen_size()
 
     assert result == (1920, 1080)
 
 
 def test_start_tracking_when_already_active():
     """When start_tracking is called while tracking is active then it returns failure."""
-    eyetrack_plugin.tracking_active = True
+    headtrack.tracking_active = True
 
-    success, msg = eyetrack_plugin.start_tracking()
+    success, msg = headtrack.start_tracking()
 
     assert success is False
     assert msg == "Already tracking"
 
 
-@patch.object(eyetrack_plugin, "run_tracking")
+@patch.object(headtrack, "run_tracking")
 def test_start_tracking_when_inactive(mock_run_tracking):
     """When start_tracking is called while inactive then it starts tracking thread."""
-    eyetrack_plugin.tracking_active = False
-    eyetrack_plugin.frozen = True
+    headtrack.tracking_active = False
+    headtrack.frozen = True
 
-    success, msg = eyetrack_plugin.start_tracking()
+    success, msg = headtrack.start_tracking()
 
     assert success is True
     assert msg == "Tracking"
-    assert eyetrack_plugin.frozen is False
-    assert eyetrack_plugin.tracking_active is True
-    assert eyetrack_plugin.stop_event.is_set() is False
-    assert eyetrack_plugin.tracking_thread is not None
-    assert eyetrack_plugin.tracking_thread.daemon is True
+    assert headtrack.frozen is False
+    assert headtrack.tracking_active is True
+    assert headtrack.stop_event.is_set() is False
+    assert headtrack.tracking_thread is not None
+    assert headtrack.tracking_thread.daemon is True
 
 
 def test_stop_tracking():
     """When stop_tracking is called then it signals thread to stop and sets tracking_active to False."""
-    eyetrack_plugin.tracking_active = True
-    eyetrack_plugin.stop_event.clear()
+    headtrack.tracking_active = True
+    headtrack.stop_event.clear()
 
-    success, msg = eyetrack_plugin.stop_tracking()
+    success, msg = headtrack.stop_tracking()
 
     assert success is True
     assert msg == "Stopped"
-    assert eyetrack_plugin.tracking_active is False
-    assert eyetrack_plugin.stop_event.is_set() is True
+    assert headtrack.tracking_active is False
+    assert headtrack.stop_event.is_set() is True
 
 
-@patch.object(eyetrack_plugin, "start_tracking", return_value=(True, "Tracking"))
-@patch.object(eyetrack_plugin, "stop_tracking", return_value=(True, "Stopped"))
+@patch.object(headtrack, "start_tracking", return_value=(True, "Tracking"))
+@patch.object(headtrack, "stop_tracking", return_value=(True, "Stopped"))
 def test_recalibrate_when_tracking(mock_stop, mock_start):
     """When recalibrate is called during tracking then it restarts tracking."""
-    eyetrack_plugin.tracking_active = True
+    headtrack.tracking_active = True
 
-    success, msg = eyetrack_plugin.recalibrate()
+    success, msg = headtrack.recalibrate()
 
     assert success is True
     assert msg == "Recalibrating"
@@ -167,9 +167,9 @@ def test_recalibrate_when_tracking(mock_stop, mock_start):
 
 def test_recalibrate_when_not_tracking():
     """When recalibrate is called while not tracking then it returns failure."""
-    eyetrack_plugin.tracking_active = False
+    headtrack.tracking_active = False
 
-    success, msg = eyetrack_plugin.recalibrate()
+    success, msg = headtrack.recalibrate()
 
     assert success is False
     assert msg == "Not tracking"
@@ -183,11 +183,11 @@ def test_recalibrate_when_not_tracking():
         ["enable tracking"],
     ],
 )
-@patch.object(eyetrack_plugin, "listen_for_tracking_commands")
-@patch.object(eyetrack_plugin, "start_tracking", return_value=(True, "Tracking"))
+@patch.object(headtrack, "listen_for_tracking_commands")
+@patch.object(headtrack, "start_tracking", return_value=(True, "Tracking"))
 def test_handle_start_tracking_commands(mock_start, mock_listen, command, mock_core):
     """When handle receives a start tracking command then it starts tracking and listens."""
-    result = eyetrack_plugin.handle(command, mock_core)
+    result = headtrack.handle(command, mock_core)
 
     assert result is True
     assert mock_start.called
@@ -207,10 +207,10 @@ def test_handle_start_tracking_commands(mock_start, mock_listen, command, mock_c
         ["stop track"],
     ],
 )
-@patch.object(eyetrack_plugin, "stop_tracking", return_value=(True, "Stopped"))
+@patch.object(headtrack, "stop_tracking", return_value=(True, "Stopped"))
 def test_handle_stop_tracking_commands(mock_stop, command, mock_core):
     """When handle receives a stop tracking command then it stops tracking."""
-    result = eyetrack_plugin.handle(command, mock_core)
+    result = headtrack.handle(command, mock_core)
 
     assert result is True
     assert mock_stop.called
@@ -224,10 +224,10 @@ def test_handle_stop_tracking_commands(mock_stop, command, mock_core):
         ["calibrate"],
     ],
 )
-@patch.object(eyetrack_plugin, "recalibrate", return_value=(True, "Recalibrating"))
+@patch.object(headtrack, "recalibrate", return_value=(True, "Recalibrating"))
 def test_handle_recalibrate_commands(mock_recalibrate, command, mock_core):
     """When handle receives a recalibrate command then it recalibrates."""
-    result = eyetrack_plugin.handle(command, mock_core)
+    result = headtrack.handle(command, mock_core)
 
     assert result is True
     assert mock_recalibrate.called
@@ -236,19 +236,17 @@ def test_handle_recalibrate_commands(mock_recalibrate, command, mock_core):
 
 def test_handle_unrecognized_command(mock_core):
     """When handle receives an unrecognized command then it returns None."""
-    result = eyetrack_plugin.handle("unrelated command", mock_core)
+    result = headtrack.handle("unrelated command", mock_core)
 
     assert result is None
     assert not mock_core.speak.called
 
 
-@patch.object(
-    eyetrack_plugin, "start_tracking", return_value=(False, "Already tracking")
-)
+@patch.object(headtrack, "start_tracking", return_value=(False, "Already tracking"))
 def test_handle_start_tracking_when_already_active(mock_start, mock_core):
     """When handle receives start tracking while already active then it does not call listen."""
-    with patch.object(eyetrack_plugin, "listen_for_tracking_commands") as mock_listen:
-        result = eyetrack_plugin.handle("start tracking", mock_core)
+    with patch.object(headtrack, "listen_for_tracking_commands") as mock_listen:
+        result = headtrack.handle("start tracking", mock_core)
 
         assert result is True
         assert mock_start.called
@@ -258,7 +256,7 @@ def test_handle_start_tracking_when_already_active(mock_start, mock_core):
 
 def test_one_euro_filter_first_call_returns_input():
     """When filter is called first time then it returns input value unchanged."""
-    filter_obj = eyetrack_plugin.OneEuroFilter()
+    filter_obj = headtrack.OneEuroFilter()
 
     result = filter_obj(10.0)
 
@@ -268,7 +266,7 @@ def test_one_euro_filter_first_call_returns_input():
 
 def test_one_euro_filter_smoothing_with_constant_input():
     """When filter receives constant input then it smooths toward that value."""
-    filter_obj = eyetrack_plugin.OneEuroFilter()
+    filter_obj = headtrack.OneEuroFilter()
 
     filter_obj(0.0)
     result = filter_obj(10.0)
@@ -279,7 +277,7 @@ def test_one_euro_filter_smoothing_with_constant_input():
 
 def test_one_euro_filter_multiple_calls_converge():
     """When filter receives same value repeatedly then output converges to input."""
-    filter_obj = eyetrack_plugin.OneEuroFilter()
+    filter_obj = headtrack.OneEuroFilter()
 
     filter_obj(0.0)
     for _ in range(100):
@@ -290,7 +288,7 @@ def test_one_euro_filter_multiple_calls_converge():
 
 def test_one_euro_filter_alpha_calculation():
     """When _alpha is called then it calculates exponential smoothing factor."""
-    filter_obj = eyetrack_plugin.OneEuroFilter(freq=30.0)
+    filter_obj = headtrack.OneEuroFilter(freq=30.0)
 
     alpha = filter_obj._alpha(1.0)
 
@@ -299,7 +297,7 @@ def test_one_euro_filter_alpha_calculation():
 
 def test_one_euro_filter_derivative_tracking():
     """When filter processes values then it tracks derivative for adaptive cutoff."""
-    filter_obj = eyetrack_plugin.OneEuroFilter()
+    filter_obj = headtrack.OneEuroFilter()
 
     filter_obj(0.0)
     filter_obj(1.0)
@@ -309,7 +307,7 @@ def test_one_euro_filter_derivative_tracking():
 
 def test_one_euro_filter_custom_parameters():
     """When filter is created with custom parameters then they are stored."""
-    filter_obj = eyetrack_plugin.OneEuroFilter(
+    filter_obj = headtrack.OneEuroFilter(
         freq=60.0, min_cutoff=2.0, beta=0.01, d_cutoff=2.0
     )
 
@@ -319,75 +317,75 @@ def test_one_euro_filter_custom_parameters():
     assert filter_obj.d_cutoff == 2.0
 
 
-@patch.object(eyetrack_plugin, "get_screen_size", return_value=(1920, 1080))
-@patch.object(eyetrack_plugin, "dbus_call", return_value=True)
+@patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))
+@patch.object(headtrack, "dbus_call", return_value=True)
 def test_listen_for_tracking_commands_stops_on_stop_command(
     mock_dbus, mock_screen_size, mock_core
 ):
     """When listen_for_tracking_commands receives stop then it exits loop."""
-    eyetrack_plugin.tracking_active = True
+    headtrack.tracking_active = True
     mock_core.wait_for_speech.return_value = b"audio"
     mock_core.record_until_silence.return_value = b"more_audio"
     mock_core.transcribe.return_value = "stop tracking"
 
-    eyetrack_plugin.listen_for_tracking_commands(mock_core)
+    headtrack.listen_for_tracking_commands(mock_core)
 
     assert mock_core.speak.call_args.args[0] == "Stopped"
-    assert eyetrack_plugin.tracking_active is False
+    assert headtrack.tracking_active is False
 
 
-@patch.object(eyetrack_plugin, "get_screen_size", return_value=(1920, 1080))
-@patch.object(eyetrack_plugin, "dbus_call", return_value=True)
+@patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))
+@patch.object(headtrack, "dbus_call", return_value=True)
 def test_listen_for_tracking_commands_freeze(mock_dbus, mock_screen_size, mock_core):
     """When listen_for_tracking_commands receives freeze then it sets frozen flag."""
-    eyetrack_plugin.tracking_active = True
-    eyetrack_plugin.frozen = False
-    eyetrack_plugin.cursor_x = 100
-    eyetrack_plugin.cursor_y = 200
+    headtrack.tracking_active = True
+    headtrack.frozen = False
+    headtrack.cursor_x = 100
+    headtrack.cursor_y = 200
 
     mock_core.wait_for_speech.side_effect = [b"audio1", b"audio2"]
     mock_core.record_until_silence.return_value = b"more_audio"
     mock_core.transcribe.side_effect = ["freeze", "stop"]
 
-    eyetrack_plugin.listen_for_tracking_commands(mock_core)
+    headtrack.listen_for_tracking_commands(mock_core)
 
-    assert eyetrack_plugin.frozen is False
+    assert headtrack.frozen is False
 
 
-@patch.object(eyetrack_plugin, "get_screen_size", return_value=(1920, 1080))
-@patch.object(eyetrack_plugin, "dbus_call", return_value=True)
+@patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))
+@patch.object(headtrack, "dbus_call", return_value=True)
 def test_listen_for_tracking_commands_click(mock_dbus, mock_screen_size, mock_core):
     """When listen_for_tracking_commands receives click then it calls dbus Click."""
-    eyetrack_plugin.tracking_active = True
-    eyetrack_plugin.cursor_x = 100
-    eyetrack_plugin.cursor_y = 200
+    headtrack.tracking_active = True
+    headtrack.cursor_x = 100
+    headtrack.cursor_y = 200
 
     mock_core.wait_for_speech.side_effect = [b"audio1", b"audio2"]
     mock_core.record_until_silence.return_value = b"more_audio"
     mock_core.transcribe.side_effect = ["click", "stop"]
 
-    eyetrack_plugin.listen_for_tracking_commands(mock_core)
+    headtrack.listen_for_tracking_commands(mock_core)
 
     click_calls = [call for call in mock_dbus.call_args_list if call.args[0] == "Click"]
     assert len(click_calls) >= 1
 
 
-@patch.object(eyetrack_plugin, "get_screen_size", return_value=(1920, 1080))
-@patch.object(eyetrack_plugin, "dbus_call", return_value=True)
+@patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))
+@patch.object(headtrack, "dbus_call", return_value=True)
 def test_listen_for_tracking_commands_nudge_when_frozen(
     mock_dbus, mock_screen_size, mock_core
 ):
     """When listen_for_tracking_commands receives nudge while frozen then it adjusts cursor."""
-    eyetrack_plugin.tracking_active = True
-    eyetrack_plugin.frozen = True
-    eyetrack_plugin.cursor_x = 500
-    eyetrack_plugin.cursor_y = 500
+    headtrack.tracking_active = True
+    headtrack.frozen = True
+    headtrack.cursor_x = 500
+    headtrack.cursor_y = 500
 
     mock_core.wait_for_speech.side_effect = [b"audio1", b"audio2"]
     mock_core.record_until_silence.return_value = b"more_audio"
     mock_core.transcribe.side_effect = ["nudge right", "stop"]
 
-    eyetrack_plugin.listen_for_tracking_commands(mock_core)
+    headtrack.listen_for_tracking_commands(mock_core)
 
     moveto_calls = [
         call for call in mock_dbus.call_args_list if call.args[0] == "MoveTo"
@@ -395,22 +393,22 @@ def test_listen_for_tracking_commands_nudge_when_frozen(
     assert len(moveto_calls) >= 1
 
 
-@patch.object(eyetrack_plugin, "get_screen_size", return_value=(1920, 1080))
-@patch.object(eyetrack_plugin, "dbus_call", return_value=True)
+@patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))
+@patch.object(headtrack, "dbus_call", return_value=True)
 def test_listen_for_tracking_commands_go_unfreezes(
     mock_dbus, mock_screen_size, mock_core
 ):
     """When listen_for_tracking_commands receives go then it unfreezes cursor."""
-    eyetrack_plugin.tracking_active = True
-    eyetrack_plugin.frozen = True
+    headtrack.tracking_active = True
+    headtrack.frozen = True
 
     mock_core.wait_for_speech.side_effect = [b"audio1", b"audio2"]
     mock_core.record_until_silence.return_value = b"more_audio"
     mock_core.transcribe.side_effect = ["go", "stop"]
 
-    eyetrack_plugin.listen_for_tracking_commands(mock_core)
+    headtrack.listen_for_tracking_commands(mock_core)
 
-    assert eyetrack_plugin.frozen is False
+    assert headtrack.frozen is False
 
 
 @pytest.mark.parametrize(
@@ -422,22 +420,22 @@ def test_listen_for_tracking_commands_go_unfreezes(
         ["nudge right", "right"],
     ],
 )
-@patch.object(eyetrack_plugin, "get_screen_size", return_value=(1920, 1080))
-@patch.object(eyetrack_plugin, "dbus_call", return_value=True)
+@patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))
+@patch.object(headtrack, "dbus_call", return_value=True)
 def test_listen_for_tracking_commands_nudge_directions(
     mock_dbus, mock_screen_size, command, expected_direction, mock_core
 ):
     """When listen_for_tracking_commands receives nudge commands then it moves cursor in specified direction."""
-    eyetrack_plugin.tracking_active = True
-    eyetrack_plugin.frozen = True
-    eyetrack_plugin.cursor_x = 500
-    eyetrack_plugin.cursor_y = 500
+    headtrack.tracking_active = True
+    headtrack.frozen = True
+    headtrack.cursor_x = 500
+    headtrack.cursor_y = 500
 
     mock_core.wait_for_speech.side_effect = [b"audio1", b"audio2"]
     mock_core.record_until_silence.return_value = b"more_audio"
     mock_core.transcribe.side_effect = [command, "stop"]
 
-    eyetrack_plugin.listen_for_tracking_commands(mock_core)
+    headtrack.listen_for_tracking_commands(mock_core)
 
     moveto_calls = [
         call for call in mock_dbus.call_args_list if call.args[0] == "MoveTo"
@@ -445,40 +443,40 @@ def test_listen_for_tracking_commands_nudge_directions(
     assert len(moveto_calls) >= 1
 
 
-@patch.object(eyetrack_plugin, "get_screen_size", return_value=(1920, 1080))
-@patch.object(eyetrack_plugin, "dbus_call", return_value=True)
-@patch.object(eyetrack_plugin, "recalibrate", return_value=(True, "Recalibrating"))
+@patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))
+@patch.object(headtrack, "dbus_call", return_value=True)
+@patch.object(headtrack, "recalibrate", return_value=(True, "Recalibrating"))
 def test_listen_for_tracking_commands_recalibrate(
     mock_recalibrate, mock_dbus, mock_screen_size, mock_core
 ):
     """When listen_for_tracking_commands receives recalibrate then it recalibrates."""
-    eyetrack_plugin.tracking_active = True
+    headtrack.tracking_active = True
 
     mock_core.wait_for_speech.side_effect = [b"audio1", b"audio2"]
     mock_core.record_until_silence.return_value = b"more_audio"
     mock_core.transcribe.side_effect = ["recalibrate", "stop"]
 
-    eyetrack_plugin.listen_for_tracking_commands(mock_core)
+    headtrack.listen_for_tracking_commands(mock_core)
 
     assert mock_recalibrate.called
     assert mock_core.speak.call_args_list[0].args[0] == "Recalibrating"
 
 
-@patch.object(eyetrack_plugin, "get_screen_size", return_value=(1920, 1080))
-@patch.object(eyetrack_plugin, "dbus_call", return_value=True)
+@patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))
+@patch.object(headtrack, "dbus_call", return_value=True)
 def test_listen_for_tracking_commands_double_click(
     mock_dbus, mock_screen_size, mock_core
 ):
     """When listen_for_tracking_commands receives double click then it calls dbus DoubleClick."""
-    eyetrack_plugin.tracking_active = True
-    eyetrack_plugin.cursor_x = 100
-    eyetrack_plugin.cursor_y = 200
+    headtrack.tracking_active = True
+    headtrack.cursor_x = 100
+    headtrack.cursor_y = 200
 
     mock_core.wait_for_speech.side_effect = [b"audio1", b"audio2"]
     mock_core.record_until_silence.return_value = b"more_audio"
     mock_core.transcribe.side_effect = ["double click", "stop"]
 
-    eyetrack_plugin.listen_for_tracking_commands(mock_core)
+    headtrack.listen_for_tracking_commands(mock_core)
 
     double_click_calls = [
         call for call in mock_dbus.call_args_list if call.args[0] == "DoubleClick"
@@ -486,21 +484,21 @@ def test_listen_for_tracking_commands_double_click(
     assert len(double_click_calls) >= 1
 
 
-@patch.object(eyetrack_plugin, "get_screen_size", return_value=(1920, 1080))
-@patch.object(eyetrack_plugin, "dbus_call", return_value=True)
+@patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))
+@patch.object(headtrack, "dbus_call", return_value=True)
 def test_listen_for_tracking_commands_right_click(
     mock_dbus, mock_screen_size, mock_core
 ):
     """When listen_for_tracking_commands receives right click then it calls dbus RightClick."""
-    eyetrack_plugin.tracking_active = True
-    eyetrack_plugin.cursor_x = 100
-    eyetrack_plugin.cursor_y = 200
+    headtrack.tracking_active = True
+    headtrack.cursor_x = 100
+    headtrack.cursor_y = 200
 
     mock_core.wait_for_speech.side_effect = [b"audio1", b"audio2"]
     mock_core.record_until_silence.return_value = b"more_audio"
     mock_core.transcribe.side_effect = ["right click", "stop"]
 
-    eyetrack_plugin.listen_for_tracking_commands(mock_core)
+    headtrack.listen_for_tracking_commands(mock_core)
 
     right_click_calls = [
         call for call in mock_dbus.call_args_list if call.args[0] == "RightClick"
@@ -522,21 +520,21 @@ def test_listen_for_tracking_commands_right_click(
         ["done"],
     ],
 )
-@patch.object(eyetrack_plugin, "get_screen_size", return_value=(1920, 1080))
-@patch.object(eyetrack_plugin, "dbus_call", return_value=True)
+@patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))
+@patch.object(headtrack, "dbus_call", return_value=True)
 def test_listen_for_tracking_commands_exit_commands(
     mock_dbus, mock_screen_size, exit_command, mock_core
 ):
     """When listen_for_tracking_commands receives exit commands then it stops tracking."""
-    eyetrack_plugin.tracking_active = True
+    headtrack.tracking_active = True
 
     mock_core.wait_for_speech.return_value = b"audio"
     mock_core.record_until_silence.return_value = b"more_audio"
     mock_core.transcribe.return_value = exit_command
 
-    eyetrack_plugin.listen_for_tracking_commands(mock_core)
+    headtrack.listen_for_tracking_commands(mock_core)
 
-    assert eyetrack_plugin.tracking_active is False
+    assert headtrack.tracking_active is False
     assert mock_core.speak.call_args.args[0] == "Stopped"
 
 
@@ -560,8 +558,8 @@ def test_listen_for_tracking_commands_exit_commands(
         (True, 50, [[[1.0], [2.0], [0.0]]] * 10 + [[[-10.0], [-12.0], [0.0]]] * 40),
     ],
 )
-@patch.object(eyetrack_plugin, "get_screen_size", return_value=(1920, 1080))
-@patch.object(eyetrack_plugin, "dbus_call", return_value=True)
+@patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))
+@patch.object(headtrack, "dbus_call", return_value=True)
 def test_run_tracking_scenarios(
     mock_dbus,
     mock_screen_size,
@@ -580,7 +578,7 @@ def test_run_tracking_scenarios(
         read_counter[0] += 1
         if read_counter[0] > frame_count + 20:
             # Safety: force stop after many iterations to prevent infinite loop
-            eyetrack_plugin.stop_event.set()
+            headtrack.stop_event.set()
         if read_counter[0] <= frame_count:
             return (True, Mock())
         return (False, None)
@@ -620,29 +618,29 @@ def test_run_tracking_scenarios(
             "sixdrepnet": Mock(SixDRepNet=mock_sixdrepnet_class),
         },
     ):
-        eyetrack_plugin.tracking_active = True
-        eyetrack_plugin.stop_event.clear()
+        headtrack.tracking_active = True
+        headtrack.stop_event.clear()
 
         # read_side_effect already stops the loop deterministically once the
         # frames run out. Stub the real-time pacing sleep so the loop processes
         # every frame at full speed, making coverage of the motion branches
         # stable instead of racing a wall-clock timer.
         with patch("time.sleep"):
-            eyetrack_plugin.run_tracking()
+            headtrack.run_tracking()
 
         # After run_tracking completes, tracking_active should be False
-        assert eyetrack_plugin.tracking_active is False
+        assert headtrack.tracking_active is False
         if webcam_opens:
             assert mock_cap.release.called
 
 
-@patch.object(eyetrack_plugin, "get_screen_size", return_value=(1920, 1080))
+@patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))
 def test_listen_for_tracking_commands_thread_gone(mock_screen_size, mock_core):
     """When tracking has stopped then the mode ends on the next command."""
-    eyetrack_plugin.tracking_active = False
+    headtrack.tracking_active = False
     mock_core.transcribe.return_value = "click"
 
-    eyetrack_plugin.listen_for_tracking_commands(mock_core)
+    headtrack.listen_for_tracking_commands(mock_core)
 
     assert mock_core.listen_modal.called
 
@@ -651,22 +649,22 @@ def test_listen_for_tracking_commands_thread_gone(mock_screen_size, mock_core):
     ["command", "expected"],
     [("freeze", "Frozen"), ("go", "Following")],
 )
-@patch.object(eyetrack_plugin, "get_screen_size", return_value=(1920, 1080))
-@patch.object(eyetrack_plugin, "dbus_call", return_value=True)
+@patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))
+@patch.object(headtrack, "dbus_call", return_value=True)
 def test_tracking_announces_its_state(
     mock_dbus, mock_screen, command, expected, mock_core_factory
 ):
     """Whether the cursor is following the head is otherwise a guess."""
     mock_core = mock_core_factory(transcribe_values=[command, "stop tracking"])
-    eyetrack_plugin.tracking_active = True
+    headtrack.tracking_active = True
 
-    eyetrack_plugin.listen_for_tracking_commands(mock_core)
+    headtrack.listen_for_tracking_commands(mock_core)
 
     assert expected in [call.args[0] for call in mock_core.speak.call_args_list]
 
 
-@patch.object(eyetrack_plugin, "get_screen_size", return_value=(1920, 1080))
-@patch.object(eyetrack_plugin, "dbus_call", return_value=True)
+@patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))
+@patch.object(headtrack, "dbus_call", return_value=True)
 def test_tracking_replies_cannot_re_trigger_themselves(
     mock_dbus, mock_screen, mock_core_factory
 ):
@@ -676,9 +674,9 @@ def test_tracking_replies_cannot_re_trigger_themselves(
     the branch which spoke them.
     """
     mock_core = mock_core_factory(transcribe_values=["freeze", "go", "stop tracking"])
-    eyetrack_plugin.tracking_active = True
+    headtrack.tracking_active = True
 
-    eyetrack_plugin.listen_for_tracking_commands(mock_core)
+    headtrack.listen_for_tracking_commands(mock_core)
 
     spoken = [call.args[0].lower() for call in mock_core.speak.call_args_list]
     freeze_words = ("freeze", "free", "rees", "frees")
