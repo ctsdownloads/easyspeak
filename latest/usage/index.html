@@ -1014,7 +1014,7 @@ the module that reads each (linked to its API reference).</p>
 <tr>
 <td><code>EASYSPEAK_LANGUAGE</code></td>
 <td><code>en</code></td>
-<td>Language you dictate in</td>
+<td>Language you dictate in and are answered in</td>
 </tr>
 <tr>
 <td><code>EASYSPEAK_MODELS_DIR</code></td>
@@ -1069,8 +1069,9 @@ the module that reads each (linked to its API reference).</p>
 </tbody>
 </table>
 <p><code>EASYSPEAK_LANGUAGE</code> is the language you dictate in, and the language of the
-spoken replies where they are translated (German is); commands stay English. It
-picks which installed <a href="../packaging/#language">language pack</a>
+spoken replies where they are translated (German, Italian, French and Spanish
+are) and that language's pack is installed; commands stay English. It picks which installed
+<a href="../packaging/#language">language pack</a>
 <code>EASYSPEAK_WHISPER_MODEL</code> defaults to; without one it falls back to <code>base.en</code>
 for English and to the multilingual <code>small</code> for any other language (a download,
 see <code>EASYSPEAK_OFFLINE</code>). <code>EASYSPEAK_PIPER_MODEL</code> defaults to the voice of the
