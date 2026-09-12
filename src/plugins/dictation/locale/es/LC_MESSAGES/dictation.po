@@ -1,0 +1,32 @@
+# Spanish translations for EasySpeak.
+# Copyright (C) 2026 EasySpeak contributors
+# This file is distributed under the same license as the EasySpeak project.
+msgid ""
+msgstr ""
+"Project-Id-Version: EasySpeak\n"
+"Report-Msgid-Bugs-To: https://github.com/ctsdownloads/easyspeak/issues\n"
+"POT-Creation-Date: 2026-09-12 19:25+0200\n"
+"PO-Revision-Date: 2026-09-12 19:25+0200\n"
+"Last-Translator: EasySpeak contributors\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "Dictation"
+msgstr "Dictado"
+
+msgid "Dictation isn't set up on this system."
+msgstr "El dictado no está configurado en este sistema."
+
+msgid "Done"
+msgstr "Hecho"
+
+msgid "No text field focused."
+msgstr "Ningún campo de texto seleccionado."
+
+msgid "Nothing to scratch"
+msgstr "Nada que borrar"

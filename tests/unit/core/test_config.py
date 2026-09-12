@@ -254,9 +254,9 @@ class TestLanguagePacks:
         assert Path(config.WHISPER_MODEL) == packs / language / "whisper" / whisper
 
     def test_replies_with_the_voice_of_their_own_language(self, packs, monkeypatch):
-        """Replies in a language without a translation are English, in its voice."""
-        install_pack(packs, "es", "small", "es_ES-davefx-medium")
-        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "es")
+        """A language with a pack but no translation gets English replies, in its voice."""
+        install_pack(packs, "xx", "small", "xx_XX-nobody-medium")
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "xx")
         importlib.reload(config)
         assert config.REPLY_LANGUAGE == "en"
         assert (

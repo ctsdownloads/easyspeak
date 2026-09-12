@@ -1,0 +1,29 @@
+# Spanish translations for EasySpeak.
+# Copyright (C) 2026 EasySpeak contributors
+# This file is distributed under the same license as the EasySpeak project.
+msgid ""
+msgstr ""
+"Project-Id-Version: EasySpeak\n"
+"Report-Msgid-Bugs-To: https://github.com/ctsdownloads/easyspeak/issues\n"
+"POT-Creation-Date: 2026-09-12 19:25+0200\n"
+"PO-Revision-Date: 2026-09-12 19:25+0200\n"
+"Last-Translator: EasySpeak contributors\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "Check the terminal for available commands."
+msgstr "Los comandos disponibles están en el terminal."
+
+msgid "Goodbye."
+msgstr "Adiós."
+
+msgid "Modes now take commands on their own."
+msgstr "Los modos ahora aceptan comandos directamente."
+
+msgid "Modes now wait for the wake word."
+msgstr "Los modos ahora esperan la palabra de activación."

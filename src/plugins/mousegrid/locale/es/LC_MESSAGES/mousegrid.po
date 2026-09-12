@@ -1,0 +1,44 @@
+# Spanish translations for EasySpeak.
+# Copyright (C) 2026 EasySpeak contributors
+# This file is distributed under the same license as the EasySpeak project.
+msgid ""
+msgstr ""
+"Project-Id-Version: EasySpeak\n"
+"Report-Msgid-Bugs-To: https://github.com/ctsdownloads/easyspeak/issues\n"
+"POT-Creation-Date: 2026-09-12 19:25+0200\n"
+"PO-Revision-Date: 2026-09-12 19:25+0200\n"
+"Last-Translator: EasySpeak contributors\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "Clicked"
+msgstr "Clic"
+
+msgid "Double clicked"
+msgstr "Doble clic"
+
+msgid "Dropped"
+msgstr "Soltado"
+
+msgid "Grid"
+msgstr "Cuadrícula"
+
+msgid "Grid closed"
+msgstr "Cuadrícula cerrada"
+
+msgid "Holding"
+msgstr "Manteniendo"
+
+msgid "Middle clicked"
+msgstr "Clic central"
+
+msgid "Right clicked"
+msgstr "Clic derecho"
+
+msgid "Scrolled"
+msgstr "Desplazado"
