@@ -5447,17 +5447,7 @@ like <code>base.en</code> from Hugging Face instead.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/core/config.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-157">157</a></span>
-<span class="normal"><a href="#__codelineno-0-158">158</a></span>
-<span class="normal"><a href="#__codelineno-0-159">159</a></span>
-<span class="normal"><a href="#__codelineno-0-160">160</a></span>
-<span class="normal"><a href="#__codelineno-0-161">161</a></span>
-<span class="normal"><a href="#__codelineno-0-162">162</a></span>
-<span class="normal"><a href="#__codelineno-0-163">163</a></span>
-<span class="normal"><a href="#__codelineno-0-164">164</a></span>
-<span class="normal"><a href="#__codelineno-0-165">165</a></span>
-<span class="normal"><a href="#__codelineno-0-166">166</a></span>
-<span class="normal"><a href="#__codelineno-0-167">167</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-167">167</a></span>
 <span class="normal"><a href="#__codelineno-0-168">168</a></span>
 <span class="normal"><a href="#__codelineno-0-169">169</a></span>
 <span class="normal"><a href="#__codelineno-0-170">170</a></span>
@@ -5476,36 +5466,46 @@ like <code>base.en</code> from Hugging Face instead.</p>
 <span class="normal"><a href="#__codelineno-0-183">183</a></span>
 <span class="normal"><a href="#__codelineno-0-184">184</a></span>
 <span class="normal"><a href="#__codelineno-0-185">185</a></span>
-<span class="normal"><a href="#__codelineno-0-186">186</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-157" name="__codelineno-0-157"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_whisper_model</span><span class="p">(</span>
-<a id="__codelineno-0-158" name="__codelineno-0-158"></a>    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">WHISPER_MODEL</span><span class="p">,</span>
-<a id="__codelineno-0-159" name="__codelineno-0-159"></a>    <span class="n">compute_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">WHISPER_COMPUTE_TYPE</span><span class="p">,</span>
-<a id="__codelineno-0-160" name="__codelineno-0-160"></a>    <span class="n">cpu_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">WHISPER_CPU_THREADS</span><span class="p">,</span>
-<a id="__codelineno-0-161" name="__codelineno-0-161"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WhisperModel</span><span class="p">:</span>
-<a id="__codelineno-0-162" name="__codelineno-0-162"></a><span class="w">    </span><span class="sd">"""Build a faster-whisper model from the configured (or given) settings.</span>
-<a id="__codelineno-0-163" name="__codelineno-0-163"></a>
-<a id="__codelineno-0-164" name="__codelineno-0-164"></a><span class="sd">    A model already on disk — bundled in a language pack or cached from an earlier</span>
-<a id="__codelineno-0-165" name="__codelineno-0-165"></a><span class="sd">    run — loads without any network access. When it is missing, EasySpeak stays</span>
-<a id="__codelineno-0-166" name="__codelineno-0-166"></a><span class="sd">    offline by default and raises an actionable message; setting</span>
-<a id="__codelineno-0-167" name="__codelineno-0-167"></a><span class="sd">    `EASYSPEAK_OFFLINE=relaxed` (see `NETWORK_ALLOWED`) lets it fetch a bare name</span>
-<a id="__codelineno-0-168" name="__codelineno-0-168"></a><span class="sd">    like `base.en` from Hugging Face instead.</span>
-<a id="__codelineno-0-169" name="__codelineno-0-169"></a><span class="sd">    """</span>
-<a id="__codelineno-0-170" name="__codelineno-0-170"></a>    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"compute_type"</span><span class="p">:</span> <span class="n">compute_type</span><span class="p">,</span> <span class="s2">"cpu_threads"</span><span class="p">:</span> <span class="n">cpu_threads</span><span class="p">}</span>
-<a id="__codelineno-0-171" name="__codelineno-0-171"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-172" name="__codelineno-0-172"></a>        <span class="k">return</span> <span class="n">WhisperModel</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">local_files_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-<a id="__codelineno-0-173" name="__codelineno-0-173"></a>    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-<a id="__codelineno-0-174" name="__codelineno-0-174"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">NETWORK_ALLOWED</span><span class="p">:</span>
-<a id="__codelineno-0-175" name="__codelineno-0-175"></a>            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-<a id="__codelineno-0-176" name="__codelineno-0-176"></a>                <span class="sa">f</span><span class="s2">"speech model </span><span class="si">{</span><span class="n">model_name</span><span class="si">!r}</span><span class="s2"> is not installed; set "</span>
-<a id="__codelineno-0-177" name="__codelineno-0-177"></a>                <span class="s2">"EASYSPEAK_OFFLINE=relaxed to download it, or install a language pack"</span>
-<a id="__codelineno-0-178" name="__codelineno-0-178"></a>            <span class="p">)</span>
-<a id="__codelineno-0-179" name="__codelineno-0-179"></a>            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
-<a id="__codelineno-0-180" name="__codelineno-0-180"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-<a id="__codelineno-0-181" name="__codelineno-0-181"></a>            <span class="s2">"Speech model </span><span class="si">%r</span><span class="s2"> is not installed; downloading it from Hugging Face. "</span>
-<a id="__codelineno-0-182" name="__codelineno-0-182"></a>            <span class="s2">"Install a language pack to avoid this, or set EASYSPEAK_OFFLINE=strict "</span>
-<a id="__codelineno-0-183" name="__codelineno-0-183"></a>            <span class="s2">"to keep EasySpeak offline."</span><span class="p">,</span>
-<a id="__codelineno-0-184" name="__codelineno-0-184"></a>            <span class="n">model_name</span><span class="p">,</span>
-<a id="__codelineno-0-185" name="__codelineno-0-185"></a>        <span class="p">)</span>
-<a id="__codelineno-0-186" name="__codelineno-0-186"></a>        <span class="k">return</span> <span class="n">WhisperModel</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">local_files_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-186">186</a></span>
+<span class="normal"><a href="#__codelineno-0-187">187</a></span>
+<span class="normal"><a href="#__codelineno-0-188">188</a></span>
+<span class="normal"><a href="#__codelineno-0-189">189</a></span>
+<span class="normal"><a href="#__codelineno-0-190">190</a></span>
+<span class="normal"><a href="#__codelineno-0-191">191</a></span>
+<span class="normal"><a href="#__codelineno-0-192">192</a></span>
+<span class="normal"><a href="#__codelineno-0-193">193</a></span>
+<span class="normal"><a href="#__codelineno-0-194">194</a></span>
+<span class="normal"><a href="#__codelineno-0-195">195</a></span>
+<span class="normal"><a href="#__codelineno-0-196">196</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-167" name="__codelineno-0-167"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_whisper_model</span><span class="p">(</span>
+<a id="__codelineno-0-168" name="__codelineno-0-168"></a>    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">WHISPER_MODEL</span><span class="p">,</span>
+<a id="__codelineno-0-169" name="__codelineno-0-169"></a>    <span class="n">compute_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">WHISPER_COMPUTE_TYPE</span><span class="p">,</span>
+<a id="__codelineno-0-170" name="__codelineno-0-170"></a>    <span class="n">cpu_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">WHISPER_CPU_THREADS</span><span class="p">,</span>
+<a id="__codelineno-0-171" name="__codelineno-0-171"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WhisperModel</span><span class="p">:</span>
+<a id="__codelineno-0-172" name="__codelineno-0-172"></a><span class="w">    </span><span class="sd">"""Build a faster-whisper model from the configured (or given) settings.</span>
+<a id="__codelineno-0-173" name="__codelineno-0-173"></a>
+<a id="__codelineno-0-174" name="__codelineno-0-174"></a><span class="sd">    A model already on disk — bundled in a language pack or cached from an earlier</span>
+<a id="__codelineno-0-175" name="__codelineno-0-175"></a><span class="sd">    run — loads without any network access. When it is missing, EasySpeak stays</span>
+<a id="__codelineno-0-176" name="__codelineno-0-176"></a><span class="sd">    offline by default and raises an actionable message; setting</span>
+<a id="__codelineno-0-177" name="__codelineno-0-177"></a><span class="sd">    `EASYSPEAK_OFFLINE=relaxed` (see `NETWORK_ALLOWED`) lets it fetch a bare name</span>
+<a id="__codelineno-0-178" name="__codelineno-0-178"></a><span class="sd">    like `base.en` from Hugging Face instead.</span>
+<a id="__codelineno-0-179" name="__codelineno-0-179"></a><span class="sd">    """</span>
+<a id="__codelineno-0-180" name="__codelineno-0-180"></a>    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"compute_type"</span><span class="p">:</span> <span class="n">compute_type</span><span class="p">,</span> <span class="s2">"cpu_threads"</span><span class="p">:</span> <span class="n">cpu_threads</span><span class="p">}</span>
+<a id="__codelineno-0-181" name="__codelineno-0-181"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-182" name="__codelineno-0-182"></a>        <span class="k">return</span> <span class="n">WhisperModel</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">local_files_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-0-183" name="__codelineno-0-183"></a>    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+<a id="__codelineno-0-184" name="__codelineno-0-184"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">NETWORK_ALLOWED</span><span class="p">:</span>
+<a id="__codelineno-0-185" name="__codelineno-0-185"></a>            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-0-186" name="__codelineno-0-186"></a>                <span class="sa">f</span><span class="s2">"speech model </span><span class="si">{</span><span class="n">model_name</span><span class="si">!r}</span><span class="s2"> is not installed; set "</span>
+<a id="__codelineno-0-187" name="__codelineno-0-187"></a>                <span class="s2">"EASYSPEAK_OFFLINE=relaxed to download it, or install a language pack"</span>
+<a id="__codelineno-0-188" name="__codelineno-0-188"></a>            <span class="p">)</span>
+<a id="__codelineno-0-189" name="__codelineno-0-189"></a>            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+<a id="__codelineno-0-190" name="__codelineno-0-190"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+<a id="__codelineno-0-191" name="__codelineno-0-191"></a>            <span class="s2">"Speech model </span><span class="si">%r</span><span class="s2"> is not installed; downloading it from Hugging Face. "</span>
+<a id="__codelineno-0-192" name="__codelineno-0-192"></a>            <span class="s2">"Install a language pack to avoid this, or set EASYSPEAK_OFFLINE=strict "</span>
+<a id="__codelineno-0-193" name="__codelineno-0-193"></a>            <span class="s2">"to keep EasySpeak offline."</span><span class="p">,</span>
+<a id="__codelineno-0-194" name="__codelineno-0-194"></a>            <span class="n">model_name</span><span class="p">,</span>
+<a id="__codelineno-0-195" name="__codelineno-0-195"></a>        <span class="p">)</span>
+<a id="__codelineno-0-196" name="__codelineno-0-196"></a>        <span class="k">return</span> <span class="n">WhisperModel</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">local_files_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
