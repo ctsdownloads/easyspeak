@@ -106,8 +106,9 @@ The translations are gettext catalogs beside the code, one per language:
 `myplugin/locale/de/LC_MESSAGES/myplugin.po`, the domain being the package's
 name. `just translations de` extracts the wrapped strings and creates or
 refreshes every `.po` for German; then fill in the `msgstr` lines, in Poedit or
-any editor. A string without a translation is spoken in English. See
-[`core.i18n`][core.i18n].
+any editor. A string without a translation is spoken in English, and
+`just check-translations` (run in CI) fails while a catalog lags behind the
+code. See [`core.i18n`][core.i18n].
 
 See the [Plugins API reference](reference/plugins.md) for the generated
 documentation of every bundled plugin.

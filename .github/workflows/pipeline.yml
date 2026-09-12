@@ -21,6 +21,7 @@ jobs:
         - types
         - package
         - check-desktop-integration
+        - check-translations
       fail-fast: false
     steps:
     - uses: actions/checkout@v6

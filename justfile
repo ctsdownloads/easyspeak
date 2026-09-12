@@ -222,14 +222,25 @@ translations lang:
         grep -q '^msgid "[^"]' "$pot" || continue
         po="$package/locale/{{ lang }}/LC_MESSAGES/$domain.po"
         if [ -f "$po" ]; then
-            uvx --from babel pybabel -q update --ignore-pot-creation-date -i "$pot" -o "$po" -l {{ lang }}
+            uvx --from babel pybabel -q update --ignore-pot-creation-date --ignore-obsolete -i "$pot" -o "$po" -l {{ lang }}
         else
             mkdir -p "$(dirname "$po")"
             uvx --from babel pybabel -q init -i "$pot" -o "$po" -l {{ lang }}
-            sed -i 's/^"Project-Id-Version: EasySpeak VERSION/"Project-Id-Version: EasySpeak/' "$po"
         fi
+        sed -i -e 's/^"Project-Id-Version: .*$/"Project-Id-Version: EasySpeak\\n"/' -e '/^"Generated-By: /d' "$po"
+        printf '%s\n' "$(cat "$po")" > "$po"
         echo "$po"
     done
+
+# Verify the reply catalogs are in step with the code: `just translations` would change nothing
+[group('codestyle')]
+check-translations:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    for lang in src/core/locale/*/; do
+        just translations "$(basename "$lang")" >/dev/null
+    done
+    git diff --color --exit-code -- '*.po'
 
 # Recompile the bundled GSettings schema after editing the .gschema.xml
 [group('packaging')]
