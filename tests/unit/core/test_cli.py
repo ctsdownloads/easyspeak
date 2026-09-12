@@ -1,6 +1,7 @@
 """Tests for the core CLI entry point."""
 
 import logging
+import os
 import shutil
 from importlib import import_module
 from unittest.mock import call, patch
@@ -25,6 +26,27 @@ def test_run(mock_easyspeak):
     cli.run([])
 
     assert mock_easyspeak.mock_calls == [call(), call().run()]
+
+
+@patch("easyspeak.core.main.EasySpeak")
+def test_run_language_overrides_the_environment(mock_easyspeak, monkeypatch):
+    """--language sets EASYSPEAK_LANGUAGE before the app, and its config, load."""
+    monkeypatch.setenv("EASYSPEAK_LANGUAGE", "en")
+
+    cli.run(["--language", "de"])
+
+    assert os.environ["EASYSPEAK_LANGUAGE"] == "de"
+    assert mock_easyspeak.mock_calls == [call(), call().run()]
+
+
+@patch("easyspeak.core.main.EasySpeak")
+def test_run_without_language_leaves_the_environment_alone(mock_easyspeak, monkeypatch):
+    """No --language: whatever EASYSPEAK_LANGUAGE says stands."""
+    monkeypatch.setenv("EASYSPEAK_LANGUAGE", "it")
+
+    cli.run([])
+
+    assert os.environ["EASYSPEAK_LANGUAGE"] == "it"
 
 
 @pytest.mark.parametrize(

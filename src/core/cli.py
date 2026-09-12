@@ -2,12 +2,14 @@
 
 Verbosity comes from the mutually exclusive `-v`/`--verbose` and `-q`/`--quiet`
 flags, or — with neither — the `EASYSPEAK_LOG_LEVEL` environment variable, which
-the flags override (see [`resolve_level`][core.log.resolve_level]). The one-shot
+the flags override (see [`resolve_level`][core.log.resolve_level]). `--language`
+is the command-line form of `EASYSPEAK_LANGUAGE` and overrides it. The one-shot
 `--configure` and `--preview` subcommands set up or print the desktop-integration
 files and exit. All `EASYSPEAK_*` variables are listed in [`core.config`][core.config].
 """
 
 import argparse
+import os
 
 from . import log
 from .about import app_version
@@ -43,6 +45,14 @@ def parse_args(argv=None):
         help="print the file content that would be configured and exit",
     )
     parser.add_argument(
+        "--language",
+        metavar="CODE",
+        help=(
+            "language to dictate and be answered in, e.g. de; "
+            "alternatively set EASYSPEAK_LANGUAGE (default: en)"
+        ),
+    )
+    parser.add_argument(
         "--version",
         action="version",
         version=f"%(prog)s {app_version()}",
@@ -71,6 +81,10 @@ def run(argv=None):
         return
 
     log.configure(log.resolve_level(verbose=args.verbose, quiet=args.quiet))
+
+    if args.language:
+        # The config reads the variable when it is imported, below.
+        os.environ["EASYSPEAK_LANGUAGE"] = args.language
 
     if args.configure is not None:
         from .desktop_integration import configure
