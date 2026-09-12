@@ -1041,7 +1041,8 @@
   declared as dependencies.</li>
 <li><strong><code>easyspeak-lang-en</code></strong> (noarch) — English speech data: the Whisper <code>base.en</code>
   recognition model and the Piper <code>en_US-amy-medium</code> voice, under
-  <code>/opt/easyspeak/models</code>. More languages ship as <code>easyspeak-lang-*</code> packages.</li>
+  <code>/opt/easyspeak/models/en</code>. More languages ship as <code>easyspeak-lang-*</code> packages,
+  each under its own <code>/opt/easyspeak/models/&lt;language&gt;</code>.</li>
 </ul>
 <p>Splitting keeps the app small and lets you pick (or add) languages independently
 without re-downloading the runtime. See <a href="#language">Language</a>.</p>
@@ -1090,8 +1091,7 @@ access) and log back in:</p>
 built into the app (it ships inside the pyopen-wakeword wheel), so it stays English
 regardless of language pack.</p>
 <p><code>EASYSPEAK_LANGUAGE</code> (default <code>en</code>) is the language you dictate in, and it picks
-the installed pack's models: a Piper voice by its <code>&lt;language&gt;_</code> filename prefix, a
-Whisper model by not being one of the English-only <code>.en</code> ones. To use a language we
+the pack installed under <code>/opt/easyspeak/models/&lt;language&gt;</code>. To use a language we
 ship no package for, install/drop its models and point these environment variables
 at them (an explicit value always wins; set them in a systemd user override or your
 shell profile):</p>
