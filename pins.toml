@@ -46,3 +46,27 @@ path = "en/en_US/amy/medium"
 [lang.en.piper.files]
 "en_US-amy-medium.onnx" = "b3a6e47b57b8c7fbe6a0ce2518161a50f59a9cdd8a50835c02cb02bdd6206c18"
 "en_US-amy-medium.onnx.json" = "95a23eb4d42909d38df73bb9ac7f45f597dbfcde2d1bf9526fdeaf5466977d77"
+
+[lang.de]
+version = "1.0.0"
+
+[lang.de.whisper]
+model = "small"
+repo = "Systran/faster-whisper-small"
+revision = "536b0662742c02347bc0e980a01041f333bce120"
+
+[lang.de.whisper.files]
+"config.json" = "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828"
+"model.bin" = "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671"
+"tokenizer.json" = "fb7b63191e9bb045082c79fd742a3106a12c99513ab30df4a0d47fa6cb6fd0ab"
+"vocabulary.txt" = "34ce3fe1c5041027b3f8d42912270993f986dbc4bb34cf27f951e34a1e453913"
+
+[lang.de.piper]
+voice = "de_DE-thorsten-medium"
+repo = "rhasspy/piper-voices"
+revision = "v1.0.0"
+path = "de/de_DE/thorsten/medium"
+
+[lang.de.piper.files]
+"de_DE-thorsten-medium.onnx" = "7e64762d8e5118bb578f2eea6207e1a35a8e0c30595010b666f983fc87bb7819"
+"de_DE-thorsten-medium.onnx.json" = "974adee790533adb273a1ac88f49027d2a1b8f0f2cf4905954a4791e79264e85"
