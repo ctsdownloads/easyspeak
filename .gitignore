@@ -55,6 +55,8 @@ Thumbs.db
 # Project specific
 *.wav
 *.log
+# language packs dropped in beside the venv for a manual test
+models/
 
 # locally installed agent skills
 .agents/
