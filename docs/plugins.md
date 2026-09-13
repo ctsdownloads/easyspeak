@@ -40,6 +40,7 @@ classDiagram
         <<protocol>>
         +str NAME
         +str DESCRIPTION
+        +int PRIORITY
         +list COMMANDS
         +setup(core)
         +handle(cmd, core)

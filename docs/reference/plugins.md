@@ -5,7 +5,11 @@ contract rather than subclassing a base class. It is loaded if it exposes a
 `NAME` string and a `handle(cmd, core)` function; the optional `setup(core)` hook
 runs once at startup, `COMMANDS`/`DESCRIPTION` feed the help screen, and
 `PRIORITY` (default 50, lower first) sets its place in the routing order. A
-package's `locale/` holds the translations of what it speaks.
+package's `locale/<language>/` holds what it says, a gettext catalog, and what it
+listens for, a `vocabulary.toml` table; a plugin that has them binds `_`, its
+translator, and `vocab`, its vocabulary, at import (see
+[Writing Plugins](../plugins.md#translations)), and a plain module has neither.
+Click the diagram to enlarge it.
 
 ```mermaid
 classDiagram
@@ -15,10 +19,20 @@ classDiagram
         +str DESCRIPTION
         +int PRIORITY
         +list COMMANDS
+        +translator _
+        +Vocabulary vocab
         +setup(core)
         +handle(cmd, core)
     }
-    class base
+    class base {
+        PRIORITY = 100
+    }
+    class mousegrid {
+        PRIORITY = 1
+    }
+    class headtrack {
+        PRIORITY = 0
+    }
     class sleep
     class system
     class media
@@ -26,23 +40,35 @@ classDiagram
     class apps
     class browser
     class dictation
-    class mousegrid
-    class headtrack
 
-    PluginContract <|.. base
-    PluginContract <|.. sleep
-    PluginContract <|.. system
-    PluginContract <|.. media
-    PluginContract <|.. files
+    PluginContract <|.. headtrack
+    PluginContract <|.. mousegrid
     PluginContract <|.. apps
     PluginContract <|.. browser
     PluginContract <|.. dictation
-    PluginContract <|.. mousegrid
-    PluginContract <|.. headtrack
+    PluginContract <|.. files
+    PluginContract <|.. media
+    PluginContract <|.. sleep
+    PluginContract <|.. system
+    PluginContract <|.. base
 
-    note for base "PRIORITY = 100 — routes last; help and exit fallback"
-    note for mousegrid "PRIORITY = 1 — routes early"
-    note for headtrack "PRIORITY = 0 — routes first"
+    class Locale["locale/‹language›/"] {
+        <<directory>>
+        LC_MESSAGES/‹name›.po
+        vocabulary.toml
+    }
+    Locale "1..*" --* "1" PluginContract
+    style Locale fill:#80808026
+    style headtrack stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style mousegrid stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style apps stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style browser stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style dictation stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style files stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style media stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style sleep stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style system stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style base stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
 ```
 
 `handle` returns `True` when it consumed the command, `False` to signal the

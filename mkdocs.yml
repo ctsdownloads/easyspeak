@@ -44,6 +44,11 @@ theme:
 # the root CONTRIBUTING.md is a short stub pointing here for GitHub.
 docs_dir: docs
 
+extra_css:
+- stylesheets/diagram-overlay.css
+extra_javascript:
+- javascripts/diagram-overlay.js
+
 # These assets live under docs/media/ but are not referenced by any page, so
 # keep them out of the built site (the demo video is a 23 MB LFS object).
 exclude_docs: |
