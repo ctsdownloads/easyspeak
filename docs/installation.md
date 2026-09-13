@@ -12,21 +12,22 @@ Tested on Fedora and NixOS.
 
 ## Quick install (prebuilt packages)
 
-The easiest path. Download the latest **app** package and a
+The easiest path. Download the latest **app** package, the
+**[Parakeet pack][gh:releases:stt]** with the speech recognition model and a
 **[language pack][gh:releases:lang]** from the [Releases page][gh:releases] and
-install them together — just take the latest of each; the app and language-pack
-version numbers are independent and need not match:
+install them together — just take the latest of each; the app and pack version
+numbers are independent and need not match:
 
 === "Debian / Ubuntu"
 
     ```bash
-    sudo apt install ./easyspeak_*_amd64.deb ./easyspeak-lang-en_*_all.deb
+    sudo apt install ./easyspeak_*_amd64.deb ./easyspeak-stt-parakeet_*_all.deb ./easyspeak-lang-en_*_all.deb
     ```
 
 === "Fedora / RHEL"
 
     ```bash
-    sudo dnf install ./easyspeak-*.x86_64.rpm ./easyspeak-lang-en-*.noarch.rpm
+    sudo dnf install ./easyspeak-*.x86_64.rpm ./easyspeak-stt-parakeet-*.noarch.rpm ./easyspeak-lang-en-*.noarch.rpm
     ```
 
 Besides English there are German, Italian, French and Spanish packs
@@ -43,8 +44,8 @@ hold-to-dictate setup.
 
 ## NixOS
 
-The flake carries the runtime tools, the English language pack and the sound
-theme, so there is no system-package step:
+The flake carries the runtime tools, the Parakeet model, the English language
+pack and the sound theme, so there is no system-package step:
 
 ```bash
 nix run github:ctsdownloads/easyspeak
@@ -186,5 +187,6 @@ The `head-tracking` extra pulls in `sixdrepnet` and `opencv-python`.
 
 [gh:releases]: https://github.com/ctsdownloads/easyspeak/releases
 [gh:releases:lang]: https://github.com/ctsdownloads/easyspeak/releases?q=lang
+[gh:releases:stt]: https://github.com/ctsdownloads/easyspeak/releases?q=stt
 [pep-668]: https://peps.python.org/pep-0668/
 [uv]: https://docs.astral.sh/uv/

@@ -1,0 +1,26 @@
+# nfpm config — the Parakeet speech model for EasySpeak (NVIDIA parakeet-tdt-0.6b-v3,
+# ONNX int8 conversion), one noarch data package for every language it covers,
+# built from the tree staged by `packaging/stage-stt.sh parakeet`.
+#   VERSION=1.2.3 nfpm package -f packaging/nfpm-stt-parakeet.yaml -p deb
+#   VERSION=1.2.3 nfpm package -f packaging/nfpm-stt-parakeet.yaml -p rpm
+name: easyspeak-stt-parakeet
+arch: all                # architecture-independent: deb "all" / rpm "noarch"
+platform: linux
+version: ${VERSION}
+section: utils
+priority: optional
+maintainer: Matt Hartley <matt@matthartley.com>
+description: |
+  Parakeet speech recognition model for EasySpeak: NVIDIA's multilingual
+  parakeet-tdt-0.6b-v3 (CC BY 4.0) as an int8 ONNX model, one for the 25 European
+  languages it covers, installed under /opt/easyspeak/models/parakeet. EasySpeak
+  uses it by default and falls back to a language pack's Whisper model without it.
+vendor: EasySpeak
+homepage: https://github.com/ctsdownloads/easyspeak
+license: CC-BY-4.0
+
+contents:
+- src: ./dist/stage-stt-parakeet/opt/easyspeak/models/parakeet
+  dst: /opt/easyspeak/models/parakeet
+- src: ./packaging/copyright-stt-parakeet
+  dst: /usr/share/doc/easyspeak-stt-parakeet/copyright

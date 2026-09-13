@@ -1,6 +1,6 @@
 # Packaging
 
-EasySpeak ships **distro `.deb` and `.rpm` packages**, split into two:
+EasySpeak ships **distro `.deb` and `.rpm` packages**, split into three:
 
 - **`easyspeak`** (amd64) — the application: a self-contained Python runtime
   (standalone CPython + all wheels, including the `piper` engine and the
@@ -8,13 +8,18 @@ EasySpeak ships **distro `.deb` and `.rpm` packages**, split into two:
   at install time. Desktop integration (launcher, GNOME Shell extension, AT-SPI
   dictation helper) is wired to your system's GTK4 / PyGObject / AT-SPI packages,
   declared as dependencies.
-- **`easyspeak-lang-en`** (noarch) — English speech data: the Whisper `base.en`
-  recognition model and the Piper `en_US-amy-medium` voice, under
+- **`easyspeak-stt-parakeet`** (noarch) — the speech recognition model: NVIDIA's
+  multilingual Parakeet TDT v3, one int8 ONNX model for the 25 European languages
+  it covers, under `/opt/easyspeak/models/parakeet`. EasySpeak uses it by default.
+- **`easyspeak-lang-en`** (noarch) — English speech data: the Piper
+  `en_US-amy-medium` voice and the Whisper `base.en` recognition model, which
+  stands in when the Parakeet pack is not installed, under
   `/opt/easyspeak/models/en`. More languages ship as `easyspeak-lang-*` packages,
   each under its own `/opt/easyspeak/models/<language>`.
 
 Splitting keeps the app small and lets you pick (or add) languages independently
-without re-downloading the runtime. See [Language](#language).
+without re-downloading the runtime or the shared recognition model. See
+[Language](#language).
 
 > EasySpeak integrates deeply with the host (raw input devices, the AT-SPI bus,
 > session D-Bus, a GNOME Shell extension, and spawning host binaries). That is why
@@ -23,22 +28,22 @@ without re-downloading the runtime. See [Language](#language).
 
 ## Install
 
-Download the latest packages from the [Releases page][gh:releases] — grab
-**both** the app and a [language pack][gh:releases:lang] — and install them
-**together**. Just take the latest of each: a pack is a separate file (not
-auto-fetched from GitHub) and is versioned by its models, so the app and
-language-pack version numbers are independent and need not match:
+Download the latest packages from the [Releases page][gh:releases] — the app,
+the [Parakeet pack][gh:releases:stt] and a [language pack][gh:releases:lang] —
+and install them **together**. Just take the latest of each: a pack is a
+separate file (not auto-fetched from GitHub) and is versioned by its models, so
+the app and pack version numbers are independent and need not match:
 
 === "Debian / Ubuntu"
 
     ```bash
-    sudo apt install ./easyspeak_*_amd64.deb ./easyspeak-lang-en_*_all.deb
+    sudo apt install ./easyspeak_*_amd64.deb ./easyspeak-stt-parakeet_*_all.deb ./easyspeak-lang-en_*_all.deb
     ```
 
 === "Fedora / RHEL"
 
     ```bash
-    sudo dnf install ./easyspeak-*.x86_64.rpm ./easyspeak-lang-en-*.noarch.rpm
+    sudo dnf install ./easyspeak-*.x86_64.rpm ./easyspeak-stt-parakeet-*.noarch.rpm ./easyspeak-lang-en-*.noarch.rpm
     ```
 
 This is **fully offline** (assuming the system dependencies — GTK4, PortAudio,
@@ -49,9 +54,12 @@ Dictation additionally needs `wl-clipboard`, since it places text by pasting
 rather than through the accessibility bridge, which Chromium-based applications
 ignore. It is a hard dependency, so it comes with the package.
 
-Installing the app **without** a language pack also works: the wake word is built
-in, the Whisper model then downloads automatically on first run, and voice feedback
-stays off until you add a Piper voice.
+Installing the app **without** the packs also works: the wake word is built in,
+the speech model then downloads on first run if you allow it (see
+`EASYSPEAK_OFFLINE` in the [configuration](usage.md#configuration)), and voice
+feedback stays off until you add a Piper voice. Without the Parakeet pack and
+with downloads off, a language pack's Whisper model does the recognition, more
+slowly.
 
 One non-package step remains: **log out and back in once** after the first launch so
 GNOME loads the bundled Shell extension (mouse grid + panel indicator).
@@ -63,12 +71,21 @@ access) and log back in:
 sudo usermod -aG input "$USER"
 ```
 
+## Speech recognition
+
+`easyspeak-stt-parakeet` carries NVIDIA's Parakeet TDT v3 model, converted to an
+int8 ONNX model, which recognizes speech in 25 European languages and tells them
+apart by itself. It is one pack for every language, under
+`/opt/easyspeak/models/parakeet`, and the recognizer EasySpeak uses by default. The
+model is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); the package
+ships the attribution as `/usr/share/doc/easyspeak-stt-parakeet/copyright`.
+
 ## Language
 
-The default `easyspeak-lang-en` pack is **US English** — Whisper `base.en`
-(recognition) and Piper `en_US-amy-medium` (feedback). The `hey_jarvis` wake word is
-built into the app (it ships inside the pyopen-wakeword wheel), so it stays English
-regardless of language pack.
+The default `easyspeak-lang-en` pack is **US English** — Piper `en_US-amy-medium`
+(feedback) and Whisper `base.en` (recognition without the Parakeet pack). The
+`hey_jarvis` wake word is built into the app (it ships inside the pyopen-wakeword
+wheel), so it stays English regardless of language pack.
 
 `easyspeak-lang-de` is **German** — the multilingual Whisper `small` and Piper
 `de_DE-thorsten-medium`: German dictation and German replies in the German voice.
@@ -104,17 +121,18 @@ just package-app              # -> ./dist/ : the easyspeak app .deb and .rpm
 just package-app 1.2.3        # set an explicit app version
 just package-lang             # -> ./dist/ : every easyspeak-lang-* .deb and .rpm
 just package-lang en          # ... or just the named pack(s)
-just package-distro           # both of the above (every distro package)
+just package-stt              # -> ./dist/ : the easyspeak-stt-parakeet .deb and .rpm
+just package-distro           # all of the above (every distro package)
 ```
 
-The app and the language packs build independently. The app build needs a
-compiler and the standalone CPython bundle; a language pack is only downloaded
-speech models, so it builds in a lighter container with no compiler and carries
-its own version from `pins.toml`, independent of the app release. They release
-on their own cadence too, but both go through the same `release.yml` workflow on
-a published GitHub Release: an application tag builds and attaches the app
-packages, while a `lang-<code>-<version>` tag skips those jobs and instead fans
-the language packs out over a build matrix and attaches them to that release.
+The app and the packs build independently. The app build needs a compiler and
+the standalone CPython bundle; a pack is only downloaded speech models, so it
+builds in a lighter container with no compiler and carries its own version from
+`pins.toml`, independent of the app release. They release on their own cadence
+too, but all go through the same `release.yml` workflow on a published GitHub
+Release: an application tag builds and attaches the app packages, while a
+`lang-<code>-<version>` or `stt-<code>-<version>` tag skips those jobs and
+instead builds that pack and attaches it to that release.
 
 ## Other distributions
 
@@ -159,3 +177,4 @@ formats.
 
 [gh:releases]: https://github.com/ctsdownloads/easyspeak/releases
 [gh:releases:lang]: https://github.com/ctsdownloads/easyspeak/releases?q=lang
+[gh:releases:stt]: https://github.com/ctsdownloads/easyspeak/releases?q=stt

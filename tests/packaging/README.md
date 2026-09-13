@@ -20,7 +20,8 @@ container (Docker required); the Python packages build with `uv`:
 just check-deb-package        # build app in-docker, then test_deb.sh
 just check-rpm-package        # build app in-docker, then test_rpm.sh
 just check-lang-packages      # build lang in-docker, then test_lang.sh
-just check-distro-packages    # all of the above (app built once, each lang once)
+just check-stt-packages       # build the Parakeet pack in-docker, then test_stt.sh
+just check-distro-packages    # all of the above (app built once, each pack once)
 just check-python-packages    # uv build, then test_python_wheel.sh + test_python_sdist.sh
 ```
 
@@ -33,6 +34,7 @@ non-zero on the first missing (or forbidden) path.
 test_deb.sh            # dpkg-deb --contents: launcher, units, extension + schema present
 test_rpm.sh            # rpm --query --list: same contract for the .rpm
 test_lang.sh           # dpkg-deb + rpm: language pack ships the models, carries its own version
+test_stt.sh            # dpkg-deb + rpm: Parakeet pack ships the model files and the license notice
 test_python_wheel.sh   # unzip -Z1: core + plugins + extension present, docs/tests absent
 test_python_sdist.sh   # tar tzf: same contract for the source tarball
 ```

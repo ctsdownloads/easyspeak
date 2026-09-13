@@ -180,9 +180,14 @@ check-rpm-package: (package-app)
 check-lang-packages: (package-lang)
     bash tests/packaging/test_lang.sh
 
-# Build the app once and each language pack once (just dedupes), check them all
+# Build the Parakeet speech model pack and verify its version, files and notice
 [group('release')]
-check-distro-packages: check-deb-package check-rpm-package check-lang-packages
+check-stt-packages: (package-stt)
+    bash tests/packaging/test_stt.sh
+
+# Build the app and every pack once each (just dedupes), check them all
+[group('release')]
+check-distro-packages: check-deb-package check-rpm-package check-lang-packages check-stt-packages
 
 # Build the wheel and sdist, then verify their contents
 [group('release')]
@@ -278,8 +283,13 @@ package-app version='0.0.0':
 # Build language packs' .deb and .rpm; no code builds all, e.g. `just package-lang en`
 [group('packaging')]
 package-lang *codes:
-    bash packaging/build-lang-in-docker.sh {{ codes }}
+    bash packaging/build-packs-in-docker.sh lang {{ codes }}
 
-# Build every distro package (app + all language packs) locally -> ./dist
+# Build the speech model packs' .deb and .rpm, e.g. `just package-stt parakeet`
 [group('packaging')]
-package-distro version='0.0.0': (package-app version) (package-lang)
+package-stt *codes:
+    bash packaging/build-packs-in-docker.sh stt {{ codes }}
+
+# Build every distro package (app + all packs) locally -> ./dist
+[group('packaging')]
+package-distro version='0.0.0': (package-app version) (package-lang) (package-stt)

@@ -86,8 +86,9 @@
         # One derivation per language pack in pins.toml, laid out as the
         # .deb/.rpm install it (whisper/<model>/... and piper/...), each file
         # fetched at build time from its pinned revision and verified against
-        # its pinned checksum. The English pack is linked into a models
-        # directory under XDG_STATE_HOME that EASYSPEAK_MODELS_DIR points at;
+        # its pinned checksum. The English pack and the Parakeet model are
+        # linked into a models directory under XDG_STATE_HOME that
+        # EASYSPEAK_MODELS_DIR points at;
         # `easyspeak-lang <code>...` links the others in on demand, so
         # EASYSPEAK_LANGUAGE selects a pack exactly as it does with the
         # packages installed, without fetching every language up front.
@@ -116,6 +117,23 @@
             }) piper.files
           );
         languagePacks = pkgs.lib.mapAttrs languagePack langPins;
+
+        # The speech model packs the same way: `stt-parakeet` is the Parakeet
+        # model every language shares, linked in by default since it is the
+        # default recognizer.
+        sttPins = (builtins.fromTOML (builtins.readFile ./pins.toml)).stt;
+        sttPack =
+          code: stt:
+          pkgs.linkFarm "easyspeak-stt-${code}" (
+            pkgs.lib.mapAttrsToList (file: sha256: {
+              name = file;
+              path = pkgs.fetchurl {
+                url = "https://huggingface.co/${stt.repo}/resolve/${stt.revision}/${file}";
+                inherit sha256;
+              };
+            }) stt.files
+          );
+        sttPacks = pkgs.lib.mapAttrs sttPack sttPins;
         modelsDir = ''"''${EASYSPEAK_MODELS_DIR:-''${XDG_STATE_HOME:-$HOME/.local/state}/easyspeak/models}"'';
 
         easyspeakLang = pkgs.writeShellApplication {
@@ -146,7 +164,13 @@
           export EASYSPEAK_OFFLINE="''${EASYSPEAK_OFFLINE:-relaxed}"
           export EASYSPEAK_MODELS_DIR=${modelsDir}
           mkdir -p "$EASYSPEAK_MODELS_DIR"
+          # A real directory there, from a download in relaxed mode, would
+          # swallow the link instead of being replaced by it.
+          for pack in en parakeet; do
+            [ -d "$EASYSPEAK_MODELS_DIR/$pack" ] && [ ! -L "$EASYSPEAK_MODELS_DIR/$pack" ] && rm -rf "''${EASYSPEAK_MODELS_DIR:?}/$pack"
+          done
           ln -sfn '${languagePacks.en}' "$EASYSPEAK_MODELS_DIR/en"
+          ln -sfn '${sttPacks.parakeet}' "$EASYSPEAK_MODELS_DIR/parakeet"
           export EASYSPEAK_SOUNDS_DIR="''${EASYSPEAK_SOUNDS_DIR:-${soundsNixDir}}"
           export GI_TYPELIB_PATH='${giTypelibPath}'":''${GI_TYPELIB_PATH:-}"
           export LD_LIBRARY_PATH='${lib.makeLibraryPath runtimeLibs}'":''${LD_LIBRARY_PATH:-}"
@@ -197,7 +221,8 @@
           easyspeak = easyspeak;
           easyspeak-lang = easyspeakLang;
         }
-        // pkgs.lib.mapAttrs' (code: pack: pkgs.lib.nameValuePair "lang-${code}" pack) languagePacks;
+        // pkgs.lib.mapAttrs' (code: pack: pkgs.lib.nameValuePair "lang-${code}" pack) languagePacks
+        // pkgs.lib.mapAttrs' (code: pack: pkgs.lib.nameValuePair "stt-${code}" pack) sttPacks;
 
         apps = {
           default = {

@@ -10,6 +10,7 @@ One policy per pin:
 - `toolchain.nfpm` — latest GitHub release.
 - `lang.*.whisper.revision` — the model repo's current snapshot commit.
 - `lang.*.piper.revision` — the voice repo's newest tag.
+- `stt.*.revision` — the speech model repo's current snapshot commit.
 - `lang.*.version` — the language pack's own release version. Not fetched from
   upstream: its patch component is bumped whenever that pack's downloaded
   content (its `.files` checksums) changes, so the version always tracks the
@@ -108,7 +109,7 @@ def latest_nfpm():
     return release["tag_name"].removeprefix("v")
 
 
-def whisper_revision(repo):
+def hf_revision(repo):
     """Return the current snapshot commit of the Hugging Face `repo`."""
     return fetch_json(f"https://huggingface.co/api/models/{repo}")["sha"]
 
@@ -163,23 +164,20 @@ def piper_files(piper, revision):
     return files
 
 
-def set_files(text, code, model, files):
-    """Insert or replace the `[lang.<code>.<model>.files]` table in `text`.
+def set_files(text, table, files):
+    """Insert or replace the `[<table>.files]` table in `text`.
 
-    The table is machine-owned, so it is rewritten wholesale rather than bumped
-    key by key; a first run drops it in after the model's scalar keys, before
-    the next table.
+    `table` is a pack model's dotted table name, `lang.de.whisper` or
+    `stt.parakeet`. The table is machine-owned, so it is rewritten wholesale
+    rather than bumped key by key; a first run drops it in after the model's
+    scalar keys, before the next table.
     """
     block = "\n".join(
-        [f"[lang.{code}.{model}.files]"]
-        + [f'"{name}" = "{files[name]}"' for name in sorted(files)]
+        [f"[{table}.files]"] + [f'"{name}" = "{files[name]}"' for name in sorted(files)]
     )
-    if match := re.search(rf"\[lang\.{re.escape(code)}\.{model}\.files\][^\[]*", text):
-        separator = "\n\n" if match.end() < len(text) else "\n"
-        return text[: match.start()] + block + separator + text[match.end() :]
-    scalars = re.search(
-        rf"\[lang\.{re.escape(code)}\.{model}\]\n(?:[^\[\n].*\n)*", text
-    )
+    if match := re.search(rf"\[{re.escape(table)}\.files\]\n(?:\".*\n)*", text):
+        return text[: match.start()] + block + "\n" + text[match.end() :]
+    scalars = re.search(rf"\[{re.escape(table)}\]\n(?:[^\[\n].*\n)*", text)
     return text[: scalars.end()] + "\n" + block + "\n" + text[scalars.end() :]
 
 
@@ -201,13 +199,16 @@ def bump(text, key, old, new, label):
     return text.replace(f'{key} = "{old}"', f'{key} = "{new}"', 1)
 
 
-def content(lang):
-    """Return a language pack's file→checksum map: its actual shipped content.
+def content(pack):
+    """Return a pack's file→checksum map: its actual shipped content.
 
-    Empty until the `.files` tables have been generated, so a newly added pack
-    (scalars only) reads as no content yet.
+    A language pack's content is its Whisper and Piper files; a speech model
+    pack's content is its own files. Empty until the `.files` tables have been
+    generated, so a newly added pack (scalars only) reads as no content yet.
     """
-    return {**lang["whisper"].get("files", {}), **lang["piper"].get("files", {})}
+    if "whisper" in pack:
+        return {**pack["whisper"].get("files", {}), **pack["piper"].get("files", {})}
+    return pack.get("files", {})
 
 
 def next_patch(version):
@@ -216,14 +217,14 @@ def next_patch(version):
     return f"{major}.{minor}.{int(patch) + 1}"
 
 
-def bump_lang_version(text, code, old, new):
-    """Replace the `version` under the `[lang.<code>]` header, reporting it.
+def bump_pack_version(text, table, old, new):
+    """Replace the `version` under the `[<table>]` header, reporting it.
 
     Anchored to the pack's own table header so packs that share a version number
     don't collide, unlike the section-agnostic `bump`.
     """
-    print(f"  bump  lang.{code}.version: {old} -> {new}")
-    header = re.escape(f"[lang.{code}]")
+    print(f"  bump  {table}.version: {old} -> {new}")
+    header = re.escape(f"[{table}]")
     return re.sub(
         rf'({header}\nversion = ")({re.escape(old)})(")',
         rf"\g<1>{new}\g<3>",
@@ -256,7 +257,7 @@ def update_toolchain(text, pins, requires_python):
 def update_language(text, code, lang):
     """Bump one language pack's Whisper and Piper revisions and refill its `.files`."""
     whisper, piper = lang["whisper"], lang["piper"]
-    new_revision = whisper_revision(whisper["repo"])
+    new_revision = hf_revision(whisper["repo"])
     text = bump(
         text,
         "revision",
@@ -265,7 +266,7 @@ def update_language(text, code, lang):
         f"lang.{code}.whisper.revision",
     )
     files = whisper_files(whisper["repo"], new_revision)
-    text = set_files(text, code, "whisper", files)
+    text = set_files(text, f"lang.{code}.whisper", files)
     print(f"  files lang.{code}.whisper.files ({len(files)} files)")
 
     new_tag = latest_piper_tag(piper["repo"])
@@ -273,13 +274,61 @@ def update_language(text, code, lang):
         text, "revision", piper["revision"], new_tag, f"lang.{code}.piper.revision"
     )
     files = piper_files(piper, new_tag)
-    text = set_files(text, code, "piper", files)
+    text = set_files(text, f"lang.{code}.piper", files)
     print(f"  files lang.{code}.piper.files ({len(files)} files)")
     return text
 
 
+def stt_files(stt, revision):
+    """Return `{filename: hex_sha256}` for the speech model's files at `revision`.
+
+    The files are the ones onnx-asr loads for the pinned quantization, named as
+    the ONNX conversions name them; the weights are LFS, so their sha256 comes
+    from the tree listing, and the small config and vocabulary are hashed by
+    download.
+    """
+    suffix = f".{stt['quantization']}.onnx"
+    wanted = {
+        "config.json",
+        "vocab.txt",
+        f"encoder-model{suffix}",
+        f"decoder_joint-model{suffix}",
+    }
+    tree = fetch_json(
+        f"https://huggingface.co/api/models/{stt['repo']}/tree/{revision}"
+    )
+    files = {}
+    for entry in tree:
+        name = entry["path"]
+        if name not in wanted:
+            continue
+        if lfs := entry.get("lfs"):
+            files[name] = lfs["oid"].removeprefix("sha256:")
+        else:
+            files[name] = sha256_of(
+                f"https://huggingface.co/{stt['repo']}/resolve/{revision}/{name}"
+            )
+    if missing := wanted - files.keys():
+        msg = (
+            f"{stt['repo']}@{revision} lacks {sorted(missing)}; "
+            "not pinning a partial model"
+        )
+        raise SystemExit(msg)
+    return files
+
+
+def update_stt(text, code, stt):
+    """Bump one speech model pack's revision and refill its `.files`."""
+    new_revision = hf_revision(stt["repo"])
+    text = bump(text, "revision", stt["revision"], new_revision, f"stt.{code}.revision")
+    files = stt_files(stt, new_revision)
+    text = set_files(text, f"stt.{code}", files)
+    print(f"  files stt.{code}.files ({len(files)} files)")
+    return text
+
+
 def bump_versions(text, pins):
-    """Bump each language pack's version to follow its regenerated content.
+    """Bump each pack's version to follow its regenerated content.
 
     A pack's version tracks its models: where the refreshed `.files` checksums in
     `text` differ from what `pins` held, the patch component is bumped, so a
@@ -287,15 +336,17 @@ def bump_versions(text, pins):
     `.files` yet) keeps its hand-set version — the first checksum fill is not a
     change.
     """
-    updated = tomllib.loads(text)["lang"]
-    for code, lang in pins["lang"].items():
-        was = content(lang)
-        if was and was != content(updated[code]):
-            text = bump_lang_version(
-                text, code, lang["version"], next_patch(lang["version"])
-            )
-        else:
-            print(f"  ok    lang.{code}.version = {lang['version']}")
+    updated = tomllib.loads(text)
+    for kind in ("lang", "stt"):
+        for code, pack in pins.get(kind, {}).items():
+            table = f"{kind}.{code}"
+            was = content(pack)
+            if was and was != content(updated[kind][code]):
+                text = bump_pack_version(
+                    text, table, pack["version"], next_patch(pack["version"])
+                )
+            else:
+                print(f"  ok    {table}.version = {pack['version']}")
     return text
 
 
@@ -308,6 +359,8 @@ def main():
     text = update_toolchain(text, pins, pyproject["project"]["requires-python"])
     for code, lang in pins["lang"].items():
         text = update_language(text, code, lang)
+    for code, stt in pins.get("stt", {}).items():
+        text = update_stt(text, code, stt)
     text = bump_versions(text, pins)
 
     if text != original:

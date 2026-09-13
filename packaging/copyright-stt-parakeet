@@ -1,0 +1,12 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: parakeet-tdt-0.6b-v3
+Upstream-Contact: NVIDIA Corporation
+Source: https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3
+
+Files: opt/easyspeak/models/parakeet/*
+Copyright: NVIDIA Corporation
+License: CC-BY-4.0
+ NVIDIA's parakeet-tdt-0.6b-v3 speech recognition model, converted to ONNX by
+ Ilya Stupakov (https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx),
+ packaged for EasySpeak. Licensed under the Creative Commons Attribution 4.0
+ International License: https://creativecommons.org/licenses/by/4.0/
