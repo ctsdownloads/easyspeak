@@ -40,6 +40,14 @@ class TestCredits:
         # No automated/bot accounts in the human credits.
         assert not any("Copilot" in c for c in about.CONTRIBUTORS)
 
+    def test_credits_every_model_with_its_license(self):
+        """Each shipped model names its owner and a license the dialog can show."""
+        assert len(about.LEGAL) == 8
+        for title, owner, license_id in about.LEGAL:
+            assert title and owner.startswith("©"), title
+            assert license_id in {"MIT", "Apache-2.0", *about.LICENSE_URLS}, title
+        assert all(url.startswith("https://") for url in about.LICENSE_URLS.values())
+
     def test_links_out_to_the_project(self):
         """The repo, docs, issues and discussions links are all real https URLs."""
         for url in (
