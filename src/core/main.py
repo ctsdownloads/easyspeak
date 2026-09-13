@@ -113,7 +113,7 @@ class EasySpeak:
         self.last_wake_time = 0
         self.misunderstand_count = 0
         self.help_shown = False
-        self.keep_listening = False
+        self.needs_wake_word = False
         self.unrecognized = False
         self.spoke = False
         # Set by listen_modal when the tray asks to quit from inside a plugin's
@@ -317,7 +317,6 @@ class EasySpeak:
         if not self.help_shown:
             self._show_help()
             self.help_shown = True
-        self.keep_listening = True
 
     def _show_help(self):
         """Display the command list via the plugin that owns it.
@@ -596,21 +595,13 @@ class EasySpeak:
                 return
             if action is TrayAction.RESUME:
                 logger.info("%s mode ended: reactivated", label.capitalize())
-                self.speak(
-                    _("Leaving {label}. Say {wake_word_spoken} to continue.").format(
-                        label=label, wake_word_spoken=WAKE_WORD_SPOKEN
-                    )
-                )
+                self._leave_unattended(label)
                 return
 
             remaining = deadline - time.monotonic()
             if remaining <= 0:
                 logger.info("%s mode ended: idle", label.capitalize())
-                self.speak(
-                    _("Leaving {label}. Say {wake_word_spoken} to continue.").format(
-                        label=label, wake_word_spoken=WAKE_WORD_SPOKEN
-                    )
-                )
+                self._leave_unattended(label)
                 return
 
             if (
@@ -648,6 +639,20 @@ class EasySpeak:
                 self._drain_feedback()
                 self.spoke = False
                 deadline = time.monotonic() + idle_timeout
+
+    def _leave_unattended(self, label):
+        """Leave a mode nobody is talking to, and ask for the wake word next time.
+
+        The user went quiet for the mode's idle time, or woke the daemon from the
+        tray, so the follow-up window stays shut: the next command starts with
+        the wake word, as the spoken notice says.
+        """
+        self.needs_wake_word = True
+        self.speak(
+            _("Leaving {label}. Say {wake_word_spoken} to continue.").format(
+                label=label, wake_word_spoken=WAKE_WORD_SPOKEN
+            )
+        )
 
     # --- Main loop ---
 
@@ -719,11 +724,11 @@ class EasySpeak:
         self.flush_stream()
 
     def _drain_feedback(self):
-        """Wait for the "didn't understand" feedback to finish, then flush the mic.
+        """Wait for a spoken reply to finish, then flush the mic.
 
         speak() is non-blocking, so flushing alone leaves the still-playing tail for the
-        open mic to transcribe into the next escalation (e.g. opening help) with no one
-        having spoken.
+        open mic to transcribe as the next command, with no one having spoken: "Sorry,
+        I didn't understand." would escalate to help, "Opening files." would be routed.
         """
         self.speech.drain()
         self.flush_stream()
@@ -748,51 +753,54 @@ class EasySpeak:
     def _capture_command_session(self):
         """Capture and route commands after a wake, staying open for follow-ups.
 
-        After a recognized command that gave no spoken reply (e.g. volume), the mic
-        stays open so the user can chain commands ("louder", "louder") at their own pace
-        without repeating the wake word; the session ends once a couple of quiet listens
-        (FOLLOWUP_IDLE_ROUNDS) pass, the wake-time silence times out, or a command
-        speaks (whose reply the open mic would otherwise hear). A repeated
-        misunderstanding still re-arms keep_listening for the help retry, and its
-        feedback is drained before listening again. Returns True if a command asked the
-        daemon to exit.
+        The mic stays open after every command, understood or not, so the user can
+        go on ("open documents", then "louder") or try again after a miss, at their
+        own pace and without repeating the wake word. A spoken reply is drained first,
+        so the open mic does not transcribe the assistant's own voice as the next
+        command. The session ends after FOLLOWUP_IDLE_ROUNDS quiet listens in a row,
+        silence or noise, when a mode was left unattended (the wake word is then asked
+        for, as its notice says), or when a command asks the daemon to exit, which
+        returns True. Silence right after the wake word is answered out loud.
         """
-        self.keep_listening = True
         awake = True
         quiet = 0
-        while self.keep_listening:
-            self.keep_listening = False
+        while True:
             self.unrecognized = False
             self.spoke = False
+            self.needs_wake_word = False
 
             heard = self.wait_for_speech(timeout=5)
-            if heard is None:
-                if awake:
-                    self.speak(_("I didn't hear anything."))
-            else:
+            cmd = None
+            if heard is not None:
                 cmd = self.transcribe(
                     heard + self.record_until_silence(), language=COMMAND_LANGUAGE
                 )
-                if cmd:
-                    logger.info("👂 %s", cmd)
-                    if not self.route_command(cmd.lower().strip(".,!? ")):
-                        return True
-                    # A plugin's modal mode may have taken the tray's Quit while it
-                    # held the microphone; honour it now that the stack has unwound.
-                    if self.exit_requested:
-                        return True
-                    self._reset_detector()
-                    if not self.unrecognized and not self.spoke:
-                        quiet = 0
-                        self.keep_listening = True
-                elif not awake:
-                    quiet += 1
-                    self.keep_listening = quiet < FOLLOWUP_IDLE_ROUNDS
+            if not cmd:
+                if awake and heard is None:
+                    self.speak(_("I didn't hear anything."))
+                    return False
+                quiet += 1
+                if quiet >= FOLLOWUP_IDLE_ROUNDS:
+                    return False
+                awake = False
+                continue
 
-            awake = False
-            if self.unrecognized:
+            logger.info("👂 %s", cmd)
+            if not self.route_command(cmd.lower().strip(".,!? ")):
+                return True
+            # A plugin's modal mode may have taken the tray's Quit while it held
+            # the microphone; honour it now that the stack has unwound.
+            if self.exit_requested:
+                return True
+            self._reset_detector()
+            if self.spoke:
+                # Also before giving the mic back: the unattended-mode notice
+                # names the wake word, and the detector must not hear it.
                 self._drain_feedback()
-        return False
+            if self.needs_wake_word:
+                return False
+            quiet = 0
+            awake = False
 
     def run(self):
         """Load models and plugins, then run the wake-word listen loop forever.

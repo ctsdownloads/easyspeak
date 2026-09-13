@@ -6,16 +6,20 @@ command succeeds. These steps drive route_command with stub plugins and read
 the spoken replies back off the stubbed speech pipeline.
 """
 
+import re
 from contextlib import ExitStack
 from unittest.mock import Mock, patch
 
 import pytest
-from easyspeak.core.config import MISUNDERSTAND_GRACE
+from easyspeak.core.config import FOLLOWUP_IDLE_ROUNDS, MISUNDERSTAND_GRACE
 from easyspeak.core.main import EasySpeak
 from easyspeak.core.tray import TrayAction
 from pytest_bdd import given, parsers, scenarios, then, when
 
-scenarios("features/command_recognition.feature")
+scenarios(
+    "features/command_recognition.feature",
+    "features/follow_up_listening.feature",
+)
 
 
 def _live_proc():
@@ -38,9 +42,12 @@ class _StubPlugins:
 
     def __init__(self):
         self.help_shown_count = 0
+        self.handled = []
 
     def handle(self, cmd, core):
         if cmd == "open files":
+            self.handled.append(cmd)
+            core.speak("Opening files.")
             return True
         if cmd == "help":
             self.show_help(core)
@@ -76,9 +83,7 @@ def fresh_easyspeak(ctx):
 
 
 def _route(ctx, phrase):
-    """Route one deliberate utterance, mirroring the loop's per-iteration reset
-    of keep_listening so each turn's assertion reflects only this command."""
-    ctx["easy"].keep_listening = False
+    """Route one deliberate utterance straight through route_command."""
     ctx["easy"].route_command(phrase)
 
 
@@ -94,14 +99,16 @@ def mic_mishears(ctx, phrase):
     _route(ctx, phrase)
 
 
-@when("the wake word fires and EasySpeak hears one unrecognised command")
-def run_one_unrecognised_command(ctx):
-    """Drive the real run() loop through a single wake → unrecognised command.
+def _run_session(ctx, transcripts):
+    """Drive the real run() loop through one wake and the scripted utterances.
 
     The model/audio layer is stubbed so the loop exercises its own
-    orchestration: wake fires once, one gibberish transcript is heard, then a
-    KeyboardInterrupt ends the loop. route_command stays real, so the soft
-    apology and the post-miss drain happen exactly as in production.
+    orchestration: the wake word fires once, each transcript in `transcripts`
+    is heard in turn (None is a silent listen), then a KeyboardInterrupt on the
+    next wake-word read ends the run. route_command and the session loop stay
+    real, so replies, misses and drains happen exactly as in production. A
+    session that ends early leaves utterances unheard, and one that never ends
+    runs out of script, so either failure shows.
     """
     easy = ctx["easy"]
     easy.speech = Mock()  # count drains; speak becomes a no-op
@@ -114,9 +121,12 @@ def run_one_unrecognised_command(ctx):
     # Startup samples the room to set the silence threshold, which would eat the
     # scripted stream reads below before the wake word ever fires.
     easy.calibrate_silence = Mock()
-    easy.wait_for_speech = Mock(return_value=b"heard-something")
+    heard = [None if text is None else b"heard-something" for text in transcripts]
+    easy.wait_for_speech = Mock(side_effect=heard)
     easy.record_until_silence = Mock(return_value=b"")
-    easy.transcribe = Mock(return_value="flibbertigibbet")
+    easy.transcribe = Mock(
+        side_effect=[text for text in transcripts if text is not None]
+    )
     easy.flush_stream = Mock()  # don't consume the scripted stream reads
 
     stream = Mock()
@@ -133,6 +143,19 @@ def run_one_unrecognised_command(ctx):
     wake.return_value.predict.return_value = 0.9  # above threshold
 
     easy.run()
+
+
+@when("the wake word fires and EasySpeak hears one unrecognised command")
+def run_one_unrecognised_command(ctx):
+    _run_session(ctx, ["flibbertigibbet", None, None])
+
+
+@when(parsers.re(r"the wake word fires and I say (?P<said>.+), then fall silent"))
+def run_scripted_session(ctx, said):
+    """Each quoted utterance is heard in turn, then the mic hears nothing until
+    the session gives up, however long that takes."""
+    utterances = re.findall(r'"([^"]*)"', said)
+    _run_session(ctx, [*utterances, *([None] * FOLLOWUP_IDLE_ROUNDS)])
 
 
 def _spoken(ctx):
@@ -173,14 +196,38 @@ def command_list_shown_once(ctx):
     assert ctx["plugin"].help_shown_count == 1
 
 
-@then("EasySpeak keeps listening for another command")
-def easyspeak_keeps_listening(ctx):
-    assert ctx["easy"].keep_listening is True
-
-
 @then("EasySpeak drains its speech before listening again")
 def drains_before_listening(ctx):
     # Drained twice: once right after the misunderstanding (so its still-playing
     # apology can't be misheard into the next escalation), once on shutdown.
     # Without the fix only the shutdown drain happens (call_count == 1).
     assert ctx["easy"].speech.drain.call_count == 2
+
+
+@then("both commands are carried out on the one wake word")
+def both_commands_carried_out(ctx):
+    assert ctx["plugin"].handled == ["open files", "open files"]
+
+
+@then('"open files" is carried out on the one wake word')
+def open_files_carried_out(ctx):
+    assert ctx["plugin"].handled == ["open files"]
+
+
+@then("each reply is drained before the next listen")
+def each_reply_drained(ctx):
+    # One drain per reply, plus the one on shutdown.
+    assert ctx["easy"].speech.drain.call_count == len(ctx["plugin"].handled) + 1
+
+
+@then("the apology is drained before the next listen")
+def apology_drained(ctx):
+    # The apology, the reply to "open files", and the shutdown drain.
+    assert ctx["easy"].speech.drain.call_count == 3
+
+
+@then("EasySpeak listens twice more, then waits for the wake word again")
+def listens_twice_more(ctx):
+    # The command, then FOLLOWUP_IDLE_ROUNDS silent listens; the run ended on the
+    # wake-word read that followed, so the session did give the mic back.
+    assert ctx["easy"].wait_for_speech.call_count == 1 + FOLLOWUP_IDLE_ROUNDS

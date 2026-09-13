@@ -13,10 +13,12 @@ source ~/easyspeak-venv/bin/activate
 easyspeak
 ```
 
-Say "Hey Jarvis" followed by a command. After a command that gives no spoken
-reply (such as volume changes), EasySpeak keeps listening for a few seconds so
-you can chain commands — say "louder", "louder", "louder" without repeating the
-wake word each time.
+Say "Hey Jarvis" followed by a command. Afterwards EasySpeak keeps listening,
+whether it replied, acted silently or did not understand, so you can go on or
+try again at your own pace — "open documents", then "louder", "louder" — without
+repeating the wake word. It goes back to waiting for the wake word after about
+ten seconds of silence, or when a mode ended because you went quiet, which its
+spoken notice tells you.
 
 ## Command-line options
 

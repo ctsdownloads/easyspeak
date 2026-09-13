@@ -14,12 +14,11 @@ Feature: Friendly feedback when a command isn't understood
     Then EasySpeak's last reply is "Sorry, I didn't understand."
     And the command list is not shown
 
-  Scenario: A second miss shows help once and keeps the mic open
+  Scenario: A second miss shows help once
     When I say "flibbertigibbet"
     And I say "wibble wobble"
     Then EasySpeak says "I didn't understand."
     And the command list is shown
-    And EasySpeak keeps listening for another command
 
   Scenario: Repeated misses stop re-showing the command list
     When I say "flibbertigibbet"

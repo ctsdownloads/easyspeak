@@ -418,7 +418,6 @@ class TestEasySpeakRouteCommand:
 
         assert result is True
         mock_speak.assert_called_once_with("Sorry, I didn't understand.")
-        assert easy.keep_listening is False
 
     @patch.object(EasySpeak, "speak")
     def test_route_command_plugin_error(
@@ -466,7 +465,6 @@ class TestEasySpeakRouteCommand:
             (("I didn't understand.",),),
         ]
         mock_show_help.assert_called_once_with()
-        assert easy.keep_listening is True
         assert easy.help_shown is True
 
     @patch.object(EasySpeak, "_show_help")
@@ -483,7 +481,6 @@ class TestEasySpeakRouteCommand:
 
         easy.route_command("miss one")
         easy.route_command("miss two")
-        easy.keep_listening = False
         easy.route_command("miss three")
 
         mock_show_help.assert_called_once_with()
@@ -492,7 +489,6 @@ class TestEasySpeakRouteCommand:
             (("I didn't understand.",),),
             (("I didn't understand.",),),
         ]
-        assert easy.keep_listening is True
 
     @patch.object(EasySpeak, "speak")
     @patch("time.time")
@@ -511,7 +507,6 @@ class TestEasySpeakRouteCommand:
         mock_speak.assert_called_once_with("Sorry, I didn't understand.")
         assert easy.misunderstand_count == 1
         assert easy.help_shown is False
-        assert easy.keep_listening is False
         assert easy.unrecognized is False
 
     @patch.object(EasySpeak, "_show_help")
@@ -1014,7 +1009,7 @@ class TestEasySpeakRun:
         mock_wakeword_model.return_value = mock_wakeword_instance
 
         # Speech once (handled), then silence ends the follow-up window.
-        mock_wait.side_effect = [b"audio_data", None]
+        mock_wait.side_effect = [b"audio_data", None, None]
         mock_record.return_value = b"more_audio"
         mock_transcribe.return_value = "test command"
         mock_route_command.return_value = True
@@ -1053,7 +1048,7 @@ class TestEasySpeakRun:
     @patch.object(EasySpeak, "transcribe")
     @patch.object(EasySpeak, "route_command")
     @patch.object(EasySpeak, "flush_stream")
-    def test_run_keeps_listening_after_help(
+    def test_run_keeps_listening_after_a_reply(
         self,
         mock_flush_stream,
         mock_route_command,
@@ -1068,9 +1063,8 @@ class TestEasySpeakRun:
         mock_subprocess_run,
         mock_plugin,
     ):
-        """When route_command re-arms keep_listening (help shown), the loop
-        drains speech and listens for a follow-up command without a new wake
-        word."""
+        """A miss and then a command that replies out loud both keep the mic
+        open, each reply drained first; two silent listens end the session."""
         easy = EasySpeak()
         easy.plugins = [mock_plugin]
         easy.speech = Mock()
@@ -1087,18 +1081,17 @@ class TestEasySpeakRun:
         mock_wakeword_instance.predict.return_value = 0.8
         mock_wakeword_model.return_value = mock_wakeword_instance
 
-        mock_wait.return_value = b"audio_data"
+        mock_wait.side_effect = [b"audio_data", b"audio_data", None, None]
         mock_record.return_value = b"more_audio"
-        mock_transcribe.return_value = "gibberish"
+        mock_transcribe.side_effect = ["gibberish", "open documents"]
 
         def route(_cmd):
-            """First call mimics a help-miss (re-arms the loop); the second
-            speaks a reply, which ends the session rather than keeping the mic."""
+            """First a soft-apology miss, then a command with a spoken reply."""
             if mock_route_command.call_count == 1:
                 easy.unrecognized = True
-                easy.keep_listening = True
+                easy.speak("Sorry, I didn't understand.")
             else:
-                easy.speak("done")
+                easy.speak("Opening documents.")
             return True
 
         mock_route_command.side_effect = route
@@ -1106,8 +1099,69 @@ class TestEasySpeakRun:
         easy.run()
 
         assert mock_route_command.call_count == 2
-        assert mock_wait.call_count == 2
-        # Once between the two captures, once on shutdown.
+        assert mock_wait.call_count == 4
+        # After each reply, then on shutdown.
+        assert easy.speech.drain.call_count == 3
+
+    @patch("subprocess.run")
+    @patch("easyspeak.core.main.pyaudio")
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch("time.time")
+    @patch.object(EasySpeak, "wait_for_speech")
+    @patch.object(EasySpeak, "record_until_silence")
+    @patch.object(EasySpeak, "transcribe")
+    @patch.object(EasySpeak, "route_command")
+    @patch.object(EasySpeak, "flush_stream")
+    @patch.object(EasySpeak, "load_plugins")
+    def test_run_asks_for_the_wake_word_after_an_unattended_mode(
+        self,
+        mock_load_plugins,
+        mock_flush_stream,
+        mock_route_command,
+        mock_transcribe,
+        mock_record,
+        mock_wait,
+        mock_time,
+        mock_whisper_model,
+        mock_wakeword_model,
+        mock_pyaudio,
+        mock_subprocess_run,
+        mock_plugin,
+    ):
+        """A mode left unattended says so and the session ends with it."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin]
+        easy.speech = Mock()
+        mock_time.return_value = 100.0
+
+        mock_audio = Mock()
+        mock_stream = Mock()
+        pcm_data = b"\x00\x00" * 1280
+        mock_stream.read.side_effect = [pcm_data, KeyboardInterrupt()]
+        mock_audio.open.return_value = mock_stream
+        mock_pyaudio.PyAudio.return_value = mock_audio
+
+        mock_wakeword_instance = Mock()
+        mock_wakeword_instance.predict.return_value = 0.8
+        mock_wakeword_model.return_value = mock_wakeword_instance
+
+        mock_wait.side_effect = [b"audio_data"]
+        mock_record.return_value = b"more_audio"
+        mock_transcribe.return_value = "grid"
+
+        def route(_cmd):
+            """The mode ran and ended idle, as listen_modal reports it."""
+            easy._leave_unattended("grid")
+            return True
+
+        mock_route_command.side_effect = route
+
+        easy.run()
+
+        mock_wait.assert_called_once()
+        # The notice names the wake word: drained before the detector listens
+        # again, then the shutdown drain.
         assert easy.speech.drain.call_count == 2
 
     @patch("subprocess.run")
@@ -1155,22 +1209,23 @@ class TestEasySpeakRun:
         mock_wakeword_instance.predict.return_value = 0.8
         mock_wakeword_model.return_value = mock_wakeword_instance
 
-        mock_wait.return_value = b"audio_data"
+        mock_wait.side_effect = [b"audio_data", None, None]
         mock_record.return_value = b"more_audio"
         mock_transcribe.return_value = "gibberish"
 
         def route(_cmd):
-            """A soft-apology miss: sets unrecognized but never keep_listening."""
+            """A soft-apology miss, spoken out loud as route_command does."""
             easy.unrecognized = True
+            easy.speak("Sorry, I didn't understand.")
             return True
 
         mock_route_command.side_effect = route
 
         easy.run()
 
-        assert easy.keep_listening is False
-        # Once after the miss, once on shutdown — though we never kept listening.
+        # Once after the miss, before listening on, and once on shutdown.
         assert easy.speech.drain.call_count == 2
+        assert mock_wait.call_count == 3
 
     @patch("subprocess.run")
     @patch("time.time")
@@ -1227,7 +1282,6 @@ class TestEasySpeakRun:
         # The command fired once; the empty rounds drove the idle-out, no wake.
         mock_route_command.assert_called_once()
         assert mock_transcribe.call_count == 3
-        assert easy.keep_listening is False
 
     @patch("subprocess.run")
     @patch("time.time")
@@ -1355,7 +1409,7 @@ class TestEasySpeakRun:
         mock_wakeword_model.return_value = mock_wakeword_instance
 
         # Speech once (handled), then silence ends the follow-up window.
-        mock_wait.side_effect = [b"audio_data", None]
+        mock_wait.side_effect = [b"audio_data", None, None]
         mock_record.return_value = b"more_audio"
         mock_transcribe.return_value = "test command"
         mock_route_command.return_value = True
