@@ -72,13 +72,16 @@ def strip_wake_words(cmd):
     Only a prefix is removed. Replacing every occurrence anywhere in the utterance
     -- which is what this did -- eats the word out of the middle of a command, so
     "search jarvis" became "search" and a URL containing it lost part of itself.
-    Longest prefix first, so "hey jarvis," is matched before "jarvis".
+    Longest prefix first, so "hey jarvis," is matched before "jarvis". The case
+    of what remains is kept: dictation inserts it as spoken, and every other
+    consumer lowercases for itself.
     """
-    cmd = cmd.lower().strip()
+    cmd = cmd.strip()
+    lowered = cmd.lower()
     for wake in sorted(WAKE_PREFIXES, key=len, reverse=True):
-        if cmd == wake:
+        if lowered == wake:
             return ""
-        if cmd.startswith(wake):
+        if lowered.startswith(wake):
             rest = cmd[len(wake) :]
             # Only a prefix if a word actually ends here.
             if not rest or rest[0] in " ,.!?":
@@ -269,7 +272,7 @@ class EasySpeak:
 
         Returns False to exit.
         """
-        cmd = strip_wake_words(cmd)
+        cmd = strip_wake_words(cmd).lower()
         self.unrecognized = False
 
         if not cmd:
@@ -577,9 +580,11 @@ class EasySpeak:
         wake word before every dictated sentence. `language` is passed on to
         [`transcribe`][core.main.EasySpeak.transcribe].
 
-        Yields each recognised command, lowercased and stripped of surrounding
-        punctuation. The generator simply stops when the mode should end, so a
-        caller's `for` loop falls through to its own cleanup.
+        Yields each recognised command stripped of the wake word and surrounding
+        punctuation, in the case Whisper wrote it: dictation inserts it as is,
+        the modes lowercase it to match their words. The generator simply stops
+        when the mode should end, so a caller's `for` loop falls through to its
+        own cleanup.
         """
         if self.spoke:
             self._drain_feedback()
@@ -786,7 +791,7 @@ class EasySpeak:
                 continue
 
             logger.info("👂 %s", cmd)
-            if not self.route_command(cmd.lower().strip(".,!? ")):
+            if not self.route_command(cmd):
                 return True
             # A plugin's modal mode may have taken the tray's Quit while it held
             # the microphone; honour it now that the stack has unwound.

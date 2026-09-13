@@ -54,11 +54,11 @@ class TestYieldedCommands:
     """What the generator hands back to the plugin."""
 
     def test_yields_normalised_commands(self, easy):
-        """Commands arrive lowercased and stripped of surrounding punctuation."""
+        """Commands arrive stripped of surrounding punctuation, case kept."""
         drive(easy, [b"a", b"b"], ["Close!", "  Grid?  "])
 
         with clock():
-            assert list(easy.listen_modal("grid")) == ["close", "grid"]
+            assert list(easy.listen_modal("grid")) == ["Close", "Grid"]
 
     def test_skips_empty_transcriptions(self, easy):
         """An unrecognised utterance is dropped without ending the mode."""
@@ -560,6 +560,18 @@ class TestWakeWordInsideAMode:
         with clock():
             assert list(easy.listen_modal("browser")) == ["numbers"]
 
+    def test_keeps_the_case_of_what_was_said(self, easy):
+        """Dictation inserts the text as spoken, so the mode gets it unlowered.
+
+        Lowercasing here turned "United States" into "united states" in every
+        dictated sentence (#183). The modes that match words lowercase for
+        themselves.
+        """
+        drive(easy, [b"a"], ["Hey Jarvis, Dear Sir"])
+
+        with clock():
+            assert list(easy.listen_modal("dictation")) == ["Dear Sir"]
+
     def test_bare_wake_word_is_not_a_command(self, easy):
         """The wake word alone leaves nothing to act on."""
         drive(easy, [b"a", b"b"], ["hey jarvis", "close"])
@@ -687,6 +699,7 @@ class TestWakeWordStripping:
             ("hey jarvis numbers", "numbers"),
             ("jarvis, back", "back"),
             ("Hey Jarvis", ""),
+            ("Hey Jarvis, Open Documents", "Open Documents"),
             ("grid", "grid"),
         ],
     )

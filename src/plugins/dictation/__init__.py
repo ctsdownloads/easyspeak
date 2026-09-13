@@ -182,7 +182,7 @@ def says(text, phrases):
 def is_exit_phrase(text, phrases=None):
     """Whether a dictated utterance asks to leave dictation mode."""
     phrases = EXIT_PHRASES if phrases is None else phrases
-    return any(phrase in text for phrase in phrases)
+    return any(phrase in text.lower() for phrase in phrases)
 
 
 # --- Insertion ---------------------------------------------------------------
@@ -651,6 +651,7 @@ def _handle_keystroke(core, text):
     A backspace shortens what "scratch that" still has to remove rather than
     discarding it, so the two can be used in either order on one utterance.
     """
+    text = text.lower()
     request = mediakeys.parse_key_request(
         text.split(), BARE_KEYS, names=KEY_NAMES, counts=COUNTS, prefixes=KEY_PREFIXES
     )
@@ -729,7 +730,7 @@ def run_push_to_talk(core, should_continue):
         text = core.transcribe(audio, prompt=DICTATION_PROMPT, language=LANGUAGE)
         if not text:
             continue
-        if _dictate_utterance(core, text.strip().lower()):
+        if _dictate_utterance(core, text.strip()):
             return
 
 

@@ -518,6 +518,7 @@ def test_listen_for_tracking_commands_right_click(
         ["exit"],
         ["quit"],
         ["done"],
+        ["Stop Tracking"],
     ],
 )
 @patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))

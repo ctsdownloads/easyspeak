@@ -771,7 +771,8 @@ def browser_mode(core):
 
 def _run_browser_mode(core):
     """Dispatch one browser command per utterance until the mode ends."""
-    for cmd_lower in core.listen_modal("browser", timeout=30, idle_timeout=180):
+    for spoken in core.listen_modal("browser", timeout=30, idle_timeout=180):
+        cmd_lower = spoken.lower()
         logger.debug("  [browser] %s", cmd_lower)
 
         # Leave the mode, browser left running

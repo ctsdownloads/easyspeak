@@ -1480,6 +1480,89 @@ def test_a_keystroke_does_not_end_the_dictation_session(mock_press, mock_core):
     assert mock_core.speak.call_args.args[0] == "Done"
 
 
+# --- Capitalization is kept (#183) --------------------------------------------
+
+
+@patch("easyspeak.plugins.dictation.insert_text", return_value=dictation.INSERTED)
+def test_push_to_talk_keeps_the_capitals_whisper_wrote(mock_insert):
+    """ "United States" went in as "united states" for the control words' sake."""
+    core = Mock()
+    core.wait_for_speech = Mock(return_value=b"audio1")
+    core.record_until_silence = Mock(return_value=b"audio2")
+    core.transcribe = Mock(return_value="Flying to the United States.")
+
+    dictation.run_push_to_talk(core, _holds(1))
+
+    assert mock_insert.call_args.args == (" Flying to the United States",)
+
+
+@patch("easyspeak.plugins.dictation.insert_text", return_value=dictation.INSERTED)
+def test_dictation_session_keeps_the_capitals_whisper_wrote(mock_insert, mock_core):
+    """The voice `notes` flow inserts the sentence as transcribed too."""
+    mock_core.transcribe.side_effect = ["Dear Mr Smith comma", "stop notes"]
+
+    assert dictation._dictation_session(mock_core) is True
+
+    assert mock_insert.call_args.args == (" Dear Mr Smith,",)
+
+
+@pytest.mark.parametrize("spoken", ["Stop notes", "STOP NOTES", "Notes stop"])
+@patch("easyspeak.plugins.dictation.insert_text")
+def test_a_capitalized_exit_phrase_still_ends_dictation(mock_insert, spoken, mock_core):
+    """Whisper capitalizes the first word of an utterance; the phrase must still match."""
+    mock_core.transcribe.side_effect = [spoken]
+
+    assert dictation._dictation_session(mock_core) is True
+
+    assert mock_core.speak.call_args.args[0] == "Done"
+    assert not mock_insert.called
+
+
+@patch.object(mediakeys, "press_key", return_value=True)
+def test_a_capitalized_keystroke_is_still_a_keystroke(mock_press, mock_core):
+    """ "Press enter" at the start of an utterance is the command, not text."""
+    mock_core.dictation_last_length = 0
+    mock_core.transcribe.side_effect = ["Press enter", "stop notes"]
+
+    assert dictation._dictation_session(mock_core) is True
+
+    assert mock_press.call_args.args == (mediakeys.KEYS["enter"], 1)
+
+
+@patch.object(mediakeys, "press_key", return_value=True)
+def test_a_capitalized_scratch_that_still_undoes(mock_press, mock_core):
+    """ "Scratch that" removes what was dictated last, however Whisper cased it."""
+    mock_core.dictation_last_length = 6
+    mock_core.transcribe.side_effect = ["Scratch that", "stop notes"]
+
+    assert dictation._dictation_session(mock_core) is True
+
+    assert mock_press.call_args.args == (mediakeys.KEYS["backspace"], 6)
+    assert mock_core.dictation_last_length == 0
+
+
+@pytest.mark.parametrize("language", ["en", "de", "it", "fr", "es"])
+def test_every_language_ends_dictation_with_its_exit_phrase_capitalized(language):
+    """ "Notizen beenden", "Fine dettatura", "Fin de la dictée", "Fin del dictado"."""
+    vocabulary = dictation.load_vocabulary(language)
+    phrases = dictation.exit_phrases(vocabulary)
+
+    assert dictation.is_exit_phrase(vocabulary["exit"]["say"].title(), phrases)
+
+
+@pytest.mark.parametrize("language", ["en", "de", "it", "fr", "es"])
+def test_every_language_hears_its_comma_word_capitalized(language):
+    """ "Komma", "Virgola", "Virgule", "Coma" at the start of a sentence are the sign."""
+    vocabulary = dictation.load_vocabulary(language)
+    comma = next(e for e in vocabulary["replace"] if e["insert"] == ", ")["say"][0]
+
+    assert (
+        dictation.format_text(f"Alpha {comma.title()} Beta", vocabulary)
+        == "Alpha, Beta"
+    )
+    assert dictation.format_text(f"{comma.title()} Beta", vocabulary) == ", Beta"
+
+
 # --- Control words per language -----------------------------------------------
 
 

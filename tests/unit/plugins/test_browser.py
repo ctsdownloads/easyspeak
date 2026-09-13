@@ -1242,7 +1242,7 @@ def test_browser_mode_close_quits_the_browser(mock_qb, command, mock_core_factor
     assert mock_core.speak.call_args.args[0] == "Closing browser."
 
 
-@pytest.mark.parametrize("command", ["exit browser", "leave browser"])
+@pytest.mark.parametrize("command", ["exit browser", "leave browser", "Leave Browser"])
 @patch.object(browser, "qb")
 def test_browser_mode_leave_keeps_the_browser(mock_qb, command, mock_core_factory):
     """When told to leave the mode then the browser is left running."""

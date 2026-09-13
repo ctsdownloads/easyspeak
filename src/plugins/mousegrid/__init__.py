@@ -525,7 +525,7 @@ def _run_grid_mode(core):
     """Dispatch one grid command per utterance until the mode ends."""
     global grid_active, drag_start
 
-    for cmd_lower in core.listen_modal(
+    for spoken in core.listen_modal(
         "grid",
         prompt=(
             "one two three four five six seven eight nine click double "
@@ -534,6 +534,7 @@ def _run_grid_mode(core):
         timeout=10,
         idle_timeout=30,
     ):
+        cmd_lower = spoken.lower()
         logger.debug("  ← %s", cmd_lower)
 
         # === Exit ===

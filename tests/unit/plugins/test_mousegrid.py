@@ -847,6 +847,7 @@ def test_listen_for_grid_commands_drag(mock_end_drag, mock_core_factory):
         ["stop"],
         ["done"],
         ["quit"],
+        ["Close"],
     ],
 )
 def test_listen_for_grid_commands_exit_commands(exit_command, mock_core_factory):

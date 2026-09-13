@@ -436,7 +436,7 @@ def listen_for_tracking_commands(core):
 
     logger.info("Tracking mode: freeze, nudge, click, or stop tracking")
 
-    for cmd_lower in core.listen_modal(
+    for spoken in core.listen_modal(
         "tracking",
         prompt=(
             "click double click right click freeze go nudge up down left "
@@ -445,6 +445,7 @@ def listen_for_tracking_commands(core):
         timeout=10,
         idle_timeout=30,
     ):
+        cmd_lower = spoken.lower()
         if not tracking_active:
             logger.info("Tracking stopped; leaving tracking mode")
             return

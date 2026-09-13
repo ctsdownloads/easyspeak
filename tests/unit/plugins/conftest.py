@@ -27,7 +27,7 @@ def attach_listen_modal(core):
         for value in values:
             if value:
                 yielded = True
-                yield value.lower().strip(".,!? ")
+                yield value.strip(".,!? ")
         if yielded:
             return
         # Tests that set a constant `transcribe.return_value` relied on the old
@@ -36,7 +36,7 @@ def attach_listen_modal(core):
         constant = getattr(core.transcribe, "return_value", None)
         if isinstance(constant, str) and constant:
             for _ in range(REPEATED_TRANSCRIPTION_LIMIT):
-                yield constant.lower().strip(".,!? ")
+                yield constant.strip(".,!? ")
 
     core.listen_modal = Mock(side_effect=_listen_modal)
     return core

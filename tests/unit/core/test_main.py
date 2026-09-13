@@ -380,6 +380,15 @@ class TestEasySpeakRouteCommand:
         easy.route_command("jarvis test command")
         mock_plugin.handle.assert_called_with("test command", easy)
 
+    def test_route_command_lowercases_what_whisper_capitalized(self, mock_plugin):
+        """Plugins match lowercase words; only dictation wants the case kept."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin]
+
+        easy.route_command("Hey Jarvis, Open Documents.")
+
+        mock_plugin.handle.assert_called_with("open documents", easy)
+
     def test_route_command_strip_punctuation(self, mock_plugin):
         """Test that route_command strips punctuation."""
         easy = EasySpeak()
