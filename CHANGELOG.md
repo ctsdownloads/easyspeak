@@ -5,6 +5,44 @@ canonical, GitHub-independent record of releases. It is updated once per
 release. The format loosely follows [Keep a Changelog](https://keepachangelog.com/),
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.11.0 · Commands in Your Language · 2026-09-13
+
+**Commands, Dictation Control Words and the Help Screen in the User's Language,
+and a Microphone That Stays Open**
+
+With `EASYSPEAK_LANGUAGE` set, or the new `--language` option, the general,
+app, folder, media, sleep and system commands take that language's words —
+"öffne den Rechner", "lauter", "geh schlafen" — and so do the words inside
+dictation, "Komma", "neue Zeile", "Notizen beenden", and the word that starts
+it, "Diktat"; the English words keep working everywhere. What a plugin listens
+for is a `vocabulary.toml` table beside its reply catalog, one per language, so
+tuning a phrase, or adding the spellings Whisper makes of it, is editing a file;
+the help screen lists the words of the active language, built from those tables.
+The grid, browser and head-tracking modes still take English words. A typo in
+the language code is reported at startup, and so is why replies fall back to
+English.
+
+The microphone now stays open after every command, whether it replied, acted
+silently or did not understand, and gives up only after about ten seconds of
+silence, so "open documents" or a misheard word no longer sends you back to the
+wake word. The docs' diagrams enlarge on click, and the file manager can be
+closed by its everyday names — the one your desktop is configured for.
+
+### What's Changed
+
+- Speak the dictation control words in the user's language by @bittner in [#174](https://github.com/ctsdownloads/easyspeak/pull/174)
+- Add a `--language` option to the command line by @bittner in [#176](https://github.com/ctsdownloads/easyspeak/pull/176)
+- Report an unknown language and why replies fall back to English by @bittner in [#177](https://github.com/ctsdownloads/easyspeak/pull/177)
+- Show the help screen in the active language by @bittner in [#181](https://github.com/ctsdownloads/easyspeak/pull/181)
+- Start dictation with the active language's word by @bittner in [#180](https://github.com/ctsdownloads/easyspeak/pull/180)
+- Take commands in the user's language in the simple plugins by @bittner in [#182](https://github.com/ctsdownloads/easyspeak/pull/182)
+- Make the docs' diagrams enlarge on click and show the plugin locale by @bittner in [#184](https://github.com/ctsdownloads/easyspeak/pull/184)
+- Keep the mic open after every command, reply or miss by @bittner in [#187](https://github.com/ctsdownloads/easyspeak/pull/187)
+- Build the help lines from the vocabulary tables by @bittner in [#185](https://github.com/ctsdownloads/easyspeak/pull/185)
+- Hear the file manager as Whisper writes it by @bittner in [#186](https://github.com/ctsdownloads/easyspeak/pull/186)
+
+**Full Changelog**: [`0.10.0...0.11.0`](https://github.com/ctsdownloads/easyspeak/compare/0.10.0...0.11.0)
+
 ## 0.10.0 · Answers in Your Language · 2026-09-12
 
 **Spoken Replies in German, Italian, French and Spanish, a Language Pack for
