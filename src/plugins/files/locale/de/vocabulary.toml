@@ -8,7 +8,7 @@ file_manager = ["dateimanager", "datei manager", "datei-manager", "dateien manag
 [folders]
 documents = ["dokumente"]
 downloads = ["downloads"]
-pictures = ["bilder"]
+pictures = ["bilder", "fotos"]
 music = ["musik"]
 videos = ["videos"]
 projects = ["projekte"]

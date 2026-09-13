@@ -231,3 +231,12 @@ def test_apps_closes_the_file_manager_by_its_german_name(mock_close, mock_core):
     """ "schließe den Datei Manager" closes nautilus."""
     assert apps.handle("schließe den datei manager", mock_core) is True
     mock_close.assert_called_once_with("nautilus", mock_core)
+
+
+@pytest.mark.usefixtures("german")
+@patch.object(files, "open_folder", return_value=True)
+def test_files_opens_the_pictures_as_photos(mock_open, mock_core):
+    """ "Fotos" and "photos" name the Pictures folder as well."""
+    assert files.handle("zeige die fotos", mock_core) is True
+    assert files.handle("open photos", mock_core) is True
+    assert [c.args[0] for c in mock_open.call_args_list] == ["~/Pictures", "~/Pictures"]
