@@ -16,7 +16,7 @@ NAME = "sleep"
 DESCRIPTION = "Deactivate (sleep) until reactivated from the tray or Quick Settings"
 
 COMMANDS = [
-    _("go to sleep / stop listening - release the mic (reactivate from the tray icon)"),
+    f"{vocab.say('sleep')} - " + _("release the mic (reactivate from the tray icon)"),
 ]
 
 

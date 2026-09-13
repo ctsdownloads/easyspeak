@@ -53,7 +53,6 @@ msgstr ""
 "Simboli: apostrofo, virgolette, trattino lungo, trattino, chiocciola, "
 "cancelletto, percento, asterisco"
 
-msgid "notes - start dictation mode (say 'stop notes' to end)"
-msgstr ""
-"notes / dettatura - avvia la dettatura (di' 'fine dettatura' per "
-"terminare)"
+#, python-brace-format
+msgid "start dictation mode (say '{exit}' to end)"
+msgstr "avvia la dettatura (di' '{exit}' per terminare)"

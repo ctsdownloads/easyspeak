@@ -30,17 +30,14 @@ msgstr "Wiedergabe."
 msgid "Previous."
 msgstr "Zurück."
 
-msgid "next/skip - next track"
-msgstr "next/skip - nächster Titel"
+msgid "next track"
+msgstr "nächster Titel"
 
-msgid "pause - pause playback"
-msgstr "pause - Wiedergabe pausieren"
+msgid "pause playback"
+msgstr "Wiedergabe pausieren"
 
-msgid "play/resume - resume playback"
-msgstr "play/resume - Wiedergabe fortsetzen"
+msgid "previous track"
+msgstr "vorheriger Titel"
 
-msgid "previous - previous track"
-msgstr "previous - vorheriger Titel"
-
-msgid "stop the music - pause playback"
-msgstr "stop the music - Wiedergabe pausieren"
+msgid "resume playback"
+msgstr "Wiedergabe fortsetzen"

@@ -2,4 +2,4 @@
 # Whisper's lowercased transcript, so common mishearings belong here too.
 
 [commands]
-sleep = ["go to sleep", "goto sleep", "stop listening"]
+sleep = ["go to sleep", "stop listening", "goto sleep"]

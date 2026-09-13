@@ -30,14 +30,14 @@ msgstr "Modi nehmen Befehle jetzt direkt entgegen."
 msgid "Modes now wait for the wake word."
 msgstr "Modi warten jetzt auf das Aktivierungswort."
 
-msgid "free listening - modes accept bare commands again"
-msgstr "free listening - Modi nehmen Befehle wieder direkt entgegen"
+msgid "exit EasySpeak"
+msgstr "EasySpeak beenden"
 
-msgid "help - list all commands"
-msgstr "help - alle Befehle auflisten"
+msgid "list all commands"
+msgstr "alle Befehle auflisten"
 
-msgid "quit/exit/goodbye - exit EasySpeak"
-msgstr "quit/exit/goodbye - EasySpeak beenden"
+msgid "modes accept bare commands again"
+msgstr "Modi nehmen Befehle wieder direkt entgegen"
 
-msgid "require wake word - modes wait for the wake word each command"
-msgstr "require wake word - Modi warten vor jedem Befehl auf das Aktivierungswort"
+msgid "modes wait for the wake word each command"
+msgstr "Modi warten vor jedem Befehl auf das Aktivierungswort"

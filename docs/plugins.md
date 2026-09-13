@@ -139,7 +139,9 @@ def handle(cmd, core):
 `says` matches any of the key's phrases as whole words, in the active language's
 table and in the English one, so the English phrases keep working whatever the
 language; `which(cmd, section)` names the key of a section that was said, for
-things like app or folder names. Commands are transcribed in the active language
+things like app or folder names; `say(key)` gives the first ways of saying it in
+the active language, for a help line: `f"{vocab.say('hello')} - " + _("greet")`
+lists the German words when German is active and the English ones otherwise. Commands are transcribed in the active language
 once the core has a table for it (German, Italian, French and Spanish have one),
 so list the words people actually say, mishearings included.
 

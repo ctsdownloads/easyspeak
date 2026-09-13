@@ -55,7 +55,6 @@ msgstr ""
 "Symboles : apostrophe, guillemets, tiret, trait d'union, arobase, dièse, "
 "pour cent, astérisque"
 
-msgid "notes - start dictation mode (say 'stop notes' to end)"
-msgstr ""
-"notes / dictée - commencer la dictée (dites 'fin de la dictée' pour "
-"terminer)"
+#, python-brace-format
+msgid "start dictation mode (say '{exit}' to end)"
+msgstr "commencer la dictée (dites '{exit}' pour terminer)"

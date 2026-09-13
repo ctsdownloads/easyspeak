@@ -12,9 +12,21 @@ NAME = "apps"
 DESCRIPTION = "Launch and close applications"
 
 COMMANDS = [
-    _("open/launch [app] - open an application"),
-    _("close [app] - close an application"),
-    _("Apps: browser, steam, spotify, calculator, settings, terminal"),
+    f"{vocab.say('open')} [app] - " + _("open an application"),
+    f"{vocab.say('close', limit=1)} [app] - " + _("close an application"),
+    _("Apps: {names}").format(
+        names=", ".join(
+            vocab.say(app, "apps", limit=1)
+            for app in (
+                "browser",
+                "steam",
+                "spotify",
+                "calculator",
+                "settings",
+                "terminal",
+            )
+        )
+    ),
 ]
 
 # Flatpak apps

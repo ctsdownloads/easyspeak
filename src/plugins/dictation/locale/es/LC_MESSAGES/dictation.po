@@ -53,5 +53,6 @@ msgstr ""
 "Símbolos: apóstrofo, comillas, raya, guion, arroba, almohadilla, por "
 "ciento, asterisco"
 
-msgid "notes - start dictation mode (say 'stop notes' to end)"
-msgstr "notes / dictado - iniciar el dictado (di 'fin del dictado' para terminar)"
+#, python-brace-format
+msgid "start dictation mode (say '{exit}' to end)"
+msgstr "iniciar el dictado (di '{exit}' para terminar)"

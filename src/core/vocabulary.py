@@ -78,6 +78,18 @@ class Vocabulary:
             for phrase in self.phrases(key, section)
         )
 
+    def say(self, key, section="commands", limit=2):
+        """Return up to `limit` ways of saying `key`, joined by "/", for the help.
+
+        The active language's phrases when it has any, else the English ones, so
+        the help lists what the user can actually say.
+        """
+        for table in self.tables:
+            phrases = table.get(section, {}).get(key, [])
+            if phrases:
+                return "/".join(phrases[:limit])
+        return key
+
     def which(self, text, section):
         """Return the first key of `section` that `text` says, or None."""
         return next(

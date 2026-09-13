@@ -15,12 +15,9 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid ""
-"Folders: documents, downloads, pictures, music, videos, projects, home, "
-"desktop"
-msgstr ""
-"Cartelle: documents, downloads, pictures, music, videos, projects, home, "
-"desktop"
+#, python-brace-format
+msgid "Folders: {names}"
+msgstr "Cartelle: {names}"
 
 msgid "No file manager found."
 msgstr "Nessun gestore di file trovato."
@@ -29,8 +26,8 @@ msgstr "Nessun gestore di file trovato."
 msgid "Opening {label}."
 msgstr "Apro {label}."
 
-msgid "open [folder] - open a folder in your default file manager"
-msgstr "open [folder] - apre una cartella nel gestore di file"
+msgid "open a folder in your default file manager"
+msgstr "apre una cartella nel gestore di file"
 
-msgid "open files / file manager - open your default file manager"
-msgstr "open files / file manager - apre il gestore di file"
+msgid "open your default file manager"
+msgstr "apre il gestore di file"

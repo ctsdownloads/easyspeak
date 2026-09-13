@@ -168,3 +168,14 @@ def test_every_shipped_language_has_the_core_table():
         table = vocabulary.load_table(locale, code)
         assert set(table["numbers"].values()) == set(range(11)), code
         assert table["commands"]["prompt"], code
+
+
+def test_say_lists_the_active_languages_ways_for_the_help(package):
+    """The help shows the German words, up to the limit, or the English ones."""
+    vocab = vocabulary.Vocabulary(package, language="de")
+
+    assert vocab.say("open") == "öffne/starte"
+    assert vocab.say("open", limit=1) == "öffne"
+    assert vocab.say("close") == "close"
+    assert vocab.say("calculator", "apps", limit=1) == "rechner"
+    assert vocab.say("nothing") == "nothing"

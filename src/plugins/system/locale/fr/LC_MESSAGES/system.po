@@ -27,14 +27,14 @@ msgstr "Ne pas déranger désactivé."
 msgid "Do not disturb on."
 msgstr "Ne pas déranger activé."
 
-msgid "brightness up/down - adjust screen brightness"
-msgstr "brightness up/down - régler la luminosité"
+msgid "adjust screen brightness"
+msgstr "régler la luminosité"
 
-msgid "do not disturb on/off - toggle notifications"
-msgstr "do not disturb on/off - activer/désactiver les notifications"
+msgid "adjust volume"
+msgstr "régler le volume"
 
-msgid "mute - toggle mute"
-msgstr "mute - couper/rétablir le son"
+msgid "toggle mute"
+msgstr "couper/rétablir le son"
 
-msgid "volume up/down - adjust volume"
-msgstr "volume up/down - régler le volume"
+msgid "toggle notifications"
+msgstr "activer/désactiver les notifications"

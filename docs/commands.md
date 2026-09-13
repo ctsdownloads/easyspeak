@@ -1,14 +1,15 @@
 # Commands
 
 Say "Hey Jarvis" followed by any of the commands below. Say **"help"** at any
-time to print the full list to the terminal, described in the active language.
+time to print the full list to the terminal.
 
-The commands are listed in English, which works in every language. With
+This page lists the English commands, which work in every language. With
 `EASYSPEAK_LANGUAGE` set to German, Italian, French or Spanish, the general,
 app, folder, media, sleep and system commands also take that language's words
-("öffne den Rechner", "lauter", "geh schlafen"); each plugin's words are its
+("öffne den Rechner", "lauter", "geh schlafen"), and the terminal help lists
+them in those words, described in that language; each plugin's words are its
 `locale/<language>/vocabulary.toml`. The grid, browser and head-tracking modes
-still take English words only.
+still take English words only, and the help shows them so.
 
 ## Mouse grid
 

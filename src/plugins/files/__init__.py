@@ -12,11 +12,14 @@ NAME = "files"
 DESCRIPTION = "Folder navigation"
 
 COMMANDS = [
-    _("open [folder] - open a folder in your default file manager"),
-    _("open files / file manager - open your default file manager"),
-    _(
-        "Folders: documents, downloads, pictures, music, videos, projects, "
-        "home, desktop"
+    f"{vocab.say('open', limit=1)} [folder] - "
+    + _("open a folder in your default file manager"),
+    f"{vocab.say('open', limit=1)} {vocab.say('file_manager')} - "
+    + _("open your default file manager"),
+    _("Folders: {names}").format(
+        names=", ".join(
+            vocab.say(folder, "folders", limit=1) for folder in vocab.keys("folders")
+        )
     ),
 ]
 

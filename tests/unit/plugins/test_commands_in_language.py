@@ -1,5 +1,6 @@
 """The simple plugins take their commands in the active language, English too."""
 
+import importlib
 from unittest.mock import Mock, patch
 
 import pytest
@@ -184,3 +185,30 @@ def test_apps_named_without_a_verb_is_not_ours(mock_core):
     """An app name alone, no open or close, is left for another plugin."""
     assert apps.handle("gimp", mock_core) is None
     mock_core.speak.assert_not_called()
+
+
+@pytest.fixture
+def apps_in_german(monkeypatch):
+    """The apps plugin as imported with German active; English again after."""
+    from easyspeak.core import config
+
+    monkeypatch.setattr(config, "LANGUAGE", "de")
+    importlib.reload(apps)
+    yield apps
+    monkeypatch.setattr(config, "LANGUAGE", "en")
+    importlib.reload(apps)
+
+
+def test_help_lines_follow_the_active_language(apps_in_german):
+    """The real command list names the German words, with the app names too."""
+    assert apps_in_german.COMMANDS[0] == "öffne/öffnen [app] - open an application"
+    assert apps_in_german.COMMANDS[2].endswith("rechner, einstellungen, terminal")
+
+
+def test_help_lines_are_english_by_default():
+    """With English active the list reads as it always did."""
+    assert apps.COMMANDS[0] == "open/launch [app] - open an application"
+    assert (
+        files.COMMANDS[1] == "open files/file manager - open your default file manager"
+    )
+    assert sleep.COMMANDS[0].startswith("go to sleep/stop listening - ")

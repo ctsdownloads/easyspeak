@@ -2,4 +2,4 @@
 # kleingeschriebener Abschrift verglichen; häufige Verhörer gehören also dazu.
 
 [commands]
-sleep = ["schlaf", "geh schlafen", "schlafen gehen", "hör auf zuzuhören", "nicht mehr zuhören"]
+sleep = ["geh schlafen", "hör auf zuzuhören", "schlaf", "schlafen gehen", "nicht mehr zuhören"]

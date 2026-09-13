@@ -11,10 +11,12 @@ PRIORITY = 100  # the catch-all for help and exit routes last
 DESCRIPTION = "Help and exit commands"
 
 COMMANDS = [
-    _("help - list all commands"),
-    _("require wake word - modes wait for the wake word each command"),
-    _("free listening - modes accept bare commands again"),
-    _("quit/exit/goodbye - exit EasySpeak"),
+    f"{vocab.say('help', limit=1)} - " + _("list all commands"),
+    f"{vocab.say('require_wake_word', limit=1)} - "
+    + _("modes wait for the wake word each command"),
+    f"{vocab.say('free_listening', limit=1)} - "
+    + _("modes accept bare commands again"),
+    f"{vocab.say('exit', limit=3)} - " + _("exit EasySpeak"),
 ]
 
 core = None

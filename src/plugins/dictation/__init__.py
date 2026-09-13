@@ -26,14 +26,6 @@ DESCRIPTION = "Voice dictation into any text field"
 MAX_RECORD_SECONDS = 20.0
 SILENCE_DURATION = 0.7
 
-COMMANDS = [
-    _("notes - start dictation mode (say 'stop notes' to end)"),
-    _("Punctuation: comma, period, question mark, exclamation mark, colon, semicolon"),
-    _("Editing: backspace, backspace five, scratch that"),
-    _("Keys: enter, tab, escape, page up, page down, press down five"),
-    _("Structure: new sentence, new line, new paragraph"),
-    _("Symbols: apostrophe, quote, dash, hyphen, at sign, hashtag, percent, asterisk"),
-]
 
 core = None
 
@@ -106,6 +98,19 @@ REPLACEMENTS = compile_replacements(VOCABULARY)
 DICTATION_PROMPT = ", ".join(
     [entry["say"][0] for entry in VOCABULARY["replace"]] + [VOCABULARY["exit"]["say"]]
 )
+
+COMMANDS = [
+    "/".join(VOCABULARY["enter"]["say"][:2])
+    + " - "
+    + _("start dictation mode (say '{exit}' to end)").format(
+        exit=VOCABULARY["exit"]["say"]
+    ),
+    _("Punctuation: comma, period, question mark, exclamation mark, colon, semicolon"),
+    _("Editing: backspace, backspace five, scratch that"),
+    _("Keys: enter, tab, escape, page up, page down, press down five"),
+    _("Structure: new sentence, new line, new paragraph"),
+    _("Symbols: apostrophe, quote, dash, hyphen, at sign, hashtag, percent, asterisk"),
+]
 
 
 def ensure_gnome_accessibility():

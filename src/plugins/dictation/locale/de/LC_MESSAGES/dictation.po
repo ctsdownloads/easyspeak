@@ -53,5 +53,6 @@ msgstr ""
 "Zeichen: Apostroph, Anführungszeichen, Gedankenstrich, Bindestrich, At-"
 "Zeichen, Raute, Prozent, Sternchen"
 
-msgid "notes - start dictation mode (say 'stop notes' to end)"
-msgstr "notes / Diktat - Diktat starten (sag 'Notizen beenden' zum Beenden)"
+#, python-brace-format
+msgid "start dictation mode (say '{exit}' to end)"
+msgstr "Diktat starten (sag '{exit}' zum Beenden)"

@@ -12,11 +12,12 @@ NAME = "media"
 DESCRIPTION = "Media playback controls"
 
 COMMANDS = [
-    _("play/resume - resume playback"),
-    _("pause - pause playback"),
-    _("stop the music - pause playback"),
-    _("next/skip - next track"),
-    _("previous - previous track"),
+    f"{vocab.say('play')} - " + _("resume playback"),
+    f"{vocab.say('pause', limit=1)} - " + _("pause playback"),
+    f"{vocab.say('needs_noun', limit=1)} {vocab.say('media', 'nouns', limit=1)} - "
+    + _("pause playback"),
+    f"{vocab.say('next')} - " + _("next track"),
+    f"{vocab.say('previous', limit=1)} - " + _("previous track"),
 ]
 
 # Playback verbs and the MPRIS action each maps to.

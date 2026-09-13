@@ -15,8 +15,9 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "Apps: browser, steam, spotify, calculator, settings, terminal"
-msgstr "Applicazioni: browser, steam, spotify, calculator, settings, terminal"
+#, python-brace-format
+msgid "Apps: {names}"
+msgstr "Applicazioni: {names}"
 
 #, python-brace-format
 msgid "Closing {app}."
@@ -26,11 +27,11 @@ msgstr "Chiudo {app}."
 msgid "Opening {app}."
 msgstr "Apro {app}."
 
-msgid "close [app] - close an application"
-msgstr "close [app] - chiude un'applicazione"
+msgid "close an application"
+msgstr "chiude un'applicazione"
 
-msgid "open/launch [app] - open an application"
-msgstr "open/launch [app] - apre un'applicazione"
+msgid "open an application"
+msgstr "apre un'applicazione"
 
 #, python-brace-format
 msgid "{app} not installed."

@@ -9,11 +9,14 @@ vocab = Vocabulary(__file__)
 NAME = "system"
 DESCRIPTION = "System controls"
 
+UP_DOWN = f"{vocab.say('up', limit=1)}/{vocab.say('down', limit=1)}"
+ON_OFF = f"{vocab.say('on', limit=1)}/{vocab.say('off', limit=1)}"
+
 COMMANDS = [
-    _("volume up/down - adjust volume"),
-    _("mute - toggle mute"),
-    _("brightness up/down - adjust screen brightness"),
-    _("do not disturb on/off - toggle notifications"),
+    f"{vocab.say('volume', limit=1)} {UP_DOWN} - " + _("adjust volume"),
+    f"{vocab.say('mute', limit=1)} - " + _("toggle mute"),
+    f"{vocab.say('brightness', limit=1)} {UP_DOWN} - " + _("adjust screen brightness"),
+    f"{vocab.say('dnd', limit=1)} {ON_OFF} - " + _("toggle notifications"),
 ]
 
 core = None
