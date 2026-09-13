@@ -978,7 +978,9 @@ yours joins them the same way.</p>
   <code>False</code> to make the daemon exit, or <code>None</code> to pass the command on</li>
 </ul>
 <p>A plain module has neither <code>_</code> nor <code>vocab</code>: it speaks English and matches the
-words in its code. A package with a <code>locale/</code> directory has both.</p>
+words in its code. A localized package binds <code>_</code> for what it says, and <code>vocab</code>
+as well if it listens for words of its own; the browser and grid modes, for
+example, have the first but not the second.</p>
 <h2 id="core-methods-you-can-use">Core methods you can use<a class="headerlink" href="#core-methods-you-can-use" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
