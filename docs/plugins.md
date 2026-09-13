@@ -52,7 +52,15 @@ classDiagram
     PluginContract <|.. browser
     PluginContract <|.. dictation
     PluginContract <|.. mousegrid
+    style base stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style apps stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style browser stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style dictation stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style mousegrid stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
 ```
+
+The dashed boxes are examples of bundled plugins that implement the contract;
+yours joins them the same way.
 
 - `NAME` — short identifier shown in the help screen (required)
 - `DESCRIPTION` — one-line summary for the help screen
