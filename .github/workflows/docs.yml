@@ -67,8 +67,8 @@ jobs:
     - name: Publish "latest" docs from main
       if: github.ref == 'refs/heads/main'
       run: |
-        just docs-mike deploy --push latest
-        just docs-mike set-default --push latest
+        just docs-push deploy latest
+        just docs-push set-default latest
     - name: Archive a release and move the "stable" alias
       if: startsWith(github.ref, 'refs/tags/')
-      run: just docs-mike deploy --push --update-aliases --alias-type=copy "${GITHUB_REF_NAME}" stable
+      run: just docs-push deploy --update-aliases --alias-type=copy "${GITHUB_REF_NAME}" stable

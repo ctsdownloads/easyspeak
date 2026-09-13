@@ -154,6 +154,17 @@ docs *args=('build --strict'):
 docs-mike *args:
     uv run --extra=docs mike {{ args }}
 
+# Push a mike change to gh-pages, retrying on a fresh copy of the branch when another deploy pushed first
+[group('docs')]
+docs-push *args:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    for attempt in 1 2 3; do
+        git fetch --force origin gh-pages:gh-pages
+        uv run --extra=docs mike {{ args }} --push && exit 0
+    done
+    exit 1
+
 # Build the Debian package and verify its contents
 [group('release')]
 check-deb-package: (package-app)
