@@ -1076,14 +1076,15 @@ the module that reads each (linked to its API reference).</p>
 </table>
 <p><code>EASYSPEAK_LANGUAGE</code> is the language you dictate in, and the language of the
 spoken replies where they are translated (German, Italian, French and Spanish
-are) and that language's pack is installed; commands stay English. Where the
-replies fall back to English, or the code is not one Whisper knows, a warning at
-startup says so. It picks which installed
-<a href="../packaging/#language">language pack</a>
-<code>EASYSPEAK_WHISPER_MODEL</code> defaults to; without one it falls back to <code>base.en</code>
-for English and to the multilingual <code>small</code> for any other language (a download,
-see <code>EASYSPEAK_OFFLINE</code>). <code>EASYSPEAK_PIPER_MODEL</code> defaults to the voice of the
-pack the replies are spoken in, else <code>~/.local/share/piper/en_US-amy-medium.onnx</code>.</p>
+are) and that language's pack is installed. Commands take that language's words
+where a plugin has them (see <a href="../commands/">Commands</a>); the English ones always
+work. Where the replies fall back to English, or the code is not one Whisper
+knows, a warning at startup says so. It picks which installed
+<a href="../packaging/#language">language pack</a> <code>EASYSPEAK_WHISPER_MODEL</code> defaults to;
+without one it falls back to <code>base.en</code> for English and to the multilingual
+<code>small</code> for any other language (a download, see <code>EASYSPEAK_OFFLINE</code>).
+<code>EASYSPEAK_PIPER_MODEL</code> defaults to the voice of the pack the replies are spoken
+in, else <code>~/.local/share/piper/en_US-amy-medium.onnx</code>.</p>
 <p><code>EASYSPEAK_SILENCE_THRESHOLD</code> is normally left alone. On startup EasySpeak
 listens to the room for a second and sets the threshold above whatever it
 measures — a fixed value assumes a quiet room, and where the ambient level sits
