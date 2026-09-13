@@ -212,3 +212,22 @@ def test_help_lines_are_english_by_default():
         files.COMMANDS[1] == "open files/file manager - open your default file manager"
     )
     assert sleep.COMMANDS[0].startswith("go to sleep/stop listening - ")
+
+
+@pytest.mark.usefixtures("german")
+@pytest.mark.parametrize("command", ["öffne den datei manager", "öffne dateimanager"])
+@patch.object(files, "open_folder", return_value=True)
+def test_files_hears_the_file_manager_as_whisper_writes_it(
+    mock_open, command, mock_core
+):
+    """Whisper writes "Dateimanager" as "datei manager" as often as not."""
+    assert files.handle(command, mock_core) is True
+    mock_open.assert_called_once()
+
+
+@pytest.mark.usefixtures("german")
+@patch.object(apps, "close_app")
+def test_apps_closes_the_file_manager_by_its_german_name(mock_close, mock_core):
+    """ "schließe den Datei Manager" closes nautilus."""
+    assert apps.handle("schließe den datei manager", mock_core) is True
+    mock_close.assert_called_once_with("nautilus", mock_core)
