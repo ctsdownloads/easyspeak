@@ -15,6 +15,9 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "Closing the file manager."
+msgstr "Je ferme le gestionnaire de fichiers."
+
 #, python-brace-format
 msgid "Folders: {names}"
 msgstr "Dossiers : {names}"
@@ -25,6 +28,9 @@ msgstr "Aucun gestionnaire de fichiers trouvé."
 #, python-brace-format
 msgid "Opening {label}."
 msgstr "J'ouvre {label}."
+
+msgid "close your default file manager"
+msgstr "fermer le gestionnaire de fichiers par défaut"
 
 msgid "open a folder in your default file manager"
 msgstr "ouvrir un dossier dans le gestionnaire de fichiers"

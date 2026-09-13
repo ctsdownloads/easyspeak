@@ -15,6 +15,9 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "Closing the file manager."
+msgstr "Cierro el gestor de archivos."
+
 #, python-brace-format
 msgid "Folders: {names}"
 msgstr "Carpetas: {names}"
@@ -25,6 +28,9 @@ msgstr "No se ha encontrado ningún gestor de archivos."
 #, python-brace-format
 msgid "Opening {label}."
 msgstr "Abro {label}."
+
+msgid "close your default file manager"
+msgstr "cerrar el gestor de archivos predeterminado"
 
 msgid "open a folder in your default file manager"
 msgstr "abrir una carpeta en el gestor de archivos"

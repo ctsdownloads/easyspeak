@@ -207,6 +207,7 @@ Folders open in whatever file manager your desktop is configured for (via
 | Command | Action |
 |---------|--------|
 | open files / file manager | Open your default file manager (at `$HOME`) |
+| close files / file manager | Close your default file manager |
 | open documents | Open Documents folder |
 | open downloads | Open Downloads folder |
 | open pictures | Open Pictures folder |

@@ -3,6 +3,7 @@
 
 [commands]
 open = ["apri", "mostra", "vai a"]
+close = ["chiudi", "termina"]
 file_manager = ["gestore di file", "gestore file", "gestore dei file", "file manager", "file"]
 
 [folders]

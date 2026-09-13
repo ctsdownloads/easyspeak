@@ -225,12 +225,61 @@ def test_files_hears_the_file_manager_as_whisper_writes_it(
     mock_open.assert_called_once()
 
 
+@pytest.fixture
+def desktop_with(tmp_path, monkeypatch, mock_core):
+    """Configure a default file manager: return a function taking its Exec line."""
+
+    def configure(exec_line):
+        apps_dir = tmp_path / "applications"
+        apps_dir.mkdir(exist_ok=True)
+        (apps_dir / "manager.desktop").write_text(
+            f"[Desktop Entry]\nExec={exec_line}\n"
+        )
+        monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path))
+
+        def host_run(cmd, **_kwargs):
+            if cmd[:2] == ["xdg-mime", "query"]:
+                return Mock(returncode=0, stdout="manager.desktop\n")
+            return Mock(returncode=0, stdout="")
+
+        mock_core.host_run.side_effect = host_run
+        return mock_core
+
+    return configure
+
+
 @pytest.mark.usefixtures("german")
-@patch.object(apps, "close_app")
-def test_apps_closes_the_file_manager_by_its_german_name(mock_close, mock_core):
-    """ "schließe den Datei Manager" closes nautilus."""
-    assert apps.handle("schließe den datei manager", mock_core) is True
-    mock_close.assert_called_once_with("nautilus", mock_core)
+def test_files_closes_the_configured_file_manager(desktop_with):
+    """ "schließe den Datei Manager" closes whatever xdg-open would open, not Nautilus."""
+    core = desktop_with("/usr/bin/nemo %U")
+
+    assert files.handle("schließe den datei manager", core) is True
+
+    assert ["pkill", "-f", "nemo"] in [c.args[0] for c in core.host_run.call_args_list]
+    core.speak.assert_called_once_with("Closing the file manager.")
+
+
+def test_files_closes_a_flatpak_file_manager_by_its_app_id(desktop_with):
+    """A Flatpak's Exec runs flatpak; the app id is what the process list shows."""
+    core = desktop_with(
+        "/usr/bin/flatpak run --branch=stable --command=nautilus org.gnome.Nautilus %U"
+    )
+
+    assert files.handle("close file manager", core) is True
+
+    assert ["pkill", "-f", "org.gnome.Nautilus"] in [
+        c.args[0] for c in core.host_run.call_args_list
+    ]
+
+
+def test_files_close_says_when_no_manager_is_configured(mock_core):
+    """Nothing configured: the user is told, nothing is killed."""
+    mock_core.host_run.return_value = Mock(returncode=1, stdout="")
+
+    assert files.handle("close file manager", mock_core) is True
+
+    mock_core.speak.assert_called_once_with("No file manager found.")
+    assert all(c.args[0][0] != "pkill" for c in mock_core.host_run.call_args_list)
 
 
 @pytest.mark.usefixtures("german")

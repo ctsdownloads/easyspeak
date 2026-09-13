@@ -1,6 +1,6 @@
 """Tests for the files plugin module."""
 
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 from easyspeak.plugins import files
@@ -153,3 +153,37 @@ def test_handle_requires_both_folder_and_action_keywords(mock_open_folder, mock_
     assert result1 is None
     assert result2 is None
     assert not mock_open_folder.called
+
+
+@pytest.fixture
+def xdg(tmp_path, monkeypatch, mock_core):
+    """XDG data dirs under tmp_path, with xdg-mime naming "manager.desktop"."""
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "home"))
+    monkeypatch.setenv("XDG_DATA_DIRS", f"{tmp_path / 'missing'}:{tmp_path / 'system'}")
+    mock_core.host_run.return_value = Mock(returncode=0, stdout="manager.desktop\n")
+    return tmp_path
+
+
+def _entry(directory, exec_line):
+    apps = directory / "applications"
+    apps.mkdir(parents=True)
+    (apps / "manager.desktop").write_text(f"[Desktop Entry]\n{exec_line}\n")
+
+
+def test_default_file_manager_is_found_in_a_later_data_dir(xdg, mock_core):
+    """Data dirs without the entry are skipped until one has it."""
+    _entry(xdg / "system", "Exec=/usr/bin/thunar %U")
+
+    assert files.default_file_manager(mock_core) == "thunar"
+
+
+def test_default_file_manager_with_an_empty_exec_line_is_unknown(xdg, mock_core):
+    """An entry that runs nothing names nothing."""
+    _entry(xdg / "home", "Exec=")
+
+    assert files.default_file_manager(mock_core) is None
+
+
+def test_default_file_manager_without_an_entry_is_unknown(xdg, mock_core):
+    """xdg-mime names an entry no data dir has."""
+    assert files.default_file_manager(mock_core) is None
