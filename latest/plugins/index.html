@@ -947,6 +947,8 @@ There is no base class to subclass — plugins follow a duck-typed protocol:</p>
         +str DESCRIPTION
         +int PRIORITY
         +list COMMANDS
+        +translator _
+        +Vocabulary vocab
         +setup(core)
         +handle(cmd, core)
     }
@@ -959,6 +961,10 @@ There is no base class to subclass — plugins follow a duck-typed protocol:</p>
 <li><code>NAME</code> — short identifier shown in the help screen (required)</li>
 <li><code>DESCRIPTION</code> — one-line summary for the help screen</li>
 <li><code>COMMANDS</code> — list of <code>"phrase - description"</code> strings for the help screen</li>
+<li><code>_</code> — the plugin's reply catalog, <code>translator(__file__)</code>, wrapped around
+  everything it speaks (see <a href="#translations">Translations</a>)</li>
+<li><code>vocab</code> — the words it listens for, <code>Vocabulary(__file__)</code>, read from its
+  <code>locale/&lt;language&gt;/vocabulary.toml</code></li>
 <li><code>setup(core)</code> — optional one-time hook; store the <code>core</code> reference and do any
   host-environment setup here</li>
 <li><code>handle(cmd, core)</code> — required; returns <code>True</code> if it consumed the command,
