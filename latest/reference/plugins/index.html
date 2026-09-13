@@ -55,6 +55,8 @@
     
       <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
+      <link rel="stylesheet" href="../../stylesheets/diagram-overlay.css">
+    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -3556,7 +3558,11 @@ contract rather than subclassing a base class. It is loaded if it exposes a
 <code>NAME</code> string and a <code>handle(cmd, core)</code> function; the optional <code>setup(core)</code> hook
 runs once at startup, <code>COMMANDS</code>/<code>DESCRIPTION</code> feed the help screen, and
 <code>PRIORITY</code> (default 50, lower first) sets its place in the routing order. A
-package's <code>locale/</code> holds the translations of what it speaks.</p>
+package's <code>locale/&lt;language&gt;/</code> holds what it says, a gettext catalog, and what it
+listens for, a <code>vocabulary.toml</code> table; a plugin that has them binds <code>_</code>, its
+translator, and <code>vocab</code>, its vocabulary, at import (see
+<a href="../../plugins/#translations">Writing Plugins</a>), and a plain module has neither.
+Click the diagram to enlarge it.</p>
 <pre class="mermaid"><code>classDiagram
     class PluginContract {
         &lt;&lt;protocol&gt;&gt;
@@ -3564,10 +3570,20 @@ package's <code>locale/</code> holds the translations of what it speaks.</p>
         +str DESCRIPTION
         +int PRIORITY
         +list COMMANDS
+        +translator _
+        +Vocabulary vocab
         +setup(core)
         +handle(cmd, core)
     }
-    class base
+    class base {
+        PRIORITY = 100
+    }
+    class mousegrid {
+        PRIORITY = 1
+    }
+    class headtrack {
+        PRIORITY = 0
+    }
     class sleep
     class system
     class media
@@ -3575,23 +3591,35 @@ package's <code>locale/</code> holds the translations of what it speaks.</p>
     class apps
     class browser
     class dictation
-    class mousegrid
-    class headtrack
 
-    PluginContract &lt;|.. base
-    PluginContract &lt;|.. sleep
-    PluginContract &lt;|.. system
-    PluginContract &lt;|.. media
-    PluginContract &lt;|.. files
+    PluginContract &lt;|.. headtrack
+    PluginContract &lt;|.. mousegrid
     PluginContract &lt;|.. apps
     PluginContract &lt;|.. browser
     PluginContract &lt;|.. dictation
-    PluginContract &lt;|.. mousegrid
-    PluginContract &lt;|.. headtrack
+    PluginContract &lt;|.. files
+    PluginContract &lt;|.. media
+    PluginContract &lt;|.. sleep
+    PluginContract &lt;|.. system
+    PluginContract &lt;|.. base
 
-    note for base "PRIORITY = 100 — routes last; help and exit fallback"
-    note for mousegrid "PRIORITY = 1 — routes early"
-    note for headtrack "PRIORITY = 0 — routes first"</code></pre>
+    class Locale["locale/‹language›/"] {
+        &lt;&lt;directory&gt;&gt;
+        LC_MESSAGES/‹name›.po
+        vocabulary.toml
+    }
+    Locale "1..*" --* "1" PluginContract
+    style Locale fill:#80808026
+    style headtrack stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style mousegrid stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style apps stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style browser stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style dictation stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style files stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style media stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style sleep stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style system stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5
+    style base stroke:var(--md-mermaid-node-fg-color),stroke-dasharray:5</code></pre>
 <p><code>handle</code> returns <code>True</code> when it consumed the command, <code>False</code> to signal the
 daemon to exit, or <code>None</code> to pass the command to the next plugin, in order of
 <code>PRIORITY</code>: the modes first, the base plugin last as the catch-all for help and
@@ -11001,6 +11029,8 @@ leave the user in a mode with nothing driving the cursor.</p>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../javascripts/diagram-overlay.js"></script>
       
     
   </body>
