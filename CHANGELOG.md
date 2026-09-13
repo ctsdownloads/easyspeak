@@ -5,6 +5,41 @@ canonical, GitHub-independent record of releases. It is updated once per
 release. The format loosely follows [Keep a Changelog](https://keepachangelog.com/),
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.12.0 · A Faster Ear · 2026-09-14
+
+**Parakeet Recognizes the Speech by Default, in Its Own Package, and Dictation
+Keeps Its Capitals**
+
+Speech is now recognized by NVIDIA's Parakeet TDT v3 instead of Whisper: one
+model for 25 European languages that tells them apart by itself, several times
+faster on a short command than the Whisper model of a language pack, and with
+punctuation and capitalization of its own. It ships as a third package,
+`easyspeak-stt-parakeet`, installed once next to the app and a language pack, and
+is fetched on first start where downloads are allowed. Whisper stays behind
+`EASYSPEAK_STT=whisper` and takes over, with a note at startup, when the Parakeet
+model is not there or the language is one it does not cover. Dictation no longer
+lowercases what was said: "United States" and German nouns keep their capitals,
+while the control words still match however they were cased.
+
+The About window credits every model and voice EasySpeak ships with its owner and
+license, the plugin contract diagram matches the reference one, and the docs
+deploy of a release no longer trips over the deploy of the merge before it.
+
+### What's Changed
+
+- Serialize the docs deploys of a release by @bittner in [#189](https://github.com/ctsdownloads/easyspeak/pull/189)
+- Retry the docs push on a fresh gh-pages when another deploy won by @bittner in [#190](https://github.com/ctsdownloads/easyspeak/pull/190)
+- Show the translator and vocabulary in the plugin contract diagram by @bittner in [#191](https://github.com/ctsdownloads/easyspeak/pull/191)
+- Mark the translator and vocabulary optional in the plugin contract by @bittner in [#192](https://github.com/ctsdownloads/easyspeak/pull/192)
+- Dash the plugin boxes in the contract diagram like the reference one by @bittner in [#193](https://github.com/ctsdownloads/easyspeak/pull/193)
+- Describe the translator and vocabulary as independent by @bittner in [#194](https://github.com/ctsdownloads/easyspeak/pull/194)
+- Keep the capitalization Whisper writes when dictating by @bittner in [#195](https://github.com/ctsdownloads/easyspeak/pull/195)
+- Credit the speech models and voices in the About window by @bittner in [#197](https://github.com/ctsdownloads/easyspeak/pull/197)
+- Recognize speech with Parakeet TDT v3 by default by @bittner in [#196](https://github.com/ctsdownloads/easyspeak/pull/196)
+- Package the Parakeet speech model as easyspeak-stt-parakeet by @bittner in [#198](https://github.com/ctsdownloads/easyspeak/pull/198)
+
+**Full Changelog**: [`0.11.0...0.12.0`](https://github.com/ctsdownloads/easyspeak/compare/0.11.0...0.12.0)
+
 ## 0.11.0 · Commands in Your Language · 2026-09-13
 
 **Commands, Dictation Control Words and the Help Screen in the User's Language,
