@@ -951,10 +951,10 @@ Review the diff before committing.</p>
 <li>uv itself: latest in CI (<code>astral-sh/setup-uv</code>) and in the build container
   (install script); pinned only for the dev shell via <code>flake.lock</code>.</li>
 <li>GitHub Actions: pinned by major version tag, floating within it.</li>
-<li>The Whisper model at <em>runtime</em>: with <code>EASYSPEAK_OFFLINE=relaxed</code> and no
-  local model, faster-whisper fetches the latest snapshot from Hugging Face
-  (<code>src/core/config.py</code>); installing the language package avoids this
-  entirely.</li>
+<li>The speech model at <em>runtime</em>: with <code>EASYSPEAK_OFFLINE=relaxed</code> and no
+  local model, onnx-asr fetches the latest Parakeet snapshot from Hugging Face
+  into the models directory, and faster-whisper a Whisper one when that is the
+  backend (<code>src/core/config.py</code>); installing the packages avoids this entirely.</li>
 </ul>
 
 

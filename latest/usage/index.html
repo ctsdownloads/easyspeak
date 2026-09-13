@@ -1037,6 +1037,11 @@ the module that reads each (linked to its API reference).</p>
 <td>Stay offline; <code>relaxed</code> downloads models</td>
 </tr>
 <tr>
+<td><code>EASYSPEAK_STT</code></td>
+<td><code>parakeet</code>, <code>whisper</code> if not installed</td>
+<td>Speech model: <code>parakeet</code> or <code>whisper</code></td>
+</tr>
+<tr>
 <td><code>EASYSPEAK_PIPER_BIN</code></td>
 <td><code>piper</code></td>
 <td>Piper TTS binary</td>
@@ -1078,6 +1083,13 @@ the module that reads each (linked to its API reference).</p>
 </tr>
 </tbody>
 </table>
+<p>Speech is recognized with NVIDIA's Parakeet TDT v3 by default: one model for 25
+European languages, several times faster than Whisper on a short command, with
+punctuation and capitalization of its own. It picks the language itself.
+<code>EASYSPEAK_STT=whisper</code> uses the language pack's Whisper model instead, which is
+also what happens, with a warning, when the Parakeet model is neither installed
+nor allowed to download, or when <code>EASYSPEAK_LANGUAGE</code> is one Parakeet does not
+cover.</p>
 <p><code>EASYSPEAK_LANGUAGE</code> is the language you dictate in, and the language of the
 spoken replies where they are translated (German, Italian, French and Spanish
 are) and that language's pack is installed. Commands take that language's words

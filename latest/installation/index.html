@@ -1180,8 +1180,10 @@ directly fails:</p>
 <p>A Python-only installation has no bundled speech-recognition model, and EasySpeak
 stays offline by default (<a href="../usage/#configuration"><code>EASYSPEAK_OFFLINE=strict</code></a>),
 so on first run it reports the model as missing. Set <code>EASYSPEAK_OFFLINE=relaxed</code>
-to have it fetch <code>base.en</code> (about 140 MB) from Hugging Face for you, or install a
-<a href="https://github.com/ctsdownloads/easyspeak/releases?q=lang">language pack</a>.</p>
+to have it fetch Parakeet (about 640 MB) from Hugging Face for you, or Whisper's
+<code>base.en</code> (about 140 MB) with <code>EASYSPEAK_STT=whisper</code>; or install a
+<a href="https://github.com/ctsdownloads/easyspeak/releases?q=lang">language pack</a>, whose Whisper model is used until Parakeet is
+installed.</p>
 <h3 id="head-tracking-optional">Head tracking (optional)<a class="headerlink" href="#head-tracking-optional" title="Permanent link">&para;</a></h3>
 <p>Head tracking requires a webcam and additional dependencies. With uv, add the
 extra to the run command and it pulls them in for you:</p>
