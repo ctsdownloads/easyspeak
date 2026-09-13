@@ -57,14 +57,17 @@ classDiagram
 - `NAME` — short identifier shown in the help screen (required)
 - `DESCRIPTION` — one-line summary for the help screen
 - `COMMANDS` — list of `"phrase - description"` strings for the help screen
-- `_` — the plugin's reply catalog, `translator(__file__)`, wrapped around
-  everything it speaks (see [Translations](#translations))
-- `vocab` — the words it listens for, `Vocabulary(__file__)`, read from its
-  `locale/<language>/vocabulary.toml`
+- `_` — optional; a localized package's translator, `translator(__file__)`,
+  wrapped around everything it speaks (see [Translations](#translations))
+- `vocab` — optional; a localized package's vocabulary, `Vocabulary(__file__)`,
+  the words it listens for, read from its `locale/<language>/vocabulary.toml`
 - `setup(core)` — optional one-time hook; store the `core` reference and do any
   host-environment setup here
 - `handle(cmd, core)` — required; returns `True` if it consumed the command,
   `False` to make the daemon exit, or `None` to pass the command on
+
+A plain module has neither `_` nor `vocab`: it speaks English and matches the
+words in its code. A package with a `locale/` directory has both.
 
 ## Core methods you can use
 
