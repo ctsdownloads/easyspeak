@@ -961,15 +961,17 @@ There is no base class to subclass — plugins follow a duck-typed protocol:</p>
 <li><code>NAME</code> — short identifier shown in the help screen (required)</li>
 <li><code>DESCRIPTION</code> — one-line summary for the help screen</li>
 <li><code>COMMANDS</code> — list of <code>"phrase - description"</code> strings for the help screen</li>
-<li><code>_</code> — the plugin's reply catalog, <code>translator(__file__)</code>, wrapped around
-  everything it speaks (see <a href="#translations">Translations</a>)</li>
-<li><code>vocab</code> — the words it listens for, <code>Vocabulary(__file__)</code>, read from its
-  <code>locale/&lt;language&gt;/vocabulary.toml</code></li>
+<li><code>_</code> — optional; a localized package's translator, <code>translator(__file__)</code>,
+  wrapped around everything it speaks (see <a href="#translations">Translations</a>)</li>
+<li><code>vocab</code> — optional; a localized package's vocabulary, <code>Vocabulary(__file__)</code>,
+  the words it listens for, read from its <code>locale/&lt;language&gt;/vocabulary.toml</code></li>
 <li><code>setup(core)</code> — optional one-time hook; store the <code>core</code> reference and do any
   host-environment setup here</li>
 <li><code>handle(cmd, core)</code> — required; returns <code>True</code> if it consumed the command,
   <code>False</code> to make the daemon exit, or <code>None</code> to pass the command on</li>
 </ul>
+<p>A plain module has neither <code>_</code> nor <code>vocab</code>: it speaks English and matches the
+words in its code. A package with a <code>locale/</code> directory has both.</p>
 <h2 id="core-methods-you-can-use">Core methods you can use<a class="headerlink" href="#core-methods-you-can-use" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
