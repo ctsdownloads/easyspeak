@@ -49,6 +49,7 @@ dependencies = [
   "faster-whisper>=1.2.1",
   "jeepney>=0.9",
   "numpy>=2.2.6",
+  "onnx-asr[hub]>=0.12",
   "onnxruntime>=1.23.2",
   "onnxruntime<1.24 ; python_full_version < '3.11'",
   "polib>=1.2",

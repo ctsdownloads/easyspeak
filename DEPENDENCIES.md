@@ -60,7 +60,7 @@ Review the diff before committing.
 - uv itself: latest in CI (`astral-sh/setup-uv`) and in the build container
   (install script); pinned only for the dev shell via `flake.lock`.
 - GitHub Actions: pinned by major version tag, floating within it.
-- The Whisper model at *runtime*: with `EASYSPEAK_OFFLINE=relaxed` and no
-  local model, faster-whisper fetches the latest snapshot from Hugging Face
-  (`src/core/config.py`); installing the language package avoids this
-  entirely.
+- The speech model at *runtime*: with `EASYSPEAK_OFFLINE=relaxed` and no
+  local model, onnx-asr fetches the latest Parakeet snapshot from Hugging Face
+  into the models directory, and faster-whisper a Whisper one when that is the
+  backend (`src/core/config.py`); installing the packages avoids this entirely.

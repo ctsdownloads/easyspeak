@@ -52,6 +52,7 @@ the module that reads each (linked to its API reference).
 | `EASYSPEAK_LANGUAGE`             | `en`                                   | Language you dictate in and are answered in |
 | `EASYSPEAK_MODELS_DIR`           | `models/` beside the venv              | Where language packs are installed          |
 | `EASYSPEAK_OFFLINE`              | `strict`                               | Stay offline; `relaxed` downloads models    |
+| `EASYSPEAK_STT`                  | `parakeet`, `whisper` if not installed | Speech model: `parakeet` or `whisper`       |
 | `EASYSPEAK_PIPER_BIN`            | `piper`                                | Piper TTS binary                            |
 | `EASYSPEAK_REQUIRE_WAKE_WORD`    | unset                                  | Modes wait for the wake word each command   |
 | `EASYSPEAK_PIPER_MODEL`          | an installed language pack's voice     | Piper voice `.onnx` for speech output       |
@@ -60,6 +61,14 @@ the module that reads each (linked to its API reference).
 | `EASYSPEAK_WHISPER_CPU_THREADS`  | `0`                                    | CPU threads for transcription (`0` = auto)  |
 | `EASYSPEAK_WHISPER_MODEL`        | an installed language pack's model     | faster-whisper model for transcription      |
 | `EASYSPEAK_SILENCE_THRESHOLD`    | measured at startup                    | Amplitude below which audio counts as quiet |
+
+Speech is recognized with NVIDIA's Parakeet TDT v3 by default: one model for 25
+European languages, several times faster than Whisper on a short command, with
+punctuation and capitalization of its own. It picks the language itself.
+`EASYSPEAK_STT=whisper` uses the language pack's Whisper model instead, which is
+also what happens, with a warning, when the Parakeet model is neither installed
+nor allowed to download, or when `EASYSPEAK_LANGUAGE` is one Parakeet does not
+cover.
 
 `EASYSPEAK_LANGUAGE` is the language you dictate in, and the language of the
 spoken replies where they are translated (German, Italian, French and Spanish

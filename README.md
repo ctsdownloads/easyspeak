@@ -25,7 +25,7 @@ EasySpeak is **free and open source** (GPL-3.0), **fully local** (no cloud, no a
 - Wake word activation ("Hey Jarvis")
 - Mouse grid and experimental head tracking
 - Browser control, dictation, app launcher, media and system controls
-- pyopen-wakeword + Whisper + Piper, all on-device
+- pyopen-wakeword + Parakeet (or Whisper) + Piper, all on-device
 
 ## Demo
 

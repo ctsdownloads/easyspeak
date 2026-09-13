@@ -702,6 +702,19 @@ class TestEasySpeakRun:
     """Tests for EasySpeak run method."""
 
     @pytest.fixture(autouse=True)
+    def _whisper_backend(self):
+        """Pin the speech backend to Whisper, whatever models this machine has.
+
+        The default depends on whether the Parakeet model is installed; the one
+        test that wants Parakeet patches it back.
+        """
+        with (
+            patch("easyspeak.core.main.STT", "whisper"),
+            patch("easyspeak.core.main.STT_WARNINGS", []),
+        ):
+            yield
+
+    @pytest.fixture(autouse=True)
     def _stub_speech_warmup(self):
         """Keep run() from spawning the real piper/player pipeline at startup."""
         with patch("easyspeak.core.speech.SpeechPipeline.ensure") as mock_ensure:
@@ -788,6 +801,32 @@ class TestEasySpeakRun:
         easy.run()
 
         _stub_ensure_extension.assert_called_once_with()
+
+    @patch("easyspeak.core.main.STT", "parakeet")
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_parakeet_model")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch.object(EasySpeak, "load_plugins")
+    def test_run_loads_parakeet_when_selected(
+        self,
+        mock_load_plugins,
+        mock_whisper_model,
+        mock_parakeet_model,
+        mock_wakeword_model,
+        _stub_ensure_extension,
+        caplog,
+    ):
+        """EASYSPEAK_STT=parakeet loads that model instead of Whisper."""
+        easy = EasySpeak()
+        easy.plugins = []
+
+        with caplog.at_level("INFO"):
+            easy.run()
+
+        assert easy.parakeet is mock_parakeet_model.return_value
+        assert easy.whisper is None
+        mock_whisper_model.assert_not_called()
+        assert "Loading Parakeet" in caplog.text
 
     @patch("easyspeak.core.main.WakeWordModel")
     @patch("easyspeak.core.main.load_whisper_model")

@@ -28,12 +28,16 @@ from .config import (
     MAX_RECORD_SECONDS,
     MISUNDERSTAND_GRACE,
     NUMBER_WORDS,
+    PARAKEET_MODEL,
+    PARAKEET_QUANTIZATION,
     REQUIRE_WAKE_WORD,
     SILENCE_CALIBRATION_SECONDS,
     SILENCE_DURATION,
     SILENCE_NOISE_MARGIN,
     SILENCE_THRESHOLD,
     SILENCE_THRESHOLD_MAX,
+    STT,
+    STT_WARNINGS,
     WAKE_COOLDOWN,
     WAKE_SOUND,
     WAKE_THRESHOLD,
@@ -41,6 +45,7 @@ from .config import (
     WHISPER_COMPUTE_TYPE,
     WHISPER_CPU_THREADS,
     WHISPER_MODEL,
+    load_parakeet_model,
     load_whisper_model,
 )
 from .gnome_extension import ensure_extension
@@ -98,7 +103,7 @@ def strip_wake_words(cmd):
 class EasySpeak:
     """The voice-control daemon: wake detection, transcription, and routing.
 
-    Owns the audio pipeline (wake word -> Whisper), the loaded plugins, the
+    Owns the audio pipeline (wake word -> speech recognizer), the loaded plugins, the
     text-to-speech pipeline, and the panel indicator, and exposes the small
     plugin-facing API ([`speak`][core.main.EasySpeak.speak],
     [`host_run`][core.main.EasySpeak.host_run],
@@ -110,6 +115,7 @@ class EasySpeak:
         """Initialise daemon state; models and audio are loaded later in run()."""
         self.plugins = []
         self.whisper = None
+        self.parakeet = None
         self.wakeword = None
         self.audio = None
         self.stream = None
@@ -502,7 +508,7 @@ class EasySpeak:
         )
 
     def transcribe(self, audio_data, prompt=None, language="en"):
-        """Transcribe raw PCM audio to text with Whisper.
+        """Transcribe raw PCM audio to text with the configured speech model.
 
         `prompt` biases recognition (defaults to the command vocabulary), and
         `language` is the Whisper language code to transcribe as. The main loop
@@ -510,7 +516,8 @@ class EasySpeak:
         whose words are still English, take the English default. Plugin-facing.
         An echo of that prompt is dropped as silence: Whisper hands its own
         `initial_prompt` back when given near-silence, and grid mode was executing
-        that as a command.
+        that as a command. Parakeet (`EASYSPEAK_STT=parakeet`) takes neither a
+        prompt nor a language: it tells the language apart itself.
         """
         samples = np.frombuffer(audio_data, dtype=np.int16).astype(np.float32) / 32768.0
 
@@ -518,24 +525,27 @@ class EasySpeak:
         # so a mode still decoding English is not primed with German words.
         use_prompt = prompt or COMMAND_PROMPTS.get(language, COMMAND_PROMPT)
         started = time.monotonic()
-        segments, _ = self.whisper.transcribe(
-            samples,
-            initial_prompt=use_prompt,
-            beam_size=1,
-            vad_filter=True,
-            language=language,
-            # Nothing here reads timestamps, and generating them costs tokens.
-            without_timestamps=True,
-            condition_on_previous_text=False,
-        )
-        text = " ".join([s.text for s in segments]).strip()
+        if self.parakeet is not None:
+            text = self.parakeet.recognize(samples).strip()
+        else:
+            segments, _ = self.whisper.transcribe(
+                samples,
+                initial_prompt=use_prompt,
+                beam_size=1,
+                vad_filter=True,
+                language=language,
+                # Nothing here reads timestamps, and generating them costs tokens.
+                without_timestamps=True,
+                condition_on_previous_text=False,
+            )
+            text = " ".join([s.text for s in segments]).strip()
         logger.debug(
             "transcribed %.1fs of audio in %.2fs",
             len(audio_data) / 32000,
             time.monotonic() - started,
         )
 
-        if text and self._is_prompt_echo(text, use_prompt):
+        if text and self.parakeet is None and self._is_prompt_echo(text, use_prompt):
             logger.debug("Ignoring prompt echo: %s", text)
             return ""
         return text
@@ -816,19 +826,28 @@ class EasySpeak:
         logger.info("Loading OpenWakeWord...")
         self.wakeword = WakeWordModel()
 
-        logger.info(
-            "Loading Whisper (%s, %s, language=%s, cpu_threads=%s)...",
-            WHISPER_MODEL,
-            WHISPER_COMPUTE_TYPE,
-            LANGUAGE,
-            WHISPER_CPU_THREADS or "auto",
-        )
         try:
-            self.whisper = load_whisper_model()
+            if STT == "parakeet":
+                logger.info(
+                    "Loading Parakeet (%s, %s, language=%s)...",
+                    PARAKEET_MODEL,
+                    PARAKEET_QUANTIZATION,
+                    LANGUAGE,
+                )
+                self.parakeet = load_parakeet_model()
+            else:
+                logger.info(
+                    "Loading Whisper (%s, %s, language=%s, cpu_threads=%s)...",
+                    WHISPER_MODEL,
+                    WHISPER_COMPUTE_TYPE,
+                    LANGUAGE,
+                    WHISPER_CPU_THREADS or "auto",
+                )
+                self.whisper = load_whisper_model()
         except RuntimeError as exc:
             logger.error("Cannot start EasySpeak: %s", exc)  # noqa: TRY400
             raise SystemExit(1) from exc
-        for warning in LANGUAGE_WARNINGS:
+        for warning in (*STT_WARNINGS, *LANGUAGE_WARNINGS):
             logger.warning(warning)
 
         ensure_extension()

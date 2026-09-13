@@ -161,8 +161,10 @@ easyspeak
 A Python-only installation has no bundled speech-recognition model, and EasySpeak
 stays offline by default ([`EASYSPEAK_OFFLINE=strict`](usage.md#configuration)),
 so on first run it reports the model as missing. Set `EASYSPEAK_OFFLINE=relaxed`
-to have it fetch `base.en` (about 140 MB) from Hugging Face for you, or install a
-[language pack][gh:releases:lang].
+to have it fetch Parakeet (about 640 MB) from Hugging Face for you, or Whisper's
+`base.en` (about 140 MB) with `EASYSPEAK_STT=whisper`; or install a
+[language pack][gh:releases:lang], whose Whisper model is used until Parakeet is
+installed.
 
 ### Head tracking (optional)
 

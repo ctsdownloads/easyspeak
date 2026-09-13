@@ -1,7 +1,8 @@
 # How it works
 
 - **Wake word** — pyopen-wakeword detects "Hey Jarvis" instantly
-- **Speech-to-text** — faster-whisper transcribes commands locally
+- **Speech-to-text** — NVIDIA's Parakeet model transcribes commands locally,
+  through onnx-asr; faster-whisper stands in for languages it lacks
 - **Text-to-speech** — Piper provides voice feedback
 - **Mouse control** — GNOME Shell extension with Clutter virtual input
 - **Browser scroll** — JavaScript injection via qutebrowser IPC

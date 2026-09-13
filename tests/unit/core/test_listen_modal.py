@@ -263,6 +263,20 @@ class TestPromptEcho:
 
         assert easy.transcribe(b"\x00\x00", prompt=self.GRID) == "close"
 
+    def test_transcribe_with_parakeet_takes_its_text_as_is(self, easy):
+        """Parakeet gets no prompt, so nothing it returns is a prompt echo."""
+        easy.whisper = None
+        easy.parakeet = Mock()
+        easy.parakeet.recognize = Mock(
+            return_value=" six seven eight nine click double right scroll "
+        )
+
+        text = easy.transcribe(b"\x00\x00", prompt=self.GRID, language="de")
+
+        assert text == "six seven eight nine click double right scroll"
+        easy.parakeet.recognize.assert_called_once()
+        assert easy.parakeet.recognize.call_args.kwargs == {}
+
 
 class TestSoundPlayback:
     """A missing player or sound file must never take the daemon down."""

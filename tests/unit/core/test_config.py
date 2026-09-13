@@ -1,8 +1,9 @@
 """Tests for the core config module."""
 
 import importlib
+import sys
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from easyspeak.core import config
@@ -27,6 +28,7 @@ def _restore_config(monkeypatch):
         "EASYSPEAK_LANGUAGE",
         "EASYSPEAK_MODELS_DIR",
         "EASYSPEAK_OFFLINE",
+        "EASYSPEAK_STT",
     ]:
         monkeypatch.delenv(var, raising=False)
     importlib.reload(config)
@@ -115,6 +117,186 @@ def test_load_whisper_model_strict_raises_when_missing(monkeypatch):
         config.load_whisper_model("base.en")
 
     mock_model.assert_called_once()
+
+
+def _install_parakeet(models_dir):
+    """Lay down every file of the Parakeet model, empty, and return its directory."""
+    model_dir = models_dir / "parakeet"
+    model_dir.mkdir()
+    for name in config.PARAKEET_FILES:
+        (model_dir / name).touch()
+    return model_dir
+
+
+def test_stt_defaults_to_parakeet_when_its_model_is_installed(monkeypatch, tmp_path):
+    """Unset EASYSPEAK_STT with the model on disk means Parakeet, no warning."""
+    model_dir = _install_parakeet(tmp_path)
+    monkeypatch.setenv("EASYSPEAK_MODELS_DIR", str(tmp_path))
+    monkeypatch.setenv("EASYSPEAK_STT", "")
+    importlib.reload(config)
+
+    assert config.STT == "parakeet"
+    assert model_dir == config.PARAKEET_MODEL_DIR
+    assert config.STT_WARNINGS == []
+
+
+def test_stt_defaults_to_parakeet_when_downloads_are_allowed(monkeypatch, tmp_path):
+    """Relaxed mode fetches the Parakeet model on first start, as for Whisper."""
+    monkeypatch.setenv("EASYSPEAK_MODELS_DIR", str(tmp_path))
+    monkeypatch.setenv("EASYSPEAK_OFFLINE", "relaxed")
+    importlib.reload(config)
+
+    assert config.STT == "parakeet"
+    assert config.STT_WARNINGS == []
+
+
+@pytest.mark.parametrize("partial", [False, True])
+def test_stt_falls_back_to_whisper_when_parakeet_is_missing_offline(
+    monkeypatch, tmp_path, partial
+):
+    """A language pack alone still starts EasySpeak, on Whisper, with a warning.
+
+    A directory left by an interrupted download is not an installed model either.
+    """
+    if partial:
+        (tmp_path / "parakeet").mkdir()
+        (tmp_path / "parakeet" / "config.json").touch()
+    monkeypatch.setenv("EASYSPEAK_MODELS_DIR", str(tmp_path))
+    monkeypatch.delenv("EASYSPEAK_OFFLINE", raising=False)
+    importlib.reload(config)
+
+    assert config.STT == "whisper"
+    assert len(config.STT_WARNINGS) == 1
+    assert "Parakeet model not installed" in config.STT_WARNINGS[0]
+    assert "EASYSPEAK_OFFLINE=relaxed" in config.STT_WARNINGS[0]
+    assert config.LANGUAGE_WARNINGS == []
+
+
+@pytest.mark.parametrize("chosen", ["", "parakeet"])
+@pytest.mark.parametrize("installed", [True, False])
+def test_stt_uses_whisper_for_a_language_parakeet_lacks(
+    monkeypatch, tmp_path, chosen, installed
+):
+    """Parakeet finds the language itself, among 25; Japanese is not one of them.
+
+    That is the one reason given, whether or not the model happens to be there.
+    """
+    if installed:
+        _install_parakeet(tmp_path)
+    monkeypatch.setenv("EASYSPEAK_MODELS_DIR", str(tmp_path))
+    monkeypatch.delenv("EASYSPEAK_OFFLINE", raising=False)
+    monkeypatch.setenv("EASYSPEAK_LANGUAGE", "ja")
+    monkeypatch.setenv("EASYSPEAK_STT", chosen)
+    importlib.reload(config)
+
+    assert config.STT == "whisper"
+    assert config.STT_WARNINGS == ["Parakeet does not cover 'ja', using Whisper"]
+
+
+def test_stt_stays_parakeet_for_every_pack_language(monkeypatch, tmp_path):
+    """The five shipped language packs are all covered."""
+    _install_parakeet(tmp_path)
+    monkeypatch.setenv("EASYSPEAK_MODELS_DIR", str(tmp_path))
+    for language in ["en", "de", "it", "fr", "es"]:
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", language)
+        importlib.reload(config)
+        assert config.STT == "parakeet", language
+        assert config.STT_WARNINGS == [], language
+
+
+def test_stt_whisper_can_be_chosen_case_insensitively(monkeypatch):
+    """`Whisper` and `whisper` select the same backend, without a warning."""
+    monkeypatch.setenv("EASYSPEAK_STT", " Whisper ")
+    importlib.reload(config)
+
+    assert config.STT == "whisper"
+    assert config.STT_WARNINGS == []
+
+
+def test_unknown_stt_warns_and_uses_the_default(monkeypatch, tmp_path):
+    """A typo in the backend name is reported at startup, then the default applies."""
+    _install_parakeet(tmp_path)
+    monkeypatch.setenv("EASYSPEAK_MODELS_DIR", str(tmp_path))
+    monkeypatch.setenv("EASYSPEAK_STT", "vosk")
+    importlib.reload(config)
+
+    assert config.STT == "parakeet"
+    assert config.STT_WARNINGS == [
+        "Unknown speech recognition backend 'vosk' (EASYSPEAK_STT), using the default"
+    ]
+
+
+def test_load_parakeet_model_loads_an_installed_model_offline(tmp_path, caplog):
+    """A directory holding the whole model is handed to onnx-asr as is."""
+    model_dir = _install_parakeet(tmp_path)
+    onnx_asr = MagicMock()
+    with patch.dict(sys.modules, {"onnx_asr": onnx_asr}), caplog.at_level("WARNING"):
+        result = config.load_parakeet_model(model_dir)
+
+    onnx_asr.load_model.assert_called_once_with(
+        config.PARAKEET_MODEL, model_dir, quantization="int8"
+    )
+    assert result is onnx_asr.load_model.return_value
+    assert "downloading" not in caplog.text.lower()
+
+
+def test_load_parakeet_model_reports_an_incomplete_download(monkeypatch, tmp_path):
+    """onnx-asr would load an existing directory offline and fail on the missing file."""
+    monkeypatch.setattr(config, "NETWORK_ALLOWED", True)
+    model_dir = tmp_path / "parakeet"
+    model_dir.mkdir()
+    (model_dir / "config.json").touch()
+    onnx_asr = MagicMock()
+    with (
+        patch.dict(sys.modules, {"onnx_asr": onnx_asr}),
+        pytest.raises(RuntimeError, match=r"incomplete .* delete that directory"),
+    ):
+        config.load_parakeet_model(model_dir)
+
+    onnx_asr.load_model.assert_not_called()
+
+
+def test_load_parakeet_model_reports_what_onnx_asr_refuses(tmp_path):
+    """A corrupt model directory ends in the daemon's clean exit, not a traceback."""
+    model_dir = _install_parakeet(tmp_path)
+    onnx_asr = MagicMock()
+    onnx_asr.utils.ModelLoadingError = type("ModelLoadingError", (Exception,), {})
+    onnx_asr.load_model.side_effect = onnx_asr.utils.ModelLoadingError("bad vocab")
+    with (
+        patch.dict(sys.modules, {"onnx_asr": onnx_asr}),
+        pytest.raises(RuntimeError, match="cannot be loaded: bad vocab"),
+    ):
+        config.load_parakeet_model(model_dir)
+
+
+def test_load_parakeet_model_strict_raises_when_missing(monkeypatch, tmp_path):
+    """Strict mode: an absent model directory raises rather than downloading."""
+    monkeypatch.setattr(config, "NETWORK_ALLOWED", False)
+    onnx_asr = MagicMock()
+    with (
+        patch.dict(sys.modules, {"onnx_asr": onnx_asr}),
+        pytest.raises(RuntimeError, match="EASYSPEAK_OFFLINE=relaxed"),
+    ):
+        config.load_parakeet_model(tmp_path / "parakeet")
+
+    onnx_asr.load_model.assert_not_called()
+
+
+def test_load_parakeet_model_downloads_when_missing_and_relaxed(
+    monkeypatch, tmp_path, caplog
+):
+    """Relaxed mode: onnx-asr fetches the model into the directory, with a warning."""
+    monkeypatch.setattr(config, "NETWORK_ALLOWED", True)
+    onnx_asr = MagicMock()
+    target = tmp_path / "parakeet"
+    with patch.dict(sys.modules, {"onnx_asr": onnx_asr}), caplog.at_level("WARNING"):
+        result = config.load_parakeet_model(target)
+
+    onnx_asr.load_model.assert_called_once_with(
+        config.PARAKEET_MODEL, target, quantization=config.PARAKEET_QUANTIZATION
+    )
+    assert result is onnx_asr.load_model.return_value
+    assert "downloading" in caplog.text.lower()
 
 
 def test_offline_default_blocks_network(monkeypatch):

@@ -37,7 +37,7 @@ Current and in active development:
 - **App launcher** — Open and close applications by name
 - **Media control** — Play, pause, skip via MPRIS
 - **System controls** — Volume, brightness, do not disturb
-- **Fully local** — pyopen-wakeword + Whisper + Piper, no cloud services
+- **Fully local** — pyopen-wakeword + Parakeet (or Whisper) + Piper, no cloud services
 - **Plugin architecture** — Easy to extend
 
 ## Demo

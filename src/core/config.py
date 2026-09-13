@@ -1,9 +1,9 @@
 """Central tuning constants and the speech-model factory for EasySpeak.
 
 Holds the wake-word, audio, silent-hotkey, speech-model, and desktop-sound
-settings the daemon reads at import, alongside `load_whisper_model()`, which
-builds the faster-whisper model from them. Most are plain constants; these
-honor an `EASYSPEAK_*` environment variable:
+settings the daemon reads at import, alongside `load_parakeet_model()` and
+`load_whisper_model()`, which build the speech model from them. Most are plain
+constants; these honor an `EASYSPEAK_*` environment variable:
 
 - `EASYSPEAK_HOTKEY`
 - `EASYSPEAK_LANGUAGE`
@@ -12,6 +12,7 @@ honor an `EASYSPEAK_*` environment variable:
 - `EASYSPEAK_PIPER_BIN`
 - `EASYSPEAK_PIPER_MODEL`
 - `EASYSPEAK_SOUNDS_DIR`
+- `EASYSPEAK_STT`
 - `EASYSPEAK_WHISPER_COMPUTE_TYPE`
 - `EASYSPEAK_WHISPER_CPU_THREADS`
 - `EASYSPEAK_WHISPER_MODEL`
@@ -27,6 +28,7 @@ import logging
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 from faster_whisper import WhisperModel
 
@@ -209,6 +211,59 @@ NUMBER_WORDS = frozenset(
 )
 
 
+# --- Speech recognition backend ---
+# Parakeet TDT v3 (NVIDIA, through onnx-asr) is the default: one multilingual
+# model for the 25 languages it covers, several times faster than Whisper on a
+# short command, punctuation and capitalization of its own, no prompt biasing.
+# Whisper (faster-whisper, one model per language pack) remains for the other
+# languages, and takes over when the Parakeet model is neither installed nor
+# downloadable, so a language pack alone still gives a working EasySpeak.
+STT_BACKENDS = ("whisper", "parakeet")
+STT_WARNINGS: list[str] = []
+PARAKEET_MODEL = "nemo-parakeet-tdt-0.6b-v3"
+PARAKEET_MODEL_DIR = MODELS_DIR / "parakeet"
+# The 25 languages the model tells apart by itself; any other one needs Whisper.
+PARAKEET_LANGUAGES = frozenset(
+    "bg hr cs da nl en et fi fr de el hu it lv lt mt pl pt ro sk sl es sv ru uk".split()  # noqa: SIM905
+)
+PARAKEET_QUANTIZATION = "int8"
+PARAKEET_FILES = (
+    "config.json",
+    "vocab.txt",
+    f"encoder-model.{PARAKEET_QUANTIZATION}.onnx",
+    f"decoder_joint-model.{PARAKEET_QUANTIZATION}.onnx",
+)
+
+
+def parakeet_installed(model_dir: Path = PARAKEET_MODEL_DIR) -> bool:
+    """Whether every file of the Parakeet model is in `model_dir`.
+
+    A directory left behind by an interrupted download has some of them, and
+    counts as not installed.
+    """
+    return all((model_dir / name).is_file() for name in PARAKEET_FILES)
+
+
+STT = os.environ.get("EASYSPEAK_STT", "").strip().lower()
+if STT and STT not in STT_BACKENDS:
+    STT_WARNINGS.append(
+        f"Unknown speech recognition backend {STT!r} (EASYSPEAK_STT), using the default"
+    )
+    STT = ""
+if STT != "whisper" and LANGUAGE not in PARAKEET_LANGUAGES:
+    STT = "whisper"
+    STT_WARNINGS.append(f"Parakeet does not cover {LANGUAGE!r}, using Whisper")
+if not STT:
+    if parakeet_installed() or NETWORK_ALLOWED:
+        STT = "parakeet"
+    else:
+        STT = "whisper"
+        STT_WARNINGS.append(
+            f"Parakeet model not installed in {PARAKEET_MODEL_DIR}, using Whisper; "
+            "set EASYSPEAK_OFFLINE=relaxed to download it"
+        )
+
+
 # --- Desktop sounds ---
 SOUNDS_DIR = Path(
     os.environ.get("EASYSPEAK_SOUNDS_DIR", "/usr/share/sounds/freedesktop/stereo")
@@ -247,3 +302,43 @@ def load_whisper_model(
             model_name,
         )
         return WhisperModel(model_name, local_files_only=False, **kwargs)
+
+
+def load_parakeet_model(model_dir: Path = PARAKEET_MODEL_DIR) -> Any:
+    """Build the Parakeet TDT v3 recognizer from the ONNX files in `model_dir`.
+
+    A directory holding the whole model loads offline; a missing one is fetched
+    from Hugging Face into it when `EASYSPEAK_OFFLINE=relaxed`, and refused
+    otherwise, like the Whisper models. An incomplete one, left by an interrupted
+    download, is reported for the user to delete: onnx-asr never downloads into
+    a directory that exists. Whatever else onnx-asr refuses to load is reported
+    the same way, as a `RuntimeError` the daemon turns into a clean exit.
+    """
+    import onnx_asr
+
+    if not parakeet_installed(model_dir):
+        if model_dir.exists():
+            msg = (
+                f"speech model {PARAKEET_MODEL!r} is incomplete in {model_dir}; "
+                "delete that directory to download it again"
+            )
+            raise RuntimeError(msg)
+        if not NETWORK_ALLOWED:
+            msg = (
+                f"speech model {PARAKEET_MODEL!r} is not installed in {model_dir}; "
+                "set EASYSPEAK_OFFLINE=relaxed to download it"
+            )
+            raise RuntimeError(msg)
+        logger.warning(
+            "Speech model %r is not installed; downloading it from Hugging Face "
+            "into %s. Set EASYSPEAK_OFFLINE=strict to keep EasySpeak offline.",
+            PARAKEET_MODEL,
+            model_dir,
+        )
+    try:
+        return onnx_asr.load_model(
+            PARAKEET_MODEL, model_dir, quantization=PARAKEET_QUANTIZATION
+        )
+    except (onnx_asr.utils.ModelLoadingError, ValueError) as exc:
+        msg = f"speech model {PARAKEET_MODEL!r} in {model_dir} cannot be loaded: {exc}"
+        raise RuntimeError(msg) from exc
