@@ -1,0 +1,20 @@
+# Was man sagt, auf Deutsch. Die Wörter werden als ganze Wörter mit Whispers
+# kleingeschriebener Abschrift verglichen; häufige Verhörer gehören also dazu.
+
+[commands]
+very = ["sehr", "ganz"]
+loud = ["laut", "lauter"]
+quiet = ["leise", "leiser", "still"]
+louder = ["lauter"]
+quieter = ["leiser"]
+volume = ["lautstärke", "ton"]
+up = ["hoch", "rauf", "höher", "erhöhen"]
+down = ["runter", "niedriger", "senken"]
+mute = ["stumm", "stummschalten", "ton aus", "ton an"]
+brightness = ["helligkeit", "bildschirm"]
+brighter = ["heller"]
+dimmer = ["dunkler"]
+dnd = ["nicht stören", "bitte nicht stören"]
+notifications = ["benachrichtigungen"]
+on = ["an", "ein", "einschalten", "aktivieren"]
+off = ["aus", "ausschalten", "deaktivieren"]

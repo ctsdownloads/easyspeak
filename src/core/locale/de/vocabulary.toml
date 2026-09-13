@@ -1,0 +1,18 @@
+# Was man sagt, auf Deutsch. Die Wörter werden als ganze Wörter mit Whispers
+# kleingeschriebener Abschrift verglichen; häufige Verhörer gehören also dazu.
+
+[numbers]
+null = 0
+eins = 1
+zwei = 2
+drei = 3
+vier = 4
+"fünf" = 5
+sechs = 6
+sieben = 7
+acht = 8
+neun = 9
+zehn = 10
+
+[commands]
+prompt = ["nummern", "scrollen", "klick", "öffne", "schließe", "zurück", "vorwärts", "lautstärke", "helligkeit", "stopp"]

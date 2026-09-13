@@ -1,0 +1,20 @@
+# Ce que l'on dit, en français. Les mots sont comparés en mots entiers à la
+# transcription en minuscules de Whisper ; les confusions fréquentes en font partie.
+
+[commands]
+very = ["très"]
+loud = ["fort", "plus fort"]
+quiet = ["doucement", "moins fort", "silencieux", "bas"]
+louder = ["plus fort", "monte"]
+quieter = ["moins fort", "baisse"]
+volume = ["volume", "son"]
+up = ["monte", "augmente", "plus haut"]
+down = ["baisse", "diminue", "plus bas"]
+mute = ["muet", "coupe le son", "remets le son", "sourdine"]
+brightness = ["luminosité", "écran"]
+brighter = ["plus lumineux", "plus clair"]
+dimmer = ["plus sombre", "moins lumineux"]
+dnd = ["ne pas déranger"]
+notifications = ["notifications"]
+on = ["active", "activer", "allume"]
+off = ["désactive", "désactiver", "éteins"]

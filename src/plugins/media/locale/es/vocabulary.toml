@@ -1,0 +1,15 @@
+# Qué decir, en español. Las frases se comparan como palabras enteras con la
+# transcripción en minúsculas de Whisper; las confusiones frecuentes también van aquí.
+
+[commands]
+play = ["reproducir", "reproduce", "reanudar", "reanuda"]
+pause = ["pausa", "pausar", "para", "stop"]
+next = ["siguiente", "salta", "saltar"]
+previous = ["anterior", "atrás"]
+needs_noun = ["para", "stop", "atrás"]
+
+[nouns]
+media = ["música", "canción", "canciones", "pista", "pistas", "reproducción", "vídeo", "video", "audio", "reproductor"]
+
+[filler]
+words = ["la", "el", "los", "las", "un", "una", "mi", "por favor", "esto", "esta", "este"]

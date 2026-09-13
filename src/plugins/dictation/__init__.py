@@ -7,19 +7,14 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 import threading
 import time
 from pathlib import Path
 
 from easyspeak.core import mediakeys
-
-if sys.version_info < (3, 11):
-    import tomli as tomllib
-else:
-    import tomllib
 from easyspeak.core.config import LANGUAGE
 from easyspeak.core.i18n import translator
+from easyspeak.core.vocabulary import load_table
 
 logger = logging.getLogger(__name__)
 
@@ -56,10 +51,9 @@ def load_vocabulary(language, locale_dir=None):
         Path(__file__).with_name("locale") if locale_dir is None else locale_dir
     )
     for code in (language, "en"):
-        table = locale_dir / code / "vocabulary.toml"
-        if table.is_file():
-            with table.open("rb") as f:
-                return tomllib.load(f)
+        table = load_table(locale_dir, code)
+        if table is not None:
+            return table
     msg = "the English dictation vocabulary is missing"
     raise FileNotFoundError(msg)
 
@@ -88,8 +82,8 @@ def exit_phrases(vocabulary):
 
 
 VOCABULARY = load_vocabulary(LANGUAGE)
-# Commands reach the plugin transcribed as English, so the English words are
-# always accepted, alongside the active language's.
+# The English words are always accepted alongside the active language's, as
+# for every command.
 ENGLISH = VOCABULARY if LANGUAGE == "en" else load_vocabulary("en")
 ENTER_PHRASES = frozenset(VOCABULARY["enter"]["say"]) | frozenset(
     ENGLISH["enter"]["say"]

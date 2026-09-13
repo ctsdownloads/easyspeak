@@ -1,8 +1,8 @@
 # Was man beim Diktieren sagt, auf Deutsch. Die Wörter werden mit Whispers
 # kleingeschriebener Abschrift verglichen, häufige Verhörer gehören also dazu.
 
-# Als Befehl gesagt, um das Diktat zu starten (Whisper hört Befehle auf Englisch,
-# daher auch die Schreibweisen, die dabei herauskommen).
+# Als Befehl gesagt, um das Diktat zu starten; auch die Schreibweisen, die
+# Whisper daraus macht.
 [enter]
 say = ["diktat", "diktieren", "notizen", "notiz", "dictat"]
 

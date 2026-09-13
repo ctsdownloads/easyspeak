@@ -1,0 +1,5 @@
+# Ce que l'on dit, en français. Les mots sont comparés en mots entiers à la
+# transcription en minuscules de Whisper ; les confusions fréquentes en font partie.
+
+[commands]
+sleep = ["va dormir", "dors", "arrête d'écouter"]

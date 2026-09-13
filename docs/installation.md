@@ -32,8 +32,8 @@ version numbers are independent and need not match:
 Besides English there are German, Italian, French and Spanish packs
 (`easyspeak-lang-de`, `-it`, `-fr`, `-es`). Install the one for the language you
 speak and set `EASYSPEAK_LANGUAGE` to its code, see [Usage](usage.md#configuration);
-you dictate in that language and EasySpeak answers in it, while the commands stay
-English words.
+you dictate in that language, EasySpeak answers in it, and most commands take
+that language's words too. The English commands work in every language.
 
 This bundles the Python runtime, Piper, the GNOME Shell extension, and the speech
 models — no `pip`/`uv` step and no compiler. **Log out and back in once** after

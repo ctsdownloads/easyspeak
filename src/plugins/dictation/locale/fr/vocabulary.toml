@@ -2,8 +2,8 @@
 # transcription en minuscules de Whisper, les confusions fréquentes en font
 # donc partie.
 
-# Dit comme commande pour commencer la dictée (Whisper écoute les commandes en
-# anglais, d'où aussi les graphies qui en sortent).
+# Dit comme commande pour commencer la dictée ; aussi les graphies que Whisper
+# en tire.
 [enter]
 say = ["dictée", "dictee", "dicter", "dictay"]
 

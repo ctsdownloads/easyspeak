@@ -1,0 +1,8 @@
+# Was man sagt, auf Deutsch. Die Wörter werden als ganze Wörter mit Whispers
+# kleingeschriebener Abschrift verglichen; häufige Verhörer gehören also dazu.
+
+[commands]
+require_wake_word = ["aktivierungswort verlangen", "aktivierungswort nötig"]
+free_listening = ["frei zuhören", "freies zuhören"]
+exit = ["beenden", "auf wiedersehen", "tschüss", "verlassen"]
+help = ["hilfe", "was kannst du"]

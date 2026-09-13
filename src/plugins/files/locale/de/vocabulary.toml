@@ -1,0 +1,16 @@
+# Was man sagt, auf Deutsch. Die Wörter werden als ganze Wörter mit Whispers
+# kleingeschriebener Abschrift verglichen; häufige Verhörer gehören also dazu.
+
+[commands]
+open = ["öffne", "öffnen", "zeige", "zeig", "gehe zu"]
+file_manager = ["dateimanager", "dateien", "dateibrowser"]
+
+[folders]
+documents = ["dokumente"]
+downloads = ["downloads"]
+pictures = ["bilder"]
+music = ["musik"]
+videos = ["videos"]
+projects = ["projekte"]
+home = ["persönlicher ordner", "home"]
+desktop = ["schreibtisch", "desktop"]

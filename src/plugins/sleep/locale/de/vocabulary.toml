@@ -1,0 +1,5 @@
+# Was man sagt, auf Deutsch. Die Wörter werden als ganze Wörter mit Whispers
+# kleingeschriebener Abschrift verglichen; häufige Verhörer gehören also dazu.
+
+[commands]
+sleep = ["schlaf", "geh schlafen", "schlafen gehen", "hör auf zuzuhören", "nicht mehr zuhören"]

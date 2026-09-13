@@ -1,0 +1,8 @@
+# Ce que l'on dit, en français. Les mots sont comparés en mots entiers à la
+# transcription en minuscules de Whisper ; les confusions fréquentes en font partie.
+
+[commands]
+require_wake_word = ["exiger le mot d'activation", "mot d'activation obligatoire"]
+free_listening = ["écoute libre"]
+exit = ["quitter", "au revoir", "salut", "sortir"]
+help = ["aide", "que sais-tu faire"]

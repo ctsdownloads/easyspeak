@@ -74,8 +74,8 @@ regardless of language pack.
 `de_DE-thorsten-medium`: German dictation and German replies in the German voice.
 `easyspeak-lang-it` is **Italian** the same way, with Piper `it_IT-paola-medium`,
 `easyspeak-lang-fr` **French**, with Piper `fr_FR-siwis-medium`, and
-`easyspeak-lang-es` **Spanish**, with Piper `es_ES-davefx-medium`. Commands stay
-English words.
+`easyspeak-lang-es` **Spanish**, with Piper `es_ES-davefx-medium`. Most commands
+take that language's words too; the English ones work everywhere.
 
 `EASYSPEAK_LANGUAGE` (default `en`) is the language you dictate in, and it picks
 the pack installed under `/opt/easyspeak/models/<language>`. To use a language we

@@ -34,6 +34,8 @@ from faster_whisper import WhisperModel
 # rather than at the first dictation.
 from faster_whisper.tokenizer import _LANGUAGE_CODES as LANGUAGE_CODES
 
+from .vocabulary import load_table
+
 logger = logging.getLogger(__name__)
 
 # --- Network policy ---
@@ -88,9 +90,10 @@ def _language():
     """Return the language the user dictates in, English unless a valid code is set.
 
     `EASYSPEAK_LANGUAGE` (and the `--language` option, which sets it) selects the
-    installed language pack's Whisper model, the reply catalog and the voice.
-    Commands stay English words wherever a plugin matches them. A code Whisper
-    does not know is reported and English used.
+    installed language pack's Whisper model, the reply catalog and the voice, and
+    the words the commands take where a plugin has a vocabulary table for it;
+    the English words work in every language. A code Whisper does not know is
+    reported and English used.
     """
     code = os.environ.get("EASYSPEAK_LANGUAGE", "en").strip().lower() or "en"
     if code not in LANGUAGE_CODES:
@@ -187,9 +190,22 @@ try:
 except ValueError:
     WHISPER_CPU_THREADS = 0
 
-# Prompt to help Whisper recognize common commands
-COMMAND_PROMPT = (
-    "numbers, scroll, click, open, close, back, forward, volume, brightness, stop"
+# Commands are transcribed in the user's language once the core's vocabulary
+# table exists for it, English otherwise; the English phrases are accepted in
+# every language. The table also carries the number words and the words that
+# bias Whisper towards the commands.
+_LOCALE = Path(__file__).with_name("locale")
+COMMAND_LANGUAGE = LANGUAGE if load_table(_LOCALE, LANGUAGE) else "en"
+_vocabularies = {
+    code: load_table(_LOCALE, code) for code in dict.fromkeys((COMMAND_LANGUAGE, "en"))
+}
+COMMAND_PROMPTS = {
+    code: ", ".join(table["commands"]["prompt"])
+    for code, table in _vocabularies.items()
+}
+COMMAND_PROMPT = COMMAND_PROMPTS[COMMAND_LANGUAGE]
+NUMBER_WORDS = frozenset(
+    word for table in _vocabularies.values() for word in table["numbers"]
 )
 
 

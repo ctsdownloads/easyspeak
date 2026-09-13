@@ -1,8 +1,12 @@
 """Media Plugin - Playback controls via MPRIS."""
 
+import re
+
 from easyspeak.core.i18n import translator
+from easyspeak.core.vocabulary import Vocabulary
 
 _ = translator(__file__)
+vocab = Vocabulary(__file__)
 
 NAME = "media"
 DESCRIPTION = "Media playback controls"
@@ -16,38 +20,7 @@ COMMANDS = [
 ]
 
 # Playback verbs and the MPRIS action each maps to.
-ACTIONS = {
-    "play": "play",
-    "resume": "play",
-    "unpause": "play",
-    "pause": "pause",
-    "stop": "pause",
-    "next": "next",
-    "skip": "next",
-    "previous": "previous",
-    "back": "previous",
-}
-
-NEEDS_NOUN = {"stop", "back"}
-
-# Words naming what is being played. Ignored when picking the verb, so "pause the
-# music" and "pause" are the same command, and present to satisfy NEEDS_NOUN.
-MEDIA_NOUNS = {
-    "music",
-    "song",
-    "songs",
-    "track",
-    "tracks",
-    "playback",
-    "player",
-    "media",
-    "video",
-    "audio",
-    "playing",
-}
-
-# Words that carry no meaning for this plugin.
-FILLER = {"the", "a", "an", "my", "this", "that", "it", "please"}
+PLAYBACK = ("play", "pause", "next", "previous")
 
 # What to say once the action has actually reached a player.
 FEEDBACK = {
@@ -122,22 +95,28 @@ def media_control(action, core):
 def _action_for(cmd):
     """Return the MPRIS action a command asks for, or None if it isn't ours.
 
-    Matching is on whole words after filler and media nouns are removed, and what
-    is left has to be exactly one playback verb. Substring matching used to make
-    this plugin answer for anything containing a verb -- "make the display brighter"
-    was caught by the "play" inside "display" and swallowed with a cheery
-    "Playing." -- and requiring a lone verb also keeps "next tab" with the browser.
+    Filler words and media nouns, which may be phrases ("per favore"), are
+    stripped first, and what is left has to be exactly one playback verb from the
+    vocabulary table. Substring matching used to make this plugin answer for
+    anything containing a verb -- "make the display brighter" was caught by the
+    "play" inside "display" and swallowed with a cheery "Playing." -- and
+    requiring a lone verb also keeps "next tab" with the browser. A verb listed
+    under `needs_noun` ("stop", "back") only counts with a media noun beside it.
     """
-    words = [word.strip(".,!?") for word in cmd.lower().split()]
-    words = [word for word in words if word]
-    has_noun = any(word in MEDIA_NOUNS for word in words)
-    verbs = [word for word in words if word not in FILLER and word not in MEDIA_NOUNS]
+    text = " ".join(word.strip(".,!?") for word in cmd.lower().split())
+    nouns = vocab.phrases("media", "nouns")
+    has_noun = vocab.says(text, "media", "nouns")
+    for phrase in sorted(
+        nouns + vocab.phrases("words", "filler"), key=len, reverse=True
+    ):
+        text = re.sub(rf"\b{re.escape(phrase)}\b", " ", text)
+    verbs = text.split()
     if len(verbs) != 1:
         return None
     verb = verbs[0]
-    if verb in NEEDS_NOUN and not has_noun:
+    if verb in vocab.phrases("needs_noun") and not has_noun:
         return None
-    return ACTIONS.get(verb)
+    return next((action for action in PLAYBACK if verb in vocab.phrases(action)), None)
 
 
 def handle(cmd, core):

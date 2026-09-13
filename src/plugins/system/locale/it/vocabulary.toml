@@ -1,0 +1,20 @@
+# Cosa dire, in italiano. Le frasi sono confrontate come parole intere con la
+# trascrizione in minuscolo di Whisper; ci vanno anche gli errori di ascolto.
+
+[commands]
+very = ["molto"]
+loud = ["alto", "forte", "più alto", "più forte"]
+quiet = ["basso", "piano", "più basso", "silenzioso"]
+louder = ["più alto", "più forte", "alza"]
+quieter = ["più basso", "abbassa"]
+volume = ["volume", "audio"]
+up = ["su", "alza", "aumenta"]
+down = ["giù", "abbassa", "diminuisci"]
+mute = ["muto", "silenzia", "riattiva l'audio"]
+brightness = ["luminosità", "schermo"]
+brighter = ["più luminoso", "più chiaro"]
+dimmer = ["più scuro", "meno luminoso"]
+dnd = ["non disturbare"]
+notifications = ["notifiche"]
+on = ["attiva", "accendi", "on"]
+off = ["disattiva", "spegni", "off"]

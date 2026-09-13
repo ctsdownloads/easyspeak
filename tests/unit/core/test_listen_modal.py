@@ -373,6 +373,32 @@ class TestTranscription:
         assert kwargs["condition_on_previous_text"] is False
         assert kwargs["language"] == "en"
 
+    def test_default_prompt_follows_the_decoding_language(self, easy, monkeypatch):
+        """Decoding English, a mode gets the English prompt, not the German one."""
+        monkeypatch.setattr(
+            "easyspeak.core.main.COMMAND_PROMPTS",
+            {"de": "öffne, schließe", "en": "open, close"},
+        )
+        easy.whisper = Mock()
+        easy.whisper.transcribe = Mock(return_value=([], None))
+
+        easy.transcribe(b"\x00\x00", language="en")
+        easy.transcribe(b"\x00\x00", language="de")
+
+        prompts = [
+            c.kwargs["initial_prompt"] for c in easy.whisper.transcribe.call_args_list
+        ]
+        assert prompts == ["open, close", "öffne, schließe"]
+
+    def test_modes_transcribe_in_english_by_default(self, easy):
+        """A mode's words are English until its vocabulary is migrated."""
+        easy.whisper = Mock()
+        easy.whisper.transcribe = Mock(return_value=([], None))
+
+        easy.transcribe(b"\x00\x00")
+
+        assert easy.whisper.transcribe.call_args.kwargs["language"] == "en"
+
     def test_transcribes_in_the_language_asked_for(self, easy):
         """Dictation speaks the user's language; commands stay English."""
         easy.whisper = Mock()

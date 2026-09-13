@@ -1,0 +1,8 @@
+# Qué decir, en español. Las frases se comparan como palabras enteras con la
+# transcripción en minúsculas de Whisper; las confusiones frecuentes también van aquí.
+
+[commands]
+require_wake_word = ["exigir la palabra de activación", "palabra de activación obligatoria"]
+free_listening = ["escucha libre"]
+exit = ["salir", "adiós", "hasta luego", "terminar"]
+help = ["ayuda", "qué sabes hacer"]

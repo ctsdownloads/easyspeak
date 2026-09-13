@@ -1,0 +1,26 @@
+# Cosa dire, in italiano. Le frasi sono confrontate come parole intere con la
+# trascrizione in minuscolo di Whisper; ci vanno anche gli errori di ascolto.
+
+[commands]
+open = ["apri", "avvia", "lancia"]
+close = ["chiudi", "termina"]
+
+[apps]
+calculator = ["calcolatrice"]
+settings = ["impostazioni"]
+alarm = ["sveglia"]
+calendar = ["calendario"]
+camera = ["fotocamera", "camera"]
+characters = ["caratteri"]
+clocks = ["orologio", "orologi"]
+connections = ["connessioni"]
+contacts = ["contatti"]
+editor = ["editor"]
+extensions = ["estensioni"]
+logs = ["registri"]
+maps = ["mappe"]
+weather = ["meteo"]
+"music app" = ["app musica"]
+"music player" = ["lettore musicale"]
+"video player" = ["lettore video"]
+terminal = ["terminale"]

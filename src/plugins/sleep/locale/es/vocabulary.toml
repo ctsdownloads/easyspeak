@@ -1,0 +1,5 @@
+# Qué decir, en español. Las frases se comparan como palabras enteras con la
+# transcripción en minúsculas de Whisper; las confusiones frecuentes también van aquí.
+
+[commands]
+sleep = ["vete a dormir", "duerme", "deja de escuchar"]

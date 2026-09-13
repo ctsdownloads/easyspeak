@@ -1,0 +1,26 @@
+# Qué decir, en español. Las frases se comparan como palabras enteras con la
+# transcripción en minúsculas de Whisper; las confusiones frecuentes también van aquí.
+
+[commands]
+open = ["abre", "abrir", "lanza", "lanzar"]
+close = ["cierra", "cerrar"]
+
+[apps]
+calculator = ["calculadora"]
+settings = ["ajustes", "configuración"]
+alarm = ["alarma", "despertador"]
+calendar = ["calendario"]
+camera = ["cámara"]
+characters = ["caracteres"]
+clocks = ["reloj", "relojes"]
+connections = ["conexiones"]
+contacts = ["contactos"]
+editor = ["editor"]
+extensions = ["extensiones"]
+logs = ["registros"]
+maps = ["mapas"]
+weather = ["tiempo", "clima"]
+"music app" = ["app de música"]
+"music player" = ["reproductor de música"]
+"video player" = ["reproductor de vídeo"]
+terminal = ["terminal"]

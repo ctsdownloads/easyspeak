@@ -1,0 +1,5 @@
+# What to say, in English. Phrases are matched as whole words against
+# Whisper's lowercased transcript, so common mishearings belong here too.
+
+[commands]
+sleep = ["go to sleep", "goto sleep", "stop listening"]

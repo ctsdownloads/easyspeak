@@ -1,0 +1,20 @@
+# Qué decir, en español. Las frases se comparan como palabras enteras con la
+# transcripción en minúsculas de Whisper; las confusiones frecuentes también van aquí.
+
+[commands]
+very = ["muy"]
+loud = ["alto", "fuerte", "más alto", "más fuerte"]
+quiet = ["bajo", "más bajo", "silencioso", "suave"]
+louder = ["más alto", "más fuerte", "sube"]
+quieter = ["más bajo", "baja"]
+volume = ["volumen", "sonido"]
+up = ["sube", "subir", "arriba", "aumenta"]
+down = ["baja", "bajar", "abajo", "disminuye"]
+mute = ["silencio", "silenciar", "mudo", "quita el silencio"]
+brightness = ["brillo", "pantalla"]
+brighter = ["más brillante", "más claro"]
+dimmer = ["más oscuro", "menos brillante"]
+dnd = ["no molestar"]
+notifications = ["notificaciones"]
+on = ["activa", "activar", "enciende"]
+off = ["desactiva", "desactivar", "apaga"]

@@ -1,0 +1,15 @@
+# Was man sagt, auf Deutsch. Die Wörter werden als ganze Wörter mit Whispers
+# kleingeschriebener Abschrift verglichen; häufige Verhörer gehören also dazu.
+
+[commands]
+play = ["abspielen", "spielen", "spiel", "fortsetzen", "weiter"]
+pause = ["pause", "pausieren", "anhalten", "stopp"]
+next = ["nächster", "nächstes", "überspringen"]
+previous = ["vorheriger", "vorheriges", "zurück"]
+needs_noun = ["stopp", "zurück", "weiter"]
+
+[nouns]
+media = ["musik", "lied", "lieder", "titel", "wiedergabe", "video", "audio", "song", "player"]
+
+[filler]
+words = ["die", "das", "den", "der", "bitte", "mal", "ein", "eine", "es"]

@@ -1,0 +1,15 @@
+# What to say, in English. Phrases are matched as whole words against
+# Whisper's lowercased transcript, so common mishearings belong here too.
+
+[commands]
+play = ["play", "resume", "unpause"]
+pause = ["pause", "stop"]
+next = ["next", "skip"]
+previous = ["previous", "back"]
+needs_noun = ["stop", "back"]
+
+[nouns]
+media = ["music", "song", "songs", "track", "tracks", "playback", "player", "media", "video", "audio", "playing"]
+
+[filler]
+words = ["the", "a", "an", "my", "this", "that", "it", "please"]

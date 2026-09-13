@@ -1,0 +1,26 @@
+# Was man sagt, auf Deutsch. Die Wörter werden als ganze Wörter mit Whispers
+# kleingeschriebener Abschrift verglichen; häufige Verhörer gehören also dazu.
+
+[commands]
+open = ["öffne", "öffnen", "starte", "starten"]
+close = ["schließe", "schließen", "beende"]
+
+[apps]
+calculator = ["rechner", "taschenrechner"]
+settings = ["einstellungen"]
+alarm = ["wecker"]
+calendar = ["kalender"]
+camera = ["kamera"]
+characters = ["sonderzeichen"]
+clocks = ["uhr", "uhren"]
+connections = ["verbindungen"]
+contacts = ["kontakte"]
+editor = ["editor", "texteditor"]
+extensions = ["erweiterungen"]
+logs = ["protokolle"]
+maps = ["karten"]
+weather = ["wetter"]
+"music app" = ["musik-app", "musikapp"]
+"music player" = ["musikplayer", "musikspieler"]
+"video player" = ["videoplayer", "videospieler"]
+terminal = ["terminal", "konsole"]

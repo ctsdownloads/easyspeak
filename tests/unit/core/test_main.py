@@ -1028,6 +1028,8 @@ class TestEasySpeakRun:
 
         # Check that methods were called
         mock_wait.assert_called_with(timeout=5)
+        # Commands are decoded in the command language; the modes decide their own.
+        assert mock_transcribe.call_args.kwargs["language"] == "en"
         mock_record.assert_called_once()
         mock_transcribe.assert_called_once()
         mock_route_command.assert_called_once()

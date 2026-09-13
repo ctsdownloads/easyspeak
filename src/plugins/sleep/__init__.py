@@ -7,8 +7,10 @@ since voice control is off until reactivated.
 """
 
 from easyspeak.core.i18n import translator
+from easyspeak.core.vocabulary import Vocabulary
 
 _ = translator(__file__)
+vocab = Vocabulary(__file__)
 
 NAME = "sleep"
 DESCRIPTION = "Deactivate (sleep) until reactivated from the tray or Quick Settings"
@@ -17,13 +19,11 @@ COMMANDS = [
     _("go to sleep / stop listening - release the mic (reactivate from the tray icon)"),
 ]
 
-SLEEP_PHRASES = ("go to sleep", "goto sleep", "stop listening")
-
 
 def handle(cmd, core):
     """Deactivate the assistant on a sleep phrase; return None otherwise."""
     cmd_lower = cmd.lower().strip()
-    if any(phrase in cmd_lower for phrase in SLEEP_PHRASES):
+    if vocab.says(cmd_lower, "sleep"):
         core.speak(_("Voice control turned off."))
         core.deactivate()
         return True

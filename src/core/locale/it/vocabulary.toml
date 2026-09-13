@@ -1,0 +1,18 @@
+# Cosa dire, in italiano. Le frasi sono confrontate come parole intere con la
+# trascrizione in minuscolo di Whisper; ci vanno anche gli errori di ascolto.
+
+[numbers]
+zero = 0
+uno = 1
+due = 2
+tre = 3
+quattro = 4
+cinque = 5
+sei = 6
+sette = 7
+otto = 8
+nove = 9
+dieci = 10
+
+[commands]
+prompt = ["numeri", "scorri", "clic", "apri", "chiudi", "indietro", "avanti", "volume", "luminosità", "stop"]

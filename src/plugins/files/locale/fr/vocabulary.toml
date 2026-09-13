@@ -1,0 +1,16 @@
+# Ce que l'on dit, en français. Les mots sont comparés en mots entiers à la
+# transcription en minuscules de Whisper ; les confusions fréquentes en font partie.
+
+[commands]
+open = ["ouvre", "ouvrir", "montre", "affiche", "va dans"]
+file_manager = ["gestionnaire de fichiers", "fichiers"]
+
+[folders]
+documents = ["documents"]
+downloads = ["téléchargements"]
+pictures = ["images", "photos"]
+music = ["musique"]
+videos = ["vidéos"]
+projects = ["projets"]
+home = ["dossier personnel", "home"]
+desktop = ["bureau"]

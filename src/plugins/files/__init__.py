@@ -3,8 +3,10 @@
 from pathlib import Path
 
 from easyspeak.core.i18n import translator
+from easyspeak.core.vocabulary import Vocabulary
 
 _ = translator(__file__)
+vocab = Vocabulary(__file__)
 
 NAME = "files"
 DESCRIPTION = "Folder navigation"
@@ -17,9 +19,6 @@ COMMANDS = [
         "home, desktop"
     ),
 ]
-
-OPEN_VERBS = ("open", "go to", "show", "browse")
-FILE_MANAGER_PHRASES = ("file manager", "file browser", "files")
 
 FOLDERS = {
     "documents": "~/Documents",
@@ -58,15 +57,15 @@ def open_folder(path, core):
 
 def handle(cmd, core):
     """Open a named folder, or the file manager itself; None if neither matched."""
-    if not any(verb in cmd for verb in OPEN_VERBS):
+    if not vocab.says(cmd, "open"):
         return None
 
-    for folder, path in FOLDERS.items():
-        if folder in cmd:
-            _open(path, folder, core)
-            return True
+    folder = vocab.which(cmd, "folders")
+    if folder in FOLDERS:
+        _open(FOLDERS[folder], folder, core)
+        return True
 
-    if any(phrase in cmd for phrase in FILE_MANAGER_PHRASES):
+    if vocab.says(cmd, "file_manager"):
         _open("~", "files", core)
         return True
 

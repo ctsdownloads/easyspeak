@@ -18,13 +18,16 @@ import numpy as np
 import pyaudio
 
 from .config import (
+    COMMAND_LANGUAGE,
     COMMAND_PROMPT,
+    COMMAND_PROMPTS,
     FOLLOWUP_IDLE_ROUNDS,
     HOTKEY_COMBO,
     LANGUAGE,
     LANGUAGE_WARNINGS,
     MAX_RECORD_SECONDS,
     MISUNDERSTAND_GRACE,
+    NUMBER_WORDS,
     REQUIRE_WAKE_WORD,
     SILENCE_CALIBRATION_SECONDS,
     SILENCE_DURATION,
@@ -481,29 +484,13 @@ class EasySpeak:
 
     PROMPT_ECHO_MIN_WORDS = 4
 
-    NUMBER_WORDS = frozenset(
-        {
-            "zero",
-            "one",
-            "two",
-            "three",
-            "four",
-            "five",
-            "six",
-            "seven",
-            "eight",
-            "nine",
-            "ten",
-        }
-    )
-
     @classmethod
     def _is_prompt_echo(cls, text, prompt):
         """Whether `text` is a verbatim, non-numeric run of words from `prompt`."""
         words = re.sub(r"[^\w\s]", " ", text.lower()).split()
         if len(words) < cls.PROMPT_ECHO_MIN_WORDS:
             return False
-        if all(w.isdigit() or w in cls.NUMBER_WORDS for w in words):
+        if all(w.isdigit() or w in NUMBER_WORDS for w in words):
             return False
         prompt_words = re.sub(r"[^\w\s]", " ", prompt.lower()).split()
         span = len(words)
@@ -516,16 +503,18 @@ class EasySpeak:
         """Transcribe raw PCM audio to text with Whisper.
 
         `prompt` biases recognition (defaults to the command vocabulary), and
-        `language` is the Whisper language code to transcribe as. Commands are
-        English words, so it takes English; dictation passes the user's
-        `LANGUAGE`. Plugin-facing.
+        `language` is the Whisper language code to transcribe as. The main loop
+        passes `COMMAND_LANGUAGE` and dictation the user's `LANGUAGE`; the modes,
+        whose words are still English, take the English default. Plugin-facing.
         An echo of that prompt is dropped as silence: Whisper hands its own
         `initial_prompt` back when given near-silence, and grid mode was executing
         that as a command.
         """
         samples = np.frombuffer(audio_data, dtype=np.int16).astype(np.float32) / 32768.0
 
-        use_prompt = prompt or COMMAND_PROMPT
+        # The default prompt names the commands in the language being decoded,
+        # so a mode still decoding English is not primed with German words.
+        use_prompt = prompt or COMMAND_PROMPTS.get(language, COMMAND_PROMPT)
         started = time.monotonic()
         segments, _ = self.whisper.transcribe(
             samples,
@@ -781,7 +770,9 @@ class EasySpeak:
                 if awake:
                     self.speak(_("I didn't hear anything."))
             else:
-                cmd = self.transcribe(heard + self.record_until_silence())
+                cmd = self.transcribe(
+                    heard + self.record_until_silence(), language=COMMAND_LANGUAGE
+                )
                 if cmd:
                     logger.info("👂 %s", cmd)
                     if not self.route_command(cmd.lower().strip(".,!? ")):

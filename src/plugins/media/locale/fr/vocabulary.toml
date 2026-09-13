@@ -1,0 +1,15 @@
+# Ce que l'on dit, en français. Les mots sont comparés en mots entiers à la
+# transcription en minuscules de Whisper ; les confusions fréquentes en font partie.
+
+[commands]
+play = ["lire", "lis", "joue", "lance", "reprendre", "reprends"]
+pause = ["pause", "arrête", "stop"]
+next = ["suivant", "suivante", "passe"]
+previous = ["précédent", "précédente", "retour"]
+needs_noun = ["arrête", "stop", "retour"]
+
+[nouns]
+media = ["musique", "chanson", "chansons", "morceau", "piste", "lecture", "vidéo", "audio", "lecteur"]
+
+[filler]
+words = ["la", "le", "les", "un", "une", "ma", "mon", "s'il te plaît", "ça", "cette", "ce"]

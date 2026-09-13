@@ -318,6 +318,40 @@ class TestLanguagePacks:
             == packs / "de" / "piper" / "de_DE-thorsten-medium.onnx"
         )
 
+    def test_commands_follow_a_language_with_a_core_table(self, monkeypatch):
+        """German has a core table: commands are decoded and prompted in German."""
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "de")
+        importlib.reload(config)
+        assert config.COMMAND_LANGUAGE == "de"
+        assert config.COMMAND_PROMPT.startswith("nummern, scrollen")
+        assert config.COMMAND_PROMPTS["en"].startswith("numbers, scroll")
+        assert {"eins", "one", "zehn"} <= config.NUMBER_WORDS
+
+    def test_commands_stay_english_without_a_core_table(self, monkeypatch):
+        """Dutch has no core table: commands are decoded and prompted in English."""
+        monkeypatch.setenv("EASYSPEAK_LANGUAGE", "nl")
+        importlib.reload(config)
+        assert config.COMMAND_LANGUAGE == "en"
+        assert config.COMMAND_PROMPT.startswith("numbers, scroll")
+        assert (
+            frozenset(
+                [
+                    "zero",
+                    "one",
+                    "two",
+                    "three",
+                    "four",
+                    "five",
+                    "six",
+                    "seven",
+                    "eight",
+                    "nine",
+                    "ten",
+                ]
+            )
+            == config.NUMBER_WORDS
+        )
+
     def test_models_dir_env_override(self, models, monkeypatch, tmp_path):
         """`EASYSPEAK_MODELS_DIR` finds packs installed anywhere else."""
         elsewhere = tmp_path / "elsewhere"

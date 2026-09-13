@@ -1,0 +1,186 @@
+"""The simple plugins take their commands in the active language, English too."""
+
+from unittest.mock import Mock, patch
+
+import pytest
+from easyspeak.core.vocabulary import Vocabulary
+from easyspeak.plugins import apps, base, files, media, sleep, system
+
+
+@pytest.fixture
+def german(monkeypatch):
+    """Give every plugin under test its German vocabulary, English still accepted."""
+    for plugin in (apps, base, files, media, sleep, system):
+        monkeypatch.setattr(plugin, "vocab", Vocabulary(plugin.__file__, language="de"))
+
+
+@pytest.mark.usefixtures("german")
+@pytest.mark.parametrize("command", ["hilfe", "was kannst du", "help"])
+@patch.object(base, "show_help")
+def test_base_help(mock_show_help, command, mock_core):
+    """ "Hilfe" shows the help, and so does "help"."""
+    assert base.handle(command, mock_core) is True
+    mock_show_help.assert_called_once()
+
+
+@pytest.mark.usefixtures("german")
+@pytest.mark.parametrize("command", ["beenden", "jarvis beenden", "quit"])
+def test_base_exit(command, mock_core):
+    """ "Beenden" at the end of a command exits; "quit tracking" would not."""
+    assert base.handle(command, mock_core) is False
+
+
+@pytest.mark.usefixtures("german")
+def test_base_exit_word_inside_a_command_is_not_an_exit(mock_core):
+    """ "beenden" followed by more words belongs to whatever those words mean."""
+    assert base.handle("beenden verfolgung", mock_core) is None
+
+
+@pytest.mark.usefixtures("german")
+@patch.object(apps, "launch_app", return_value=True)
+def test_apps_open_in_german(mock_launch, mock_core):
+    """ "Öffne den Taschenrechner" launches the calculator, by its English key."""
+    assert apps.handle("öffne den taschenrechner", mock_core) is True
+    mock_launch.assert_called_once_with("calculator", mock_core)
+
+
+@pytest.mark.usefixtures("german")
+@patch.object(apps, "close_app")
+def test_apps_close_in_german(mock_close, mock_core):
+    """ "Schließe die Einstellungen" closes settings."""
+    assert apps.handle("schließe die einstellungen", mock_core) is True
+    mock_close.assert_called_once_with("settings", mock_core)
+
+
+@pytest.mark.usefixtures("german")
+@patch.object(apps, "launch_app", return_value=True)
+def test_apps_english_still_works_with_german_active(mock_launch, mock_core):
+    """An app with no German name is still opened by its English one."""
+    assert apps.handle("öffne gimp", mock_core) is True
+    mock_launch.assert_called_once_with("gimp", mock_core)
+
+
+@pytest.mark.usefixtures("german")
+@patch.object(files, "open_folder", return_value=True)
+def test_files_folder_in_german(mock_open, mock_core):
+    """ "Zeige die Bilder" opens the pictures folder."""
+    assert files.handle("zeige die bilder", mock_core) is True
+    mock_open.assert_called_once_with("~/Pictures", mock_core)
+
+
+@pytest.mark.usefixtures("german")
+@patch.object(files, "open_folder", return_value=True)
+def test_files_manager_in_german(mock_open, mock_core):
+    """ "Öffne den Dateimanager" opens the home folder in it."""
+    assert files.handle("öffne den dateimanager", mock_core) is True
+    mock_open.assert_called_once_with("~", mock_core)
+
+
+@pytest.mark.usefixtures("german")
+@pytest.mark.parametrize(
+    ("command", "action"),
+    [
+        ("pause", "pause"),
+        ("musik abspielen", "play"),
+        ("nächster titel", "next"),
+        ("stopp die musik", "pause"),
+        ("next", "next"),
+    ],
+)
+def test_media_actions_in_german(command, action):
+    """German playback verbs map to the same MPRIS actions."""
+    assert media._action_for(command) == action
+
+
+@pytest.fixture
+def italian(monkeypatch):
+    """Give the media plugin its Italian vocabulary."""
+    monkeypatch.setattr(media, "vocab", Vocabulary(media.__file__, language="it"))
+
+
+@pytest.fixture
+def french(monkeypatch):
+    """Give the media plugin its French vocabulary."""
+    monkeypatch.setattr(media, "vocab", Vocabulary(media.__file__, language="fr"))
+
+
+@pytest.mark.usefixtures("french")
+@pytest.mark.parametrize(
+    ("command", "action"),
+    [("lance la lecture", "play"), ("arrête la lecture", "pause"), ("lis", "play")],
+)
+def test_media_lecture_is_the_noun_in_french(command, action):
+    """ "lecture" names the playback, so it can neither hide nor be the verb."""
+    assert media._action_for(command) == action
+
+
+@pytest.mark.usefixtures("italian")
+def test_media_strips_filler_phrases():
+    """ "per favore" is filler even though it is two words."""
+    assert media._action_for("riproduci la musica per favore") == "play"
+
+
+@pytest.mark.usefixtures("german")
+@patch.object(apps, "launch_app", return_value=True)
+def test_apps_terminal_opens_once_registered(mock_launch, mock_core, monkeypatch):
+    """ "Öffne die Konsole" opens the terminal setup found; none found, no match."""
+    assert apps.handle("öffne die konsole", mock_core) is None
+    monkeypatch.setitem(apps.LOCAL_APPS, "terminal", "kgx")
+    assert apps.handle("öffne die konsole", mock_core) is True
+    mock_launch.assert_called_once_with("terminal", mock_core)
+
+
+@pytest.mark.usefixtures("german")
+def test_media_stop_alone_is_not_ours():
+    """A bare "stopp" needs a media noun, like the English "stop"."""
+    assert media._action_for("stopp") is None
+
+
+@pytest.mark.usefixtures("german")
+@pytest.mark.parametrize(
+    "command", ["geh schlafen", "hör auf zuzuhören", "stop listening"]
+)
+def test_sleep_in_german(command, mock_core):
+    """The German sleep phrases deactivate, and the English one still does."""
+    assert sleep.handle(command, mock_core) is True
+    mock_core.deactivate.assert_called_once()
+
+
+@pytest.mark.usefixtures("german")
+@pytest.mark.parametrize(
+    ("command", "action"),
+    [
+        ("lauter", "volume_up"),
+        ("lautstärke runter", "volume_down"),
+        ("sehr leise", "volume_min"),
+        ("stumm", "volume_mute"),
+        ("bildschirm heller", "brightness_up"),
+        ("nicht stören an", "dnd_on"),
+        ("benachrichtigungen an", "dnd_off"),
+        ("volume up", "volume_up"),
+    ],
+)
+def test_system_in_german(command, action, mock_core, monkeypatch):
+    """German volume, brightness and do-not-disturb words reach their actions."""
+    called = Mock()
+    for name in (
+        "volume_up",
+        "volume_down",
+        "volume_max",
+        "volume_min",
+        "volume_mute",
+        "brightness_up",
+        "brightness_down",
+        "dnd_on",
+        "dnd_off",
+    ):
+        monkeypatch.setattr(system, name, getattr(called, name))
+
+    assert system.handle(command, mock_core) is True
+    assert [c[0] for c in called.method_calls] == [action]
+
+
+def test_apps_named_without_a_verb_is_not_ours(mock_core):
+    """An app name alone, no open or close, is left for another plugin."""
+    assert apps.handle("gimp", mock_core) is None
+    mock_core.speak.assert_not_called()

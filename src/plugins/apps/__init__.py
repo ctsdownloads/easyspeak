@@ -3,8 +3,10 @@
 from pathlib import Path
 
 from easyspeak.core.i18n import translator
+from easyspeak.core.vocabulary import Vocabulary
 
 _ = translator(__file__)
+vocab = Vocabulary(__file__)
 
 NAME = "apps"
 DESCRIPTION = "Launch and close applications"
@@ -189,19 +191,20 @@ def close_app(name, core):
 
 def handle(cmd, core):
     """Open or close an app named in the command; return None if none matched."""
-    all_apps = list(FLATPAK_APPS.keys()) + list(LOCAL_APPS.keys())
+    app = vocab.which(cmd, "apps")
+    if app is None or (app not in FLATPAK_APPS and app not in LOCAL_APPS):
+        return None
 
-    for app in all_apps:
-        if ("open" in cmd or "launch" in cmd) and app in cmd:
-            if launch_app(app, core):
-                core.speak(_("Opening {app}.").format(app=app))
-            else:
-                core.speak(_("{app} not installed.").format(app=app))
-            return True
+    if vocab.says(cmd, "open"):
+        if launch_app(app, core):
+            core.speak(_("Opening {app}.").format(app=app))
+        else:
+            core.speak(_("{app} not installed.").format(app=app))
+        return True
 
-        if "close" in cmd and app in cmd:
-            close_app(app, core)
-            core.speak(_("Closing {app}.").format(app=app))
-            return True
+    if vocab.says(cmd, "close"):
+        close_app(app, core)
+        core.speak(_("Closing {app}.").format(app=app))
+        return True
 
     return None  # Not handled

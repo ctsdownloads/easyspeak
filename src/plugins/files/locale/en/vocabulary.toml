@@ -1,0 +1,16 @@
+# What to say, in English. Phrases are matched as whole words against
+# Whisper's lowercased transcript, so common mishearings belong here too.
+
+[commands]
+open = ["open", "go to", "show", "browse"]
+file_manager = ["file manager", "file browser", "files"]
+
+[folders]
+documents = ["documents"]
+downloads = ["downloads"]
+pictures = ["pictures"]
+music = ["music"]
+videos = ["videos"]
+projects = ["projects"]
+home = ["home"]
+desktop = ["desktop"]

@@ -1,0 +1,15 @@
+# Cosa dire, in italiano. Le frasi sono confrontate come parole intere con la
+# trascrizione in minuscolo di Whisper; ci vanno anche gli errori di ascolto.
+
+[commands]
+play = ["riproduci", "riprendi", "suona"]
+pause = ["pausa", "ferma", "stop"]
+next = ["successivo", "prossimo", "salta", "avanti"]
+previous = ["precedente", "indietro"]
+needs_noun = ["ferma", "stop", "indietro", "avanti"]
+
+[nouns]
+media = ["musica", "canzone", "canzoni", "brano", "brani", "riproduzione", "video", "audio", "player"]
+
+[filler]
+words = ["la", "il", "lo", "un", "una", "per favore", "questo", "questa", "mi"]

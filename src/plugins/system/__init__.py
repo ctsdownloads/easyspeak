@@ -1,8 +1,10 @@
 """System Plugin - Volume, brightness, do not disturb."""
 
 from easyspeak.core.i18n import translator
+from easyspeak.core.vocabulary import Vocabulary
 
 _ = translator(__file__)
+vocab = Vocabulary(__file__)
 
 NAME = "system"
 DESCRIPTION = "System controls"
@@ -114,52 +116,53 @@ def dnd_off(core):
 
 
 def handle(cmd, core):
-    """Route a volume/brightness/DND command; return None if none matched."""
+    """Route a volume/brightness/DND command; return None if none matched.
+
+    Every word comes from the vocabulary table and is matched whole, so "silent"
+    doesn't fire on "silently", "softer" on "softest", and "screenshot" isn't read
+    as a screen command.
+    """
+    says = lambda key: vocab.says(cmd, key)  # noqa: E731
+
     # Volume -- "louder"/"quieter" etc. work on their own, without "volume"/"sound".
-    # Match whole words so "silent" doesn't fire on "silently", "softer" on "softest"...
-    words = cmd.split()
-    if "very" in words:
-        if "loud" in words or "louder" in words:
+    if says("very"):
+        if says("loud"):
             volume_max(core)
             return True
-        if any(w in words for w in ("silent", "quiet", "quieter", "soft", "softer")):
+        if says("quiet"):
             volume_min(core)
             return True
-    louder = "louder" in words
-    quieter = any(word in words for word in ("quieter", "softer", "silent"))
+    louder, quieter = says("louder"), says("quieter")
     # No spoken feedback for volume/mute: GNOME's native OSD and chime already
     # acknowledge the change (and a spoken reply would be inaudible once muted).
-    if "volume" in cmd or "sound" in cmd or louder or quieter:
-        if "up" in cmd or louder:
+    if says("volume") or louder or quieter:
+        if says("up") or louder:
             volume_up(core)
             return True
-        if "down" in cmd or quieter:
+        if says("down") or quieter:
             volume_down(core)
             return True
-        if "mute" in cmd or "unmute" in cmd:
+        if says("mute"):
             volume_mute(core)
             return True
 
-    if "mute" in cmd:
+    if says("mute"):
         volume_mute(core)
         return True
 
-    # Brightness -- whole-word matching, so "screenshot" isn't read as a screen
-    # command and a stray "up"/"down" inside another word can't flip the direction.
-    if "brightness" in words or "screen" in words:
-        if "up" in words or "brighter" in words:
+    if says("brightness"):
+        if says("up") or says("brighter"):
             core.speak(_("Brighter."))
             brightness_up(core)
             return True
-        if "down" in words or "dimmer" in words or "darker" in words:
+        if says("down") or says("dimmer"):
             core.speak(_("Dimmer."))
             brightness_down(core)
             return True
 
-    dnd_named = "do not disturb" in cmd or "dnd" in words
-    if dnd_named or "notifications" in words:
-        turning_on = "on" in words or "enable" in words
-        turning_off = "off" in words or "disable" in words
+    dnd_named = says("dnd")
+    if dnd_named or says("notifications"):
+        turning_on, turning_off = says("on"), says("off")
         if not (turning_on or turning_off):
             return None  # a bare "notifications" says nothing about direction
         # Silencing notifications is do-not-disturb ON, so the notifications

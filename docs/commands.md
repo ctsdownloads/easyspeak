@@ -3,6 +3,13 @@
 Say "Hey Jarvis" followed by any of the commands below. Say **"help"** at any
 time to print the full list to the terminal, described in the active language.
 
+The commands are listed in English, which works in every language. With
+`EASYSPEAK_LANGUAGE` set to German, Italian, French or Spanish, the general,
+app, folder, media, sleep and system commands also take that language's words
+("öffne den Rechner", "lauter", "geh schlafen"); each plugin's words are its
+`locale/<language>/vocabulary.toml`. The grid, browser and head-tracking modes
+still take English words only.
+
 ## Mouse grid
 
 Screen splits into a 3x3 layout (like a phone keypad):

@@ -213,6 +213,7 @@ check-desktop-integration:
 translations lang:
     #!/usr/bin/env bash
     set -euo pipefail
+    [ "{{ lang }}" != en ] || { echo "English is the source language; it has no catalog" >&2; exit 1; }
     pot=$(mktemp)
     trap 'rm -f "$pot"' EXIT
     for package in src/core src/plugins/*/; do
@@ -238,7 +239,8 @@ check-translations:
     #!/usr/bin/env bash
     set -euo pipefail
     for lang in src/core/locale/*/; do
-        just translations "$(basename "$lang")" >/dev/null
+        lang="$(basename "$lang")"
+        [ "$lang" = en ] || just translations "$lang" >/dev/null
     done
     git diff --color --exit-code -- '*.po'
 

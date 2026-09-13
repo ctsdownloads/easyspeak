@@ -1,0 +1,16 @@
+# Qué decir, en español. Las frases se comparan como palabras enteras con la
+# transcripción en minúsculas de Whisper; las confusiones frecuentes también van aquí.
+
+[commands]
+open = ["abre", "abrir", "muestra", "ve a"]
+file_manager = ["gestor de archivos", "archivos", "explorador"]
+
+[folders]
+documents = ["documentos"]
+downloads = ["descargas"]
+pictures = ["imágenes", "fotos"]
+music = ["música"]
+videos = ["vídeos", "videos"]
+projects = ["proyectos"]
+home = ["carpeta personal", "home"]
+desktop = ["escritorio"]

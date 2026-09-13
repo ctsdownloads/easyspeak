@@ -115,6 +115,33 @@ def handle(cmd, core):
 Text with a value in it stays a template until it is looked up:
 `core.speak(_("Opening {app}.").format(app=app))`.
 
+What the plugin listens for goes the same way, through its `vocabulary.toml`:
+
+```toml
+[commands]
+hello = ["say hello", "greet me"]
+```
+
+```python
+from easyspeak.core.vocabulary import Vocabulary
+
+vocab = Vocabulary(__file__)
+
+
+def handle(cmd, core):
+    if vocab.says(cmd, "hello"):
+        core.speak(_("Hello there!"))
+        return True
+    return None
+```
+
+`says` matches any of the key's phrases as whole words, in the active language's
+table and in the English one, so the English phrases keep working whatever the
+language; `which(cmd, section)` names the key of a section that was said, for
+things like app or folder names. Commands are transcribed in the active language
+once the core has a table for it (German, Italian, French and Spanish have one),
+so list the words people actually say, mishearings included.
+
 The translations are gettext catalogs beside the code, one per language:
 `myplugin/locale/de/LC_MESSAGES/myplugin.po`, the domain being the package's
 name. `just translations de` extracts the wrapped strings and creates or

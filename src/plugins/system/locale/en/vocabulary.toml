@@ -1,0 +1,20 @@
+# What to say, in English. Phrases are matched as whole words against
+# Whisper's lowercased transcript, so common mishearings belong here too.
+
+[commands]
+very = ["very"]
+loud = ["loud", "louder"]
+quiet = ["silent", "quiet", "quieter", "soft", "softer"]
+louder = ["louder"]
+quieter = ["quieter", "softer", "silent"]
+volume = ["volume", "sound"]
+up = ["up"]
+down = ["down"]
+mute = ["mute", "unmute"]
+brightness = ["brightness", "screen"]
+brighter = ["brighter"]
+dimmer = ["dimmer", "darker"]
+dnd = ["do not disturb", "dnd"]
+notifications = ["notifications"]
+on = ["on", "enable"]
+off = ["off", "disable"]

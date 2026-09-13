@@ -1,8 +1,10 @@
 """Base Plugin - Help and Exit."""
 
 from easyspeak.core.i18n import translator
+from easyspeak.core.vocabulary import Vocabulary
 
 _ = translator(__file__)
+vocab = Vocabulary(__file__)
 
 NAME = "base"
 PRIORITY = 100  # the catch-all for help and exit routes last
@@ -32,28 +34,23 @@ def handle(cmd, core):
     """
     cmd_lower = cmd.lower().strip()
 
-    if cmd_lower in ["require wake word", "require the wake word"]:
+    if vocab.says(cmd_lower, "require_wake_word"):
         core.require_wake_word = True
         core.speak(_("Modes now wait for the wake word."))
         return True
 
-    if cmd_lower in ["free listening", "stop requiring wake word"]:
+    if vocab.says(cmd_lower, "free_listening"):
         core.require_wake_word = False
         core.speak(_("Modes now take commands on their own."))
         return True
 
-    # Exit - but NOT if it's "quit tracking" etc
-    if "tracking" not in cmd_lower:
-        if cmd_lower in ["exit", "quit", "goodbye", "bye"]:
-            core.speak(_("Goodbye."))
-            return False  # Signal to exit
-        # Also match "jarvis quit" etc
-        if any(cmd_lower.endswith(x) for x in [" exit", " quit"]):
-            core.speak(_("Goodbye."))
-            return False
+    # The exit word must end the command ("jarvis quit"), so "quit tracking"
+    # is left to head tracking.
+    if vocab.ends(cmd_lower, "exit"):
+        core.speak(_("Goodbye."))
+        return False  # Signal to exit
 
-    # Help
-    if "help" in cmd_lower or "what can you do" in cmd_lower:
+    if vocab.says(cmd_lower, "help"):
         show_help(core)
         return True
 

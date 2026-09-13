@@ -1,0 +1,8 @@
+# What to say, in English. Phrases are matched as whole words against
+# Whisper's lowercased transcript, so common mishearings belong here too.
+
+[commands]
+require_wake_word = ["require wake word", "require the wake word"]
+free_listening = ["free listening", "stop requiring wake word"]
+exit = ["exit", "quit", "goodbye", "bye"]
+help = ["help", "what can you do"]
