@@ -40,6 +40,24 @@ const ABOUT = {
     copyright: '© Matt Hartley and the EasySpeak contributors',
 };
 
+// The models EasySpeak ships or fetches, under their own licenses; the same
+// list as core/about.py, which the daemon's About window shows.
+const LICENSE_URLS = {
+    'CC-BY-4.0': 'https://creativecommons.org/licenses/by/4.0/',
+    'CC-BY-SA-4.0': 'https://creativecommons.org/licenses/by-sa/4.0/',
+    'CC0-1.0': 'https://creativecommons.org/publicdomain/zero/1.0/',
+};
+const LEGAL = [
+    ['Parakeet TDT 0.6b v3 speech model', '© NVIDIA Corporation', 'CC-BY-4.0'],
+    ['Whisper speech models', '© OpenAI, converted to CTranslate2 by SYSTRAN', 'MIT'],
+    ['Hey Jarvis wake-word model (openWakeWord)', '© David Scripka', 'Apache-2.0'],
+    ['Piper voice en_US-amy', '© Mycroft AI (Mimic 3 voices)', 'CC-BY-SA-4.0'],
+    ['Piper voice de_DE-thorsten', '© Thorsten Müller', 'CC0-1.0'],
+    ['Piper voice it_IT-paola', '© Paola Persico', 'CC0-1.0'],
+    ['Piper voice fr_FR-siwis', '© SIWIS, University of Edinburgh', 'CC-BY-4.0'],
+    ['Piper voice es_ES-davefx', '© davefx (OHF voice datasets)', 'CC0-1.0'],
+];
+
 export default class EasySpeakPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const page = new Adw.PreferencesPage();
@@ -134,6 +152,14 @@ export default class EasySpeakPreferences extends ExtensionPreferences {
         dialog.add_link('Source Code', 'https://github.com/ctsdownloads/easyspeak');
         dialog.add_link(
             'Discussions', 'https://github.com/ctsdownloads/easyspeak/discussions');
+        const known = { MIT: Gtk.License.MIT_X11, 'Apache-2.0': Gtk.License.APACHE_2_0 };
+        for (const [title, owner, license] of LEGAL) {
+            if (license in known)
+                dialog.add_legal_section(title, owner, known[license], null);
+            else
+                dialog.add_legal_section(title, owner, Gtk.License.CUSTOM,
+                    `<a href="${LICENSE_URLS[license]}">${license}</a>`);
+        }
         dialog.present(window);
     }
 }
