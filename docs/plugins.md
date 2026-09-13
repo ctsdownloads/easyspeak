@@ -42,6 +42,8 @@ classDiagram
         +str DESCRIPTION
         +int PRIORITY
         +list COMMANDS
+        +translator _
+        +Vocabulary vocab
         +setup(core)
         +handle(cmd, core)
     }
@@ -55,6 +57,10 @@ classDiagram
 - `NAME` — short identifier shown in the help screen (required)
 - `DESCRIPTION` — one-line summary for the help screen
 - `COMMANDS` — list of `"phrase - description"` strings for the help screen
+- `_` — the plugin's reply catalog, `translator(__file__)`, wrapped around
+  everything it speaks (see [Translations](#translations))
+- `vocab` — the words it listens for, `Vocabulary(__file__)`, read from its
+  `locale/<language>/vocabulary.toml`
 - `setup(core)` — optional one-time hook; store the `core` reference and do any
   host-environment setup here
 - `handle(cmd, core)` — required; returns `True` if it consumed the command,
