@@ -14,7 +14,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: docs-${{ github.event_name == 'push' && 'deploy' || github.ref }}
+  group: docs-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
