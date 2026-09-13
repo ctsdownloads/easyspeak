@@ -395,6 +395,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#speech-recognition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Speech recognition
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#language" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -919,6 +930,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#speech-recognition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Speech recognition
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#language" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1033,7 +1055,7 @@
 
 
 <h1 id="packaging">Packaging<a class="headerlink" href="#packaging" title="Permanent link">&para;</a></h1>
-<p>EasySpeak ships <strong>distro <code>.deb</code> and <code>.rpm</code> packages</strong>, split into two:</p>
+<p>EasySpeak ships <strong>distro <code>.deb</code> and <code>.rpm</code> packages</strong>, split into three:</p>
 <ul>
 <li><strong><code>easyspeak</code></strong> (amd64) — the application: a self-contained Python runtime
   (standalone CPython + all wheels, including the <code>piper</code> engine and the
@@ -1041,13 +1063,18 @@
   at install time. Desktop integration (launcher, GNOME Shell extension, AT-SPI
   dictation helper) is wired to your system's GTK4 / PyGObject / AT-SPI packages,
   declared as dependencies.</li>
-<li><strong><code>easyspeak-lang-en</code></strong> (noarch) — English speech data: the Whisper <code>base.en</code>
-  recognition model and the Piper <code>en_US-amy-medium</code> voice, under
+<li><strong><code>easyspeak-stt-parakeet</code></strong> (noarch) — the speech recognition model: NVIDIA's
+  multilingual Parakeet TDT v3, one int8 ONNX model for the 25 European languages
+  it covers, under <code>/opt/easyspeak/models/parakeet</code>. EasySpeak uses it by default.</li>
+<li><strong><code>easyspeak-lang-en</code></strong> (noarch) — English speech data: the Piper
+  <code>en_US-amy-medium</code> voice and the Whisper <code>base.en</code> recognition model, which
+  stands in when the Parakeet pack is not installed, under
   <code>/opt/easyspeak/models/en</code>. More languages ship as <code>easyspeak-lang-*</code> packages,
   each under its own <code>/opt/easyspeak/models/&lt;language&gt;</code>.</li>
 </ul>
 <p>Splitting keeps the app small and lets you pick (or add) languages independently
-without re-downloading the runtime. See <a href="#language">Language</a>.</p>
+without re-downloading the runtime or the shared recognition model. See
+<a href="#language">Language</a>.</p>
 <blockquote>
 <p>EasySpeak integrates deeply with the host (raw input devices, the AT-SPI bus,
 session D-Bus, a GNOME Shell extension, and spawning host binaries). That is why
@@ -1055,19 +1082,19 @@ the supported formats are <strong>unconfined distro packages</strong> — sandbo
 (Flatpak/Snap) fight every one of those integration points.</p>
 </blockquote>
 <h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
-<p>Download the latest packages from the <a href="https://github.com/ctsdownloads/easyspeak/releases">Releases page</a> — grab
-<strong>both</strong> the app and a <a href="https://github.com/ctsdownloads/easyspeak/releases?q=lang">language pack</a> — and install them
-<strong>together</strong>. Just take the latest of each: a pack is a separate file (not
-auto-fetched from GitHub) and is versioned by its models, so the app and
-language-pack version numbers are independent and need not match:</p>
+<p>Download the latest packages from the <a href="https://github.com/ctsdownloads/easyspeak/releases">Releases page</a> — the app,
+the <a href="https://github.com/ctsdownloads/easyspeak/releases?q=stt">Parakeet pack</a> and a <a href="https://github.com/ctsdownloads/easyspeak/releases?q=lang">language pack</a> —
+and install them <strong>together</strong>. Just take the latest of each: a pack is a
+separate file (not auto-fetched from GitHub) and is versioned by its models, so
+the app and pack version numbers are independent and need not match:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Debian / Ubuntu</label><label for="__tabbed_1_2">Fedora / RHEL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>./easyspeak_*_amd64.deb<span class="w"> </span>./easyspeak-lang-en_*_all.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>./easyspeak_*_amd64.deb<span class="w"> </span>./easyspeak-stt-parakeet_*_all.deb<span class="w"> </span>./easyspeak-lang-en_*_all.deb
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>./easyspeak-*.x86_64.rpm<span class="w"> </span>./easyspeak-lang-en-*.noarch.rpm
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>./easyspeak-*.x86_64.rpm<span class="w"> </span>./easyspeak-stt-parakeet-*.noarch.rpm<span class="w"> </span>./easyspeak-lang-en-*.noarch.rpm
 </code></pre></div>
 </div>
 </div>
@@ -1078,20 +1105,30 @@ PyGObject, … — are already present, as on any GNOME desktop). Then launch
 <p>Dictation additionally needs <code>wl-clipboard</code>, since it places text by pasting
 rather than through the accessibility bridge, which Chromium-based applications
 ignore. It is a hard dependency, so it comes with the package.</p>
-<p>Installing the app <strong>without</strong> a language pack also works: the wake word is built
-in, the Whisper model then downloads automatically on first run, and voice feedback
-stays off until you add a Piper voice.</p>
+<p>Installing the app <strong>without</strong> the packs also works: the wake word is built in,
+the speech model then downloads on first run if you allow it (see
+<code>EASYSPEAK_OFFLINE</code> in the <a href="../usage/#configuration">configuration</a>), and voice
+feedback stays off until you add a Piper voice. Without the Parakeet pack and
+with downloads off, a language pack's Whisper model does the recognition, more
+slowly.</p>
 <p>One non-package step remains: <strong>log out and back in once</strong> after the first launch so
 GNOME loads the bundled Shell extension (mouse grid + panel indicator).</p>
 <p>To use hold-to-dictate, add yourself to the <code>input</code> group (raw <code>/dev/input</code>
 access) and log back in:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>usermod<span class="w"> </span>-aG<span class="w"> </span>input<span class="w"> </span><span class="s2">"</span><span class="nv">$USER</span><span class="s2">"</span>
 </code></pre></div>
+<h2 id="speech-recognition">Speech recognition<a class="headerlink" href="#speech-recognition" title="Permanent link">&para;</a></h2>
+<p><code>easyspeak-stt-parakeet</code> carries NVIDIA's Parakeet TDT v3 model, converted to an
+int8 ONNX model, which recognizes speech in 25 European languages and tells them
+apart by itself. It is one pack for every language, under
+<code>/opt/easyspeak/models/parakeet</code>, and the recognizer EasySpeak uses by default. The
+model is <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>; the package
+ships the attribution as <code>/usr/share/doc/easyspeak-stt-parakeet/copyright</code>.</p>
 <h2 id="language">Language<a class="headerlink" href="#language" title="Permanent link">&para;</a></h2>
-<p>The default <code>easyspeak-lang-en</code> pack is <strong>US English</strong> — Whisper <code>base.en</code>
-(recognition) and Piper <code>en_US-amy-medium</code> (feedback). The <code>hey_jarvis</code> wake word is
-built into the app (it ships inside the pyopen-wakeword wheel), so it stays English
-regardless of language pack.</p>
+<p>The default <code>easyspeak-lang-en</code> pack is <strong>US English</strong> — Piper <code>en_US-amy-medium</code>
+(feedback) and Whisper <code>base.en</code> (recognition without the Parakeet pack). The
+<code>hey_jarvis</code> wake word is built into the app (it ships inside the pyopen-wakeword
+wheel), so it stays English regardless of language pack.</p>
 <p><code>easyspeak-lang-de</code> is <strong>German</strong> — the multilingual Whisper <code>small</code> and Piper
 <code>de_DE-thorsten-medium</code>: German dictation and German replies in the German voice.
 <code>easyspeak-lang-it</code> is <strong>Italian</strong> the same way, with Piper <code>it_IT-paola-medium</code>,
@@ -1121,16 +1158,17 @@ CPython and manylinux wheels can't run on the host:</p>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>just<span class="w"> </span>package-app<span class="w"> </span><span class="m">1</span>.2.3<span class="w">        </span><span class="c1"># set an explicit app version</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>just<span class="w"> </span>package-lang<span class="w">             </span><span class="c1"># -&gt; ./dist/ : every easyspeak-lang-* .deb and .rpm</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>just<span class="w"> </span>package-lang<span class="w"> </span>en<span class="w">          </span><span class="c1"># ... or just the named pack(s)</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>just<span class="w"> </span>package-distro<span class="w">           </span><span class="c1"># both of the above (every distro package)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>just<span class="w"> </span>package-stt<span class="w">              </span><span class="c1"># -&gt; ./dist/ : the easyspeak-stt-parakeet .deb and .rpm</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>just<span class="w"> </span>package-distro<span class="w">           </span><span class="c1"># all of the above (every distro package)</span>
 </code></pre></div>
-<p>The app and the language packs build independently. The app build needs a
-compiler and the standalone CPython bundle; a language pack is only downloaded
-speech models, so it builds in a lighter container with no compiler and carries
-its own version from <code>pins.toml</code>, independent of the app release. They release
-on their own cadence too, but both go through the same <code>release.yml</code> workflow on
-a published GitHub Release: an application tag builds and attaches the app
-packages, while a <code>lang-&lt;code&gt;-&lt;version&gt;</code> tag skips those jobs and instead fans
-the language packs out over a build matrix and attaches them to that release.</p>
+<p>The app and the packs build independently. The app build needs a compiler and
+the standalone CPython bundle; a pack is only downloaded speech models, so it
+builds in a lighter container with no compiler and carries its own version from
+<code>pins.toml</code>, independent of the app release. They release on their own cadence
+too, but all go through the same <code>release.yml</code> workflow on a published GitHub
+Release: an application tag builds and attaches the app packages, while a
+<code>lang-&lt;code&gt;-&lt;version&gt;</code> or <code>stt-&lt;code&gt;-&lt;version&gt;</code> tag skips those jobs and
+instead builds that pack and attaches it to that release.</p>
 <h2 id="other-distributions">Other distributions<a class="headerlink" href="#other-distributions" title="Permanent link">&para;</a></h2>
 <p>These formats are maintained <strong>outside this repository</strong>. The notes below capture
 what each one needs.</p>

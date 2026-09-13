@@ -1065,18 +1065,19 @@
 </ul>
 <p>Tested on Fedora and NixOS.</p>
 <h2 id="quick-install-prebuilt-packages">Quick install (prebuilt packages)<a class="headerlink" href="#quick-install-prebuilt-packages" title="Permanent link">&para;</a></h2>
-<p>The easiest path. Download the latest <strong>app</strong> package and a
+<p>The easiest path. Download the latest <strong>app</strong> package, the
+<strong><a href="https://github.com/ctsdownloads/easyspeak/releases?q=stt">Parakeet pack</a></strong> with the speech recognition model and a
 <strong><a href="https://github.com/ctsdownloads/easyspeak/releases?q=lang">language pack</a></strong> from the <a href="https://github.com/ctsdownloads/easyspeak/releases">Releases page</a> and
-install them together — just take the latest of each; the app and language-pack
-version numbers are independent and need not match:</p>
+install them together — just take the latest of each; the app and pack version
+numbers are independent and need not match:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Debian / Ubuntu</label><label for="__tabbed_1_2">Fedora / RHEL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>./easyspeak_*_amd64.deb<span class="w"> </span>./easyspeak-lang-en_*_all.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>./easyspeak_*_amd64.deb<span class="w"> </span>./easyspeak-stt-parakeet_*_all.deb<span class="w"> </span>./easyspeak-lang-en_*_all.deb
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>./easyspeak-*.x86_64.rpm<span class="w"> </span>./easyspeak-lang-en-*.noarch.rpm
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>./easyspeak-*.x86_64.rpm<span class="w"> </span>./easyspeak-stt-parakeet-*.noarch.rpm<span class="w"> </span>./easyspeak-lang-en-*.noarch.rpm
 </code></pre></div>
 </div>
 </div>
@@ -1092,8 +1093,8 @@ the first launch so GNOME loads the bundled extension. See the
 <a href="../packaging/#install">Packaging guide</a> for offline notes, more languages, and
 hold-to-dictate setup.</p>
 <h2 id="nixos">NixOS<a class="headerlink" href="#nixos" title="Permanent link">&para;</a></h2>
-<p>The flake carries the runtime tools, the English language pack and the sound
-theme, so there is no system-package step:</p>
+<p>The flake carries the runtime tools, the Parakeet model, the English language
+pack and the sound theme, so there is no system-package step:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>nix<span class="w"> </span>run<span class="w"> </span>github:ctsdownloads/easyspeak
 </code></pre></div>
 <p>Another language is one more command, then <code>EASYSPEAK_LANGUAGE=de</code> (or <code>it</code>,
