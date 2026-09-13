@@ -953,10 +953,12 @@ script directly:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">source</span><span class="w"> </span>~/easyspeak-venv/bin/activate
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>easyspeak
 </code></pre></div>
-<p>Say "Hey Jarvis" followed by a command. After a command that gives no spoken
-reply (such as volume changes), EasySpeak keeps listening for a few seconds so
-you can chain commands — say "louder", "louder", "louder" without repeating the
-wake word each time.</p>
+<p>Say "Hey Jarvis" followed by a command. Afterwards EasySpeak keeps listening,
+whether it replied, acted silently or did not understand, so you can go on or
+try again at your own pace — "open documents", then "louder", "louder" — without
+repeating the wake word. It goes back to waiting for the wake word after about
+ten seconds of silence, or when a mode ended because you went quiet, which its
+spoken notice tells you.</p>
 <h2 id="command-line-options">Command-line options<a class="headerlink" href="#command-line-options" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
