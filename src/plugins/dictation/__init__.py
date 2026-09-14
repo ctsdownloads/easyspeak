@@ -306,7 +306,9 @@ def paste_chord(wm_class=UNKNOWN):
     if wm_class is UNKNOWN:
         wm_class = focused_wm_class()
     chord = (
-        TERMINAL_PASTE_CHORD if wm_class in TERMINAL_WM_CLASSES else DEFAULT_PASTE_CHORD
+        TERMINAL_PASTE_CHORD
+        if (wm_class or "").lower() in TERMINAL_WM_CLASSES
+        else DEFAULT_PASTE_CHORD
     )
     return [KEYCODES[part] for part in chord.split("+")]
 
@@ -571,7 +573,8 @@ def insert_via_atspi(text):
     that matches the real cause instead of always blaming focus.
     """
     python = atspi_python()
-    logger.info("⌨️  inserting %d chars via AT-SPI (%s)", len(text), python)
+    if text:
+        logger.info("⌨️  inserting %d chars via AT-SPI (%s)", len(text), python)
     if python is None:
         logger.warning(
             "Dictation needs PyGObject and the AT-SPI typelib, and no interpreter "
