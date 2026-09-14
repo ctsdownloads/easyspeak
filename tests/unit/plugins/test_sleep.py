@@ -11,16 +11,20 @@ from easyspeak.plugins import sleep
         "go to sleep jarvis",
         "goto sleep",
         "GO TO SLEEP",
+        "stop listening",
     ],
 )
 def test_handle_sleep_commands(mock_core, command):
-    """When handle receives a sleep phrase then it deactivates and returns True."""
+    """When handle receives a sleep phrase then it deactivates and returns True.
+
+    The confirmation is spoken here, on the voice path, so the tray stays silent
+    when it releases the mic and the phrase is not repeated. Releasing the mic
+    is core's job, at its next tray poll: the plugin only queues it.
+    """
     result = sleep.handle(command, mock_core)
 
     assert result is True
     mock_core.deactivate.assert_called_once()
-    # Speaking the deactivation here also ends the command session promptly; the
-    # tray stays silent on this voice path so the phrase isn't repeated.
     mock_core.speak.assert_called_once_with("Voice control turned off.")
 
 

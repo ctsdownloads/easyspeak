@@ -24,3 +24,12 @@ Feature: The microphone stays open for follow-ups
   Scenario: Two quiet listens end the session
     When the wake word fires and I say "open files", then fall silent
     Then EasySpeak listens twice more, then waits for the wake word again
+
+  # Regression: the follow-up window used to stay open on "stop listening" too,
+  # so EasySpeak confirmed voice control was off and then carried on hearing,
+  # and acting on, whatever was said next.
+  Scenario: "Stop listening" closes the session and releases the mic at once
+    Given the sleep plugin is loaded as well
+    When the wake word fires and I say "stop listening", then EasySpeak is reactivated from the tray
+    Then the mic is released before EasySpeak listens again
+    And the confirmation is drained before the mic is released

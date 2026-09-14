@@ -2,12 +2,12 @@
 
 import subprocess
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock, call, patch
 
 import numpy as np
 import pytest
 from easyspeak.core.main import EasySpeak
-from easyspeak.core.tray import TrayAction
+from easyspeak.core.tray import STATE_MUTED, TrayAction
 
 
 class TestEasySpeakInit:
@@ -1330,6 +1330,154 @@ class TestEasySpeakRun:
         # The command fired once; the empty rounds drove the idle-out, no wake.
         mock_route_command.assert_called_once()
         assert mock_transcribe.call_count == 3
+
+    @patch("subprocess.run")
+    @patch("time.time")
+    @patch("easyspeak.core.main.pyaudio")
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch.object(EasySpeak, "load_plugins")
+    @patch.object(EasySpeak, "wait_for_speech")
+    @patch.object(EasySpeak, "record_until_silence")
+    @patch.object(EasySpeak, "transcribe")
+    @patch.object(EasySpeak, "route_command")
+    @patch.object(EasySpeak, "flush_stream")
+    def test_run_releases_the_mic_right_after_a_sleep_command(
+        self,
+        mock_flush_stream,
+        mock_route_command,
+        mock_transcribe,
+        mock_record,
+        mock_wait,
+        mock_load_plugins,
+        mock_whisper_model,
+        mock_wakeword_model,
+        mock_pyaudio,
+        mock_time,
+        mock_subprocess_run,
+        mock_plugin,
+    ):
+        """A command that asks for sleep ends the follow-up window at once: its
+        reply is drained, then the mic is released, and nothing is listened for
+        until the tray reactivates, which goes back to the wake word. Drives the
+        real tray controller, since that is where the queued sleep lives."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin]
+        mock_time.return_value = 100.0
+
+        # One parent records the speech and stream calls in order.
+        boundary = Mock()
+        easy.speech = boundary.speech
+        mock_stream = boundary.stream
+        pcm_data = b"\x00\x00" * 1280
+        mock_stream.read.side_effect = [pcm_data, KeyboardInterrupt()]
+        mock_audio = Mock()
+        mock_audio.open.return_value = mock_stream
+        mock_pyaudio.PyAudio.return_value = mock_audio
+
+        mock_wakeword_instance = Mock()
+        mock_wakeword_instance.predict.return_value = 0.8
+        mock_wakeword_model.return_value = mock_wakeword_instance
+
+        # One listen only: a session that went on would run out of script.
+        mock_wait.side_effect = [b"audio_data"]
+        mock_record.return_value = b"more_audio"
+        mock_transcribe.return_value = "stop listening"
+
+        def route(_cmd):
+            """What the sleep plugin does: confirm out loud, then deactivate."""
+            easy.speak("Voice control turned off.")
+            easy.deactivate()
+            return True
+
+        mock_route_command.side_effect = route
+        easy.tray.set_state = Mock(return_value=True)
+        # The tray's idle loop finds the reactivation on its first read.
+        easy.tray.take_command = Mock(
+            side_effect=lambda: (
+                "unmute"
+                if call(STATE_MUTED) in easy.tray.set_state.call_args_list
+                else None
+            )
+        )
+
+        easy.run()
+
+        mock_route_command.assert_called_once()
+        # No second listen: the sleep phrase was the session's last command.
+        mock_wait.assert_called_once()
+        easy.tray.set_state.assert_any_call(STATE_MUTED)
+        # Drained, then released for the sleep; drained and released on exit.
+        lifecycle = [
+            c for c in boundary.mock_calls if c[0] in ("speech.drain", "stream.close")
+        ]
+        assert lifecycle == [call.speech.drain(), call.stream.close()] * 2
+        assert mock_audio.open.call_count == 2  # reopened on reactivation
+
+    @patch("subprocess.run")
+    @patch("time.time")
+    @patch("easyspeak.core.main.pyaudio")
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch.object(EasySpeak, "load_plugins")
+    @patch.object(EasySpeak, "wait_for_speech")
+    @patch.object(EasySpeak, "record_until_silence")
+    @patch.object(EasySpeak, "transcribe")
+    @patch.object(EasySpeak, "route_command")
+    @patch.object(EasySpeak, "flush_stream")
+    def test_run_follow_up_window_ends_when_the_tray_reactivates(
+        self,
+        mock_flush_stream,
+        mock_route_command,
+        mock_transcribe,
+        mock_record,
+        mock_wait,
+        mock_load_plugins,
+        mock_whisper_model,
+        mock_wakeword_model,
+        mock_pyaudio,
+        mock_time,
+        mock_subprocess_run,
+        mock_plugin,
+    ):
+        """The tray is polled between follow-up listens, so a mute clicked while
+        the window is open takes effect, and the reactivation that follows ends
+        the session instead of listening on for follow-ups."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin]
+        mock_time.return_value = 100.0
+
+        mock_audio = Mock()
+        mock_stream = Mock()
+        pcm_data = b"\x00\x00" * 1280
+        mock_stream.read.side_effect = [pcm_data, KeyboardInterrupt()]
+        mock_audio.open.return_value = mock_stream
+        mock_pyaudio.PyAudio.return_value = mock_audio
+
+        mock_wakeword_instance = Mock()
+        mock_wakeword_instance.predict.return_value = 0.8
+        mock_wakeword_model.return_value = mock_wakeword_instance
+
+        mock_wait.side_effect = [b"audio_data"]  # one listen only, as above
+        mock_record.return_value = b"more_audio"
+        mock_transcribe.return_value = "louder"
+        mock_route_command.return_value = True
+
+        easy.tray = Mock()
+        # Main loop, first listen, then the poll after the command: the tray
+        # slept and woke; the main loop's next poll carries on.
+        easy.tray.poll.side_effect = [
+            TrayAction.CONTINUE,
+            TrayAction.CONTINUE,
+            TrayAction.RESUME,
+            TrayAction.CONTINUE,
+        ]
+
+        easy.run()
+
+        mock_route_command.assert_called_once()
+        mock_wait.assert_called_once()
+        assert easy.tray.poll.call_count == 4
 
     @patch("subprocess.run")
     @patch("time.time")

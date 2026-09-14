@@ -147,6 +147,24 @@ def test_sleep_in_german(command, mock_core):
     mock_core.deactivate.assert_called_once()
 
 
+@pytest.mark.parametrize(
+    ("language", "command"),
+    [
+        ("de", "hör auf zuzuhören"),
+        ("it", "smetti di ascoltare"),
+        ("fr", "arrête d'écouter"),
+        ("es", "deja de escuchar"),
+    ],
+)
+def test_stop_listening_in_every_language(language, command, mock_core, monkeypatch):
+    """ "Stop listening" in each shipped language confirms out loud and deactivates."""
+    monkeypatch.setattr(sleep, "vocab", Vocabulary(sleep.__file__, language=language))
+
+    assert sleep.handle(command, mock_core) is True
+    mock_core.speak.assert_called_once()
+    mock_core.deactivate.assert_called_once()
+
+
 @pytest.mark.usefixtures("german")
 @pytest.mark.parametrize(
     ("command", "action"),

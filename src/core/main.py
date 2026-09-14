@@ -198,8 +198,9 @@ class EasySpeak:
         """Request the assistant go to sleep (plugin-facing).
 
         Releases the mic and stops wake detection until reactivated from the tray. The
-        actual release happens at the next main-loop iteration (handled by the tray
-        controller) so the triggering command can finish, and speak, first.
+        actual release happens at the listening loop's next tray poll (handled by the
+        tray controller), right after the triggering command has finished and its
+        reply has been drained, so the follow-up window does not stay open on it.
         """
         self.tray.request_sleep()
 
@@ -776,10 +777,23 @@ class EasySpeak:
         silence or noise, when a mode was left unattended (the wake word is then asked
         for, as its notice says), or when a command asks the daemon to exit, which
         returns True. Silence right after the wake word is answered out loud.
+
+        The tray is polled before every listen, as the wake-word loop and the modes
+        do, so a "go to sleep" just carried out releases the mic at once instead of
+        keeping the follow-up window open on it, and the tray's Quit and mute reach
+        the daemon while the window is open. Waking from that sleep ends the session
+        and goes back to the wake word, as a reactivation from the tray always does.
         """
         awake = True
         quiet = 0
         while True:
+            action = self.tray.poll(self._close_stream, self._open_stream)
+            if action is TrayAction.QUIT:
+                return True
+            if action is TrayAction.RESUME:
+                self._reset_detector()
+                return False
+
             self.unrecognized = False
             self.spoke = False
             self.needs_wake_word = False

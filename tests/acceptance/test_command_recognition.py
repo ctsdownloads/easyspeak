@@ -8,12 +8,14 @@ the spoken replies back off the stubbed speech pipeline.
 
 import re
 from contextlib import ExitStack
+from unittest import mock
 from unittest.mock import Mock, patch
 
 import pytest
 from easyspeak.core.config import FOLLOWUP_IDLE_ROUNDS, MISUNDERSTAND_GRACE
 from easyspeak.core.main import EasySpeak
-from easyspeak.core.tray import TrayAction
+from easyspeak.core.tray import STATE_MUTED
+from easyspeak.plugins import sleep
 from pytest_bdd import given, parsers, scenarios, then, when
 
 scenarios(
@@ -80,6 +82,15 @@ def fresh_easyspeak(ctx):
     ctx["piper"] = piper
     ctx["plugin"] = _StubPlugins()
     ctx["easy"].plugins = [ctx["plugin"]]
+    # The real tray controller, with its channels stubbed: nothing is clicked
+    # in the menu, and the indicator is there, so a sleep can engage.
+    ctx["easy"].tray.take_command = Mock(return_value=None)
+    ctx["easy"].tray.set_state = Mock(return_value=True)
+
+
+@given("the sleep plugin is loaded as well")
+def with_sleep_plugin(ctx):
+    ctx["easy"].plugins.append(sleep)
 
 
 def _route(ctx, phrase):
@@ -111,11 +122,12 @@ def _run_session(ctx, transcripts):
     runs out of script, so either failure shows.
     """
     easy = ctx["easy"]
-    easy.speech = Mock()  # count drains; speak becomes a no-op
-    easy.tray = Mock()
-    easy.tray.poll.return_value = TrayAction.CONTINUE
+    # One parent records the speech and stream calls in order, so a step can
+    # tell what was drained or released before what. speak becomes a no-op.
+    ctx["boundary"] = boundary = Mock()
+    easy.speech = boundary.speech
 
-    # Keep only the stub plugin (skip the real plugin scan) and short-circuit
+    # Keep the scenario's plugins (skip the real plugin scan) and short-circuit
     # the audio helpers so nothing touches a real mic.
     easy.load_plugins = Mock()
     # Startup samples the room to set the silence threshold, which would eat the
@@ -129,7 +141,7 @@ def _run_session(ctx, transcripts):
     )
     easy.flush_stream = Mock()  # don't consume the scripted stream reads
 
-    stream = Mock()
+    stream = boundary.stream
     pcm = b"\x00\x00" * 1280
     stream.read.side_effect = [pcm, KeyboardInterrupt()]  # wake once, then stop
 
@@ -156,6 +168,27 @@ def run_scripted_session(ctx, said):
     the session gives up, however long that takes."""
     utterances = re.findall(r'"([^"]*)"', said)
     _run_session(ctx, [*utterances, *([None] * FOLLOWUP_IDLE_ROUNDS)])
+
+
+@when(
+    parsers.parse(
+        'the wake word fires and I say "{phrase}", then EasySpeak is reactivated '
+        "from the tray"
+    )
+)
+def run_then_reactivate(ctx, phrase):
+    """The phrase is heard once; the tray's idle loop then finds the reactivation
+    on its first read. A session that kept listening after the phrase would run
+    out of script instead."""
+    tray = ctx["easy"].tray
+    tray.take_command = Mock(
+        side_effect=lambda: (
+            "unmute"
+            if mock.call(STATE_MUTED) in tray.set_state.call_args_list
+            else None
+        )
+    )
+    _run_session(ctx, [phrase])
 
 
 def _spoken(ctx):
@@ -231,3 +264,24 @@ def listens_twice_more(ctx):
     # The command, then FOLLOWUP_IDLE_ROUNDS silent listens; the run ended on the
     # wake-word read that followed, so the session did give the mic back.
     assert ctx["easy"].wait_for_speech.call_count == 1 + FOLLOWUP_IDLE_ROUNDS
+
+
+@then("the mic is released before EasySpeak listens again")
+def mic_released_before_next_listen(ctx):
+    easy = ctx["easy"]
+    assert easy.wait_for_speech.call_count == 1
+    easy.tray.set_state.assert_any_call(STATE_MUTED)
+    # Released for the sleep and reopened on reactivation, then closed on exit.
+    assert ctx["boundary"].stream.close.call_count == 2
+
+
+@then("the confirmation is drained before the mic is released")
+def confirmation_drained_before_release(ctx):
+    boundary = ctx["boundary"]
+    assert (
+        mock.call("Voice control turned off.") in boundary.speech.speak.call_args_list
+    )
+    lifecycle = [
+        c for c in boundary.mock_calls if c[0] in ("speech.drain", "stream.close")
+    ]
+    assert lifecycle[:2] == [mock.call.speech.drain(), mock.call.stream.close()]
