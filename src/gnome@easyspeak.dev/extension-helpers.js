@@ -121,3 +121,11 @@ export function autostartEnabledFromText(text) {
 export function pickAutostartSource(userText, systemTexts, fallback) {
     return userText ?? systemTexts.find((text) => text != null) ?? fallback;
 }
+
+// Whether a window is the preferences dialog GNOME Shell opened for this
+// extension. The shell hosts every extension's prefs.js in its own
+// org.gnome.Shell.Extensions service, so that is the window's app id (its
+// wm_class), and it titles the dialog after the extension's metadata name.
+export function isPrefsWindow(title, wmClass, extensionName) {
+    return wmClass === 'org.gnome.Shell.Extensions' && title === extensionName;
+}

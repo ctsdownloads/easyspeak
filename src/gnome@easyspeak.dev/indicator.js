@@ -57,9 +57,10 @@ class TrayIndicator extends PanelMenu.Button {
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
-        // Settings opens this extension's own prefs window (prefs.js) in-process.
-        // Help and About route through the daemon (which knows its interpreter
-        // and the docs URL) via the same control-file channel as the other items.
+        // Settings shows this extension's own prefs window (prefs.js); the
+        // extension raises the open one or opens it. Help and About route through
+        // the daemon (which knows its interpreter and the docs URL) via the same
+        // control-file channel as the other items.
         const settingsItem = new PopupMenu.PopupMenuItem('Settings…');
         settingsItem.connect('activate', () => this._openPreferences());
         this.menu.addMenuItem(settingsItem);

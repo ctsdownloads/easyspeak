@@ -13,6 +13,7 @@ import {
     setAutostartEnabledInText,
     autostartEnabledFromText,
     pickAutostartSource,
+    isPrefsWindow,
 } from '../../src/gnome@easyspeak.dev/extension-helpers.js';
 
 test('clampToWorkArea returns the rectangle unchanged without a work area', () => {
@@ -203,4 +204,22 @@ test('dragPath handles a backwards drag', () => {
     const path = dragPath(400, 300, 100, 50, 10);
     assert.deepEqual(path.at(-1), { x: 100, y: 50 });
     assert.ok(path[0].x < 400 && path[0].y < 300);
+});
+
+test('isPrefsWindow recognises the shell-hosted prefs dialog by app id and title', () => {
+    assert.equal(isPrefsWindow('EasySpeak', 'org.gnome.Shell.Extensions', 'EasySpeak'), true);
+});
+
+test('isPrefsWindow ignores other windows named after the extension', () => {
+    // A terminal or a browser tab titled like the project is not the dialog.
+    assert.equal(isPrefsWindow('EasySpeak', 'com.mitchellh.ghostty', 'EasySpeak'), false);
+    assert.equal(isPrefsWindow('EasySpeak - Brave', 'brave-browser', 'EasySpeak'), false);
+});
+
+test("isPrefsWindow ignores another extension's prefs dialog", () => {
+    assert.equal(isPrefsWindow('GSConnect', 'org.gnome.Shell.Extensions', 'EasySpeak'), false);
+});
+
+test('isPrefsWindow copes with a window that has no title or class yet', () => {
+    assert.equal(isPrefsWindow(null, null, 'EasySpeak'), false);
 });

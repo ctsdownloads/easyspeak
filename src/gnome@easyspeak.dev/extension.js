@@ -10,6 +10,7 @@ import { GridOverlay } from './grid.js';
 import { WindowManager } from './windows.js';
 import { ScreenshotManager } from './screenshot.js';
 import { TrayIndicator, EasySpeakQuickSettings } from './indicator.js';
+import { isPrefsWindow } from './extension-helpers.js';
 
 const DBUS_INTERFACE = `
 <node>
@@ -118,7 +119,7 @@ export default class EasySpeakGridExtension extends Extension {
         this._grid = new GridOverlay();
         this._winMgr = new WindowManager();
         this._screenMgr = new ScreenshotManager();
-        this._tray = new TrayIndicator(() => this.openPreferences());
+        this._tray = new TrayIndicator(() => this._showPreferences());
         Main.panel.addToStatusArea('easyspeak', this._tray);
         // addToStatusArea drops new indicators at the LEFT end of the status
         // area (the "application content" zone). Move ours to the RIGHT end of
@@ -151,7 +152,7 @@ export default class EasySpeakGridExtension extends Extension {
 
         // Always added to the panel; the setting only governs whether the toggle
         // shows, so flipping it takes effect live.
-        this._quickSettings = new EasySpeakQuickSettings(() => this.openPreferences());
+        this._quickSettings = new EasySpeakQuickSettings(() => this._showPreferences());
         Main.panel.statusArea.quickSettings.addExternalIndicator(this._quickSettings);
         if (this._settings) {
             this._settingsChangedId = this._settings.connect(
@@ -208,6 +209,22 @@ export default class EasySpeakGridExtension extends Extension {
         });
 
         this._dbus.export(Gio.DBus.session, '/org/easyspeak/Desktop');
+    }
+
+    // Bring the open preferences dialog to the front, or open it. GNOME Shell
+    // allows one prefs dialog at a time and refuses a second open ("Already
+    // showing a prefs dialog"), so a Settings click while the dialog sits behind
+    // other windows, or on another workspace, would otherwise do nothing.
+    // The dialog is modal, hence not a "normal" window: no type filter here.
+    _showPreferences() {
+        const open = global.get_window_actors()
+            .map((actor) => actor.get_meta_window())
+            .find((win) => win &&
+                isPrefsWindow(win.get_title(), win.get_wm_class(), this.metadata.name));
+        if (open)
+            Main.activateWindow(open);
+        else
+            this.openPreferences();
     }
 
     // Fan a daemon-pushed state out to both surfaces.

@@ -26,4 +26,5 @@ just lint-js        # eslint over the extension sources (--fix to autocorrect)
 ```sh
 extension-helpers.test.js  # unit tests for the pure, gi-free helpers in extension-helpers.js
 dbus-contract.test.js      # contract: every D-Bus method in the XML has a handler, and vice versa
+prefs-entry.test.js        # contract: every Settings entry raises an open prefs dialog before opening one
 ```
