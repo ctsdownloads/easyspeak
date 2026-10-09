@@ -1,9 +1,11 @@
-"""GNOME panel-indicator bridge and asleep-state lifecycle for the daemon.
+"""Panel-indicator bridge and asleep-state lifecycle for the daemon.
 
 The daemon is voice-first and otherwise headless; this module gives it a
-top-panel microphone icon (served by the bundled `gnome@easyspeak.dev` GNOME
-Shell extension) and owns everything about it so the audio loop in `core.main`
-stays about audio. It runs without a D-Bus server of its own via two
+top-panel microphone icon and owns everything about it so the audio loop in
+`core.main` stays about audio. On GNOME the bundled `gnome@easyspeak.dev` Shell
+extension serves the icon; on other desktops, such as KDE Plasma, a
+StatusNotifierItem helper process ([`core.statusnotifier`][core.statusnotifier])
+does. Either way the daemon runs without a D-Bus server of its own, via two
 one-directional channels:
 
 * daemon -> icon: state is pushed for display via a one-shot `gdbus call`
@@ -46,6 +48,11 @@ COMMAND_HELP = "help"  # open the documentation page in the default browser
 COMMAND_ABOUT = "about"  # open the libadwaita About window
 
 ABOUT_HELPER = str(Path(__file__).with_name("about.py"))
+TRAY_HELPER = str(Path(__file__).with_name("statusnotifier.py"))
+
+# Who serves the indicator's SetState: the GNOME Shell extension, or the tray helper.
+SHELL_SERVICE = "org.gnome.Shell"
+TRAY_SERVICE = "org.easyspeak.Tray"
 
 # Shared with the extension's ScreenshotManager, which creates ~/.cache/easyspeak.
 CONTROL_FILE = Path.home() / ".cache" / "easyspeak" / "control"
@@ -61,6 +68,11 @@ MUTED_REPUSH_INTERVAL = 5.0
 GDBUS_TIMEOUT = 5.0
 
 HELPER_STARTUP_GRACE = 1.5
+
+
+def on_gnome():
+    """Return whether the session is GNOME, where the Shell extension is the tray."""
+    return "GNOME" in os.environ.get("XDG_CURRENT_DESKTOP", "").split(":")
 
 
 class TrayAction(enum.Enum):
@@ -79,9 +91,9 @@ class Tray:
     runs the idle loop itself, using caller-supplied callbacks to release and reacquire
     the microphone. It never touches audio directly.
 
-    Best-effort throughout: on a non-GNOME desktop (no `gdbus`/extension) the state
-    pushes simply fail and the daemon carries on, mirroring how the mouse-grid plugin
-    tolerates a missing extension.
+    Best-effort throughout: without a tray (no `gdbus`, extension or panel to show
+    the icon) the state pushes simply fail and the daemon carries on, mirroring how
+    the mouse-grid plugin tolerates a missing extension.
     """
 
     def __init__(self, control_file=CONTROL_FILE, speak=None):
@@ -95,6 +107,8 @@ class Tray:
         headless and in tests.
         """
         self._control_file = Path(control_file)
+        self._service = SHELL_SERVICE if on_gnome() else TRAY_SERVICE
+        self._helper = None
         self._sleep_requested = False
         self._speak = speak or (lambda _text: None)
 
@@ -111,14 +125,21 @@ class Tray:
 
         Greets the user once startup reaches a listening state, the spoken
         counterpart of the wake chime — and the same greeting reactivation gives.
+
+        Outside GNOME it starts the tray helper first.
         """
         self.take_command()
+        if self._service == TRAY_SERVICE:
+            self._start_helper()
         self.set_state(STATE_LISTENING)
         self._speak(_("Welcome! I'm ready."))
 
     def stopped(self):
         """Daemon is exiting; hide the indicator so no stale icon is left."""
         self.set_state(STATE_LISTENING)
+        if self._helper:
+            self._helper.terminate()
+            self._helper = None
 
     def request_sleep(self):
         """Queue a deactivate (e.g. the "go to sleep" voice command).
@@ -170,6 +191,16 @@ class Tray:
             self._spawn([python, ABOUT_HELPER], "About window")
             return True
         return False
+
+    def _start_helper(self):
+        """Start the StatusNotifierItem tray helper for desktops other than GNOME."""
+        try:
+            self._helper = subprocess.Popen(
+                [sys.executable, TRAY_HELPER, str(self._control_file)],
+                stdout=subprocess.DEVNULL,
+            )
+        except OSError:
+            logger.warning("Couldn't start the tray icon.", exc_info=True)
 
     def _spawn(self, cmd, what):
         """Launch a helper process, reporting it if it fails to start.
@@ -230,12 +261,12 @@ class Tray:
         """Release the mic and idle until reactivated, then greet and resume.
 
         Pushes the muted state first and refuses to sleep unless it lands:
-        reactivation arrives via the extension (tray menu or Quick Settings
+        reactivation arrives via the tray (its menu or the Quick Settings
         toggle), so releasing the mic while the indicator is missing (no
-        GNOME/extension) would strand the daemon with no way back. While asleep
-        the muted state is re-asserted every `MUTED_REPUSH_INTERVAL` seconds so
-        the icon recovers if GNOME Shell or the extension reloads (it would
-        otherwise come back hidden).
+        extension, or no panel to show the icon) would strand the daemon with no
+        way back. While asleep the muted state is re-asserted every
+        `MUTED_REPUSH_INTERVAL` seconds so the icon recovers if the panel or the
+        extension reloads (it would otherwise come back hidden).
 
         `announce` says whether to speak the deactivation confirmation: True for
         a button mute, False for a voice "go to sleep" (the sleep plugin already
@@ -279,7 +310,7 @@ class Tray:
             "call",
             "--session",
             "--dest",
-            "org.gnome.Shell",
+            self._service,
             "--object-path",
             "/org/easyspeak/Desktop",
             "--method",
@@ -292,7 +323,7 @@ class Tray:
             )
             return result.returncode == 0
         except (OSError, subprocess.TimeoutExpired):
-            return False  # gdbus missing (non-GNOME) or a wedged bus
+            return False  # gdbus missing or a wedged bus
 
     def take_command(self):
         """Return and clear the latest menu command, or None if none is pending.

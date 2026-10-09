@@ -38,6 +38,10 @@ instance and use its small public API (`speak`, `host_run`, `transcribe`,
 
 ::: core.tray
 
+## core.statusnotifier
+
+::: core.statusnotifier
+
 ## core.about
 
 ::: core.about
