@@ -93,6 +93,7 @@ mypy = [
 ]
 unittest = [
   "coverage[toml]>=7.14",
+  "lxml>=6",
   "pytest>=8",
 ]
 
@@ -203,6 +204,7 @@ packages = [
 
 [tool.setuptools.package-data]
 "*" = ["locale/*/LC_MESSAGES/*.po", "locale/*/vocabulary.toml"]
+"easyspeak.core" = ["*.xml"]
 "easyspeak.data" = ["*"]
 "easyspeak.gnome" = [
   "extension.js",

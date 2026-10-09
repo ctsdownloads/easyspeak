@@ -133,7 +133,7 @@ class EasySpeak:
         # Persistent text-to-speech pipeline (piper -> audio player) so the
         # voice model is loaded only once.
         self.speech = SpeechPipeline()
-        # GNOME panel indicator: owns the icon and the asleep lifecycle.
+        # Panel indicator: owns the icon and the asleep lifecycle.
         self.tray = Tray(speak=self.speak)
         # Hold-to-dictate keyboard activation; the dictation plugin registers
         # the session to run while the combo is held (see register_push_to_talk).

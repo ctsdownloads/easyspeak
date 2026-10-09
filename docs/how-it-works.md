@@ -28,6 +28,7 @@ easyspeak/
 │   │   ├── main.py            # EasySpeak class + main loop
 │   │   ├── mediakeys.py       # Replays multimedia keys via Mutter
 │   │   ├── speech.py          # Persistent piper -> player pipeline
+│   │   ├── statusnotifier.py  # Tray icon outside GNOME (StatusNotifierItem)
 │   │   └── tray.py            # Panel indicator + asleep lifecycle
 │   ├── data/                  # Bundled data files (easyspeak.data), shipped as package data
 │   │   ├── __init__.py        # Marks the folder as package data
@@ -95,3 +96,10 @@ only scans for extensions at login, so a `oneshot` systemd *user* unit
 (installed by EasySpeak) re-copies the bundled files before the shell loads
 them at each login. See [`core.gnome_extension`][core.gnome_extension]
 for the full lifecycle.
+
+Outside GNOME, for instance on KDE Plasma, the tray icon comes from a small
+helper process instead ([`core.statusnotifier`][core.statusnotifier]). It
+speaks the freedesktop StatusNotifierItem protocol, so any panel that shows
+such icons displays it. The icon tucks itself away among the hidden icons
+while EasySpeak listens and comes forward while it's asleep; its menu offers
+the same entries as on GNOME, except Settings.

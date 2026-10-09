@@ -54,6 +54,16 @@ def _silence_desktop_sounds(monkeypatch, tmp_path_factory):
         monkeypatch.setattr(module, name, missing)
 
 
+@pytest.fixture(autouse=True)
+def _gnome_session(monkeypatch):
+    """Run the suite as if on GNOME, whatever desktop runs the tests.
+
+    Outside GNOME the tray starts a real StatusNotifierItem helper process at
+    startup. Tests about other desktops set `XDG_CURRENT_DESKTOP` themselves.
+    """
+    monkeypatch.setenv("XDG_CURRENT_DESKTOP", "GNOME")
+
+
 def create_mock_plugin(name="TestPlugin", **kwargs) -> Mock:
     """
     Factory function to create mock plugin objects.

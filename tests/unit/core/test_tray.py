@@ -14,6 +14,7 @@ from easyspeak.core.tray import (
     COMMAND_QUIT,
     STATE_LISTENING,
     STATE_MUTED,
+    TRAY_HELPER,
     Tray,
     TrayAction,
 )
@@ -411,3 +412,80 @@ class TestLifecycleHooks:
         Tray().stopped()
 
         assert mock_run.call_args.args[0][-1] == STATE_LISTENING
+
+
+class TestOtherDesktops:
+    """Outside GNOME a StatusNotifierItem helper serves the indicator."""
+
+    @patch("easyspeak.core.tray.subprocess.run")
+    def test_pushes_state_to_the_tray_helper(self, mock_run, monkeypatch):
+        """On KDE Plasma the state goes to the helper instead of GNOME Shell."""
+        monkeypatch.setenv("XDG_CURRENT_DESKTOP", "KDE")
+        mock_run.return_value = Mock(returncode=0)
+
+        Tray().set_state(STATE_MUTED)
+
+        cmd = mock_run.call_args.args[0]
+        assert "org.easyspeak.Tray" in cmd
+        assert "org.gnome.Shell" not in cmd
+
+    @patch("easyspeak.core.tray.subprocess.run")
+    def test_ubuntu_counts_as_gnome(self, mock_run, monkeypatch):
+        """Ubuntu's "ubuntu:GNOME" desktop still uses the Shell extension."""
+        monkeypatch.setenv("XDG_CURRENT_DESKTOP", "ubuntu:GNOME")
+        mock_run.return_value = Mock(returncode=0)
+
+        Tray().set_state(STATE_MUTED)
+
+        assert "org.gnome.Shell" in mock_run.call_args.args[0]
+
+    @patch("easyspeak.core.tray.subprocess.run")
+    @patch("easyspeak.core.tray.subprocess.Popen")
+    def test_started_launches_the_helper(self, mock_popen, mock_run, monkeypatch):
+        """Startup runs the helper with our interpreter and the control file."""
+        monkeypatch.setenv("XDG_CURRENT_DESKTOP", "KDE")
+        mock_run.return_value = Mock(returncode=0)
+        tray = Tray(control_file="/tmp/control")
+
+        tray.started()
+
+        cmd = mock_popen.call_args.args[0]
+        assert cmd == [sys.executable, TRAY_HELPER, "/tmp/control"]
+
+    @patch("easyspeak.core.tray.subprocess.run")
+    @patch("easyspeak.core.tray.subprocess.Popen")
+    def test_started_skips_the_helper_on_gnome(self, mock_popen, mock_run):
+        """On GNOME the Shell extension is the tray, so no helper is started."""
+        mock_run.return_value = Mock(returncode=0)
+
+        Tray().started()
+
+        mock_popen.assert_not_called()
+
+    @patch("easyspeak.core.tray.subprocess.run")
+    @patch("easyspeak.core.tray.subprocess.Popen")
+    def test_stopped_ends_the_helper(self, mock_popen, mock_run, monkeypatch):
+        """Quitting takes the tray icon down with the daemon."""
+        monkeypatch.setenv("XDG_CURRENT_DESKTOP", "KDE")
+        mock_run.return_value = Mock(returncode=0)
+        tray = Tray()
+        tray.started()
+
+        tray.stopped()
+
+        mock_popen.return_value.terminate.assert_called_once()
+
+    @patch("easyspeak.core.tray.subprocess.run")
+    @patch("easyspeak.core.tray.subprocess.Popen", side_effect=OSError("gone"))
+    def test_helper_failing_to_start_is_not_fatal(
+        self, mock_popen, mock_run, monkeypatch
+    ):
+        """The daemon still starts listening when the helper can't be launched."""
+        monkeypatch.setenv("XDG_CURRENT_DESKTOP", "KDE")
+        mock_run.return_value = Mock(returncode=0)
+        tray = Tray(speak=Mock())
+
+        tray.started()
+        tray.stopped()
+
+        tray._speak.assert_called_once_with("Welcome! I'm ready.")
