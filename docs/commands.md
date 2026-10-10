@@ -211,6 +211,7 @@ Folders open in whatever file manager your desktop is configured for (via
 |---------|--------|
 | open files / file manager | Open your default file manager (at `$HOME`) |
 | close files / file manager | Close your default file manager |
+| close [folder], e.g. close downloads | Close your default file manager, all its windows |
 | open documents | Open Documents folder |
 | open downloads | Open Downloads folder |
 | open pictures | Open Pictures folder |

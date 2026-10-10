@@ -124,6 +124,33 @@ def test_handle_opens_the_trash(mock_open_folder, command, mock_core):
     assert mock_core.speak.call_args.args == ("Opening trash.",)
 
 
+@pytest.mark.parametrize(
+    "command",
+    ["close desktop", "close download", "close videos", "close music", "close trash"],
+)
+@patch("easyspeak.plugins.files.close_file_manager", return_value=True)
+def test_handle_closing_a_folder_closes_the_file_manager(
+    mock_close, command, mock_core
+):
+    """ "Close downloads" closes the file manager, like "close files" does."""
+    assert files.handle(command, mock_core) is True
+    mock_close.assert_called_once_with(mock_core)
+    assert mock_core.speak.call_args.args == ("Closing the file manager.",)
+
+
+@pytest.mark.parametrize(
+    ("command", "path"),
+    [("open download", "~/Downloads"), ("show picture", "~/Pictures")],
+)
+@patch("easyspeak.plugins.files.open_folder", return_value=True)
+def test_handle_accepts_singular_folder_names(
+    mock_open_folder, command, path, mock_core
+):
+    """Whisper may write the folder in the singular; it opens all the same."""
+    assert files.handle(command, mock_core) is True
+    assert mock_open_folder.call_args.args == (path, mock_core)
+
+
 @patch("easyspeak.plugins.files.open_folder", return_value=False)
 def test_handle_speaks_error_when_no_file_manager_found(mock_open_folder, mock_core):
     """When no file manager is found then handle speaks an error message."""
