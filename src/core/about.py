@@ -12,6 +12,7 @@ importable (for its metadata constants and version lookup) without PyGObject or 
 display present — which is how the unit suite exercises it.
 """
 
+import html
 import importlib.metadata
 
 APP_ID = "io.github.ctsdownloads.EasySpeak"
@@ -66,6 +67,26 @@ def app_version():
         return importlib.metadata.version("easyspeak-linux")
     except importlib.metadata.PackageNotFoundError:
         return ""
+
+
+def about_html():
+    """Return the About information as rich text, for desktops without libadwaita.
+
+    `kdialog` shows it on KDE Plasma. It carries what the dialog's legal section
+    does, as some models' licenses require crediting them.
+    """
+    name = html.escape(f"{APPLICATION_NAME} {app_version()}".strip())
+    models = "<br>".join(
+        html.escape(f"{title}, {holder}, {license_id}")
+        for title, holder, license_id in LEGAL
+    )
+    return (
+        f"<h3>{name}</h3>"
+        f"<p>{html.escape(COMMENTS)}</p>"
+        f'<p><a href="{DOCS_URL}">{html.escape(DOCS_URL)}</a></p>'
+        f"<p>{html.escape(COPYRIGHT)}<br>GNU General Public License v3.0</p>"
+        f"<p><b>Speech models and voices</b><br>{models}</p>"
+    )
 
 
 def main():  # pragma: no cover - needs libadwaita and a display; run live

@@ -57,3 +57,20 @@ class TestCredits:
             about.DISCUSSIONS_URL,
         ):
             assert url.startswith("https://")
+
+
+def test_about_html_credits_every_model():
+    """The rich-text About information names each model with its license."""
+    with patch.object(about, "app_version", return_value="1.2.3"):
+        text = about.about_html()
+
+    assert "<h3>EasySpeak 1.2.3</h3>" in text
+    for title, _holder, license_id in about.LEGAL:
+        assert title in text
+        assert license_id in text
+
+
+def test_about_html_escapes_markup():
+    """Characters with a meaning in rich text are shown as text."""
+    with patch.object(about, "COMMENTS", "Fast <and> local & private"):
+        assert "Fast &lt;and&gt; local &amp; private" in about.about_html()

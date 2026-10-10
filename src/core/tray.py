@@ -23,6 +23,7 @@ import contextlib
 import enum
 import logging
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -35,6 +36,7 @@ from .about import (
     COMMENTS,
     COPYRIGHT,
     DOCS_URL,
+    about_html,
     app_version,
 )
 from .config import ERROR_SOUND
@@ -234,7 +236,15 @@ class Tray:
         helper already runs in, falling back to our own interpreter when it isn't set
         (e.g. a plain pip install). GTK 4 and libadwaita are optional, so without them
         the user still hears who they're talking to, with the details in a notification.
+
+        Outside GNOME, KDE's `kdialog` shows the information first where it's
+        installed, in the desktop's own look.
         """
+        if not on_gnome() and shutil.which("kdialog"):
+            kdialog = ["kdialog", "--title", "About EasySpeak"]
+            kdialog += ["--icon", APPLICATION_ICON, "--msgbox", about_html()]
+            if self._spawn(kdialog, "About dialog (kdialog)"):
+                return
         python = os.environ.get("EASYSPEAK_ATSPI_PYTHON", sys.executable)
         if not self._spawn([python, ABOUT_HELPER], "About dialog"):
             self._tell_about()
