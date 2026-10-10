@@ -1,5 +1,7 @@
 """Tests for starting EasySpeak at login (core.autostart)."""
 
+from pathlib import Path
+
 import pytest
 from easyspeak.core import autostart
 
@@ -96,3 +98,21 @@ def test_a_custom_config_home_is_followed(home, tmp_path, monkeypatch):
     assert autostart.is_enabled() is True
     default, _system = home
     assert not default.exists()
+
+
+def test_a_relative_config_home_is_ignored(home, monkeypatch):
+    """A relative `XDG_CONFIG_HOME` is invalid, so `~/.config` is used instead."""
+    monkeypatch.setenv("XDG_CONFIG_HOME", "relative/config")
+    user, _system = home
+
+    assert autostart.user_entry() == user
+
+
+def test_relative_system_config_dirs_are_ignored(home, tmp_path, monkeypatch):
+    """Only absolute entries of `XDG_CONFIG_DIRS` count, else `/etc/xdg`."""
+    monkeypatch.setenv("XDG_CONFIG_DIRS", f"relative:{tmp_path / 'xdg'}")
+    _user, system = home
+    assert autostart.system_entries() == [system]
+
+    monkeypatch.setenv("XDG_CONFIG_DIRS", "relative")
+    assert autostart.system_entries() == [Path("/etc/xdg/autostart/easyspeak.desktop")]
