@@ -6696,7 +6696,17 @@ already running, so ambiguous words can't open one.</p>
 <span class="normal"><a href="#__codelineno-0-747">747</a></span>
 <span class="normal"><a href="#__codelineno-0-748">748</a></span>
 <span class="normal"><a href="#__codelineno-0-749">749</a></span>
-<span class="normal"><a href="#__codelineno-0-750">750</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-697" name="__codelineno-0-697"></a><span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
+<span class="normal"><a href="#__codelineno-0-750">750</a></span>
+<span class="normal"><a href="#__codelineno-0-751">751</a></span>
+<span class="normal"><a href="#__codelineno-0-752">752</a></span>
+<span class="normal"><a href="#__codelineno-0-753">753</a></span>
+<span class="normal"><a href="#__codelineno-0-754">754</a></span>
+<span class="normal"><a href="#__codelineno-0-755">755</a></span>
+<span class="normal"><a href="#__codelineno-0-756">756</a></span>
+<span class="normal"><a href="#__codelineno-0-757">757</a></span>
+<span class="normal"><a href="#__codelineno-0-758">758</a></span>
+<span class="normal"><a href="#__codelineno-0-759">759</a></span>
+<span class="normal"><a href="#__codelineno-0-760">760</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-697" name="__codelineno-0-697"></a><span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
 <a id="__codelineno-0-698" name="__codelineno-0-698"></a><span class="w">    </span><span class="sd">"""Enter browser mode on a browser command; return None otherwise.</span>
 <a id="__codelineno-0-699" name="__codelineno-0-699"></a>
 <a id="__codelineno-0-700" name="__codelineno-0-700"></a><span class="sd">    A matching command launches qutebrowser (if needed) and runs the continuous</span>
@@ -6731,25 +6741,35 @@ already running, so ambiguous words can't open one.</p>
 <a id="__codelineno-0-729" name="__codelineno-0-729"></a>        <span class="k">if</span> <span class="n">core</span><span class="o">.</span><span class="n">in_browser_mode</span><span class="p">:</span>
 <a id="__codelineno-0-730" name="__codelineno-0-730"></a>            <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># already there; don't stack a second one</span>
 <a id="__codelineno-0-731" name="__codelineno-0-731"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">_qutebrowser_running</span><span class="p">(</span><span class="n">core</span><span class="p">):</span>
-<a id="__codelineno-0-732" name="__codelineno-0-732"></a>            <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">"qutebrowser"</span><span class="p">],</span> <span class="n">background</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">clean_env</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-0-733" name="__codelineno-0-733"></a>        <span class="n">browser_mode</span><span class="p">(</span><span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-734" name="__codelineno-0-734"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-735" name="__codelineno-0-735"></a>
-<a id="__codelineno-0-736" name="__codelineno-0-736"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">_qutebrowser_running</span><span class="p">(</span><span class="n">core</span><span class="p">):</span>
-<a id="__codelineno-0-737" name="__codelineno-0-737"></a>        <span class="k">return</span> <span class="kc">None</span>
-<a id="__codelineno-0-738" name="__codelineno-0-738"></a>
-<a id="__codelineno-0-739" name="__codelineno-0-739"></a>    <span class="c1"># --- Single browser commands → enters browser mode ---</span>
-<a id="__codelineno-0-740" name="__codelineno-0-740"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-741" name="__codelineno-0-741"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">handle_browser_command</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-742" name="__codelineno-0-742"></a>        <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
-<a id="__codelineno-0-743" name="__codelineno-0-743"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  → Entering browser mode..."</span><span class="p">)</span>
-<a id="__codelineno-0-744" name="__codelineno-0-744"></a>            <span class="n">browser_mode</span><span class="p">(</span><span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-745" name="__codelineno-0-745"></a>            <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-746" name="__codelineno-0-746"></a>    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-<a id="__codelineno-0-747" name="__codelineno-0-747"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">"  ! Browser error"</span><span class="p">)</span>
-<a id="__codelineno-0-748" name="__codelineno-0-748"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-749" name="__codelineno-0-749"></a>
-<a id="__codelineno-0-750" name="__codelineno-0-750"></a>    <span class="k">return</span> <span class="kc">None</span>
+<a id="__codelineno-0-732" name="__codelineno-0-732"></a>            <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-733" name="__codelineno-0-733"></a>                <span class="n">core</span><span class="o">.</span><span class="n">host_run</span><span class="p">([</span><span class="s2">"qutebrowser"</span><span class="p">],</span> <span class="n">background</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">clean_env</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-734" name="__codelineno-0-734"></a>            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+<a id="__codelineno-0-735" name="__codelineno-0-735"></a>                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"qutebrowser isn't installed."</span><span class="p">)</span>
+<a id="__codelineno-0-736" name="__codelineno-0-736"></a>                <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Browser mode needs qutebrowser, which isn't installed."</span><span class="p">))</span>
+<a id="__codelineno-0-737" name="__codelineno-0-737"></a>                <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-738" name="__codelineno-0-738"></a>            <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+<a id="__codelineno-0-739" name="__codelineno-0-739"></a>                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"Couldn't start qutebrowser: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+<a id="__codelineno-0-740" name="__codelineno-0-740"></a>                <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Sorry, I couldn't start qutebrowser."</span><span class="p">))</span>
+<a id="__codelineno-0-741" name="__codelineno-0-741"></a>                <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-742" name="__codelineno-0-742"></a>        <span class="n">browser_mode</span><span class="p">(</span><span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-743" name="__codelineno-0-743"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-744" name="__codelineno-0-744"></a>
+<a id="__codelineno-0-745" name="__codelineno-0-745"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">_qutebrowser_running</span><span class="p">(</span><span class="n">core</span><span class="p">):</span>
+<a id="__codelineno-0-746" name="__codelineno-0-746"></a>        <span class="k">return</span> <span class="kc">None</span>
+<a id="__codelineno-0-747" name="__codelineno-0-747"></a>
+<a id="__codelineno-0-748" name="__codelineno-0-748"></a>    <span class="c1"># --- Single browser commands → enters browser mode ---</span>
+<a id="__codelineno-0-749" name="__codelineno-0-749"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-750" name="__codelineno-0-750"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">handle_browser_command</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-751" name="__codelineno-0-751"></a>        <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+<a id="__codelineno-0-752" name="__codelineno-0-752"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  → Entering browser mode..."</span><span class="p">)</span>
+<a id="__codelineno-0-753" name="__codelineno-0-753"></a>            <span class="n">browser_mode</span><span class="p">(</span><span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-754" name="__codelineno-0-754"></a>            <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-755" name="__codelineno-0-755"></a>    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-0-756" name="__codelineno-0-756"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">"  ! Browser error"</span><span class="p">)</span>
+<a id="__codelineno-0-757" name="__codelineno-0-757"></a>        <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Sorry, that didn't work in the browser."</span><span class="p">))</span>
+<a id="__codelineno-0-758" name="__codelineno-0-758"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-759" name="__codelineno-0-759"></a>
+<a id="__codelineno-0-760" name="__codelineno-0-760"></a>    <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -6778,39 +6798,39 @@ unattended session ends on its own instead of leaving the wake word unreachable.
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/browser/__init__.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-753">753</a></span>
-<span class="normal"><a href="#__codelineno-0-754">754</a></span>
-<span class="normal"><a href="#__codelineno-0-755">755</a></span>
-<span class="normal"><a href="#__codelineno-0-756">756</a></span>
-<span class="normal"><a href="#__codelineno-0-757">757</a></span>
-<span class="normal"><a href="#__codelineno-0-758">758</a></span>
-<span class="normal"><a href="#__codelineno-0-759">759</a></span>
-<span class="normal"><a href="#__codelineno-0-760">760</a></span>
-<span class="normal"><a href="#__codelineno-0-761">761</a></span>
-<span class="normal"><a href="#__codelineno-0-762">762</a></span>
-<span class="normal"><a href="#__codelineno-0-763">763</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-763">763</a></span>
 <span class="normal"><a href="#__codelineno-0-764">764</a></span>
 <span class="normal"><a href="#__codelineno-0-765">765</a></span>
 <span class="normal"><a href="#__codelineno-0-766">766</a></span>
 <span class="normal"><a href="#__codelineno-0-767">767</a></span>
 <span class="normal"><a href="#__codelineno-0-768">768</a></span>
-<span class="normal"><a href="#__codelineno-0-769">769</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-753" name="__codelineno-0-753"></a><span class="k">def</span><span class="w"> </span><span class="nf">browser_mode</span><span class="p">(</span><span class="n">core</span><span class="p">):</span>
-<a id="__codelineno-0-754" name="__codelineno-0-754"></a><span class="w">    </span><span class="sd">"""Handle browser commands until the user leaves or the mode ends.</span>
-<a id="__codelineno-0-755" name="__codelineno-0-755"></a>
-<a id="__codelineno-0-756" name="__codelineno-0-756"></a><span class="sd">    Core owns the listening loop (see</span>
-<a id="__codelineno-0-757" name="__codelineno-0-757"></a><span class="sd">    [`listen_modal`][core.main.EasySpeak.listen_modal]) so the tray keeps working while</span>
-<a id="__codelineno-0-758" name="__codelineno-0-758"></a><span class="sd">    browser mode holds the microphone, and an</span>
-<a id="__codelineno-0-759" name="__codelineno-0-759"></a><span class="sd">    unattended session ends on its own instead of leaving the wake word unreachable.</span>
-<a id="__codelineno-0-760" name="__codelineno-0-760"></a><span class="sd">    """</span>
-<a id="__codelineno-0-761" name="__codelineno-0-761"></a>    <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Browser"</span><span class="p">))</span>
-<a id="__codelineno-0-762" name="__codelineno-0-762"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"=== BROWSER MODE ACTIVE ==="</span><span class="p">)</span>
-<a id="__codelineno-0-763" name="__codelineno-0-763"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Say commands directly. 'exit browser' to leave."</span><span class="p">)</span>
-<a id="__codelineno-0-764" name="__codelineno-0-764"></a>
-<a id="__codelineno-0-765" name="__codelineno-0-765"></a>    <span class="n">core</span><span class="o">.</span><span class="n">in_browser_mode</span> <span class="o">=</span> <span class="kc">True</span>
-<a id="__codelineno-0-766" name="__codelineno-0-766"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-767" name="__codelineno-0-767"></a>        <span class="n">_run_browser_mode</span><span class="p">(</span><span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-768" name="__codelineno-0-768"></a>    <span class="k">finally</span><span class="p">:</span>
-<a id="__codelineno-0-769" name="__codelineno-0-769"></a>        <span class="n">core</span><span class="o">.</span><span class="n">in_browser_mode</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="normal"><a href="#__codelineno-0-769">769</a></span>
+<span class="normal"><a href="#__codelineno-0-770">770</a></span>
+<span class="normal"><a href="#__codelineno-0-771">771</a></span>
+<span class="normal"><a href="#__codelineno-0-772">772</a></span>
+<span class="normal"><a href="#__codelineno-0-773">773</a></span>
+<span class="normal"><a href="#__codelineno-0-774">774</a></span>
+<span class="normal"><a href="#__codelineno-0-775">775</a></span>
+<span class="normal"><a href="#__codelineno-0-776">776</a></span>
+<span class="normal"><a href="#__codelineno-0-777">777</a></span>
+<span class="normal"><a href="#__codelineno-0-778">778</a></span>
+<span class="normal"><a href="#__codelineno-0-779">779</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-763" name="__codelineno-0-763"></a><span class="k">def</span><span class="w"> </span><span class="nf">browser_mode</span><span class="p">(</span><span class="n">core</span><span class="p">):</span>
+<a id="__codelineno-0-764" name="__codelineno-0-764"></a><span class="w">    </span><span class="sd">"""Handle browser commands until the user leaves or the mode ends.</span>
+<a id="__codelineno-0-765" name="__codelineno-0-765"></a>
+<a id="__codelineno-0-766" name="__codelineno-0-766"></a><span class="sd">    Core owns the listening loop (see</span>
+<a id="__codelineno-0-767" name="__codelineno-0-767"></a><span class="sd">    [`listen_modal`][core.main.EasySpeak.listen_modal]) so the tray keeps working while</span>
+<a id="__codelineno-0-768" name="__codelineno-0-768"></a><span class="sd">    browser mode holds the microphone, and an</span>
+<a id="__codelineno-0-769" name="__codelineno-0-769"></a><span class="sd">    unattended session ends on its own instead of leaving the wake word unreachable.</span>
+<a id="__codelineno-0-770" name="__codelineno-0-770"></a><span class="sd">    """</span>
+<a id="__codelineno-0-771" name="__codelineno-0-771"></a>    <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Browser"</span><span class="p">))</span>
+<a id="__codelineno-0-772" name="__codelineno-0-772"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"=== BROWSER MODE ACTIVE ==="</span><span class="p">)</span>
+<a id="__codelineno-0-773" name="__codelineno-0-773"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Say commands directly. 'exit browser' to leave."</span><span class="p">)</span>
+<a id="__codelineno-0-774" name="__codelineno-0-774"></a>
+<a id="__codelineno-0-775" name="__codelineno-0-775"></a>    <span class="n">core</span><span class="o">.</span><span class="n">in_browser_mode</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-0-776" name="__codelineno-0-776"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-777" name="__codelineno-0-777"></a>        <span class="n">_run_browser_mode</span><span class="p">(</span><span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-778" name="__codelineno-0-778"></a>    <span class="k">finally</span><span class="p">:</span>
+<a id="__codelineno-0-779" name="__codelineno-0-779"></a>        <span class="n">core</span><span class="o">.</span><span class="n">in_browser_mode</span> <span class="o">=</span> <span class="kc">False</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -6835,17 +6855,17 @@ unattended session ends on its own instead of leaving the wake word unreachable.
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/browser/__init__.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-811">811</a></span>
-<span class="normal"><a href="#__codelineno-0-812">812</a></span>
-<span class="normal"><a href="#__codelineno-0-813">813</a></span>
-<span class="normal"><a href="#__codelineno-0-814">814</a></span>
-<span class="normal"><a href="#__codelineno-0-815">815</a></span>
-<span class="normal"><a href="#__codelineno-0-816">816</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-811" name="__codelineno-0-811"></a><span class="k">def</span><span class="w"> </span><span class="nf">strip_filler</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">):</span>
-<a id="__codelineno-0-812" name="__codelineno-0-812"></a><span class="w">    </span><span class="sd">"""Remove a leading filler word Whisper added to the front of a command."""</span>
-<a id="__codelineno-0-813" name="__codelineno-0-813"></a>    <span class="k">for</span> <span class="n">filler</span> <span class="ow">in</span> <span class="n">FILLER_PREFIXES</span><span class="p">:</span>
-<a id="__codelineno-0-814" name="__codelineno-0-814"></a>        <span class="k">if</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">filler</span><span class="p">):</span>
-<a id="__codelineno-0-815" name="__codelineno-0-815"></a>            <span class="k">return</span> <span class="n">cmd_lower</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">filler</span><span class="p">)</span> <span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-<a id="__codelineno-0-816" name="__codelineno-0-816"></a>    <span class="k">return</span> <span class="n">cmd_lower</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-821">821</a></span>
+<span class="normal"><a href="#__codelineno-0-822">822</a></span>
+<span class="normal"><a href="#__codelineno-0-823">823</a></span>
+<span class="normal"><a href="#__codelineno-0-824">824</a></span>
+<span class="normal"><a href="#__codelineno-0-825">825</a></span>
+<span class="normal"><a href="#__codelineno-0-826">826</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-821" name="__codelineno-0-821"></a><span class="k">def</span><span class="w"> </span><span class="nf">strip_filler</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">):</span>
+<a id="__codelineno-0-822" name="__codelineno-0-822"></a><span class="w">    </span><span class="sd">"""Remove a leading filler word Whisper added to the front of a command."""</span>
+<a id="__codelineno-0-823" name="__codelineno-0-823"></a>    <span class="k">for</span> <span class="n">filler</span> <span class="ow">in</span> <span class="n">FILLER_PREFIXES</span><span class="p">:</span>
+<a id="__codelineno-0-824" name="__codelineno-0-824"></a>        <span class="k">if</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">filler</span><span class="p">):</span>
+<a id="__codelineno-0-825" name="__codelineno-0-825"></a>            <span class="k">return</span> <span class="n">cmd_lower</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">filler</span><span class="p">)</span> <span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<a id="__codelineno-0-826" name="__codelineno-0-826"></a>    <span class="k">return</span> <span class="n">cmd_lower</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -6870,17 +6890,7 @@ unattended session ends on its own instead of leaving the wake word unreachable.
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/browser/__init__.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-819"> 819</a></span>
-<span class="normal"><a href="#__codelineno-0-820"> 820</a></span>
-<span class="normal"><a href="#__codelineno-0-821"> 821</a></span>
-<span class="normal"><a href="#__codelineno-0-822"> 822</a></span>
-<span class="normal"><a href="#__codelineno-0-823"> 823</a></span>
-<span class="normal"><a href="#__codelineno-0-824"> 824</a></span>
-<span class="normal"><a href="#__codelineno-0-825"> 825</a></span>
-<span class="normal"><a href="#__codelineno-0-826"> 826</a></span>
-<span class="normal"><a href="#__codelineno-0-827"> 827</a></span>
-<span class="normal"><a href="#__codelineno-0-828"> 828</a></span>
-<span class="normal"><a href="#__codelineno-0-829"> 829</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-829"> 829</a></span>
 <span class="normal"><a href="#__codelineno-0-830"> 830</a></span>
 <span class="normal"><a href="#__codelineno-0-831"> 831</a></span>
 <span class="normal"><a href="#__codelineno-0-832"> 832</a></span>
@@ -7101,238 +7111,248 @@ unattended session ends on its own instead of leaving the wake word unreachable.
 <span class="normal"><a href="#__codelineno-0-1047">1047</a></span>
 <span class="normal"><a href="#__codelineno-0-1048">1048</a></span>
 <span class="normal"><a href="#__codelineno-0-1049">1049</a></span>
-<span class="normal"><a href="#__codelineno-0-1050">1050</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-819" name="__codelineno-0-819"></a><span class="k">def</span><span class="w"> </span><span class="nf">handle_browser_command</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
-<a id="__codelineno-0-820" name="__codelineno-0-820"></a><span class="w">    </span><span class="sd">"""Execute a single in-browser command; None if it isn't recognised."""</span>
-<a id="__codelineno-0-821" name="__codelineno-0-821"></a>    <span class="n">cmd_lower</span> <span class="o">=</span> <span class="n">strip_filler</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">)</span>
-<a id="__codelineno-0-822" name="__codelineno-0-822"></a>
-<a id="__codelineno-0-823" name="__codelineno-0-823"></a>    <span class="c1"># Said a beat after hint mode already closed; absorbing it beats answering</span>
-<a id="__codelineno-0-824" name="__codelineno-0-824"></a>    <span class="c1"># "I didn't understand" to a phrase this plugin owns.</span>
-<a id="__codelineno-0-825" name="__codelineno-0-825"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"exit links"</span><span class="p">,</span> <span class="s2">"exit link"</span><span class="p">):</span>
-<a id="__codelineno-0-826" name="__codelineno-0-826"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-827" name="__codelineno-0-827"></a>    <span class="c1"># --- Hints ---</span>
-<a id="__codelineno-0-828" name="__codelineno-0-828"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span>
-<a id="__codelineno-0-829" name="__codelineno-0-829"></a>        <span class="s2">"numbers"</span><span class="p">,</span>
-<a id="__codelineno-0-830" name="__codelineno-0-830"></a>        <span class="s2">"number"</span><span class="p">,</span>
-<a id="__codelineno-0-831" name="__codelineno-0-831"></a>        <span class="s2">"hints"</span><span class="p">,</span>
-<a id="__codelineno-0-832" name="__codelineno-0-832"></a>        <span class="s2">"hint"</span><span class="p">,</span>
-<a id="__codelineno-0-833" name="__codelineno-0-833"></a>        <span class="s2">"show numbers"</span><span class="p">,</span>
-<a id="__codelineno-0-834" name="__codelineno-0-834"></a>        <span class="s2">"show hints"</span><span class="p">,</span>
-<a id="__codelineno-0-835" name="__codelineno-0-835"></a>        <span class="s2">"links"</span><span class="p">,</span>
-<a id="__codelineno-0-836" name="__codelineno-0-836"></a>        <span class="s2">"link"</span><span class="p">,</span>
-<a id="__codelineno-0-837" name="__codelineno-0-837"></a>        <span class="s2">"blanks"</span><span class="p">,</span>
-<a id="__codelineno-0-838" name="__codelineno-0-838"></a>        <span class="s2">"blinks"</span><span class="p">,</span>
-<a id="__codelineno-0-839" name="__codelineno-0-839"></a>        <span class="s2">"lynx"</span><span class="p">,</span>
-<a id="__codelineno-0-840" name="__codelineno-0-840"></a>        <span class="s2">"lings"</span><span class="p">,</span>
-<a id="__codelineno-0-841" name="__codelineno-0-841"></a>        <span class="s2">"lanes"</span><span class="p">,</span>
-<a id="__codelineno-0-842" name="__codelineno-0-842"></a>        <span class="s2">"licks"</span><span class="p">,</span>
-<a id="__codelineno-0-843" name="__codelineno-0-843"></a>        <span class="s2">"clicks"</span><span class="p">,</span>
-<a id="__codelineno-0-844" name="__codelineno-0-844"></a>    <span class="p">]:</span>
-<a id="__codelineno-0-845" name="__codelineno-0-845"></a>        <span class="n">show_hints</span><span class="p">(</span><span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-846" name="__codelineno-0-846"></a>        <span class="n">listen_for_hint</span><span class="p">(</span><span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-847" name="__codelineno-0-847"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-848" name="__codelineno-0-848"></a>
-<a id="__codelineno-0-849" name="__codelineno-0-849"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span>
-<a id="__codelineno-0-850" name="__codelineno-0-850"></a>        <span class="s2">"numbers new"</span><span class="p">,</span>
-<a id="__codelineno-0-851" name="__codelineno-0-851"></a>        <span class="s2">"number new"</span><span class="p">,</span>
-<a id="__codelineno-0-852" name="__codelineno-0-852"></a>        <span class="s2">"hints new"</span><span class="p">,</span>
-<a id="__codelineno-0-853" name="__codelineno-0-853"></a>        <span class="s2">"new numbers"</span><span class="p">,</span>
-<a id="__codelineno-0-854" name="__codelineno-0-854"></a>        <span class="s2">"links new"</span><span class="p">,</span>
-<a id="__codelineno-0-855" name="__codelineno-0-855"></a>        <span class="s2">"link new"</span><span class="p">,</span>
-<a id="__codelineno-0-856" name="__codelineno-0-856"></a>        <span class="s2">"blanks new"</span><span class="p">,</span>
-<a id="__codelineno-0-857" name="__codelineno-0-857"></a>        <span class="s2">"blinks new"</span><span class="p">,</span>
-<a id="__codelineno-0-858" name="__codelineno-0-858"></a>        <span class="s2">"lynx new"</span><span class="p">,</span>
-<a id="__codelineno-0-859" name="__codelineno-0-859"></a>    <span class="p">]:</span>
-<a id="__codelineno-0-860" name="__codelineno-0-860"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"hint links tab"</span><span class="p">)</span>
-<a id="__codelineno-0-861" name="__codelineno-0-861"></a>        <span class="n">listen_for_hint</span><span class="p">(</span><span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-862" name="__codelineno-0-862"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-863" name="__codelineno-0-863"></a>
-<a id="__codelineno-0-864" name="__codelineno-0-864"></a>    <span class="c1"># --- Navigation ---</span>
-<a id="__codelineno-0-865" name="__codelineno-0-865"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"back"</span><span class="p">,</span> <span class="s2">"go back"</span><span class="p">,</span> <span class="s2">"previous page"</span><span class="p">]:</span>
-<a id="__codelineno-0-866" name="__codelineno-0-866"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"back"</span><span class="p">)</span>
-<a id="__codelineno-0-867" name="__codelineno-0-867"></a>        <span class="n">core</span><span class="o">.</span><span class="n">browser_page_js_stale</span> <span class="o">=</span> <span class="kc">True</span>
-<a id="__codelineno-0-868" name="__codelineno-0-868"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-869" name="__codelineno-0-869"></a>
-<a id="__codelineno-0-870" name="__codelineno-0-870"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"forward"</span><span class="p">,</span> <span class="s2">"go forward"</span><span class="p">,</span> <span class="s2">"next page"</span><span class="p">]:</span>
-<a id="__codelineno-0-871" name="__codelineno-0-871"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"forward"</span><span class="p">)</span>
-<a id="__codelineno-0-872" name="__codelineno-0-872"></a>        <span class="n">core</span><span class="o">.</span><span class="n">browser_page_js_stale</span> <span class="o">=</span> <span class="kc">True</span>
-<a id="__codelineno-0-873" name="__codelineno-0-873"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-874" name="__codelineno-0-874"></a>
-<a id="__codelineno-0-875" name="__codelineno-0-875"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"reload"</span><span class="p">,</span> <span class="s2">"refresh"</span><span class="p">,</span> <span class="s2">"reload page"</span><span class="p">]:</span>
-<a id="__codelineno-0-876" name="__codelineno-0-876"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"reload"</span><span class="p">)</span>
-<a id="__codelineno-0-877" name="__codelineno-0-877"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-878" name="__codelineno-0-878"></a>
-<a id="__codelineno-0-879" name="__codelineno-0-879"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"stop"</span><span class="p">,</span> <span class="s2">"stop loading"</span><span class="p">]:</span>
-<a id="__codelineno-0-880" name="__codelineno-0-880"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"stop"</span><span class="p">)</span>
-<a id="__codelineno-0-881" name="__codelineno-0-881"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-882" name="__codelineno-0-882"></a>
-<a id="__codelineno-0-883" name="__codelineno-0-883"></a>    <span class="c1"># --- Scrolling ---</span>
-<a id="__codelineno-0-884" name="__codelineno-0-884"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"scroll down"</span><span class="p">,</span> <span class="s2">"down"</span><span class="p">]:</span>
-<a id="__codelineno-0-885" name="__codelineno-0-885"></a>        <span class="n">scroll_page</span><span class="p">(</span><span class="n">SCROLL_DOWN_JS</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-886" name="__codelineno-0-886"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-887" name="__codelineno-0-887"></a>
-<a id="__codelineno-0-888" name="__codelineno-0-888"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"scroll up"</span><span class="p">,</span> <span class="s2">"up"</span><span class="p">]:</span>
-<a id="__codelineno-0-889" name="__codelineno-0-889"></a>        <span class="n">scroll_page</span><span class="p">(</span><span class="n">SCROLL_UP_JS</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-890" name="__codelineno-0-890"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-891" name="__codelineno-0-891"></a>
-<a id="__codelineno-0-892" name="__codelineno-0-892"></a>    <span class="k">if</span> <span class="s2">"page"</span> <span class="ow">in</span> <span class="n">cmd_lower</span> <span class="ow">and</span> <span class="s2">"down"</span> <span class="ow">in</span> <span class="n">cmd_lower</span><span class="p">:</span>
-<a id="__codelineno-0-893" name="__codelineno-0-893"></a>        <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"jseval -q </span><span class="si">{</span><span class="n">PAGE_DOWN_JS</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-0-894" name="__codelineno-0-894"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-895" name="__codelineno-0-895"></a>
-<a id="__codelineno-0-896" name="__codelineno-0-896"></a>    <span class="k">if</span> <span class="s2">"page"</span> <span class="ow">in</span> <span class="n">cmd_lower</span> <span class="ow">and</span> <span class="s2">"up"</span> <span class="ow">in</span> <span class="n">cmd_lower</span><span class="p">:</span>
-<a id="__codelineno-0-897" name="__codelineno-0-897"></a>        <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"jseval -q </span><span class="si">{</span><span class="n">PAGE_UP_JS</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-0-898" name="__codelineno-0-898"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-899" name="__codelineno-0-899"></a>
-<a id="__codelineno-0-900" name="__codelineno-0-900"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"top"</span><span class="p">,</span> <span class="s2">"go to top"</span><span class="p">,</span> <span class="s2">"scroll to top"</span><span class="p">]:</span>
-<a id="__codelineno-0-901" name="__codelineno-0-901"></a>        <span class="n">scroll_page</span><span class="p">(</span><span class="n">SCROLL_TOP_JS</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-902" name="__codelineno-0-902"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-903" name="__codelineno-0-903"></a>
-<a id="__codelineno-0-904" name="__codelineno-0-904"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"bottom"</span><span class="p">,</span> <span class="s2">"go to bottom"</span><span class="p">,</span> <span class="s2">"scroll to bottom"</span><span class="p">]:</span>
-<a id="__codelineno-0-905" name="__codelineno-0-905"></a>        <span class="n">scroll_page</span><span class="p">(</span><span class="n">SCROLL_BOTTOM_JS</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-906" name="__codelineno-0-906"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-907" name="__codelineno-0-907"></a>
-<a id="__codelineno-0-908" name="__codelineno-0-908"></a>    <span class="c1"># --- Tabs ---</span>
-<a id="__codelineno-0-909" name="__codelineno-0-909"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"new tab"</span><span class="p">,</span> <span class="s2">"open tab"</span><span class="p">]:</span>
-<a id="__codelineno-0-910" name="__codelineno-0-910"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"open -t about:blank"</span><span class="p">)</span>
-<a id="__codelineno-0-911" name="__codelineno-0-911"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-912" name="__codelineno-0-912"></a>
-<a id="__codelineno-0-913" name="__codelineno-0-913"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"close tab"</span><span class="p">,</span> <span class="s2">"close this tab"</span><span class="p">]:</span>
-<a id="__codelineno-0-914" name="__codelineno-0-914"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"tab-close"</span><span class="p">)</span>
-<a id="__codelineno-0-915" name="__codelineno-0-915"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-916" name="__codelineno-0-916"></a>
-<a id="__codelineno-0-917" name="__codelineno-0-917"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"next tab"</span><span class="p">,</span> <span class="s2">"tab right"</span><span class="p">,</span> <span class="s2">"switch tab"</span><span class="p">,</span> <span class="s2">"change tab"</span><span class="p">]:</span>
-<a id="__codelineno-0-918" name="__codelineno-0-918"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"tab-next"</span><span class="p">)</span>
-<a id="__codelineno-0-919" name="__codelineno-0-919"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-920" name="__codelineno-0-920"></a>
-<a id="__codelineno-0-921" name="__codelineno-0-921"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"last tab"</span><span class="p">,</span> <span class="s2">"previous tab"</span><span class="p">,</span> <span class="s2">"tab left"</span><span class="p">]:</span>
-<a id="__codelineno-0-922" name="__codelineno-0-922"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"tab-prev"</span><span class="p">)</span>
-<a id="__codelineno-0-923" name="__codelineno-0-923"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-924" name="__codelineno-0-924"></a>
-<a id="__codelineno-0-925" name="__codelineno-0-925"></a>    <span class="n">tab_num</span> <span class="o">=</span> <span class="n">parse_tab_number</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">)</span>
-<a id="__codelineno-0-926" name="__codelineno-0-926"></a>    <span class="k">if</span> <span class="n">tab_num</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-927" name="__codelineno-0-927"></a>        <span class="k">if</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"close"</span><span class="p">):</span>
-<a id="__codelineno-0-928" name="__codelineno-0-928"></a>            <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"tab-focus </span><span class="si">{</span><span class="n">tab_num</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-0-929" name="__codelineno-0-929"></a>            <span class="n">qb</span><span class="p">(</span><span class="s2">"tab-close"</span><span class="p">)</span>
-<a id="__codelineno-0-930" name="__codelineno-0-930"></a>        <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-931" name="__codelineno-0-931"></a>            <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"tab-focus </span><span class="si">{</span><span class="n">tab_num</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-0-932" name="__codelineno-0-932"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-933" name="__codelineno-0-933"></a>
-<a id="__codelineno-0-934" name="__codelineno-0-934"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"undo tab"</span><span class="p">,</span> <span class="s2">"restore tab"</span><span class="p">,</span> <span class="s2">"reopen tab"</span><span class="p">]:</span>
-<a id="__codelineno-0-935" name="__codelineno-0-935"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"undo"</span><span class="p">)</span>
-<a id="__codelineno-0-936" name="__codelineno-0-936"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-937" name="__codelineno-0-937"></a>
-<a id="__codelineno-0-938" name="__codelineno-0-938"></a>    <span class="c1"># --- Find ---</span>
-<a id="__codelineno-0-939" name="__codelineno-0-939"></a>    <span class="k">if</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"find "</span><span class="p">):</span>
-<a id="__codelineno-0-940" name="__codelineno-0-940"></a>        <span class="n">query</span> <span class="o">=</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"find "</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-<a id="__codelineno-0-941" name="__codelineno-0-941"></a>        <span class="k">if</span> <span class="n">query</span><span class="p">:</span>
-<a id="__codelineno-0-942" name="__codelineno-0-942"></a>            <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"search </span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-0-943" name="__codelineno-0-943"></a>            <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-944" name="__codelineno-0-944"></a>
-<a id="__codelineno-0-945" name="__codelineno-0-945"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"find next"</span><span class="p">,</span> <span class="s2">"next match"</span><span class="p">]:</span>
-<a id="__codelineno-0-946" name="__codelineno-0-946"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"search-next"</span><span class="p">)</span>
-<a id="__codelineno-0-947" name="__codelineno-0-947"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-948" name="__codelineno-0-948"></a>
-<a id="__codelineno-0-949" name="__codelineno-0-949"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"find previous"</span><span class="p">,</span> <span class="s2">"previous match"</span><span class="p">]:</span>
-<a id="__codelineno-0-950" name="__codelineno-0-950"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"search-prev"</span><span class="p">)</span>
-<a id="__codelineno-0-951" name="__codelineno-0-951"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-952" name="__codelineno-0-952"></a>
-<a id="__codelineno-0-953" name="__codelineno-0-953"></a>    <span class="c1"># --- Escape ---</span>
-<a id="__codelineno-0-954" name="__codelineno-0-954"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"escape"</span><span class="p">,</span> <span class="s2">"cancel"</span><span class="p">,</span> <span class="s2">"nevermind"</span><span class="p">]:</span>
-<a id="__codelineno-0-955" name="__codelineno-0-955"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"fake-key &lt;Escape&gt;"</span><span class="p">)</span>
-<a id="__codelineno-0-956" name="__codelineno-0-956"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-957" name="__codelineno-0-957"></a>
-<a id="__codelineno-0-958" name="__codelineno-0-958"></a>    <span class="c1"># --- Browser config toggles ---</span>
-<a id="__codelineno-0-959" name="__codelineno-0-959"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"software rendering"</span><span class="p">,</span> <span class="s2">"fix rendering"</span><span class="p">,</span> <span class="s2">"fix the display"</span><span class="p">]:</span>
-<a id="__codelineno-0-960" name="__codelineno-0-960"></a>        <span class="k">return</span> <span class="n">_apply_config_line</span><span class="p">(</span>
-<a id="__codelineno-0-961" name="__codelineno-0-961"></a>            <span class="n">core</span><span class="p">,</span> <span class="n">SOFTWARE_RENDERING_LINE</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s2">"Software rendering on"</span><span class="p">),</span> <span class="n">wanted</span><span class="o">=</span><span class="kc">True</span>
-<a id="__codelineno-0-962" name="__codelineno-0-962"></a>        <span class="p">)</span>
-<a id="__codelineno-0-963" name="__codelineno-0-963"></a>
-<a id="__codelineno-0-964" name="__codelineno-0-964"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"hardware rendering"</span><span class="p">,</span> <span class="s2">"restore rendering"</span><span class="p">]:</span>
-<a id="__codelineno-0-965" name="__codelineno-0-965"></a>        <span class="k">return</span> <span class="n">_apply_config_line</span><span class="p">(</span>
-<a id="__codelineno-0-966" name="__codelineno-0-966"></a>            <span class="n">core</span><span class="p">,</span> <span class="n">SOFTWARE_RENDERING_LINE</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s2">"Hardware rendering on"</span><span class="p">),</span> <span class="n">wanted</span><span class="o">=</span><span class="kc">False</span>
-<a id="__codelineno-0-967" name="__codelineno-0-967"></a>        <span class="p">)</span>
-<a id="__codelineno-0-968" name="__codelineno-0-968"></a>
-<a id="__codelineno-0-969" name="__codelineno-0-969"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"allow ads"</span><span class="p">,</span> <span class="s2">"stop blocking ads"</span><span class="p">,</span> <span class="s2">"disable ad blocking"</span><span class="p">]:</span>
+<span class="normal"><a href="#__codelineno-0-1050">1050</a></span>
+<span class="normal"><a href="#__codelineno-0-1051">1051</a></span>
+<span class="normal"><a href="#__codelineno-0-1052">1052</a></span>
+<span class="normal"><a href="#__codelineno-0-1053">1053</a></span>
+<span class="normal"><a href="#__codelineno-0-1054">1054</a></span>
+<span class="normal"><a href="#__codelineno-0-1055">1055</a></span>
+<span class="normal"><a href="#__codelineno-0-1056">1056</a></span>
+<span class="normal"><a href="#__codelineno-0-1057">1057</a></span>
+<span class="normal"><a href="#__codelineno-0-1058">1058</a></span>
+<span class="normal"><a href="#__codelineno-0-1059">1059</a></span>
+<span class="normal"><a href="#__codelineno-0-1060">1060</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-829" name="__codelineno-0-829"></a><span class="k">def</span><span class="w"> </span><span class="nf">handle_browser_command</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
+<a id="__codelineno-0-830" name="__codelineno-0-830"></a><span class="w">    </span><span class="sd">"""Execute a single in-browser command; None if it isn't recognised."""</span>
+<a id="__codelineno-0-831" name="__codelineno-0-831"></a>    <span class="n">cmd_lower</span> <span class="o">=</span> <span class="n">strip_filler</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">)</span>
+<a id="__codelineno-0-832" name="__codelineno-0-832"></a>
+<a id="__codelineno-0-833" name="__codelineno-0-833"></a>    <span class="c1"># Said a beat after hint mode already closed; absorbing it beats answering</span>
+<a id="__codelineno-0-834" name="__codelineno-0-834"></a>    <span class="c1"># "I didn't understand" to a phrase this plugin owns.</span>
+<a id="__codelineno-0-835" name="__codelineno-0-835"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"exit links"</span><span class="p">,</span> <span class="s2">"exit link"</span><span class="p">):</span>
+<a id="__codelineno-0-836" name="__codelineno-0-836"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-837" name="__codelineno-0-837"></a>    <span class="c1"># --- Hints ---</span>
+<a id="__codelineno-0-838" name="__codelineno-0-838"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span>
+<a id="__codelineno-0-839" name="__codelineno-0-839"></a>        <span class="s2">"numbers"</span><span class="p">,</span>
+<a id="__codelineno-0-840" name="__codelineno-0-840"></a>        <span class="s2">"number"</span><span class="p">,</span>
+<a id="__codelineno-0-841" name="__codelineno-0-841"></a>        <span class="s2">"hints"</span><span class="p">,</span>
+<a id="__codelineno-0-842" name="__codelineno-0-842"></a>        <span class="s2">"hint"</span><span class="p">,</span>
+<a id="__codelineno-0-843" name="__codelineno-0-843"></a>        <span class="s2">"show numbers"</span><span class="p">,</span>
+<a id="__codelineno-0-844" name="__codelineno-0-844"></a>        <span class="s2">"show hints"</span><span class="p">,</span>
+<a id="__codelineno-0-845" name="__codelineno-0-845"></a>        <span class="s2">"links"</span><span class="p">,</span>
+<a id="__codelineno-0-846" name="__codelineno-0-846"></a>        <span class="s2">"link"</span><span class="p">,</span>
+<a id="__codelineno-0-847" name="__codelineno-0-847"></a>        <span class="s2">"blanks"</span><span class="p">,</span>
+<a id="__codelineno-0-848" name="__codelineno-0-848"></a>        <span class="s2">"blinks"</span><span class="p">,</span>
+<a id="__codelineno-0-849" name="__codelineno-0-849"></a>        <span class="s2">"lynx"</span><span class="p">,</span>
+<a id="__codelineno-0-850" name="__codelineno-0-850"></a>        <span class="s2">"lings"</span><span class="p">,</span>
+<a id="__codelineno-0-851" name="__codelineno-0-851"></a>        <span class="s2">"lanes"</span><span class="p">,</span>
+<a id="__codelineno-0-852" name="__codelineno-0-852"></a>        <span class="s2">"licks"</span><span class="p">,</span>
+<a id="__codelineno-0-853" name="__codelineno-0-853"></a>        <span class="s2">"clicks"</span><span class="p">,</span>
+<a id="__codelineno-0-854" name="__codelineno-0-854"></a>    <span class="p">]:</span>
+<a id="__codelineno-0-855" name="__codelineno-0-855"></a>        <span class="n">show_hints</span><span class="p">(</span><span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-856" name="__codelineno-0-856"></a>        <span class="n">listen_for_hint</span><span class="p">(</span><span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-857" name="__codelineno-0-857"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-858" name="__codelineno-0-858"></a>
+<a id="__codelineno-0-859" name="__codelineno-0-859"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span>
+<a id="__codelineno-0-860" name="__codelineno-0-860"></a>        <span class="s2">"numbers new"</span><span class="p">,</span>
+<a id="__codelineno-0-861" name="__codelineno-0-861"></a>        <span class="s2">"number new"</span><span class="p">,</span>
+<a id="__codelineno-0-862" name="__codelineno-0-862"></a>        <span class="s2">"hints new"</span><span class="p">,</span>
+<a id="__codelineno-0-863" name="__codelineno-0-863"></a>        <span class="s2">"new numbers"</span><span class="p">,</span>
+<a id="__codelineno-0-864" name="__codelineno-0-864"></a>        <span class="s2">"links new"</span><span class="p">,</span>
+<a id="__codelineno-0-865" name="__codelineno-0-865"></a>        <span class="s2">"link new"</span><span class="p">,</span>
+<a id="__codelineno-0-866" name="__codelineno-0-866"></a>        <span class="s2">"blanks new"</span><span class="p">,</span>
+<a id="__codelineno-0-867" name="__codelineno-0-867"></a>        <span class="s2">"blinks new"</span><span class="p">,</span>
+<a id="__codelineno-0-868" name="__codelineno-0-868"></a>        <span class="s2">"lynx new"</span><span class="p">,</span>
+<a id="__codelineno-0-869" name="__codelineno-0-869"></a>    <span class="p">]:</span>
+<a id="__codelineno-0-870" name="__codelineno-0-870"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"hint links tab"</span><span class="p">)</span>
+<a id="__codelineno-0-871" name="__codelineno-0-871"></a>        <span class="n">listen_for_hint</span><span class="p">(</span><span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-872" name="__codelineno-0-872"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-873" name="__codelineno-0-873"></a>
+<a id="__codelineno-0-874" name="__codelineno-0-874"></a>    <span class="c1"># --- Navigation ---</span>
+<a id="__codelineno-0-875" name="__codelineno-0-875"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"back"</span><span class="p">,</span> <span class="s2">"go back"</span><span class="p">,</span> <span class="s2">"previous page"</span><span class="p">]:</span>
+<a id="__codelineno-0-876" name="__codelineno-0-876"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"back"</span><span class="p">)</span>
+<a id="__codelineno-0-877" name="__codelineno-0-877"></a>        <span class="n">core</span><span class="o">.</span><span class="n">browser_page_js_stale</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-0-878" name="__codelineno-0-878"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-879" name="__codelineno-0-879"></a>
+<a id="__codelineno-0-880" name="__codelineno-0-880"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"forward"</span><span class="p">,</span> <span class="s2">"go forward"</span><span class="p">,</span> <span class="s2">"next page"</span><span class="p">]:</span>
+<a id="__codelineno-0-881" name="__codelineno-0-881"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"forward"</span><span class="p">)</span>
+<a id="__codelineno-0-882" name="__codelineno-0-882"></a>        <span class="n">core</span><span class="o">.</span><span class="n">browser_page_js_stale</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-0-883" name="__codelineno-0-883"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-884" name="__codelineno-0-884"></a>
+<a id="__codelineno-0-885" name="__codelineno-0-885"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"reload"</span><span class="p">,</span> <span class="s2">"refresh"</span><span class="p">,</span> <span class="s2">"reload page"</span><span class="p">]:</span>
+<a id="__codelineno-0-886" name="__codelineno-0-886"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"reload"</span><span class="p">)</span>
+<a id="__codelineno-0-887" name="__codelineno-0-887"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-888" name="__codelineno-0-888"></a>
+<a id="__codelineno-0-889" name="__codelineno-0-889"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"stop"</span><span class="p">,</span> <span class="s2">"stop loading"</span><span class="p">]:</span>
+<a id="__codelineno-0-890" name="__codelineno-0-890"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"stop"</span><span class="p">)</span>
+<a id="__codelineno-0-891" name="__codelineno-0-891"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-892" name="__codelineno-0-892"></a>
+<a id="__codelineno-0-893" name="__codelineno-0-893"></a>    <span class="c1"># --- Scrolling ---</span>
+<a id="__codelineno-0-894" name="__codelineno-0-894"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"scroll down"</span><span class="p">,</span> <span class="s2">"down"</span><span class="p">]:</span>
+<a id="__codelineno-0-895" name="__codelineno-0-895"></a>        <span class="n">scroll_page</span><span class="p">(</span><span class="n">SCROLL_DOWN_JS</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-896" name="__codelineno-0-896"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-897" name="__codelineno-0-897"></a>
+<a id="__codelineno-0-898" name="__codelineno-0-898"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"scroll up"</span><span class="p">,</span> <span class="s2">"up"</span><span class="p">]:</span>
+<a id="__codelineno-0-899" name="__codelineno-0-899"></a>        <span class="n">scroll_page</span><span class="p">(</span><span class="n">SCROLL_UP_JS</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-900" name="__codelineno-0-900"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-901" name="__codelineno-0-901"></a>
+<a id="__codelineno-0-902" name="__codelineno-0-902"></a>    <span class="k">if</span> <span class="s2">"page"</span> <span class="ow">in</span> <span class="n">cmd_lower</span> <span class="ow">and</span> <span class="s2">"down"</span> <span class="ow">in</span> <span class="n">cmd_lower</span><span class="p">:</span>
+<a id="__codelineno-0-903" name="__codelineno-0-903"></a>        <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"jseval -q </span><span class="si">{</span><span class="n">PAGE_DOWN_JS</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-904" name="__codelineno-0-904"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-905" name="__codelineno-0-905"></a>
+<a id="__codelineno-0-906" name="__codelineno-0-906"></a>    <span class="k">if</span> <span class="s2">"page"</span> <span class="ow">in</span> <span class="n">cmd_lower</span> <span class="ow">and</span> <span class="s2">"up"</span> <span class="ow">in</span> <span class="n">cmd_lower</span><span class="p">:</span>
+<a id="__codelineno-0-907" name="__codelineno-0-907"></a>        <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"jseval -q </span><span class="si">{</span><span class="n">PAGE_UP_JS</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-908" name="__codelineno-0-908"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-909" name="__codelineno-0-909"></a>
+<a id="__codelineno-0-910" name="__codelineno-0-910"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"top"</span><span class="p">,</span> <span class="s2">"go to top"</span><span class="p">,</span> <span class="s2">"scroll to top"</span><span class="p">]:</span>
+<a id="__codelineno-0-911" name="__codelineno-0-911"></a>        <span class="n">scroll_page</span><span class="p">(</span><span class="n">SCROLL_TOP_JS</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-912" name="__codelineno-0-912"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-913" name="__codelineno-0-913"></a>
+<a id="__codelineno-0-914" name="__codelineno-0-914"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"bottom"</span><span class="p">,</span> <span class="s2">"go to bottom"</span><span class="p">,</span> <span class="s2">"scroll to bottom"</span><span class="p">]:</span>
+<a id="__codelineno-0-915" name="__codelineno-0-915"></a>        <span class="n">scroll_page</span><span class="p">(</span><span class="n">SCROLL_BOTTOM_JS</span><span class="p">,</span> <span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-916" name="__codelineno-0-916"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-917" name="__codelineno-0-917"></a>
+<a id="__codelineno-0-918" name="__codelineno-0-918"></a>    <span class="c1"># --- Tabs ---</span>
+<a id="__codelineno-0-919" name="__codelineno-0-919"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"new tab"</span><span class="p">,</span> <span class="s2">"open tab"</span><span class="p">]:</span>
+<a id="__codelineno-0-920" name="__codelineno-0-920"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"open -t about:blank"</span><span class="p">)</span>
+<a id="__codelineno-0-921" name="__codelineno-0-921"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-922" name="__codelineno-0-922"></a>
+<a id="__codelineno-0-923" name="__codelineno-0-923"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"close tab"</span><span class="p">,</span> <span class="s2">"close this tab"</span><span class="p">]:</span>
+<a id="__codelineno-0-924" name="__codelineno-0-924"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"tab-close"</span><span class="p">)</span>
+<a id="__codelineno-0-925" name="__codelineno-0-925"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-926" name="__codelineno-0-926"></a>
+<a id="__codelineno-0-927" name="__codelineno-0-927"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"next tab"</span><span class="p">,</span> <span class="s2">"tab right"</span><span class="p">,</span> <span class="s2">"switch tab"</span><span class="p">,</span> <span class="s2">"change tab"</span><span class="p">]:</span>
+<a id="__codelineno-0-928" name="__codelineno-0-928"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"tab-next"</span><span class="p">)</span>
+<a id="__codelineno-0-929" name="__codelineno-0-929"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-930" name="__codelineno-0-930"></a>
+<a id="__codelineno-0-931" name="__codelineno-0-931"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"last tab"</span><span class="p">,</span> <span class="s2">"previous tab"</span><span class="p">,</span> <span class="s2">"tab left"</span><span class="p">]:</span>
+<a id="__codelineno-0-932" name="__codelineno-0-932"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"tab-prev"</span><span class="p">)</span>
+<a id="__codelineno-0-933" name="__codelineno-0-933"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-934" name="__codelineno-0-934"></a>
+<a id="__codelineno-0-935" name="__codelineno-0-935"></a>    <span class="n">tab_num</span> <span class="o">=</span> <span class="n">parse_tab_number</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">)</span>
+<a id="__codelineno-0-936" name="__codelineno-0-936"></a>    <span class="k">if</span> <span class="n">tab_num</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-937" name="__codelineno-0-937"></a>        <span class="k">if</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"close"</span><span class="p">):</span>
+<a id="__codelineno-0-938" name="__codelineno-0-938"></a>            <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"tab-focus </span><span class="si">{</span><span class="n">tab_num</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-939" name="__codelineno-0-939"></a>            <span class="n">qb</span><span class="p">(</span><span class="s2">"tab-close"</span><span class="p">)</span>
+<a id="__codelineno-0-940" name="__codelineno-0-940"></a>        <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-941" name="__codelineno-0-941"></a>            <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"tab-focus </span><span class="si">{</span><span class="n">tab_num</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-942" name="__codelineno-0-942"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-943" name="__codelineno-0-943"></a>
+<a id="__codelineno-0-944" name="__codelineno-0-944"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"undo tab"</span><span class="p">,</span> <span class="s2">"restore tab"</span><span class="p">,</span> <span class="s2">"reopen tab"</span><span class="p">]:</span>
+<a id="__codelineno-0-945" name="__codelineno-0-945"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"undo"</span><span class="p">)</span>
+<a id="__codelineno-0-946" name="__codelineno-0-946"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-947" name="__codelineno-0-947"></a>
+<a id="__codelineno-0-948" name="__codelineno-0-948"></a>    <span class="c1"># --- Find ---</span>
+<a id="__codelineno-0-949" name="__codelineno-0-949"></a>    <span class="k">if</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"find "</span><span class="p">):</span>
+<a id="__codelineno-0-950" name="__codelineno-0-950"></a>        <span class="n">query</span> <span class="o">=</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"find "</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<a id="__codelineno-0-951" name="__codelineno-0-951"></a>        <span class="k">if</span> <span class="n">query</span><span class="p">:</span>
+<a id="__codelineno-0-952" name="__codelineno-0-952"></a>            <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"search </span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-953" name="__codelineno-0-953"></a>            <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-954" name="__codelineno-0-954"></a>
+<a id="__codelineno-0-955" name="__codelineno-0-955"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"find next"</span><span class="p">,</span> <span class="s2">"next match"</span><span class="p">]:</span>
+<a id="__codelineno-0-956" name="__codelineno-0-956"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"search-next"</span><span class="p">)</span>
+<a id="__codelineno-0-957" name="__codelineno-0-957"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-958" name="__codelineno-0-958"></a>
+<a id="__codelineno-0-959" name="__codelineno-0-959"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"find previous"</span><span class="p">,</span> <span class="s2">"previous match"</span><span class="p">]:</span>
+<a id="__codelineno-0-960" name="__codelineno-0-960"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"search-prev"</span><span class="p">)</span>
+<a id="__codelineno-0-961" name="__codelineno-0-961"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-962" name="__codelineno-0-962"></a>
+<a id="__codelineno-0-963" name="__codelineno-0-963"></a>    <span class="c1"># --- Escape ---</span>
+<a id="__codelineno-0-964" name="__codelineno-0-964"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"escape"</span><span class="p">,</span> <span class="s2">"cancel"</span><span class="p">,</span> <span class="s2">"nevermind"</span><span class="p">]:</span>
+<a id="__codelineno-0-965" name="__codelineno-0-965"></a>        <span class="n">qb</span><span class="p">(</span><span class="s2">"fake-key &lt;Escape&gt;"</span><span class="p">)</span>
+<a id="__codelineno-0-966" name="__codelineno-0-966"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-967" name="__codelineno-0-967"></a>
+<a id="__codelineno-0-968" name="__codelineno-0-968"></a>    <span class="c1"># --- Browser config toggles ---</span>
+<a id="__codelineno-0-969" name="__codelineno-0-969"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"software rendering"</span><span class="p">,</span> <span class="s2">"fix rendering"</span><span class="p">,</span> <span class="s2">"fix the display"</span><span class="p">]:</span>
 <a id="__codelineno-0-970" name="__codelineno-0-970"></a>        <span class="k">return</span> <span class="n">_apply_config_line</span><span class="p">(</span>
-<a id="__codelineno-0-971" name="__codelineno-0-971"></a>            <span class="n">core</span><span class="p">,</span> <span class="n">ADBLOCK_OFF_LINE</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s2">"Ad blocking off"</span><span class="p">),</span> <span class="n">wanted</span><span class="o">=</span><span class="kc">True</span>
+<a id="__codelineno-0-971" name="__codelineno-0-971"></a>            <span class="n">core</span><span class="p">,</span> <span class="n">SOFTWARE_RENDERING_LINE</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s2">"Software rendering on"</span><span class="p">),</span> <span class="n">wanted</span><span class="o">=</span><span class="kc">True</span>
 <a id="__codelineno-0-972" name="__codelineno-0-972"></a>        <span class="p">)</span>
 <a id="__codelineno-0-973" name="__codelineno-0-973"></a>
-<a id="__codelineno-0-974" name="__codelineno-0-974"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"block ads"</span><span class="p">,</span> <span class="s2">"enable ad blocking"</span><span class="p">]:</span>
+<a id="__codelineno-0-974" name="__codelineno-0-974"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"hardware rendering"</span><span class="p">,</span> <span class="s2">"restore rendering"</span><span class="p">]:</span>
 <a id="__codelineno-0-975" name="__codelineno-0-975"></a>        <span class="k">return</span> <span class="n">_apply_config_line</span><span class="p">(</span>
-<a id="__codelineno-0-976" name="__codelineno-0-976"></a>            <span class="n">core</span><span class="p">,</span> <span class="n">ADBLOCK_OFF_LINE</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s2">"Ad blocking on"</span><span class="p">),</span> <span class="n">wanted</span><span class="o">=</span><span class="kc">False</span>
+<a id="__codelineno-0-976" name="__codelineno-0-976"></a>            <span class="n">core</span><span class="p">,</span> <span class="n">SOFTWARE_RENDERING_LINE</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s2">"Hardware rendering on"</span><span class="p">),</span> <span class="n">wanted</span><span class="o">=</span><span class="kc">False</span>
 <a id="__codelineno-0-977" name="__codelineno-0-977"></a>        <span class="p">)</span>
 <a id="__codelineno-0-978" name="__codelineno-0-978"></a>
-<a id="__codelineno-0-979" name="__codelineno-0-979"></a>    <span class="c1"># --- Keystrokes ---</span>
-<a id="__codelineno-0-980" name="__codelineno-0-980"></a>    <span class="n">request</span> <span class="o">=</span> <span class="n">mediakeys</span><span class="o">.</span><span class="n">parse_key_request</span><span class="p">(</span><span class="n">cmd_lower</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span> <span class="n">BARE_KEYS</span><span class="p">)</span>
-<a id="__codelineno-0-981" name="__codelineno-0-981"></a>    <span class="k">if</span> <span class="n">request</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-982" name="__codelineno-0-982"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">mediakeys</span><span class="o">.</span><span class="n">press_key</span><span class="p">(</span><span class="o">*</span><span class="n">request</span><span class="p">):</span>
-<a id="__codelineno-0-983" name="__codelineno-0-983"></a>            <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Keystrokes need GNOME."</span><span class="p">))</span>
-<a id="__codelineno-0-984" name="__codelineno-0-984"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-985" name="__codelineno-0-985"></a>
-<a id="__codelineno-0-986" name="__codelineno-0-986"></a>    <span class="c1"># --- Bookmarks ---</span>
-<a id="__codelineno-0-987" name="__codelineno-0-987"></a>    <span class="c1"># Save current page as quickmark</span>
-<a id="__codelineno-0-988" name="__codelineno-0-988"></a>    <span class="k">if</span> <span class="p">(</span>
-<a id="__codelineno-0-989" name="__codelineno-0-989"></a>        <span class="s2">"bookmark this"</span> <span class="ow">in</span> <span class="n">cmd_lower</span> <span class="ow">or</span> <span class="s2">"save this"</span> <span class="ow">in</span> <span class="n">cmd_lower</span>
-<a id="__codelineno-0-990" name="__codelineno-0-990"></a>    <span class="p">)</span> <span class="ow">and</span> <span class="s2">" as "</span> <span class="ow">in</span> <span class="n">cmd_lower</span><span class="p">:</span>
-<a id="__codelineno-0-991" name="__codelineno-0-991"></a>        <span class="n">name</span> <span class="o">=</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">" as "</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-<a id="__codelineno-0-992" name="__codelineno-0-992"></a>        <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
-<a id="__codelineno-0-993" name="__codelineno-0-993"></a>            <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Saved as </span><span class="si">{name}</span><span class="s2">."</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">))</span>
-<a id="__codelineno-0-994" name="__codelineno-0-994"></a>            <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"quickmark-save </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-0-995" name="__codelineno-0-995"></a>            <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-996" name="__codelineno-0-996"></a>
-<a id="__codelineno-0-997" name="__codelineno-0-997"></a>    <span class="c1"># Load quickmark (user-saved)</span>
-<a id="__codelineno-0-998" name="__codelineno-0-998"></a>    <span class="k">if</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">"go to "</span><span class="p">,</span> <span class="s2">"open "</span><span class="p">)):</span>
-<a id="__codelineno-0-999" name="__codelineno-0-999"></a>        <span class="n">target</span> <span class="o">=</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"go to "</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"open "</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-<a id="__codelineno-0-1000" name="__codelineno-0-1000"></a>
-<a id="__codelineno-0-1001" name="__codelineno-0-1001"></a>        <span class="c1"># Check predefined bookmarks first</span>
-<a id="__codelineno-0-1002" name="__codelineno-0-1002"></a>        <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">BOOKMARKS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<a id="__codelineno-0-1003" name="__codelineno-0-1003"></a>            <span class="k">if</span> <span class="n">site</span> <span class="o">==</span> <span class="n">target</span><span class="p">:</span>
-<a id="__codelineno-0-1004" name="__codelineno-0-1004"></a>                <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Opening </span><span class="si">{site}</span><span class="s2">."</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">))</span>
-<a id="__codelineno-0-1005" name="__codelineno-0-1005"></a>                <span class="n">qb_open</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-<a id="__codelineno-0-1006" name="__codelineno-0-1006"></a>                <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-1007" name="__codelineno-0-1007"></a>
-<a id="__codelineno-0-1008" name="__codelineno-0-1008"></a>        <span class="c1"># Try as spoken URL (contains "dot")</span>
-<a id="__codelineno-0-1009" name="__codelineno-0-1009"></a>        <span class="k">if</span> <span class="s2">"dot"</span> <span class="ow">in</span> <span class="n">target</span> <span class="ow">or</span> <span class="s2">"."</span> <span class="ow">in</span> <span class="n">target</span><span class="p">:</span>
-<a id="__codelineno-0-1010" name="__codelineno-0-1010"></a>            <span class="n">url</span> <span class="o">=</span> <span class="n">parse_spoken_url</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
-<a id="__codelineno-0-1011" name="__codelineno-0-1011"></a>            <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Opening </span><span class="si">{url}</span><span class="s2">."</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">))</span>
-<a id="__codelineno-0-1012" name="__codelineno-0-1012"></a>            <span class="n">qb_open</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-<a id="__codelineno-0-1013" name="__codelineno-0-1013"></a>            <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-1014" name="__codelineno-0-1014"></a>
-<a id="__codelineno-0-1015" name="__codelineno-0-1015"></a>        <span class="c1"># Don't catch generic "open X" - let other plugins handle it</span>
-<a id="__codelineno-0-1016" name="__codelineno-0-1016"></a>        <span class="c1"># Only use quickmark for explicit "go to X"</span>
-<a id="__codelineno-0-1017" name="__codelineno-0-1017"></a>        <span class="k">if</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"go to "</span><span class="p">):</span>
-<a id="__codelineno-0-1018" name="__codelineno-0-1018"></a>            <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"quickmark-load </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-0-1019" name="__codelineno-0-1019"></a>            <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-1020" name="__codelineno-0-1020"></a>
-<a id="__codelineno-0-1021" name="__codelineno-0-1021"></a>        <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Let another plugin handle "open X"</span>
-<a id="__codelineno-0-1022" name="__codelineno-0-1022"></a>
-<a id="__codelineno-0-1023" name="__codelineno-0-1023"></a>    <span class="c1"># --- Search ---</span>
-<a id="__codelineno-0-1024" name="__codelineno-0-1024"></a>    <span class="k">if</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">"search "</span><span class="p">,</span> <span class="s2">"search for "</span><span class="p">)):</span>
-<a id="__codelineno-0-1025" name="__codelineno-0-1025"></a>        <span class="n">query</span> <span class="o">=</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"search for "</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"search "</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-<a id="__codelineno-0-1026" name="__codelineno-0-1026"></a>        <span class="k">if</span> <span class="n">query</span><span class="p">:</span>
-<a id="__codelineno-0-1027" name="__codelineno-0-1027"></a>            <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"https://duckduckgo.com/?q=</span><span class="si">{</span><span class="n">query</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">' '</span><span class="p">,</span><span class="w"> </span><span class="s1">'+'</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
-<a id="__codelineno-0-1028" name="__codelineno-0-1028"></a>            <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Searching for </span><span class="si">{query}</span><span class="s2">."</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">))</span>
-<a id="__codelineno-0-1029" name="__codelineno-0-1029"></a>            <span class="n">qb_open</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-<a id="__codelineno-0-1030" name="__codelineno-0-1030"></a>            <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-1031" name="__codelineno-0-1031"></a>
-<a id="__codelineno-0-1032" name="__codelineno-0-1032"></a>    <span class="c1"># --- Phonetic hint selection (LAST - only if nothing else matched) ---</span>
-<a id="__codelineno-0-1033" name="__codelineno-0-1033"></a>    <span class="c1"># Only try hint parsing if it actually looks like a hint</span>
-<a id="__codelineno-0-1034" name="__codelineno-0-1034"></a>    <span class="k">if</span> <span class="n">looks_like_hint</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">):</span>
-<a id="__codelineno-0-1035" name="__codelineno-0-1035"></a>        <span class="c1"># Direct digit input (e.g., "02", "92", "0-2")</span>
-<a id="__codelineno-0-1036" name="__codelineno-0-1036"></a>        <span class="n">stripped</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[^0-9a-z]"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">cmd_lower</span><span class="p">)</span>
-<a id="__codelineno-0-1037" name="__codelineno-0-1037"></a>        <span class="k">if</span> <span class="n">stripped</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"o"</span><span class="p">,</span> <span class="s2">"0"</span><span class="p">)</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
-<a id="__codelineno-0-1038" name="__codelineno-0-1038"></a>            <span class="n">hint</span> <span class="o">=</span> <span class="n">stripped</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"o"</span><span class="p">,</span> <span class="s2">"0"</span><span class="p">)</span>
-<a id="__codelineno-0-1039" name="__codelineno-0-1039"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"  🔤 Direct digits: '</span><span class="si">%s</span><span class="s2">' → '</span><span class="si">%s</span><span class="s2">'"</span><span class="p">,</span> <span class="n">cmd_lower</span><span class="p">,</span> <span class="n">hint</span><span class="p">)</span>
-<a id="__codelineno-0-1040" name="__codelineno-0-1040"></a>            <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"hint-follow </span><span class="si">{</span><span class="n">hint</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-0-1041" name="__codelineno-0-1041"></a>            <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-1042" name="__codelineno-0-1042"></a>
-<a id="__codelineno-0-1043" name="__codelineno-0-1043"></a>        <span class="c1"># Try phonetic parsing</span>
-<a id="__codelineno-0-1044" name="__codelineno-0-1044"></a>        <span class="n">hint</span> <span class="o">=</span> <span class="n">parse_hint_numbers</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">)</span>
-<a id="__codelineno-0-1045" name="__codelineno-0-1045"></a>        <span class="k">if</span> <span class="n">hint</span> <span class="ow">and</span> <span class="n">hint</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
-<a id="__codelineno-0-1046" name="__codelineno-0-1046"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"  🔤 Phonetic parsed: '</span><span class="si">%s</span><span class="s2">' → '</span><span class="si">%s</span><span class="s2">'"</span><span class="p">,</span> <span class="n">cmd_lower</span><span class="p">,</span> <span class="n">hint</span><span class="p">)</span>
-<a id="__codelineno-0-1047" name="__codelineno-0-1047"></a>            <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"hint-follow </span><span class="si">{</span><span class="n">hint</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-0-1048" name="__codelineno-0-1048"></a>            <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-1049" name="__codelineno-0-1049"></a>
-<a id="__codelineno-0-1050" name="__codelineno-0-1050"></a>    <span class="k">return</span> <span class="kc">None</span>
+<a id="__codelineno-0-979" name="__codelineno-0-979"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"allow ads"</span><span class="p">,</span> <span class="s2">"stop blocking ads"</span><span class="p">,</span> <span class="s2">"disable ad blocking"</span><span class="p">]:</span>
+<a id="__codelineno-0-980" name="__codelineno-0-980"></a>        <span class="k">return</span> <span class="n">_apply_config_line</span><span class="p">(</span>
+<a id="__codelineno-0-981" name="__codelineno-0-981"></a>            <span class="n">core</span><span class="p">,</span> <span class="n">ADBLOCK_OFF_LINE</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s2">"Ad blocking off"</span><span class="p">),</span> <span class="n">wanted</span><span class="o">=</span><span class="kc">True</span>
+<a id="__codelineno-0-982" name="__codelineno-0-982"></a>        <span class="p">)</span>
+<a id="__codelineno-0-983" name="__codelineno-0-983"></a>
+<a id="__codelineno-0-984" name="__codelineno-0-984"></a>    <span class="k">if</span> <span class="n">cmd_lower</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"block ads"</span><span class="p">,</span> <span class="s2">"enable ad blocking"</span><span class="p">]:</span>
+<a id="__codelineno-0-985" name="__codelineno-0-985"></a>        <span class="k">return</span> <span class="n">_apply_config_line</span><span class="p">(</span>
+<a id="__codelineno-0-986" name="__codelineno-0-986"></a>            <span class="n">core</span><span class="p">,</span> <span class="n">ADBLOCK_OFF_LINE</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s2">"Ad blocking on"</span><span class="p">),</span> <span class="n">wanted</span><span class="o">=</span><span class="kc">False</span>
+<a id="__codelineno-0-987" name="__codelineno-0-987"></a>        <span class="p">)</span>
+<a id="__codelineno-0-988" name="__codelineno-0-988"></a>
+<a id="__codelineno-0-989" name="__codelineno-0-989"></a>    <span class="c1"># --- Keystrokes ---</span>
+<a id="__codelineno-0-990" name="__codelineno-0-990"></a>    <span class="n">request</span> <span class="o">=</span> <span class="n">mediakeys</span><span class="o">.</span><span class="n">parse_key_request</span><span class="p">(</span><span class="n">cmd_lower</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span> <span class="n">BARE_KEYS</span><span class="p">)</span>
+<a id="__codelineno-0-991" name="__codelineno-0-991"></a>    <span class="k">if</span> <span class="n">request</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-992" name="__codelineno-0-992"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">mediakeys</span><span class="o">.</span><span class="n">press_key</span><span class="p">(</span><span class="o">*</span><span class="n">request</span><span class="p">):</span>
+<a id="__codelineno-0-993" name="__codelineno-0-993"></a>            <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Keystrokes need GNOME."</span><span class="p">))</span>
+<a id="__codelineno-0-994" name="__codelineno-0-994"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-995" name="__codelineno-0-995"></a>
+<a id="__codelineno-0-996" name="__codelineno-0-996"></a>    <span class="c1"># --- Bookmarks ---</span>
+<a id="__codelineno-0-997" name="__codelineno-0-997"></a>    <span class="c1"># Save current page as quickmark</span>
+<a id="__codelineno-0-998" name="__codelineno-0-998"></a>    <span class="k">if</span> <span class="p">(</span>
+<a id="__codelineno-0-999" name="__codelineno-0-999"></a>        <span class="s2">"bookmark this"</span> <span class="ow">in</span> <span class="n">cmd_lower</span> <span class="ow">or</span> <span class="s2">"save this"</span> <span class="ow">in</span> <span class="n">cmd_lower</span>
+<a id="__codelineno-0-1000" name="__codelineno-0-1000"></a>    <span class="p">)</span> <span class="ow">and</span> <span class="s2">" as "</span> <span class="ow">in</span> <span class="n">cmd_lower</span><span class="p">:</span>
+<a id="__codelineno-0-1001" name="__codelineno-0-1001"></a>        <span class="n">name</span> <span class="o">=</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">" as "</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<a id="__codelineno-0-1002" name="__codelineno-0-1002"></a>        <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+<a id="__codelineno-0-1003" name="__codelineno-0-1003"></a>            <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Saved as </span><span class="si">{name}</span><span class="s2">."</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">))</span>
+<a id="__codelineno-0-1004" name="__codelineno-0-1004"></a>            <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"quickmark-save </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-1005" name="__codelineno-0-1005"></a>            <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-1006" name="__codelineno-0-1006"></a>
+<a id="__codelineno-0-1007" name="__codelineno-0-1007"></a>    <span class="c1"># Load quickmark (user-saved)</span>
+<a id="__codelineno-0-1008" name="__codelineno-0-1008"></a>    <span class="k">if</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">"go to "</span><span class="p">,</span> <span class="s2">"open "</span><span class="p">)):</span>
+<a id="__codelineno-0-1009" name="__codelineno-0-1009"></a>        <span class="n">target</span> <span class="o">=</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"go to "</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"open "</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<a id="__codelineno-0-1010" name="__codelineno-0-1010"></a>
+<a id="__codelineno-0-1011" name="__codelineno-0-1011"></a>        <span class="c1"># Check predefined bookmarks first</span>
+<a id="__codelineno-0-1012" name="__codelineno-0-1012"></a>        <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">BOOKMARKS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-0-1013" name="__codelineno-0-1013"></a>            <span class="k">if</span> <span class="n">site</span> <span class="o">==</span> <span class="n">target</span><span class="p">:</span>
+<a id="__codelineno-0-1014" name="__codelineno-0-1014"></a>                <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Opening </span><span class="si">{site}</span><span class="s2">."</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">))</span>
+<a id="__codelineno-0-1015" name="__codelineno-0-1015"></a>                <span class="n">qb_open</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+<a id="__codelineno-0-1016" name="__codelineno-0-1016"></a>                <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-1017" name="__codelineno-0-1017"></a>
+<a id="__codelineno-0-1018" name="__codelineno-0-1018"></a>        <span class="c1"># Try as spoken URL (contains "dot")</span>
+<a id="__codelineno-0-1019" name="__codelineno-0-1019"></a>        <span class="k">if</span> <span class="s2">"dot"</span> <span class="ow">in</span> <span class="n">target</span> <span class="ow">or</span> <span class="s2">"."</span> <span class="ow">in</span> <span class="n">target</span><span class="p">:</span>
+<a id="__codelineno-0-1020" name="__codelineno-0-1020"></a>            <span class="n">url</span> <span class="o">=</span> <span class="n">parse_spoken_url</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+<a id="__codelineno-0-1021" name="__codelineno-0-1021"></a>            <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Opening </span><span class="si">{url}</span><span class="s2">."</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">))</span>
+<a id="__codelineno-0-1022" name="__codelineno-0-1022"></a>            <span class="n">qb_open</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+<a id="__codelineno-0-1023" name="__codelineno-0-1023"></a>            <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-1024" name="__codelineno-0-1024"></a>
+<a id="__codelineno-0-1025" name="__codelineno-0-1025"></a>        <span class="c1"># Don't catch generic "open X" - let other plugins handle it</span>
+<a id="__codelineno-0-1026" name="__codelineno-0-1026"></a>        <span class="c1"># Only use quickmark for explicit "go to X"</span>
+<a id="__codelineno-0-1027" name="__codelineno-0-1027"></a>        <span class="k">if</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"go to "</span><span class="p">):</span>
+<a id="__codelineno-0-1028" name="__codelineno-0-1028"></a>            <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"quickmark-load </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-1029" name="__codelineno-0-1029"></a>            <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-1030" name="__codelineno-0-1030"></a>
+<a id="__codelineno-0-1031" name="__codelineno-0-1031"></a>        <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Let another plugin handle "open X"</span>
+<a id="__codelineno-0-1032" name="__codelineno-0-1032"></a>
+<a id="__codelineno-0-1033" name="__codelineno-0-1033"></a>    <span class="c1"># --- Search ---</span>
+<a id="__codelineno-0-1034" name="__codelineno-0-1034"></a>    <span class="k">if</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">"search "</span><span class="p">,</span> <span class="s2">"search for "</span><span class="p">)):</span>
+<a id="__codelineno-0-1035" name="__codelineno-0-1035"></a>        <span class="n">query</span> <span class="o">=</span> <span class="n">cmd_lower</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"search for "</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"search "</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<a id="__codelineno-0-1036" name="__codelineno-0-1036"></a>        <span class="k">if</span> <span class="n">query</span><span class="p">:</span>
+<a id="__codelineno-0-1037" name="__codelineno-0-1037"></a>            <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"https://duckduckgo.com/?q=</span><span class="si">{</span><span class="n">query</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">' '</span><span class="p">,</span><span class="w"> </span><span class="s1">'+'</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+<a id="__codelineno-0-1038" name="__codelineno-0-1038"></a>            <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Searching for </span><span class="si">{query}</span><span class="s2">."</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">))</span>
+<a id="__codelineno-0-1039" name="__codelineno-0-1039"></a>            <span class="n">qb_open</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+<a id="__codelineno-0-1040" name="__codelineno-0-1040"></a>            <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-1041" name="__codelineno-0-1041"></a>
+<a id="__codelineno-0-1042" name="__codelineno-0-1042"></a>    <span class="c1"># --- Phonetic hint selection (LAST - only if nothing else matched) ---</span>
+<a id="__codelineno-0-1043" name="__codelineno-0-1043"></a>    <span class="c1"># Only try hint parsing if it actually looks like a hint</span>
+<a id="__codelineno-0-1044" name="__codelineno-0-1044"></a>    <span class="k">if</span> <span class="n">looks_like_hint</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">):</span>
+<a id="__codelineno-0-1045" name="__codelineno-0-1045"></a>        <span class="c1"># Direct digit input (e.g., "02", "92", "0-2")</span>
+<a id="__codelineno-0-1046" name="__codelineno-0-1046"></a>        <span class="n">stripped</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[^0-9a-z]"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">cmd_lower</span><span class="p">)</span>
+<a id="__codelineno-0-1047" name="__codelineno-0-1047"></a>        <span class="k">if</span> <span class="n">stripped</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"o"</span><span class="p">,</span> <span class="s2">"0"</span><span class="p">)</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+<a id="__codelineno-0-1048" name="__codelineno-0-1048"></a>            <span class="n">hint</span> <span class="o">=</span> <span class="n">stripped</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"o"</span><span class="p">,</span> <span class="s2">"0"</span><span class="p">)</span>
+<a id="__codelineno-0-1049" name="__codelineno-0-1049"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"  🔤 Direct digits: '</span><span class="si">%s</span><span class="s2">' → '</span><span class="si">%s</span><span class="s2">'"</span><span class="p">,</span> <span class="n">cmd_lower</span><span class="p">,</span> <span class="n">hint</span><span class="p">)</span>
+<a id="__codelineno-0-1050" name="__codelineno-0-1050"></a>            <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"hint-follow </span><span class="si">{</span><span class="n">hint</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-1051" name="__codelineno-0-1051"></a>            <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-1052" name="__codelineno-0-1052"></a>
+<a id="__codelineno-0-1053" name="__codelineno-0-1053"></a>        <span class="c1"># Try phonetic parsing</span>
+<a id="__codelineno-0-1054" name="__codelineno-0-1054"></a>        <span class="n">hint</span> <span class="o">=</span> <span class="n">parse_hint_numbers</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">)</span>
+<a id="__codelineno-0-1055" name="__codelineno-0-1055"></a>        <span class="k">if</span> <span class="n">hint</span> <span class="ow">and</span> <span class="n">hint</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+<a id="__codelineno-0-1056" name="__codelineno-0-1056"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"  🔤 Phonetic parsed: '</span><span class="si">%s</span><span class="s2">' → '</span><span class="si">%s</span><span class="s2">'"</span><span class="p">,</span> <span class="n">cmd_lower</span><span class="p">,</span> <span class="n">hint</span><span class="p">)</span>
+<a id="__codelineno-0-1057" name="__codelineno-0-1057"></a>            <span class="n">qb</span><span class="p">(</span><span class="sa">f</span><span class="s2">"hint-follow </span><span class="si">{</span><span class="n">hint</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-1058" name="__codelineno-0-1058"></a>            <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-1059" name="__codelineno-0-1059"></a>
+<a id="__codelineno-0-1060" name="__codelineno-0-1060"></a>    <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
