@@ -48,19 +48,34 @@ def test_find_app_flatpak_installed(mock_core_success, app_name, flatpak_id):
         "spotify",
     ],
 )
-def test_find_app_flatpak_not_installed(mock_core_failure, app_name):
+def test_find_app_flatpak_not_installed(mock_core, app_name):
     """When flatpak app is not installed, then None is returned."""
-    app_type, app_id = apps.find_app(app_name, mock_core_failure)
+    mock_core.host_run.side_effect = lambda cmd, **kw: Mock(
+        returncode=0 if cmd == ["which", "flatpak"] else 1
+    )
+
+    app_type, app_id = apps.find_app(app_name, mock_core)
 
     assert app_type is None
     assert app_id is None
-    assert mock_core_failure.host_run.call_count == 2
-    assert (["flatpak", "info", apps.FLATPAK_APPS[app_name]],) in [
-        c.args for c in mock_core_failure.host_run.call_args_list
-    ]
-    assert (["which", app_name],) in [
-        c.args for c in mock_core_failure.host_run.call_args_list
-    ]
+    calls = [c.args for c in mock_core.host_run.call_args_list]
+    assert (["flatpak", "info", apps.FLATPAK_APPS[app_name]],) in calls
+    assert (["which", app_name],) in calls
+
+
+def test_find_app_without_flatpak_opens_the_local_app(mock_core):
+    """When Flatpak itself is missing, then the local app opens instead.
+
+    Asking a missing `flatpak` about an app would fail before the local app is
+    even looked for.
+    """
+    mock_core.host_run.side_effect = lambda cmd, **kw: Mock(
+        returncode=0 if cmd == ["which", "gnome-control-center"] else 1
+    )
+
+    assert apps.find_app("settings", mock_core) == ("local", "gnome-control-center")
+    calls = [c.args[0] for c in mock_core.host_run.call_args_list]
+    assert ["flatpak", "info", "org.gnome.Settings"] not in calls
 
 
 @pytest.mark.parametrize(
