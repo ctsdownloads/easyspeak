@@ -21,7 +21,7 @@ replacement for that extension that doesn't exist yet.
 | Mouse grid | ✅ | ❌ |
 | Head tracking | ✅ | ❌ |
 | About dialog | ✅ | ⚠️[^about] |
-| EasySpeak settings (e.g. start at login) | ✅ | ❌ |
+| EasySpeak settings (e.g. start at login) | ✅ | ⚠️[^settings] |
 
 ✅ works · ⚠️ partly · ❌ not yet · — not applicable
 
@@ -31,8 +31,11 @@ replacement for that extension that doesn't exist yet.
 [^browser]: Pressing keys in browser mode ("press enter") needs GNOME.
 [^dictation]: The text can't be typed yet. It lands on the clipboard, ready to
     paste with Ctrl+V.
-[^about]: Opens only if the optional GTK 4 and libadwaita are installed.
-    Otherwise EasySpeak says its version and shows the details in a notification.
+[^about]: Opens in Plasma's own look if the optional `kdialog` is installed,
+    else as GNOME's dialog if GTK 4 and libadwaita are. Without either, EasySpeak
+    says its version and shows the details in a notification.
+[^settings]: "Start at Login" is in the tray icon's menu; there are no other
+    settings yet. System Settings → Autostart shows the same entry.
 
 KDE Plasma support is new, so this table reflects a first test on Plasma 6. If you
 find something that works differently, please [report it][issues].

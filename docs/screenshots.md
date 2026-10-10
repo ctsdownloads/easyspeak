@@ -55,8 +55,8 @@ app exposes for EasySpeak, which also makes it **start on login** and opens
 
 On KDE Plasma, EasySpeak sits in the system tray. While it listens, the icon
 waits among the hidden icons, behind the arrow in the tray; when it's asleep,
-it moves into the panel, where you can't miss it. Its menu offers the same
-entries as on GNOME: **Deactivate** or **Reactivate EasySpeak**, **Help**,
+it moves into the panel, where you can't miss it. Its menu offers
+**Deactivate** or **Reactivate EasySpeak**, **Start at Login**, **Help**,
 **About EasySpeak**, and **Quit EasySpeak**.
 
 Dictation can't type on Plasma yet, so EasySpeak puts the text on the clipboard
