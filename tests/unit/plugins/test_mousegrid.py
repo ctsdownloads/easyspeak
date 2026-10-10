@@ -265,14 +265,25 @@ def test_show_grid_when_already_active(mock_screen_size, mock_dbus_call, mock_co
 
 @patch.object(mousegrid_plugin, "dbus_call", return_value=False)
 @patch.object(mousegrid_plugin, "get_screen_size", return_value=(1920, 1080))
-def test_show_grid_with_failure(mock_screen_size, mock_dbus_call, mock_core):
-    """When show_grid fails to show grid then it does not activate grid."""
+@pytest.mark.parametrize(
+    ("desktop", "reply"),
+    [
+        ("GNOME", "I couldn't show the grid. Is the EasySpeak extension enabled?"),
+        ("KDE", "The mouse grid only works on GNOME so far."),
+    ],
+)
+def test_show_grid_with_failure(
+    mock_screen_size, mock_dbus_call, mock_core, monkeypatch, desktop, reply
+):
+    """When show_grid fails to show grid then it says why and stays inactive."""
+    monkeypatch.setenv("XDG_CURRENT_DESKTOP", desktop)
     mousegrid_plugin.core = mock_core
     mousegrid_plugin.grid_active = False
 
     mousegrid_plugin.show_grid()
 
     assert mousegrid_plugin.grid_active is False
+    mock_core.speak.assert_called_once_with(reply)
 
 
 @patch.object(mousegrid_plugin, "dbus_call", return_value=True)
@@ -656,6 +667,25 @@ def test_handle_again_command(mock_screen_size, mock_dbus_call, mock_listen, moc
     assert mousegrid_plugin.grid_bounds == (100, 200, 300, 400)
     assert mock_core.speak.call_args.args[0] == "Grid"
     assert mock_listen.call_args.args[0] == mock_core
+
+
+@patch.object(mousegrid_plugin, "listen_for_grid_commands")
+@patch.object(mousegrid_plugin, "dbus_call", return_value=False)
+@patch.object(mousegrid_plugin, "get_screen_size", return_value=(1920, 1080))
+def test_handle_again_command_when_the_grid_cant_show(
+    mock_screen_size, mock_dbus_call, mock_listen, mock_core, monkeypatch
+):
+    """When the grid can't be reopened then it says so instead of "Grid"."""
+    monkeypatch.setenv("XDG_CURRENT_DESKTOP", "KDE")
+    mousegrid_plugin.grid_active = False
+    mousegrid_plugin.last_bounds = (100, 200, 300, 400)
+
+    assert mousegrid_plugin.handle("again", mock_core) is True
+    assert mousegrid_plugin.grid_active is False
+    mock_core.speak.assert_called_once_with(
+        "The mouse grid only works on GNOME so far."
+    )
+    assert not mock_listen.called
 
 
 @patch.object(mousegrid_plugin, "listen_for_grid_commands")

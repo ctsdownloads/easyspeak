@@ -12,6 +12,7 @@ import re
 import subprocess
 
 from easyspeak.core.i18n import translator
+from easyspeak.core.tray import on_gnome
 
 logger = logging.getLogger(__name__)
 
@@ -279,7 +280,17 @@ def show_grid():
         core.speak(_("Grid"))
         logger.info("Grid shown (%sx%s)", screen_size[0], screen_size[1])
     else:
-        logger.warning("Failed to show grid - is extension enabled?")
+        report_grid_unavailable(core)
+
+
+def report_grid_unavailable(core):
+    """Tell the user the grid couldn't be shown, and the likely reason."""
+    if on_gnome():
+        logger.warning("Failed to show the grid. Is the EasySpeak extension enabled?")
+        core.speak(_("I couldn't show the grid. Is the EasySpeak extension enabled?"))
+    else:
+        logger.warning("The mouse grid needs GNOME and EasySpeak's Shell extension.")
+        core.speak(_("The mouse grid only works on GNOME so far."))
 
 
 def close_grid():
@@ -473,9 +484,11 @@ def handle(cmd, core):
     # "Again" - reopen at last position
     if any(w in words for w in ["again", "repeat", "reopen"]) and last_bounds:
         screen_size = get_screen_size()
+        if not dbus_call("Show", screen_size[0], screen_size[1]):
+            report_grid_unavailable(core)
+            return True
         grid_bounds = last_bounds
         grid_active = True
-        dbus_call("Show", screen_size[0], screen_size[1])
         dbus_call("Update", *last_bounds)
         core.speak(_("Grid"))
         logger.info("Grid reopened at last position")
