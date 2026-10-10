@@ -28,9 +28,11 @@ msgstr "No he entendido."
 msgid "Leaving {label}. Say {wake_word_spoken} to continue."
 msgstr "Salgo de {label}. Di {wake_word_spoken} para continuar."
 
-#, python-brace-format
-msgid "Sorry, I couldn't open the {what}."
-msgstr "Lo siento, no he podido abrir {what}."
+msgid "Sorry, I couldn't open the About dialog."
+msgstr "Lo siento, no he podido abrir el diálogo Acerca de."
+
+msgid "Sorry, I couldn't open the documentation page."
+msgstr "Lo siento, no he podido abrir la documentación."
 
 msgid "Sorry, I didn't understand."
 msgstr "Lo siento, no he entendido."

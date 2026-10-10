@@ -28,9 +28,11 @@ msgstr "Je n'ai pas compris."
 msgid "Leaving {label}. Say {wake_word_spoken} to continue."
 msgstr "Je quitte {label}. Dites {wake_word_spoken} pour continuer."
 
-#, python-brace-format
-msgid "Sorry, I couldn't open the {what}."
-msgstr "Désolé, je n'ai pas pu ouvrir {what}."
+msgid "Sorry, I couldn't open the About dialog."
+msgstr "Désolé, je n'ai pas pu ouvrir la boîte de dialogue À propos."
+
+msgid "Sorry, I couldn't open the documentation page."
+msgstr "Désolé, je n'ai pas pu ouvrir la documentation."
 
 msgid "Sorry, I didn't understand."
 msgstr "Désolé, je n'ai pas compris."

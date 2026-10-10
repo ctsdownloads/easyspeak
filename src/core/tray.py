@@ -45,7 +45,7 @@ COMMAND_QUIT = "quit"
 COMMAND_MUTE = "mute"
 COMMAND_UNMUTE = "unmute"
 COMMAND_HELP = "help"  # open the documentation page in the default browser
-COMMAND_ABOUT = "about"  # open the libadwaita About window
+COMMAND_ABOUT = "about"  # open the libadwaita About dialog
 
 ABOUT_HELPER = str(Path(__file__).with_name("about.py"))
 TRAY_HELPER = str(Path(__file__).with_name("statusnotifier.py"))
@@ -178,19 +178,33 @@ class Tray:
         while asleep, so in practice these fire from the idle loop in `sleep`; `poll`
         handles them too so the path isn't lifecycle- dependent.
 
-        The About dialog needs PyGObject + GTK4/libadwaita, which aren't in the daemon's
+        """
+        if command == COMMAND_HELP:
+            self._spawn(
+                ["xdg-open", DOCS_URL],
+                "documentation page",
+                _("Sorry, I couldn't open the documentation page."),
+            )
+            return True
+        if command == COMMAND_ABOUT:
+            self.open_about()
+            return True
+        return False
+
+    def open_about(self):
+        """Open the About dialog, from the menu or by voice.
+
+        The dialog needs PyGObject + GTK4/libadwaita, which aren't in the daemon's
         own (uv) venv. Reuse the PyGObject-equipped interpreter the dictation AT-SPI
         helper already runs in, falling back to our own interpreter when it isn't set
         (e.g. a plain pip install).
         """
-        if command == COMMAND_HELP:
-            self._spawn(["xdg-open", DOCS_URL], "documentation page")
-            return True
-        if command == COMMAND_ABOUT:
-            python = os.environ.get("EASYSPEAK_ATSPI_PYTHON", sys.executable)
-            self._spawn([python, ABOUT_HELPER], "About window")
-            return True
-        return False
+        python = os.environ.get("EASYSPEAK_ATSPI_PYTHON", sys.executable)
+        self._spawn(
+            [python, ABOUT_HELPER],
+            "About dialog",
+            _("Sorry, I couldn't open the About dialog."),
+        )
 
     def _start_helper(self):
         """Start the StatusNotifierItem tray helper for desktops other than GNOME."""
@@ -202,7 +216,7 @@ class Tray:
         except OSError:
             logger.warning("Couldn't start the tray icon.", exc_info=True)
 
-    def _spawn(self, cmd, what):
+    def _spawn(self, cmd, what, apology):
         """Launch a helper process, reporting it if it fails to start.
 
         Fire-and-forget for the success case: a helper whose window opens keeps running
@@ -222,7 +236,7 @@ class Tray:
                 proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=errlog)
             except OSError:
                 logger.warning("Couldn't open the %s.", what, exc_info=True)
-                self._report_failure(what)
+                self._report_failure(apology)
                 return
             returncode = self._await_startup(proc)
             if returncode not in (None, 0):
@@ -234,7 +248,7 @@ class Tray:
                     returncode,
                     f"\n{detail}" if detail else "",
                 )
-                self._report_failure(what)
+                self._report_failure(apology)
 
     def _await_startup(self, proc):
         """Return the helper's exit code if it dies during startup, else None.
@@ -248,14 +262,14 @@ class Tray:
         except subprocess.TimeoutExpired:
             return None
 
-    def _report_failure(self, what):
+    def _report_failure(self, apology):
         """Tell the user a helper couldn't open.
 
         Error chime and a spoken apology (voice-first equivalent of GTK's error bell).
         """
         with contextlib.suppress(OSError):
             subprocess.run(["paplay", ERROR_SOUND], capture_output=True)
-        self._speak(_("Sorry, I couldn't open the {what}.").format(what=what))
+        self._speak(apology)
 
     def sleep(self, release_mic, acquire_mic, announce=True):
         """Release the mic and idle until reactivated, then greet and resume.

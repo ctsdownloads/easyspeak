@@ -1,4 +1,4 @@
-"""Standalone libadwaita "About EasySpeak" window.
+"""Standalone libadwaita "About EasySpeak" dialog.
 
 The daemon is headless and the panel indicator lives in a GNOME Shell extension
 (Clutter/St), which can't host GTK widgets; so the About dialog runs as its own
@@ -36,7 +36,7 @@ CONTRIBUTORS = [
 ]
 
 # The models EasySpeak ships or fetches, under their own licenses; shown in the
-# About window's legal section. The voices carry their training data's terms.
+# About dialog's legal section. The voices carry their training data's terms.
 LEGAL = [
     ("Parakeet TDT 0.6b v3 speech model", "© NVIDIA Corporation", "CC-BY-4.0"),
     ("Whisper speech models", "© OpenAI, converted to CTranslate2 by SYSTRAN", "MIT"),
@@ -69,7 +69,7 @@ def app_version():
 
 
 def main():  # pragma: no cover - needs libadwaita and a display; run live
-    """Show the About window and run until the user closes it."""
+    """Show the About dialog and run until the user closes it."""
     import gi
 
     gi.require_version("Gtk", "4.0")

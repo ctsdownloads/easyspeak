@@ -24,6 +24,25 @@ def test_base_help(mock_show_help, command, mock_core):
     mock_show_help.assert_called_once()
 
 
+@pytest.mark.parametrize(
+    ("language", "command"),
+    [
+        ("de", "info-dialog öffnen"),
+        ("de", "über easyspeak"),
+        ("it", "apri le informazioni"),
+        ("fr", "à propos d'easyspeak"),
+        ("es", "acerca de easyspeak"),
+        ("de", "open the about dialog"),
+    ],
+)
+def test_base_about_in_every_language(language, command, mock_core, monkeypatch):
+    """Asking for the About dialog in each shipped language opens it."""
+    monkeypatch.setattr(base, "vocab", Vocabulary(base.__file__, language=language))
+
+    assert base.handle(command, mock_core) is True
+    mock_core.tray.open_about.assert_called_once()
+
+
 @pytest.mark.usefixtures("german")
 @pytest.mark.parametrize("command", ["beenden", "jarvis beenden", "quit"])
 def test_base_exit(command, mock_core):
