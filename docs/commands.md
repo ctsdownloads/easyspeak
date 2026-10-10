@@ -274,6 +274,6 @@ browser. When one does, you'll hear what changed:
 | Command | Action |
 |---------|--------|
 | help | List all commands |
-| open the About dialog / about EasySpeak | Show the About dialog |
+| about EasySpeak / [show the] About box / About dialog | Show the About dialog |
 | go to sleep / stop listening / deactivate yourself | Release the mic (reactivate from the tray icon or the Quick Settings toggle) |
 | quit / exit / goodbye | Exit EasySpeak |
