@@ -1,6 +1,7 @@
 """Shared fixtures for the unit suite."""
 
 import logging
+import os
 
 import pytest
 
@@ -23,8 +24,9 @@ def _restore_easyspeak_loggers():
     """Snapshot and restore the package loggers around each test.
 
     ``log.configure`` mutates the ``easyspeak`` and ``plugins`` loggers
-    (handlers, level, ``propagate``); restoring them keeps a test that calls it
-    from leaking that state into later tests that rely on ``caplog``.
+    (handlers, level, ``propagate``) and passes the level on through
+    ``EASYSPEAK_LOG_LEVEL``; restoring both keeps a test that calls it from
+    leaking that state into later tests.
     """
     names = ("easyspeak", "plugins")
     saved = [
@@ -36,7 +38,12 @@ def _restore_easyspeak_loggers():
         )
         for n in names
     ]
+    saved_level = os.environ.get("EASYSPEAK_LOG_LEVEL")
     yield
+    if saved_level is None:
+        os.environ.pop("EASYSPEAK_LOG_LEVEL", None)
+    else:
+        os.environ["EASYSPEAK_LOG_LEVEL"] = saved_level
     for log, handlers, level, propagate in saved:
         log.handlers[:] = handlers
         log.setLevel(level)

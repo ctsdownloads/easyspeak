@@ -17,12 +17,13 @@ indicator, which shows only while asleep. Clicking it toggles between the two.
 """
 
 import contextlib
+import logging
 import os
 import sys
 from collections import deque
 from pathlib import Path
 
-from easyspeak.core import autostart
+from easyspeak.core import autostart, log
 from jeepney import (
     DBusAddress,
     HeaderFields,
@@ -35,6 +36,10 @@ from jeepney import (
 )
 from jeepney.bus_messages import message_bus
 from jeepney.io.blocking import open_dbus_connection
+
+# Named in full: run as a script, this module is `__main__`, outside the package
+# loggers that `log.configure` sets up.
+logger = logging.getLogger("easyspeak.core.statusnotifier")
 
 BUS_NAME = "org.easyspeak.Tray"
 ITEM_PATH = "/StatusNotifierItem"
@@ -337,7 +342,7 @@ class StatusNotifier:
         try:
             autostart.set_enabled(not autostart.is_enabled())
         except OSError as exc:
-            sys.stderr.write(f"EasySpeak: couldn't change starting at login: {exc}\n")
+            logger.warning("Couldn't change starting at login: %s", exc)
             return
         self._revision += 1
         menu = DBusAddress(MENU_PATH, interface="com.canonical.dbusmenu")
@@ -397,7 +402,11 @@ class StatusNotifier:
 
 
 def main(argv=None):  # pragma: no cover - needs a session bus; run live
-    """Serve the tray icon until the daemon that started it goes away."""
+    """Serve the tray icon until the daemon that started it goes away.
+
+    Logs at the daemon's level, which it passes on through `EASYSPEAK_LOG_LEVEL`.
+    """
+    log.configure(log.resolve_level())
     argv = sys.argv[1:] if argv is None else argv
     daemon = os.getppid()
     with open_dbus_connection("SESSION") as connection:
