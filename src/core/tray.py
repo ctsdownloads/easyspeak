@@ -29,7 +29,14 @@ import tempfile
 import time
 from pathlib import Path
 
-from .about import DOCS_URL
+from .about import (
+    APPLICATION_ICON,
+    APPLICATION_NAME,
+    COMMENTS,
+    COPYRIGHT,
+    DOCS_URL,
+    app_version,
+)
 from .config import ERROR_SOUND
 from .i18n import _
 
@@ -73,6 +80,35 @@ HELPER_STARTUP_GRACE = 1.5
 def on_gnome():
     """Return whether the session is GNOME, where the Shell extension is the tray."""
     return "GNOME" in os.environ.get("XDG_CURRENT_DESKTOP", "").split(":")
+
+
+def notify(summary, body):
+    """Show a desktop notification; False if no notification service took it.
+
+    Speaks the freedesktop Notifications protocol over D-Bus, which every desktop's
+    notification service implements. jeepney is imported lazily so the dependency
+    isn't needed to load this module.
+    """
+    from jeepney import DBusAddress, MessageType, new_method_call
+    from jeepney.io.blocking import open_dbus_connection
+
+    service = "org.freedesktop.Notifications"
+    address = DBusAddress(
+        "/org/freedesktop/Notifications", bus_name=service, interface=service
+    )
+    message = new_method_call(
+        address,
+        "Notify",
+        "susssasa{sv}i",
+        (APPLICATION_NAME, 0, APPLICATION_ICON, summary, body, [], {}, -1),
+    )
+    try:
+        with open_dbus_connection(bus="SESSION") as conn:
+            reply = conn.send_and_get_reply(message, timeout=GDBUS_TIMEOUT)
+    except Exception as exc:
+        logger.debug("No desktop notification: %s", exc)
+        return False
+    return reply.header.message_type is MessageType.method_return
 
 
 class TrayAction(enum.Enum):
@@ -180,11 +216,10 @@ class Tray:
 
         """
         if command == COMMAND_HELP:
-            self._spawn(
-                ["xdg-open", DOCS_URL],
-                "documentation page",
-                _("Sorry, I couldn't open the documentation page."),
-            )
+            if not self._spawn(["xdg-open", DOCS_URL], "documentation page"):
+                self._report_failure(
+                    _("Sorry, I couldn't open the documentation page.")
+                )
             return True
         if command == COMMAND_ABOUT:
             self.open_about()
@@ -197,14 +232,24 @@ class Tray:
         The dialog needs PyGObject + GTK4/libadwaita, which aren't in the daemon's
         own (uv) venv. Reuse the PyGObject-equipped interpreter the dictation AT-SPI
         helper already runs in, falling back to our own interpreter when it isn't set
-        (e.g. a plain pip install).
+        (e.g. a plain pip install). GTK 4 and libadwaita are optional, so without them
+        the user still hears who they're talking to, with the details in a notification.
         """
         python = os.environ.get("EASYSPEAK_ATSPI_PYTHON", sys.executable)
-        self._spawn(
-            [python, ABOUT_HELPER],
-            "About dialog",
-            _("Sorry, I couldn't open the About dialog."),
-        )
+        if not self._spawn([python, ABOUT_HELPER], "About dialog"):
+            self._tell_about()
+
+    def _tell_about(self):
+        """Present EasySpeak without the About dialog: spoken, plus a notification."""
+        name = f"{APPLICATION_NAME} {app_version()}".strip()
+        if notify(name, f"{COMMENTS}\n{COPYRIGHT}\nGPL-3.0 · {DOCS_URL}"):
+            self._speak(
+                _("This is {name}. The details are in a notification.").format(
+                    name=name
+                )
+            )
+        else:
+            self._speak(_("This is {name}.").format(name=name))
 
     def _start_helper(self):
         """Start the StatusNotifierItem tray helper for desktops other than GNOME."""
@@ -216,15 +261,15 @@ class Tray:
         except OSError:
             logger.warning("Couldn't start the tray icon.", exc_info=True)
 
-    def _spawn(self, cmd, what, apology):
-        """Launch a helper process, reporting it if it fails to start.
+    def _spawn(self, cmd, what):
+        """Launch a helper process; False, with the cause logged, if it fails to start.
 
         Fire-and-forget for the success case: a helper whose window opens keeps running
         and is left detached (never waited on or reaped). But a helper that *can't*
         start — a bad interpreter, missing GTK/libadwaita, no display, no `xdg-open`
         handler — exits within [`HELPER_STARTUP_GRACE`][core.tray.HELPER_STARTUP_GRACE];
-        that's caught here so the menu click isn't silently lost, with the cause logged
-        and an audible apology spoken.
+        that's caught here so the caller can tell the user, and the menu click isn't
+        silently lost.
 
         stderr is captured to an anonymous temp file rather than a pipe: a long-lived
         helper keeps writing to it (GTK logs to stderr) without ever blocking on a full
@@ -236,8 +281,7 @@ class Tray:
                 proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=errlog)
             except OSError:
                 logger.warning("Couldn't open the %s.", what, exc_info=True)
-                self._report_failure(apology)
-                return
+                return False
             returncode = self._await_startup(proc)
             if returncode not in (None, 0):
                 errlog.seek(0)
@@ -250,7 +294,8 @@ class Tray:
                     logger.debug(
                         "The %s exited with code %s:\n%s", what, returncode, detail
                     )
-                self._report_failure(apology)
+                return False
+        return True
 
     def _await_startup(self, proc):
         """Return the helper's exit code if it dies during startup, else None.
