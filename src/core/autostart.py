@@ -19,8 +19,13 @@ TEMPLATE = "easyspeak-autostart.desktop"
 
 
 def user_entry():
-    """The user's own autostart entry, which overrides the system-wide one."""
-    return Path.home() / ".config" / "autostart" / ENTRY_NAME
+    """The user's own autostart entry, which overrides the system-wide one.
+
+    It lives in the XDG user config directory, `~/.config` unless
+    `XDG_CONFIG_HOME` says otherwise, where the desktop looks for it too.
+    """
+    config = os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config"
+    return Path(config) / "autostart" / ENTRY_NAME
 
 
 def system_entries():

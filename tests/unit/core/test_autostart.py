@@ -83,3 +83,16 @@ def test_turning_it_on_without_any_entry_uses_the_template(home):
 
     assert "Exec=easyspeak" in user.read_text()
     assert autostart.is_enabled() is True
+
+
+def test_a_custom_config_home_is_followed(home, tmp_path, monkeypatch):
+    """With `XDG_CONFIG_HOME` set, the entry lives there, where the desktop looks."""
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    custom = tmp_path / "config" / "autostart" / "easyspeak.desktop"
+
+    autostart.set_enabled(True)
+
+    assert custom.is_file()
+    assert autostart.is_enabled() is True
+    default, _system = home
+    assert not default.exists()

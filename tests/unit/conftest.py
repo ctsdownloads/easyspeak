@@ -20,6 +20,16 @@ class CapturedLog:
 
 
 @pytest.fixture(autouse=True)
+def _no_custom_config_home(monkeypatch):
+    """Keep tests from following the user's `XDG_CONFIG_HOME` into a real config.
+
+    Autostart entries are found there when it's set; tests that point `HOME` at a
+    throwaway directory rely on the default `~/.config` below it instead.
+    """
+    monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
+
+
+@pytest.fixture(autouse=True)
 def _restore_easyspeak_loggers():
     """Snapshot and restore the package loggers around each test.
 
