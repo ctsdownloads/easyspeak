@@ -6,4 +6,4 @@ require_wake_word = ["richiedi la parola di attivazione", "parola di attivazione
 free_listening = ["ascolto libero"]
 exit = ["esci", "arrivederci", "ciao", "termina"]
 help = ["aiuto", "cosa sai fare"]
-about = ["apri le informazioni", "informazioni su easyspeak", "informazioni su easy speak"]
+about = ["informazioni su easyspeak", "informazioni su easy speak", "apri le informazioni", "finestra informazioni", "finestra delle informazioni"]

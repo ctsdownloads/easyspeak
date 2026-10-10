@@ -93,6 +93,9 @@ def test_handle_help_commands(mock_show_help, mock_core, command, expected_retur
         "Open the About box",
         "about easyspeak",
         "jarvis about easy speak",
+        "please show the about box",
+        "open the about dialogue",
+        "show me the about window",
     ],
 )
 def test_handle_about_commands(mock_core, command):

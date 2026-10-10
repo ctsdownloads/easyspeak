@@ -33,6 +33,9 @@ def test_base_help(mock_show_help, command, mock_core):
         ("fr", "à propos d'easyspeak"),
         ("es", "acerca de easyspeak"),
         ("de", "open the about dialog"),
+        ("de", "zeig den info-dialog"),
+        ("fr", "affiche la boîte à propos"),
+        ("es", "muestra el diálogo acerca de"),
     ],
 )
 def test_base_about_in_every_language(language, command, mock_core, monkeypatch):
