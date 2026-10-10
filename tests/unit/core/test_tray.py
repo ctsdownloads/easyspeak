@@ -18,7 +18,9 @@ from easyspeak.core.tray import (
     TRAY_HELPER,
     Tray,
     TrayAction,
+    notify,
 )
+from jeepney import HeaderFields, MessageType
 
 
 class TestSetState:
@@ -310,15 +312,18 @@ class TestMenuActions:
         cmd = mock_popen.call_args.args[0]
         assert cmd == ["/usr/bin/gtk-python", ABOUT_HELPER]
 
+    @patch("easyspeak.core.tray.app_version", return_value="1.2.3")
+    @patch("easyspeak.core.tray.notify", return_value=True)
     @patch("easyspeak.core.tray.subprocess.run")
     @patch("easyspeak.core.tray.subprocess.Popen")
-    def test_failed_helper_is_reported_not_swallowed(
-        self, mock_popen, mock_run, caplog
+    def test_about_without_gtk_tells_about_easyspeak(
+        self, mock_popen, mock_run, mock_notify, mock_version, caplog
     ):
-        """A helper that exits non-zero at startup logs why in one line, plays the
-        error chime, and speaks an apology, rather than failing silently.
+        """Without GTK 4/libadwaita the dialog can't open, so the user hears who
+        EasySpeak is and finds the details in a notification instead.
 
-        Its full stderr, traceback included, is kept for debug logging only.
+        The cause is logged in one line; the helper's full stderr, traceback
+        included, is kept for debug logging only.
         """
         caplog.set_level(logging.DEBUG)
         proc = mock_popen.return_value
@@ -336,13 +341,29 @@ class TestMenuActions:
             ):
                 assert tray.poll(Mock(), Mock()) is TrayAction.CONTINUE
 
-        assert mock_run.call_args.args[0][0] == "paplay"
-        tray._speak.assert_called_once_with("Sorry, I couldn't open the About dialog.")
         warnings = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
         assert warnings == [
             "The About dialog couldn't open: ValueError: Namespace Gtk not available"
         ]
         assert "Traceback" in caplog.text
+        assert mock_notify.call_args.args[0] == "EasySpeak 1.2.3"
+        assert "GPL-3.0" in mock_notify.call_args.args[1]
+        tray._speak.assert_called_once_with(
+            "This is EasySpeak 1.2.3. The details are in a notification."
+        )
+        mock_run.assert_not_called()  # no error chime: the user got what they asked
+
+    @patch("easyspeak.core.tray.app_version", return_value="1.2.3")
+    @patch("easyspeak.core.tray.notify", return_value=False)
+    @patch("easyspeak.core.tray.subprocess.Popen", side_effect=OSError("no python"))
+    def test_about_without_gtk_or_notifications_still_says_the_version(
+        self, mock_popen, mock_notify, mock_version
+    ):
+        """Without a notification service either, the spoken summary remains."""
+        tray = self._tray([COMMAND_ABOUT])
+
+        assert tray.poll(Mock(), Mock()) is TrayAction.CONTINUE
+        tray._speak.assert_called_once_with("This is EasySpeak 1.2.3.")
 
     @patch("easyspeak.core.tray.subprocess.Popen")
     def test_help_does_not_release_the_mic(self, mock_popen):
@@ -387,6 +408,36 @@ class TestMenuActions:
         tray._speak.assert_called_once_with(
             "Sorry, I couldn't open the documentation page."
         )
+
+
+class TestNotify:
+    """Desktop notifications over the freedesktop Notifications D-Bus API."""
+
+    @patch("jeepney.io.blocking.open_dbus_connection")
+    def test_shows_a_notification(self, mock_open):
+        """The notification service accepting the call means it was shown."""
+        conn = mock_open.return_value.__enter__.return_value
+        conn.send_and_get_reply.return_value.header.message_type = (
+            MessageType.method_return
+        )
+
+        assert notify("EasySpeak 1.2.3", "Voice control") is True
+        message = conn.send_and_get_reply.call_args.args[0]
+        assert message.header.fields[HeaderFields.member] == "Notify"
+        assert message.body[3:5] == ("EasySpeak 1.2.3", "Voice control")
+
+    @patch("jeepney.io.blocking.open_dbus_connection", side_effect=KeyError("bus"))
+    def test_without_a_session_bus(self, mock_open):
+        """No session bus to talk to means no notification, not a crash."""
+        assert notify("EasySpeak", "Voice control") is False
+
+    @patch("jeepney.io.blocking.open_dbus_connection")
+    def test_refused_by_the_service(self, mock_open):
+        """An error reply, e.g. no notification service running, means not shown."""
+        conn = mock_open.return_value.__enter__.return_value
+        conn.send_and_get_reply.return_value.header.message_type = MessageType.error
+
+        assert notify("EasySpeak", "Voice control") is False
 
 
 class TestLifecycleHooks:

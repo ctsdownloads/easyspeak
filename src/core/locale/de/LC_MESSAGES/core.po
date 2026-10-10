@@ -28,14 +28,19 @@ msgstr "Das habe ich nicht verstanden."
 msgid "Leaving {label}. Say {wake_word_spoken} to continue."
 msgstr "Verlasse {label}. Sag {wake_word_spoken}, um weiterzumachen."
 
-msgid "Sorry, I couldn't open the About dialog."
-msgstr "Entschuldigung, ich konnte den Info-Dialog nicht öffnen."
-
 msgid "Sorry, I couldn't open the documentation page."
 msgstr "Entschuldigung, ich konnte die Dokumentation nicht öffnen."
 
 msgid "Sorry, I didn't understand."
 msgstr "Entschuldigung, das habe ich nicht verstanden."
+
+#, python-brace-format
+msgid "This is {name}."
+msgstr "Hier ist {name}."
+
+#, python-brace-format
+msgid "This is {name}. The details are in a notification."
+msgstr "Hier ist {name}. Die Details stehen in einer Benachrichtigung."
 
 msgid "Voice control turned off."
 msgstr "Sprachsteuerung ausgeschaltet."
