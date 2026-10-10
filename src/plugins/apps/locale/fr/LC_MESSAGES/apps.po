@@ -27,6 +27,10 @@ msgstr "Je ferme {app}."
 msgid "Opening {app}."
 msgstr "J'ouvre {app}."
 
+#, python-brace-format
+msgid "Sorry, I couldn't start {app}."
+msgstr "Désolé, je n'ai pas pu démarrer {app}."
+
 msgid "close an application"
 msgstr "fermer une application"
 
