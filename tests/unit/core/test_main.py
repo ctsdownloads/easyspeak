@@ -1908,15 +1908,21 @@ class TestEasySpeakPushToTalk:
         assert easy._push_to_talk is handler
 
     def test_run_push_to_talk_without_handler_warns(self, readlog):
-        """With no dictation plugin registered the press warns and no-ops."""
+        """With no dictation plugin registered the press says so, audibly."""
         easy = EasySpeak()
         easy._push_to_talk = None
 
-        with patch.object(easy, "_play_wake_chime") as chime:
+        with (
+            patch.object(easy, "_play_wake_chime") as chime,
+            patch.object(easy, "play_sound") as sound,
+            patch.object(easy, "speak") as speak,
+        ):
             easy._run_push_to_talk()
 
         assert "no dictation handler" in readlog().err.lower()
         chime.assert_not_called()
+        assert sound.call_args.args[0].name == "dialog-error.oga"
+        speak.assert_called_once_with("Dictation isn't available.")
 
     @patch("subprocess.run")
     def test_run_push_to_talk_acks_then_runs_handler(self, mock_run):

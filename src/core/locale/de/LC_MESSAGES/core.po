@@ -15,6 +15,9 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "Dictation isn't available."
+msgstr "Das Diktat ist nicht verfügbar."
+
 msgid "I can't find a microphone, so I have to stop."
 msgstr "Ich finde kein Mikrofon, deshalb muss ich mich beenden."
 
