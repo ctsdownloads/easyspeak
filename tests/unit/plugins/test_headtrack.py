@@ -121,7 +121,61 @@ def test_start_tracking_when_already_active():
     assert msg == "Already tracking"
 
 
+def test_start_tracking_hands_back_why_it_failed():
+    """When the thread gives up then the reason becomes start_tracking's message.
+
+    So the foreground speaks it, after "Starting head tracking." and before
+    listening, instead of the thread speaking out of order.
+    """
+    headtrack.tracking_active = False
+
+    with patch.object(
+        headtrack,
+        "run_tracking",
+        side_effect=lambda: headtrack.give_up("I couldn't open the webcam."),
+    ):
+        assert headtrack.start_tracking() == (False, "I couldn't open the webcam.")
+    assert headtrack.tracking_active is False
+
+
+def test_start_tracking_waits_for_an_earlier_attempt(monkeypatch):
+    """When a timed-out attempt is still busy then no second one starts.
+
+    The old thread would otherwise report into the new attempt, or keep running
+    next to it.
+    """
+    busy = Mock()
+    busy.is_alive.return_value = True
+    monkeypatch.setattr(headtrack, "tracking_thread", busy)
+    monkeypatch.setattr(headtrack, "tracking_active", False)
+    headtrack.stop_event.set()
+
+    assert headtrack.start_tracking() == (
+        False,
+        "Head tracking is still busy. Try again in a moment.",
+    )
+    busy.join.assert_called_once_with(timeout=1.0)
+    assert headtrack.tracking_thread is busy
+    assert headtrack.stop_event.is_set()
+
+
 @patch.object(headtrack, "run_tracking")
+def test_start_tracking_gives_up_on_a_thread_that_never_reports(
+    mock_run_tracking, monkeypatch
+):
+    """When the thread neither runs nor fails in time then tracking counts as failed."""
+    monkeypatch.setattr(headtrack, "STARTUP_TIMEOUT", 0.01)
+    headtrack.tracking_active = False
+
+    assert headtrack.start_tracking() == (
+        False,
+        "Sorry, head tracking couldn't start.",
+    )
+    assert headtrack.tracking_active is False
+    assert headtrack.stop_event.is_set()
+
+
+@patch.object(headtrack, "run_tracking", side_effect=headtrack.tracking_started.set)
 def test_start_tracking_when_inactive(mock_run_tracking):
     """When start_tracking is called while inactive then it starts tracking thread."""
     headtrack.tracking_active = False
@@ -163,6 +217,45 @@ def test_recalibrate_when_tracking(mock_stop, mock_start):
     assert msg == "Recalibrating"
     assert mock_stop.called
     assert mock_start.called
+
+
+@patch.object(headtrack, "start_tracking", return_value=(False, "No webcam."))
+@patch.object(headtrack, "stop_tracking")
+def test_recalibrate_reports_a_failed_restart(mock_stop, mock_start, monkeypatch):
+    """When tracking can't restart then the reason comes back, not "Recalibrating"."""
+    monkeypatch.setattr(headtrack.time, "sleep", lambda _s: None)
+    headtrack.tracking_active = True
+
+    assert headtrack.recalibrate() == (False, "No webcam.")
+
+
+@patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))
+def test_listen_for_tracking_commands_leaves_when_recalibrating_fails(
+    mock_screen_size, mock_core, monkeypatch
+):
+    """When recalibrating ends tracking then the user hears why and the mode ends
+    right away, instead of waiting for another command first.
+    """
+    headtrack.tracking_active = True
+
+    def failed_recalibration():
+        headtrack.tracking_active = False
+        return False, "No webcam."
+
+    monkeypatch.setattr(headtrack, "recalibrate", failed_recalibration)
+    heard = []
+
+    def listen_modal(_label, **_kwargs):
+        for command in ["recalibrate", "click"]:
+            heard.append(command)
+            yield command
+
+    mock_core.listen_modal = listen_modal
+
+    headtrack.listen_for_tracking_commands(mock_core)
+
+    mock_core.speak.assert_called_once_with("No webcam.")
+    assert heard == ["recalibrate"]
 
 
 def test_recalibrate_when_not_tracking():
@@ -240,6 +333,29 @@ def test_handle_unrecognized_command(mock_core):
 
     assert result is None
     assert not mock_core.speak.called
+
+
+@pytest.mark.parametrize(
+    ("started", "result", "listens"),
+    [
+        ((True, "Tracking"), "Tracking", True),
+        ((False, "I couldn't open the webcam."), "I couldn't open the webcam.", False),
+    ],
+)
+@patch.object(headtrack, "listen_for_tracking_commands")
+def test_handle_announces_the_start_then_the_outcome(
+    mock_listen, mock_core, monkeypatch, started, result, listens
+):
+    """The user hears that tracking starts, then how it went, in that order."""
+    monkeypatch.setattr(headtrack, "tracking_active", False)
+    monkeypatch.setattr(headtrack, "start_tracking", lambda: started)
+
+    assert headtrack.handle("start tracking", mock_core) is True
+    assert [c.args[0] for c in mock_core.speak.call_args_list] == [
+        "Starting head tracking.",
+        result,
+    ]
+    assert mock_listen.called is listens
 
 
 @patch.object(headtrack, "start_tracking", return_value=(False, "Already tracking"))
@@ -633,6 +749,124 @@ def test_run_tracking_scenarios(
         assert headtrack.tracking_active is False
         if webcam_opens:
             assert mock_cap.release.called
+
+
+@patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))
+def test_run_tracking_reports_a_webcam_that_wont_open(
+    mock_screen_size, mock_core, monkeypatch
+):
+    """When the webcam won't open then tracking ends and the reason is handed back."""
+    mock_cv2 = Mock()
+    mock_cv2.VideoCapture.return_value.isOpened.return_value = False
+    monkeypatch.setattr(headtrack, "core", mock_core)
+    headtrack.tracking_active = True
+
+    with patch.dict("sys.modules", {"cv2": mock_cv2, "sixdrepnet": Mock()}):
+        headtrack.run_tracking()
+
+    assert headtrack.tracking_active is False
+    assert headtrack.start_failure == "I couldn't open the webcam."
+    assert headtrack.tracking_started.is_set()
+    mock_core.speak.assert_not_called()
+
+
+def test_run_tracking_reports_when_it_isnt_installed(mock_core, readlog, monkeypatch):
+    """When the head-tracking libraries are missing then tracking ends, not hangs."""
+    monkeypatch.setattr(headtrack, "core", mock_core)
+    headtrack.tracking_active = True
+
+    with patch.dict("sys.modules", {"cv2": None}):
+        headtrack.run_tracking()
+
+    assert headtrack.tracking_active is False
+    assert headtrack.start_failure == "Head tracking isn't installed."
+    assert headtrack.tracking_started.is_set()
+    mock_core.speak.assert_not_called()
+    assert "head-tracking extra" in readlog().err
+
+
+def test_run_tracking_reports_a_model_that_fails_to_load(mock_core, monkeypatch):
+    """When the model can't be loaded then tracking ends and the reason is handed back."""
+    monkeypatch.setattr(headtrack, "core", mock_core)
+    headtrack.tracking_active = True
+    broken = Mock(SixDRepNet=Mock(side_effect=RuntimeError("download failed")))
+
+    with patch.dict("sys.modules", {"cv2": Mock(), "sixdrepnet": broken}):
+        headtrack.run_tracking()
+
+    assert headtrack.tracking_active is False
+    assert headtrack.start_failure == "Sorry, head tracking couldn't start."
+    assert headtrack.tracking_started.is_set()
+    mock_core.speak.assert_not_called()
+
+
+def test_run_tracking_reports_a_library_whose_own_import_fails(
+    mock_core, readlog, monkeypatch
+):
+    """An installed library that can't import its dependencies is broken, not missing.
+
+    So it's reported as a failed start, with the stack trace in the log, and the
+    user isn't told to install what is already there.
+    """
+    import builtins
+
+    real_import = builtins.__import__
+
+    def broken_sixdrepnet(name, *args, **kwargs):
+        if name == "sixdrepnet":
+            raise ModuleNotFoundError("No module named 'torch'", name="torch")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(headtrack, "core", mock_core)
+    monkeypatch.setattr(builtins, "__import__", broken_sixdrepnet)
+    headtrack.tracking_active = True
+
+    with patch.dict("sys.modules", {"cv2": Mock()}):
+        headtrack.run_tracking()
+
+    assert headtrack.start_failure == "Sorry, head tracking couldn't start."
+    assert "Traceback" in readlog().err
+
+
+def test_run_tracking_reports_an_incompatible_library(mock_core, monkeypatch):
+    """A `sixdrepnet` without `SixDRepNet` is installed but incompatible, not missing.
+
+    Python reports that as a plain `ImportError` naming `sixdrepnet`, unlike the
+    `ModuleNotFoundError` of a module that isn't there at all.
+    """
+    import builtins
+
+    real_import = builtins.__import__
+
+    def incompatible_sixdrepnet(name, *args, **kwargs):
+        if name == "sixdrepnet":
+            msg = "cannot import name 'SixDRepNet' from 'sixdrepnet'"
+            raise ImportError(msg, name="sixdrepnet")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(headtrack, "core", mock_core)
+    monkeypatch.setattr(builtins, "__import__", incompatible_sixdrepnet)
+    headtrack.tracking_active = True
+
+    with patch.dict("sys.modules", {"cv2": Mock()}):
+        headtrack.run_tracking()
+
+    assert headtrack.start_failure == "Sorry, head tracking couldn't start."
+
+
+def test_run_tracking_reports_a_model_whose_own_import_fails(mock_core, monkeypatch):
+    """A model that fails importing its own dependencies is broken, not missing."""
+    monkeypatch.setattr(headtrack, "core", mock_core)
+    headtrack.tracking_active = True
+    broken = Mock(SixDRepNet=Mock(side_effect=ImportError("incompatible torch")))
+
+    with patch.dict("sys.modules", {"cv2": Mock(), "sixdrepnet": broken}):
+        headtrack.run_tracking()
+
+    assert headtrack.tracking_active is False
+    assert headtrack.start_failure == "Sorry, head tracking couldn't start."
+    assert headtrack.tracking_started.is_set()
+    mock_core.speak.assert_not_called()
 
 
 @patch.object(headtrack, "get_screen_size", return_value=(1920, 1080))
