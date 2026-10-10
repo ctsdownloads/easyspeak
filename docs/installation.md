@@ -2,7 +2,8 @@
 
 ## Requirements
 
-- Linux with GNOME Shell 47+ on Wayland
+- Linux on Wayland with GNOME Shell 47+ or KDE Plasma 6 — see
+  [Compatibility](compatibility.md) for what works where
 - Working microphone
 - ~2 GB disk space for models
 - Python 3.10–3.14 — **source install only**; the prebuilt packages bundle their

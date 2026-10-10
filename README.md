@@ -1,18 +1,17 @@
-# EasySpeak [![PyPI](https://img.shields.io/pypi/v/easyspeak-linux)](https://pypi.org/project/easyspeak-linux/)
+# EasySpeak [![PyPI](https://img.shields.io/pypi/v/easyspeak-linux)](https://pypi.org/project/easyspeak-linux/) [![Status](https://img.shields.io/badge/status-Alpha-orange.svg)](https://github.com/ctsdownloads/easyspeak/releases)
 
 Voice control for Linux desktops. Fully local, no cloud, Wayland-native.
 
 Say "Hey Jarvis" and control your desktop with your voice.
 
 [![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](https://easyspeak.dev/latest/license/)
+[![REUSE status](https://api.reuse.software/badge/github.com/ctsdownloads/easyspeak)](https://api.reuse.software/info/github.com/ctsdownloads/easyspeak)
 [![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)](https://easyspeak.dev/latest/installation/)
-[![Desktop](https://img.shields.io/badge/desktop-GNOME%20%7C%20Wayland-green.svg)](https://easyspeak.dev/latest/how-it-works/)
-[![Status](https://img.shields.io/badge/status-Alpha-orange.svg)](https://github.com/ctsdownloads/easyspeak/releases)
+[![Desktop](https://img.shields.io/badge/desktop-GNOME%20%7C%20KDE%20%7C%20Wayland-green.svg)](https://easyspeak.dev/latest/compatibility/)
 [![Pipeline](https://github.com/ctsdownloads/easyspeak/actions/workflows/pipeline.yml/badge.svg)](https://github.com/ctsdownloads/easyspeak/actions/workflows/pipeline.yml)
 [![Safety](https://github.com/ctsdownloads/easyspeak/actions/workflows/safety.yml/badge.svg)](https://github.com/ctsdownloads/easyspeak/actions/workflows/safety.yml)
 [![Release](https://github.com/ctsdownloads/easyspeak/actions/workflows/release.yml/badge.svg)](https://github.com/ctsdownloads/easyspeak/actions/workflows/release.yml)
 [![Docs](https://github.com/ctsdownloads/easyspeak/actions/workflows/docs.yml/badge.svg)](https://github.com/ctsdownloads/easyspeak/actions/workflows/docs.yml)
-[![REUSE status](https://api.reuse.software/badge/github.com/ctsdownloads/easyspeak)](https://api.reuse.software/info/github.com/ctsdownloads/easyspeak)
 
 > ⚠️ **Early development.** This project works but is not polished. Expect bugs, incomplete docs, and changes without notice.
 
@@ -33,7 +32,7 @@ EasySpeak is **free and open source** (GPL-3.0), **fully local** (no cloud, no a
 
 ## Quickstart
 
-Requirements: Linux with GNOME Shell 47+ on Wayland, Python 3.10–3.14 (tested against 3.10, 3.11, 3.12, 3.13, and 3.14), a microphone, and ~2 GB disk for models. Tested on Fedora 43.
+Requirements: Linux on Wayland with GNOME Shell 47+ or KDE Plasma 6 ([what works where](https://easyspeak.dev/latest/compatibility/)), Python 3.10–3.14 (tested against 3.10, 3.11, 3.12, 3.13, and 3.14), a microphone, and ~2 GB disk for models. Tested on Fedora 43.
 
 ```bash
 # 1. System packages (Fedora; see the docs for the full list)

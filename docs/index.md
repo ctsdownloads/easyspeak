@@ -18,7 +18,7 @@ EasySpeak is:
 
 - **Free and open source** — GPL-3.0 licensed, no paywalls
 - **Fully local** — No cloud, no accounts, no data leaving your machine
-- **Wayland-native** — Works on modern GNOME desktops where X11 tools fail
+- **Wayland-native** — Works on modern GNOME and KDE Plasma desktops where X11 tools fail
 - **Simple** — Say "Hey Jarvis, open downloads" and it works
 - **Extensible** — Drop a Python file in `plugins/` to add commands
 
