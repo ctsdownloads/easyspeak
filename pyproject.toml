@@ -67,10 +67,6 @@ acceptance = [
   "pytest>=8",
   "pytest-bdd>=7",
 ]
-benchmark = [
-  "pytest>=8",
-  "pytest-benchmark>=5",
-]
 # The distro bundle ships the `piper` binary inside its venv — no system piper
 # is packaged (see packaging/stage-bundle.sh). An extra so uv.lock pins it.
 bundle = [
@@ -135,7 +131,7 @@ plugins.md041.enabled = false  # first-line-heading
 plugins.md046.enabled = false  # code-block-style
 
 [tool.pytest.ini_options]
-addopts = "--ignore=tests/acceptance --ignore=tests/benchmarks --ignore=tests/integration"
+addopts = "--ignore=tests/acceptance --ignore=tests/integration"
 
 [tool.ruff.lint]
 select = ["ALL"]
