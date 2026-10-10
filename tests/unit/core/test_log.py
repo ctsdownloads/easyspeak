@@ -1,6 +1,7 @@
 """Tests for the core.log module."""
 
 import logging
+import os
 import sys
 
 import pytest
@@ -68,3 +69,12 @@ def test_configure_quiet_about_config_above_debug(capsys):
     log.configure(logging.INFO)
 
     assert capsys.readouterr().err == ""
+
+
+@pytest.mark.parametrize("level", [logging.DEBUG, logging.WARNING])
+def test_configure_passes_the_level_on(level):
+    """Processes EasySpeak starts inherit the level, even one from a CLI flag."""
+    log.configure(level)
+
+    assert os.environ["EASYSPEAK_LOG_LEVEL"] == logging.getLevelName(level)
+    assert log.resolve_level() == level

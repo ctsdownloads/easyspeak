@@ -349,6 +349,28 @@ class TestMenu:
 
         assert "Hidden=false" in user.read_text()
 
+    def test_start_at_login_that_cant_be_changed_is_logged(
+        self, control, monkeypatch, readlog
+    ):
+        """A failure to write the autostart entry is logged, and the menu stays."""
+
+        def read_only(_enabled):
+            raise PermissionError(13, "Permission denied")
+
+        monkeypatch.setattr("easyspeak.core.autostart.set_enabled", read_only)
+        bus = FakeBus()
+        tray = started(bus, control)
+        bus.sent.clear()
+
+        tray.handle(
+            call(MENU_PATH, MENU, "Event", "isvu", (7, "clicked", ("s", ""), 0))
+        )
+
+        assert "Couldn't change starting at login" in readlog().err
+        assert "LayoutUpdated" not in [
+            m.header.fields.get(HeaderFields.member) for m in bus.sent
+        ]
+
     def test_group_properties_of_some_entries(self, control):
         """Asking for given ids returns just those entries."""
         bus = FakeBus()

@@ -26,7 +26,13 @@ def resolve_level(*, verbose=False, quiet=False):
 
 
 def configure(level):
-    """Attach a message-only stderr handler to the package loggers."""
+    """Attach a message-only stderr handler to the package loggers.
+
+    The level is also passed on to the processes EasySpeak starts, such as the tray
+    helper, through `EASYSPEAK_LOG_LEVEL`, so they log like the daemon, even when
+    the level came from `--verbose` or `--quiet`.
+    """
+    os.environ["EASYSPEAK_LOG_LEVEL"] = logging.getLevelName(level)
     # Plain message-only output keeps the normal CLI clean; at DEBUG, prefix
     # each line with its level since that mode is for diagnosing.
     fmt = "%(levelname)s %(message)s" if level <= logging.DEBUG else "%(message)s"
