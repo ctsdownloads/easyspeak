@@ -28,7 +28,9 @@ EasySpeak is **free and open source** (GPL-3.0), **fully local** (no cloud, no a
 
 ## Demo
 
-[![Demo](https://img.youtube.com/vi/dl5m2Zo1oIE/maxresdefault.jpg)](https://www.youtube.com/watch?v=dl5m2Zo1oIE)
+[![EasySpeak demo and new updates](https://img.youtube.com/vi/dl5m2Zo1oIE/maxresdefault.jpg)](https://www.youtube.com/watch?v=2G0Wz1yjRBw)
+
+Matt Hartley walks through [the current state of EasySpeak](https://www.youtube.com/watch?v=2G0Wz1yjRBw). See also [the first demo](https://www.youtube.com/watch?v=dl5m2Zo1oIE) from the start of the project.
 
 ## Quickstart
 
