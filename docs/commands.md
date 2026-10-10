@@ -219,6 +219,7 @@ Folders open in whatever file manager your desktop is configured for (via
 | open projects | Open Projects folder |
 | open home | Open home folder |
 | open desktop | Open Desktop folder |
+| open trash | Open the trash |
 
 ## Media
 
