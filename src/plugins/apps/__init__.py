@@ -232,6 +232,7 @@ def handle(cmd, core):
             logger.warning("Couldn't start %s: %s", app, exc)
             core.speak(_("Sorry, I couldn't start {app}.").format(app=app))
             return True
+
         if launched:
             core.speak(_("Opening {app}.").format(app=app))
         else:
