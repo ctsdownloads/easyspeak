@@ -98,6 +98,14 @@ def control(tmp_path):
     return tmp_path / "control"
 
 
+@pytest.fixture(autouse=True)
+def home(tmp_path, monkeypatch):
+    """Keep the autostart entries in a throwaway home, away from the real ones."""
+    monkeypatch.setenv("HOME", str(tmp_path / "home"))
+    monkeypatch.setenv("XDG_CONFIG_DIRS", str(tmp_path / "xdg"))
+    return tmp_path
+
+
 def started(bus, control):
     tray = StatusNotifier(bus, control)
     assert tray.start()
@@ -279,7 +287,7 @@ class TestMenu:
     """The menu panels draw from the dbusmenu calls."""
 
     def test_layout_lists_every_entry(self, control):
-        """The layout holds the root and all six entries, labels following state."""
+        """The layout holds the root and all seven entries, labels following state."""
         bus = FakeBus()
         tray = started(bus, control)
         tray.handle(call(CONTROL_PATH, DESKTOP, "SetState", "s", ("muted",)))
@@ -292,7 +300,54 @@ class TestMenu:
         assert root_id == 0
         labels = [child[1][1].get("label") for child in children]
         assert labels[0] == ("s", "Reactivate EasySpeak")
-        assert len(children) == 6
+        assert len(children) == 7
+
+    def test_start_at_login_is_a_checkmark(self, control, home):
+        """ "Start at Login" shows whether EasySpeak starts at login."""
+        entry = home / "xdg" / "autostart" / "easyspeak.desktop"
+        entry.parent.mkdir(parents=True)
+        entry.write_text("[Desktop Entry]\nName=EasySpeak\n")
+        bus = FakeBus()
+        tray = started(bus, control)
+
+        reply = answer(
+            tray, bus, call(MENU_PATH, MENU, "GetGroupProperties", "aias", ([7], []))
+        )
+
+        assert reply.body == (
+            [
+                (
+                    7,
+                    {
+                        "label": ("s", "Start at Login"),
+                        "toggle-type": ("s", "checkmark"),
+                        "toggle-state": ("i", 1),
+                    },
+                )
+            ],
+        )
+
+    def test_clicking_start_at_login_toggles_it(self, control, home):
+        """A click turns starting at login off and back on, and the menu follows."""
+        system = home / "xdg" / "autostart" / "easyspeak.desktop"
+        system.parent.mkdir(parents=True)
+        system.write_text("[Desktop Entry]\nName=EasySpeak\n")
+        user = home / "home" / ".config" / "autostart" / "easyspeak.desktop"
+        bus = FakeBus()
+        tray = started(bus, control)
+        click = call(MENU_PATH, MENU, "Event", "isvu", (7, "clicked", ("s", ""), 0))
+
+        tray.handle(click)
+
+        assert "Hidden=true" in user.read_text()
+        assert "LayoutUpdated" in [
+            m.header.fields.get(HeaderFields.member) for m in bus.sent
+        ]
+        assert not control.exists()  # the helper switches it; the daemon isn't asked
+
+        tray.handle(click)
+
+        assert "Hidden=false" in user.read_text()
 
     def test_group_properties_of_some_entries(self, control):
         """Asking for given ids returns just those entries."""
@@ -429,6 +484,12 @@ class TestMenuLogic:
     def test_toggle_entry_follows_state(self):
         assert menu_items("listening")[0][1]["label"] == "Deactivate EasySpeak"
         assert menu_command(1, "listening") == "mute"
+
+    def test_start_at_login_follows_the_setting(self):
+        """The checkmark is ticked exactly when EasySpeak starts at login."""
+        ticked = dict(menu_items("listening", starts_at_login=True))[7]
+        unticked = dict(menu_items("listening"))[7]
+        assert (ticked["toggle-state"], unticked["toggle-state"]) == (1, 0)
 
     def test_separators_send_nothing(self):
         assert menu_command(2, "muted") is None
