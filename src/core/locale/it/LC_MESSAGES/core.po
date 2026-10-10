@@ -15,6 +15,9 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "I can't find a microphone, so I have to stop."
+msgstr "Non trovo nessun microfono, quindi devo fermarmi."
+
 msgid "I couldn't turn voice control off, so I'll keep listening."
 msgstr ""
 "Non sono riuscito a disattivare il controllo vocale, quindi continuo ad "
