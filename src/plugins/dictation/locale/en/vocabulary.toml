@@ -3,12 +3,12 @@
 
 # Said as a command to start dictating.
 [enter]
-say = ["notes", "note"]
+say = ["dictation", "notes", "dictate", "note"]
 
 [exit]
-say = "stop notes"
+say = "stop dictation"
 verbs = ["stop", "close", "closed", "end", "exit", "done", "finish", "quit"]
-nouns = ["notes", "note", "nots", "nurts", "nuts", "knots", "notice"]
+nouns = ["dictation", "dictate", "notes", "note", "nots", "nurts", "nuts", "knots", "notice"]
 
 [undo]
 phrases = ["scratch that", "scratch this", "undo that", "undo this"]

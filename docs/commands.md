@@ -145,8 +145,8 @@ included, so they can be tuned without touching code.
 
 | Command | Action |
 |---------|--------|
-| notes | Start dictation mode |
-| stop notes | End dictation mode |
+| dictation / notes | Start dictation mode |
+| stop dictation / stop notes | End dictation mode |
 | comma | Insert , |
 | period | Insert . |
 | question mark | Insert ? |
