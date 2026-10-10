@@ -11,7 +11,7 @@ NotifyKeyboardKeycode -> Stop sequence runs on one connection.
 
 import logging
 
-from jeepney import DBusAddress, new_method_call
+from jeepney import DBusAddress, MessageType, new_method_call
 from jeepney.io.blocking import open_dbus_connection
 
 logger = logging.getLogger(__name__)
@@ -23,6 +23,18 @@ _REMOTE_DESKTOP = DBusAddress(
     bus_name=_BUS,
     interface=_BUS,
 )
+
+
+class RemoteDesktopUnavailableError(RuntimeError):
+    """GNOME's RemoteDesktop interface refused or is missing, e.g. on KDE Plasma."""
+
+
+def _call(conn, message):
+    """Send `message` and return its reply, raising if D-Bus answers with an error."""
+    reply = conn.send_and_get_reply(message)
+    if reply.header.message_type is MessageType.error:
+        raise RemoteDesktopUnavailableError(" ".join(map(str, reply.body)))
+    return reply
 
 
 def tap_key(keycode):
@@ -43,32 +55,36 @@ def tap_chord(keycodes):
     implements paste, whereas accessibility-level insertion is widely stubbed out
     (Chromium-based apps accept it and discard it).
 
-    Raises if RemoteDesktop is unavailable, so the caller can report why.
+    A desktop without RemoteDesktop makes this raise
+    [`RemoteDesktopUnavailableError`][core.mediakeys.RemoteDesktopUnavailableError],
+    so the caller can report why.
     """
     conn = open_dbus_connection(bus="SESSION")
     try:
-        reply = conn.send_and_get_reply(
-            new_method_call(_REMOTE_DESKTOP, "CreateSession")
-        )
+        reply = _call(conn, new_method_call(_REMOTE_DESKTOP, "CreateSession"))
         session = DBusAddress(
             reply.body[0],
             bus_name=_BUS,
             interface=f"{_BUS}.Session",
         )
-        conn.send_and_get_reply(new_method_call(session, "Start"))
+        _call(conn, new_method_call(session, "Start"))
         # Synchronous replies guarantee Mutter has processed each event before
         # we move on, so no settling delay is needed before Stop.
         for keycode in keycodes:
-            conn.send_and_get_reply(
-                new_method_call(session, "NotifyKeyboardKeycode", "ub", (keycode, True))
+            _call(
+                conn,
+                new_method_call(
+                    session, "NotifyKeyboardKeycode", "ub", (keycode, True)
+                ),
             )
         for keycode in reversed(keycodes):
-            conn.send_and_get_reply(
+            _call(
+                conn,
                 new_method_call(
                     session, "NotifyKeyboardKeycode", "ub", (keycode, False)
-                )
+                ),
             )
-        conn.send_and_get_reply(new_method_call(session, "Stop"))
+        _call(conn, new_method_call(session, "Stop"))
     finally:
         conn.close()
 

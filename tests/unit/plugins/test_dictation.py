@@ -633,6 +633,25 @@ def test_run_push_to_talk_backend_error_stops(mock_format, mock_insert):
     core.speak.assert_called_once_with("Dictation isn't set up on this system.")
 
 
+@patch("easyspeak.plugins.dictation.insert_text", return_value=dictation.NO_KEYSTROKES)
+@patch("easyspeak.plugins.dictation.format_text", return_value="Hello")
+def test_run_push_to_talk_without_keystrokes_points_to_the_clipboard(
+    mock_format, mock_insert
+):
+    """Where keys can't be typed, the user hears where the text went instead."""
+    core = Mock()
+    core.wait_for_speech = Mock(return_value=b"audio1")
+    core.record_until_silence = Mock(return_value=b"audio2")
+    core.transcribe = Mock(return_value="hello")
+
+    dictation.run_push_to_talk(core, _holds(5))
+
+    core.speak.assert_called_once_with(
+        "I can't type on this desktop yet. "
+        "The text is on the clipboard, paste it with Control V."
+    )
+
+
 @patch("easyspeak.plugins.dictation.insert_text")
 @patch("easyspeak.plugins.dictation.format_text", return_value="")
 def test_dictate_utterance_noop_on_empty_format(mock_format, mock_insert):
@@ -864,13 +883,28 @@ def test_insert_text_leaves_an_empty_clipboard_alone(
 
 
 @patch.object(dictation, "has_focused_text_field", return_value=True)
-@patch("easyspeak.core.mediakeys.tap_chord", side_effect=RuntimeError("no portal"))
+@patch(
+    "easyspeak.core.mediakeys.tap_chord",
+    side_effect=mediakeys.RemoteDesktopUnavailableError("The name is not activatable"),
+)
+def test_insert_text_reports_a_desktop_without_keystrokes(
+    mock_chord, mock_focus, clipboard, readlog
+):
+    """Without GNOME's RemoteDesktop, e.g. on KDE Plasma, say why in one log line."""
+    assert dictation.insert_text("hello") == dictation.NO_KEYSTROKES
+    log = readlog().err
+    assert "RemoteDesktop" in log
+    assert "Traceback" not in log
+
+
+@patch.object(dictation, "has_focused_text_field", return_value=True)
+@patch("easyspeak.core.mediakeys.tap_chord", side_effect=ValueError("bug"))
 def test_insert_text_reports_a_failed_keystroke(
     mock_chord, mock_focus, clipboard, readlog
 ):
-    """When the paste keystroke can't be sent then say so, don't claim success."""
+    """An unexpected failure keeps its traceback, for the bug report."""
     assert dictation.insert_text("hello") == dictation.BACKEND_ERROR
-    assert "RemoteDesktop" in readlog().err
+    assert "Traceback" in readlog().err
 
 
 def test_insert_text_reports_a_failed_copy(monkeypatch, readlog):

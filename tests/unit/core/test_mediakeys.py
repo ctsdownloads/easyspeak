@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from easyspeak.core import mediakeys
+from jeepney import new_error, new_method_call
 
 
 @patch("easyspeak.core.mediakeys.open_dbus_connection")
@@ -54,6 +55,28 @@ def test_tap_key_closes_connection_on_error(mock_open):
     conn.close.assert_called_once()
 
 
+@patch("easyspeak.core.mediakeys.open_dbus_connection")
+def test_tap_chord_raises_when_remotedesktop_is_missing(mock_open):
+    """On a desktop without Mutter, e.g. KDE Plasma, D-Bus answers with an error.
+
+    That error is reported as such, not mistaken for a session path.
+    """
+    conn = mock_open.return_value
+    conn.send_and_get_reply.return_value = new_error(
+        new_method_call(mediakeys._REMOTE_DESKTOP, "CreateSession"),
+        "org.freedesktop.DBus.Error.ServiceUnknown",
+        "s",
+        ("The name is not activatable",),
+    )
+
+    with pytest.raises(
+        mediakeys.RemoteDesktopUnavailableError, match="not activatable"
+    ):
+        mediakeys.tap_chord([29, 47])
+
+    conn.close.assert_called_once()
+
+
 def test_tap_chord_presses_together_and_releases_in_reverse():
     """Ctrl+V is one chord, not two unrelated keypresses.
 
@@ -99,7 +122,10 @@ def test_press_key_taps_once_per_repeat(mock_chord):
     assert mock_chord.call_count == 3
 
 
-@patch("easyspeak.core.mediakeys.tap_chord", side_effect=RuntimeError("no portal"))
+@patch(
+    "easyspeak.core.mediakeys.tap_chord",
+    side_effect=mediakeys.RemoteDesktopUnavailableError("The name is not activatable"),
+)
 def test_press_key_reports_a_missing_remotedesktop(mock_chord, readlog):
     """Without GNOME's RemoteDesktop the keys can't be sent, so False, not a crash."""
     assert mediakeys.press_key(mediakeys.KEYS["enter"]) is False
