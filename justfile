@@ -14,7 +14,7 @@ all: codestyle safety test check-docs check-desktop-integration compile-schemas 
 # Remove build artifacts and reports (use -v for verbose, -n for dry-run)
 [group('lifecycle')]
 clean *args:
-    uvx pyclean . {{ args }} --debris all --erase .benchmarks 'build/**/*' build result results.json 'site/**/*' site --yes
+    uvx pyclean . {{ args }} --debris all --erase .benchmarks 'build/**/*' build result 'site/**/*' site --yes
 
 # Check Python dependencies are up-to-date (uv.lock)
 [group('lifecycle')]
@@ -109,11 +109,10 @@ integration *args=('-v'):
 acceptance *args=('-v'):
     uv run --extra=acceptance pytest tests/acceptance {{ args }}
 
-# Run Whisper benchmarks (writes results.json for bencher.dev)
+# Time the speech recognition (Whisper and Parakeet) on a sample recording
 [group('tests')]
 benchmark *args:
-    uv run --extra=benchmark pytest tests/benchmarks/ \
-        --benchmark-json=results.json {{ args }}
+    uv run --extra=benchmark pytest tests/benchmarks/ {{ args }}
 
 # Run all QA checks for the generated documentation (docstrings, markdown, links)
 [group('docs')]

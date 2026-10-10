@@ -6,7 +6,6 @@ checkextern=1
 ignore=
   /404\.html
   easyspeak\.dev/latest/
-  bencher\.dev
   github\.com/.*/compare/
   github\.com/.*/pull/
 

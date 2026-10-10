@@ -26,7 +26,6 @@ coverage.json
 coverage.xml
 htmlcov/
 junit-report.xml
-results.json
 
 # Virtual environments
 .env
