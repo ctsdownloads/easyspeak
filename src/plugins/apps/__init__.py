@@ -178,7 +178,7 @@ def find_app(name, core):
     if on_kde() and name in KDE_APPS and _has(KDE_APPS[name], core):
         return ("local", KDE_APPS[name])
 
-    if name in FLATPAK_APPS:
+    if name in FLATPAK_APPS and _has("flatpak", core):
         result = core.host_run(["flatpak", "info", FLATPAK_APPS[name]])
         if result.returncode == 0:
             return ("flatpak", FLATPAK_APPS[name])
