@@ -29,6 +29,9 @@ msgstr "Aucun gestionnaire de fichiers trouvé."
 msgid "Opening {label}."
 msgstr "J'ouvre {label}."
 
+msgid "close the file manager, all its windows"
+msgstr "fermer le gestionnaire de fichiers, toutes ses fenêtres"
+
 msgid "close your default file manager"
 msgstr "fermer le gestionnaire de fichiers par défaut"
 

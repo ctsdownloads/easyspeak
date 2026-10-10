@@ -1,11 +1,8 @@
 """Tests for the base plugin module."""
 
-import importlib
-from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
-from easyspeak.core.main import EasySpeak
 from easyspeak.plugins import base
 
 
@@ -217,35 +214,6 @@ def test_wake_word_requirement_toggle(command, expected, mock_core):
     """The requirement can be turned on and off by voice, in any mode."""
     assert base.handle(command, mock_core) is True
     assert mock_core.require_wake_word is expected
-
-
-@pytest.fixture
-def routed_core(monkeypatch):
-    """An EasySpeak core routing through every real plugin, in load order.
-
-    Plugins are sorted as `load_plugins` sorts them, so base runs last as in
-    the app; their `setup` hooks, which touch the system, are left out, and
-    commands the plugins run report failure.
-    """
-    plugins_dir = Path(base.__file__).parent.parent
-    plugins = []
-    for package in sorted(plugins_dir.iterdir()):
-        if package.name.startswith("_") or not (package / "__init__.py").is_file():
-            continue
-        module = importlib.import_module(f"easyspeak.plugins.{package.name}")
-        if hasattr(module, "NAME") and hasattr(module, "handle"):
-            plugins.append(module)
-    plugins.sort(key=lambda m: (getattr(m, "PRIORITY", 50), m.NAME))
-
-    core = EasySpeak()
-    core.plugins = plugins
-    failed = Mock(returncode=1, stdout="", stderr="")
-    monkeypatch.setattr(core, "host_run", Mock(return_value=failed))
-    monkeypatch.setattr(core, "speak", Mock())
-    monkeypatch.setattr(core, "listen_modal", Mock(return_value=iter(())))
-    for module in plugins:
-        monkeypatch.setattr(module, "core", core, raising=False)
-    return core
 
 
 @pytest.mark.parametrize(

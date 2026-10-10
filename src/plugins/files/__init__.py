@@ -19,6 +19,8 @@ COMMANDS = [
     + _("open your default file manager"),
     f"{vocab.say('close', limit=1)} {vocab.say('file_manager', limit=1)} - "
     + _("close your default file manager"),
+    f"{vocab.say('close', limit=1)} [folder] - "
+    + _("close the file manager, all its windows"),
     _("Folders: {names}").format(
         names=", ".join(
             vocab.say(folder, "folders", limit=1) for folder in vocab.keys("folders")

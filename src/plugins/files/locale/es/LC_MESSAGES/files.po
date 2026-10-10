@@ -29,6 +29,9 @@ msgstr "No se ha encontrado ningún gestor de archivos."
 msgid "Opening {label}."
 msgstr "Abro {label}."
 
+msgid "close the file manager, all its windows"
+msgstr "cerrar el gestor de archivos, todas sus ventanas"
+
 msgid "close your default file manager"
 msgstr "cerrar el gestor de archivos predeterminado"
 
