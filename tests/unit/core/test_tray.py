@@ -289,6 +289,52 @@ class TestMenuActions:
         assert mock_popen.call_args.args[0] == ["xdg-open", DOCS_URL]
         assert mock_popen.call_args.kwargs["start_new_session"] is True
 
+    @patch("easyspeak.core.tray.shutil.which", return_value="/usr/bin/kdialog")
+    @patch("easyspeak.core.tray.on_gnome", return_value=False)
+    @patch("easyspeak.core.tray.subprocess.Popen")
+    def test_about_uses_kdialog_outside_gnome(self, mock_popen, _gnome, _which):
+        """Outside GNOME, kdialog shows the About information in the native look."""
+        self._started(mock_popen)
+        tray = self._tray([COMMAND_ABOUT])
+
+        tray.poll(Mock(), Mock())
+
+        assert mock_popen.call_count == 1
+        cmd = mock_popen.call_args.args[0]
+        assert cmd[:3] == ["kdialog", "--title", "About EasySpeak"]
+        assert "--msgbox" in cmd
+
+    @patch.dict("easyspeak.core.tray.os.environ", {}, clear=True)
+    @patch("easyspeak.core.tray.shutil.which", return_value="/usr/bin/kdialog")
+    @patch("easyspeak.core.tray.on_gnome", return_value=False)
+    @patch("easyspeak.core.tray.subprocess.Popen")
+    def test_about_falls_back_from_a_failing_kdialog(self, mock_popen, _gnome, _which):
+        """When kdialog can't show it, the libadwaita dialog is tried next."""
+        failing, opened = Mock(), Mock()
+        failing.wait.return_value = 1
+        opened.wait.side_effect = subprocess.TimeoutExpired(cmd="about", timeout=1.5)
+        mock_popen.side_effect = [failing, opened]
+        tray = self._tray([COMMAND_ABOUT])
+
+        tray.poll(Mock(), Mock())
+
+        launched = [c.args[0][0] for c in mock_popen.call_args_list]
+        assert launched == ["kdialog", sys.executable]
+        tray._speak.assert_not_called()
+
+    @patch.dict("easyspeak.core.tray.os.environ", {}, clear=True)
+    @patch("easyspeak.core.tray.shutil.which", return_value="/usr/bin/kdialog")
+    @patch("easyspeak.core.tray.on_gnome", return_value=True)
+    @patch("easyspeak.core.tray.subprocess.Popen")
+    def test_about_keeps_libadwaita_on_gnome(self, mock_popen, _gnome, _which):
+        """On GNOME the libadwaita dialog stays, even with kdialog installed."""
+        self._started(mock_popen)
+        tray = self._tray([COMMAND_ABOUT])
+
+        tray.poll(Mock(), Mock())
+
+        assert mock_popen.call_args.args[0] == [sys.executable, ABOUT_HELPER]
+
     @patch.dict("easyspeak.core.tray.os.environ", {}, clear=True)
     @patch("easyspeak.core.tray.subprocess.Popen")
     def test_about_falls_back_to_own_interpreter(self, mock_popen):

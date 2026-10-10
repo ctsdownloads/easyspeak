@@ -68,6 +68,7 @@ overrides:
     - libadwaita-1-0
     - gir1.2-gtk-4.0
     - gir1.2-adw-1
+    - kdialog                # native About window on KDE Plasma
   rpm:
     depends:
     - portaudio
@@ -89,3 +90,4 @@ overrides:
     - gnome-shell
     - gtk4
     - libadwaita
+    - kdialog

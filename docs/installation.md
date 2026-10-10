@@ -106,6 +106,9 @@ notification instead. For the graphical dialog on other desktops, install it too
 sudo dnf install libadwaita
 ```
 
+On KDE Plasma, `kdialog` shows the About information in Plasma's own look
+instead, if it's installed (`sudo dnf install kdialog`).
+
 Optionally, `sudo dnf install python3-adblock` gives qutebrowser Brave's
 element-level ad blocker. EasySpeak configures the browser to use it when it is
 present and falls back to host blocking when it is not, so this is worth having:
