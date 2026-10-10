@@ -25,7 +25,7 @@ Values are rewritten in place, so comments in pins.toml survive. Nothing is
 committed; review with `git diff pins.toml`.
 """
 
-import datetime
+import datetime as dt
 import hashlib
 import json
 import os
@@ -85,11 +85,11 @@ def latest_python(requires_python):
 def supported_ubuntu_image(current):
     """Advance the LTS base image only once the pinned one has gone EOL."""
     pinned = current.removeprefix("ubuntu:")
-    today = datetime.datetime.now(tz=datetime.timezone.utc).date()
+    today = dt.datetime.now(tz=dt.timezone.utc).date()
     supported = [
         c["cycle"]
         for c in fetch_json("https://endoflife.date/api/ubuntu.json")
-        if c.get("lts") and datetime.date.fromisoformat(c["eol"]) > today
+        if c.get("lts") and dt.date.fromisoformat(c["eol"]) > today
     ]
     if pinned in supported:
         return current
