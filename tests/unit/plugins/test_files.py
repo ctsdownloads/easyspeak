@@ -225,3 +225,30 @@ def test_default_file_manager_with_an_empty_exec_line_is_unknown(xdg, mock_core)
 def test_default_file_manager_without_an_entry_is_unknown(xdg, mock_core):
     """xdg-mime names an entry no data dir has."""
     assert files.default_file_manager(mock_core) is None
+
+
+@pytest.mark.parametrize(
+    ("command", "reply"),
+    [
+        ("close music player", "Closing music player."),
+        ("close video player", "Closing video player."),
+    ],
+)
+def test_closing_an_app_named_like_a_folder_stays_with_apps(
+    routed_core, command, reply
+):
+    """ "Close music player" closes the app, though "music" also names a folder."""
+    assert routed_core.route_command(command) is True
+    assert routed_core.speak.call_args.args == (reply,)
+
+
+@pytest.mark.parametrize(
+    "command", ["close music", "close download", "close desktop", "close project"]
+)
+def test_closing_a_folder_reaches_the_file_manager(routed_core, command):
+    """Routed through every plugin, closing a folder ends up with the files plugin.
+
+    Its reply says no file manager was found, as the fixture's commands all fail.
+    """
+    assert routed_core.route_command(command) is True
+    assert routed_core.speak.call_args.args == ("No file manager found.",)

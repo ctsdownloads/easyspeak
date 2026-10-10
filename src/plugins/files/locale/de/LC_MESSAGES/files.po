@@ -29,6 +29,9 @@ msgstr "Kein Dateimanager gefunden."
 msgid "Opening {label}."
 msgstr "{label} wird geöffnet."
 
+msgid "close the file manager, all its windows"
+msgstr "den Dateimanager schließen, alle seine Fenster"
+
 msgid "close your default file manager"
 msgstr "den Standard-Dateimanager schließen"
 
