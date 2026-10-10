@@ -1,6 +1,7 @@
 """Tests for the GNOME panel-indicator bridge (core.tray)."""
 
 import itertools
+import logging
 import subprocess
 import sys
 import tempfile
@@ -311,13 +312,22 @@ class TestMenuActions:
 
     @patch("easyspeak.core.tray.subprocess.run")
     @patch("easyspeak.core.tray.subprocess.Popen")
-    def test_failed_helper_is_reported_not_swallowed(self, mock_popen, mock_run):
-        """A helper that exits non-zero at startup logs its stderr, plays the
-        error chime, and speaks an apology, rather than failing silently."""
+    def test_failed_helper_is_reported_not_swallowed(
+        self, mock_popen, mock_run, caplog
+    ):
+        """A helper that exits non-zero at startup logs why in one line, plays the
+        error chime, and speaks an apology, rather than failing silently.
+
+        Its full stderr, traceback included, is kept for debug logging only.
+        """
+        caplog.set_level(logging.DEBUG)
         proc = mock_popen.return_value
         proc.wait.return_value = 1
         with tempfile.TemporaryFile() as errlog:
-            errlog.write(b"ModuleNotFoundError: No module named 'gi'\n")
+            errlog.write(
+                b"Traceback (most recent call last):\n"
+                b"ValueError: Namespace Gtk not available\n"
+            )
             errlog.seek(0)
             tray = self._tray([COMMAND_ABOUT])
 
@@ -328,6 +338,11 @@ class TestMenuActions:
 
         assert mock_run.call_args.args[0][0] == "paplay"
         tray._speak.assert_called_once_with("Sorry, I couldn't open the About dialog.")
+        warnings = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
+        assert warnings == [
+            "The About dialog couldn't open: ValueError: Namespace Gtk not available"
+        ]
+        assert "Traceback" in caplog.text
 
     @patch("easyspeak.core.tray.subprocess.Popen")
     def test_help_does_not_release_the_mic(self, mock_popen):

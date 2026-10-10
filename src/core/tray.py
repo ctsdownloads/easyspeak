@@ -242,12 +242,14 @@ class Tray:
             if returncode not in (None, 0):
                 errlog.seek(0)
                 detail = errlog.read().decode(errors="replace").strip()
-                logger.error(
-                    "The %s exited with code %s.%s",
-                    what,
-                    returncode,
-                    f"\n{detail}" if detail else "",
+                reason = (
+                    detail.splitlines()[-1] if detail else f"exit code {returncode}"
                 )
+                logger.warning("The %s couldn't open: %s", what, reason)
+                if detail:
+                    logger.debug(
+                        "The %s exited with code %s:\n%s", what, returncode, detail
+                    )
                 self._report_failure(apology)
 
     def _await_startup(self, proc):

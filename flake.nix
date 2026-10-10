@@ -23,12 +23,19 @@
         # + the AT-SPI typelib, which uv can't put in a wheel venv (EASYSPEAK_ATSPI_PYTHON).
         atspiPython = python.withPackages (ps: [ ps.pygobject3 ]);
 
-        # Typelibs the helper's `gi` imports resolve at runtime (GLib/GObject/Gio,
-        # GIRepository, Atspi).
+        # Typelibs the helpers' `gi` imports resolve at runtime: GLib/GObject/Gio,
+        # GIRepository and Atspi for dictation, GTK 4 and libadwaita (with the
+        # libraries GTK's own typelib requires) for the About dialog.
         giTypelibPath = with pkgs; lib.makeSearchPath "lib/girepository-1.0" [
           glib
           gobject-introspection
           at-spi2-core
+          gtk4
+          libadwaita
+          graphene
+          pango.out
+          harfbuzz
+          gdk-pixbuf.out
         ];
 
         # .git is stripped from the flake source, so derive a PEP 440 "local
@@ -178,6 +185,9 @@
           export LIBRARY_PATH="${portaudio}/lib''${LIBRARY_PATH:+:$LIBRARY_PATH}"
           export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX="''${SETUPTOOLS_SCM_PRETEND_VERSION_FOR_EASYSPEAK_LINUX:-${pretendVersion}}"
           export UV_PYTHON='${python}/bin/python'
+          # GTK's settings schemas for the About dialog, appended so the apps
+          # EasySpeak launches still find the system's own schemas first.
+          export XDG_DATA_DIRS="''${XDG_DATA_DIRS:-/usr/local/share:/usr/share}:${gtk4}/share/gsettings-schemas/${gtk4.name}:${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}"
         '';
 
         easyspeak = pkgs.writeShellApplication {
