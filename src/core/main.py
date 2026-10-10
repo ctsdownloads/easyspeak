@@ -277,7 +277,9 @@ class EasySpeak:
     def route_command(self, cmd):
         """Route command to appropriate plugin.
 
-        Returns False to exit.
+        A plugin that raises doesn't stop the others from trying the command. If none
+        takes it, the command was understood but carrying it out broke, so the user
+        hears an apology rather than "I didn't understand". Returns False to exit.
         """
         cmd = strip_wake_words(cmd).lower()
         self.unrecognized = False
@@ -285,6 +287,7 @@ class EasySpeak:
         if not cmd:
             return True
 
+        failed = False
         for plugin in self.plugins:
             try:
                 result = plugin.handle(cmd, self)
@@ -296,7 +299,11 @@ class EasySpeak:
                     return False
             except Exception:
                 logger.exception("Plugin error (%s)", plugin.NAME)
+                failed = True
 
+        if failed:
+            self.speak(_("Sorry, something went wrong with that command."))
+            return True
         self._report_not_understood()
         return True
 

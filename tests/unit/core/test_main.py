@@ -441,7 +441,21 @@ class TestEasySpeakRouteCommand:
         captured = readlog()
         assert "Plugin error (TestPlugin)" in captured.out
         assert result is True
-        mock_speak.assert_called_once()
+        mock_speak.assert_called_once_with(
+            "Sorry, something went wrong with that command."
+        )
+
+    @patch.object(EasySpeak, "speak")
+    def test_route_command_plugin_error_lets_another_plugin_handle_it(
+        self, mock_speak, mock_plugin_with_error, mock_plugin
+    ):
+        """A plugin that breaks while checking a command doesn't block the others."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin_with_error, mock_plugin]
+
+        assert easy.route_command("test command") is True
+        mock_plugin.handle.assert_called_once()
+        mock_speak.assert_not_called()
 
     def test_route_command_multiple_plugins(self, mock_multiple_plugins):
         """Test route_command with multiple plugins."""
