@@ -445,6 +445,39 @@ class TestEasySpeakRouteCommand:
             "Sorry, something went wrong with that command."
         )
 
+    @patch.object(EasySpeak, "_show_help")
+    @patch.object(EasySpeak, "speak")
+    @patch("time.time")
+    def test_route_command_failed_command_ends_the_miss_streak(
+        self,
+        mock_time,
+        mock_speak,
+        mock_show_help,
+        mock_plugin_with_error,
+        mock_plugin_no_handle,
+    ):
+        """A command that was understood, even if it failed, isn't a miss.
+
+        So a miss, a failed command and another miss apologise twice instead of
+        showing the help as if the user had been misunderstood twice in a row.
+        """
+        mock_time.side_effect = [100.0, 200.0]
+        easy = EasySpeak()
+
+        easy.plugins = [mock_plugin_no_handle]
+        easy.route_command("unknown command")
+        easy.plugins = [mock_plugin_with_error]
+        easy.route_command("open settings")
+        easy.plugins = [mock_plugin_no_handle]
+        easy.route_command("unknown command")
+
+        assert [c.args[0] for c in mock_speak.call_args_list] == [
+            "Sorry, I didn't understand.",
+            "Sorry, something went wrong with that command.",
+            "Sorry, I didn't understand.",
+        ]
+        mock_show_help.assert_not_called()
+
     @patch.object(EasySpeak, "speak")
     def test_route_command_plugin_error_lets_another_plugin_handle_it(
         self, mock_speak, mock_plugin_with_error, mock_plugin

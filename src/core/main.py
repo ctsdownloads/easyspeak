@@ -303,6 +303,8 @@ class EasySpeak:
                 failed = True
 
         if failed:
+            self.misunderstand_count = 0
+            self.help_shown = False
             self.speak(_("Sorry, something went wrong with that command."))
             return True
         self._report_not_understood()
