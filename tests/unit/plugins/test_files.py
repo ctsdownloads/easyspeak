@@ -13,19 +13,11 @@ def test_setup_stores_core_reference(mock_core):
     assert files.core == mock_core
 
 
-@patch("easyspeak.plugins.files.Path")
-def test_open_folder_expands_path(mock_path, mock_core):
-    """When open_folder is used with a user path then it expands the path."""
-    files.open_folder("~/Documents", mock_core)
-
-    mock_path.assert_called_once_with("~/Documents")
-    mock_path.return_value.expanduser.assert_called_once_with()
-
-
-@patch("easyspeak.plugins.files.Path")
-def test_open_folder_uses_xdg_open(mock_path, mock_core_which_finds_file_manager):
-    """When xdg-open is available then open_folder launches it with a clean env."""
-    mock_path.return_value.expanduser.return_value = "/home/user/Documents"
+def test_open_folder_uses_xdg_open(mock_core_which_finds_file_manager, monkeypatch):
+    """When xdg-open is available then open_folder launches it with a clean env,
+    on the expanded path.
+    """
+    monkeypatch.setenv("HOME", "/home/user")
     core = mock_core_which_finds_file_manager("xdg-open")
 
     result = files.open_folder("~/Documents", core)
@@ -35,6 +27,14 @@ def test_open_folder_uses_xdg_open(mock_path, mock_core_which_finds_file_manager
     assert launch.args[0] == ["xdg-open", "/home/user/Documents"]
     assert launch.kwargs["background"] is True
     assert launch.kwargs["clean_env"] is True
+
+
+def test_open_folder_keeps_an_address_intact(mock_core_which_finds_file_manager):
+    """The trash's `trash:///` address reaches xdg-open as it is."""
+    core = mock_core_which_finds_file_manager("xdg-open")
+
+    assert files.open_folder("trash:///", core) is True
+    assert core.host_run.call_args_list[-1].args[0] == ["xdg-open", "trash:///"]
 
 
 def test_open_folder_returns_false_when_no_file_manager_found(
@@ -111,6 +111,17 @@ def test_handle_recognizes_different_command_prefixes(
 
     assert result is True
     assert mock_open_folder.call_count == 1
+
+
+@pytest.mark.parametrize(
+    "command", ["open trash", "open the trash bin", "show recycle bin"]
+)
+@patch("easyspeak.plugins.files.open_folder", return_value=True)
+def test_handle_opens_the_trash(mock_open_folder, command, mock_core):
+    """The trash opens through its `trash:///` address."""
+    assert files.handle(command, mock_core) is True
+    assert mock_open_folder.call_args.args == ("trash:///", mock_core)
+    assert mock_core.speak.call_args.args == ("Opening trash.",)
 
 
 @patch("easyspeak.plugins.files.open_folder", return_value=False)

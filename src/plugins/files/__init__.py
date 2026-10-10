@@ -35,6 +35,8 @@ FOLDERS = {
     "projects": "~/Projects",
     "home": "~",
     "desktop": "~/Desktop",
+    # The trash's address in both GIO (GNOME) and KIO (KDE) file managers.
+    "trash": "trash:///",
 }
 
 core = None
@@ -52,9 +54,10 @@ def open_folder(path, core):
     Delegates to xdg-open so whichever file manager the desktop is configured
     for is honoured, rather than hardcoding one. Launched with a clean
     environment (see core.host_run) so it doesn't inherit EasySpeak's library
-    paths.
+    paths. Addresses like `trash:///` pass through unchanged; a `Path` would
+    collapse their slashes.
     """
-    expanded = Path(path).expanduser()
+    expanded = os.path.expanduser(path)  # noqa: PTH111
     if core.host_run(["which", "xdg-open"]).returncode != 0:
         return False
     core.host_run(["xdg-open", expanded], background=True, clean_env=True)
