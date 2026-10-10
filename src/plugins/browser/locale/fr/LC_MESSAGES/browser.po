@@ -73,6 +73,9 @@ msgstr "Je cherche {query}."
 msgid "Software rendering on"
 msgstr "Rendu logiciel activé"
 
+msgid "Sorry, I couldn't start qutebrowser."
+msgstr "Désolé, je n'ai pas pu démarrer qutebrowser."
+
 msgid "Sorry, that didn't work in the browser."
 msgstr "Désolé, cela n'a pas marché dans le navigateur."
 

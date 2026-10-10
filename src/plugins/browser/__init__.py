@@ -731,9 +731,13 @@ def handle(cmd, core):
         if not _qutebrowser_running(core):
             try:
                 core.host_run(["qutebrowser"], background=True, clean_env=True)
+            except FileNotFoundError:
+                logger.warning("qutebrowser isn't installed.")
+                core.speak(_("Browser mode needs qutebrowser, which isn't installed."))
+                return True
             except OSError as exc:
                 logger.warning("Couldn't start qutebrowser: %s", exc)
-                core.speak(_("Browser mode needs qutebrowser, which isn't installed."))
+                core.speak(_("Sorry, I couldn't start qutebrowser."))
                 return True
         browser_mode(core)
         return True
