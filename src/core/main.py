@@ -21,6 +21,7 @@ from .config import (
     COMMAND_LANGUAGE,
     COMMAND_PROMPT,
     COMMAND_PROMPTS,
+    ERROR_SOUND,
     FOLLOWUP_IDLE_ROUNDS,
     HOTKEY_COMBO,
     LANGUAGE,
@@ -766,11 +767,14 @@ class EasySpeak:
         Triggered from the main loop when the silent-activation combo fires.
         Acknowledges with the wake chime — but speaks no prompt, this being the *silent*
         path — then hands off to the registered dictation handler, gating it on the
-        still-held key state so releasing the keys ends it. Warns and does nothing if no
-        handler is registered (e.g. the dictation plugin didn't load).
+        still-held key state so releasing the keys ends it. Without a registered handler
+        (e.g. the dictation plugin didn't load) the error sound and a short reply say
+        so, as a silent key press would look like it did nothing.
         """
         if self._push_to_talk is None:
             logger.warning("Hotkey pressed but no dictation handler is registered.")
+            self.play_sound(ERROR_SOUND)
+            self.speak(_("Dictation isn't available."))
             return
         logger.info("⌨️  Hotkey dictation")
         self._reset_detector()
