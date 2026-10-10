@@ -193,17 +193,16 @@ def find_app(name, core):
 
 
 def launch_app(name, core):
-    """Launch the named app (flatpak or local binary); False if not found."""
+    """Launch the named app (flatpak or local binary); False if not found.
+
+    Raises OSError if the app is there but can't be started.
+    """
     app_type, app_id = find_app(name, core)
     if app_type == "flatpak":
         core.host_run(["flatpak", "run", app_id], background=True, clean_env=True)
         return True
     if app_type == "local":
-        try:
-            core.host_run([app_id], background=True, clean_env=True)
-        except OSError as exc:
-            logger.warning("Couldn't start %s: %s", app_id, exc)
-            return False
+        core.host_run([app_id], background=True, clean_env=True)
         return True
     return False
 
@@ -227,7 +226,13 @@ def handle(cmd, core):
         return None
 
     if vocab.says(cmd, "open"):
-        if launch_app(app, core):
+        try:
+            launched = launch_app(app, core)
+        except OSError as exc:
+            logger.warning("Couldn't start %s: %s", app, exc)
+            core.speak(_("Sorry, I couldn't start {app}.").format(app=app))
+            return True
+        if launched:
             core.speak(_("Opening {app}.").format(app=app))
         else:
             core.speak(_("{app} not installed.").format(app=app))

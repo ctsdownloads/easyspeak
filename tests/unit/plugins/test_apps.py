@@ -158,13 +158,17 @@ def test_launch_app_local(mock_find_app, mock_core):
     }
 
 
-@patch("easyspeak.plugins.apps.find_app", return_value=("local", "systemsettings"))
-def test_launch_app_that_fails_to_start(mock_find_app, mock_core, readlog):
-    """When the binary can't be started after all, then it's reported, not raised."""
-    mock_core.host_run.side_effect = FileNotFoundError(2, "No such file")
-
-    assert apps.launch_app("settings", mock_core) is False
-    assert "systemsettings" in readlog().err
+@patch(
+    "easyspeak.plugins.apps.launch_app",
+    side_effect=FileNotFoundError(2, "No such file", "systemsettings"),
+)
+def test_handle_open_app_that_fails_to_start(mock_launch_app, mock_core, readlog):
+    """When the app can't be started after all, then say so instead of crashing."""
+    assert apps.handle("open settings", mock_core) is True
+    mock_core.speak.assert_called_once_with("Sorry, I couldn't start settings.")
+    log = readlog().err
+    assert "systemsettings" in log
+    assert "Traceback" not in log
 
 
 @patch("easyspeak.plugins.apps.find_app", return_value=(None, None))
