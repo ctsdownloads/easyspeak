@@ -23,6 +23,7 @@ for files in "$(dpkg-deb --contents "$deb")" "$(rpm --query --list --package "$r
         grep -q "/opt/easyspeak/models/parakeet/$name" <<<"$files" || { echo "  MISSING $name" >&2; exit 1; }
     done
     grep -q "/usr/share/doc/easyspeak-stt-parakeet/copyright" <<<"$files" || { echo "  MISSING copyright" >&2; exit 1; }
+    grep -q "/usr/share/doc/easyspeak-stt-parakeet/CC-BY-4.0.txt" <<<"$files" || { echo "  MISSING license" >&2; exit 1; }
 done
 
 echo "✔  Speech model package looks good."

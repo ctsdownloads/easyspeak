@@ -24,3 +24,5 @@ contents:
   dst: /opt/easyspeak/models/parakeet
 - src: ./packaging/copyright-stt-parakeet
   dst: /usr/share/doc/easyspeak-stt-parakeet/copyright
+- src: ./LICENSES/CC-BY-4.0.txt
+  dst: /usr/share/doc/easyspeak-stt-parakeet/CC-BY-4.0.txt

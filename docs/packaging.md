@@ -78,7 +78,8 @@ int8 ONNX model, which recognizes speech in 25 European languages and tells them
 apart by itself. It is one pack for every language, under
 `/opt/easyspeak/models/parakeet`, and the recognizer EasySpeak uses by default. The
 model is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); the package
-ships the attribution as `/usr/share/doc/easyspeak-stt-parakeet/copyright`.
+ships the attribution as `/usr/share/doc/easyspeak-stt-parakeet/copyright`, next
+to the full license text.
 
 ## Language
 

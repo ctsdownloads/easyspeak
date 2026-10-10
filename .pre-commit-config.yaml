@@ -12,6 +12,10 @@ repos:
   rev: v0.11.0.1
   hooks:
   - id: shellcheck
+- repo: https://github.com/fsfe/reuse-tool
+  rev: v6.2.0
+  hooks:
+  - id: reuse
 - repo: https://github.com/jorisroovers/gitlint
   rev: v0.19.1
   hooks:

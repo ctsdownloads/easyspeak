@@ -1,0 +1,22 @@
+version = 1
+SPDX-PackageName = "EasySpeak"
+SPDX-PackageSupplier = "Matt Hartley <matt@matthartley.com>"
+SPDX-PackageDownloadLocation = "https://github.com/ctsdownloads/easyspeak"
+
+[[annotations]]
+path = "**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Matt Hartley and the EasySpeak contributors"
+SPDX-License-Identifier = "GPL-3.0-only"
+
+[[annotations]]
+path = "packaging/copyright-stt-parakeet"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Matt Hartley and the EasySpeak contributors"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+[[annotations]]
+path = "tests/unit/core/dbus-introspect.dtd"
+precedence = "override"
+SPDX-FileCopyrightText = "2005 David A. Wheeler"
+SPDX-License-Identifier = "AFL-2.1 OR GPL-2.0-or-later"
