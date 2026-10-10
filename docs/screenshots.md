@@ -49,6 +49,20 @@ point reaches the very same extension settings — the panel GNOME's Extensions
 app exposes for EasySpeak, which also makes it **start on login** and opens
 **About EasySpeak**.
 
+## KDE Plasma
+
+![KDE Plasma 6.7.5 with Plasma's "Status and Notifications" popup open from the system tray, listing EasySpeak's microphone icon among the system icons; its context menu shows "Deactivate EasySpeak", "Help", "About EasySpeak" (hovered) and "Quit EasySpeak". Behind it, KWrite holds dictated text and EasySpeak's reply that the text is on the clipboard, ready to paste with Ctrl+V](media/kde-tray-icon-menu.png){ width="100%" }
+
+On KDE Plasma, EasySpeak sits in the system tray. While it listens, the icon
+waits among the hidden icons, behind the arrow in the tray; when it's asleep,
+it moves into the panel, where you can't miss it. Its menu offers the same
+entries as on GNOME: **Deactivate** or **Reactivate EasySpeak**, **Help**,
+**About EasySpeak**, and **Quit EasySpeak**.
+
+Dictation can't type on Plasma yet, so EasySpeak puts the text on the clipboard
+and tells you to paste it with Ctrl+V, as in KWrite above. See
+[Compatibility](compatibility.md) for what works on which desktop.
+
 ## Mouse grid
 
 ![A 3x3 numbered grid overlaying the GNOME Files window, with a red crosshair centered on cell 5](media/mouse-grid-files.png){ width="100%" }
