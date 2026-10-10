@@ -661,6 +661,26 @@ def test_handle_browser_command_exception(
     assert result is True
     captured = readlog()
     assert "Browser error" in captured.out
+    mock_core.speak.assert_called_once_with("Sorry, that didn't work in the browser.")
+
+
+@patch.object(browser, "browser_mode")
+def test_handle_open_browser_without_qutebrowser(mock_browser_mode, mock_core, readlog):
+    """When qutebrowser isn't installed then say so instead of crashing."""
+
+    def host_run(cmd, background=False, **kw):
+        if background:
+            raise FileNotFoundError(2, "No such file", "qutebrowser")
+        return Mock(returncode=1)
+
+    mock_core.host_run.side_effect = host_run
+
+    assert browser.handle("open browser", mock_core) is True
+    mock_core.speak.assert_called_once_with(
+        "Browser mode needs qutebrowser, which isn't installed."
+    )
+    assert not mock_browser_mode.called
+    assert "Traceback" not in readlog().err
 
 
 # Tests for the "only act when a browser is running" gate.

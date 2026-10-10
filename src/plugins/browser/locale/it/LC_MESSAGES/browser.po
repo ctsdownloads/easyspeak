@@ -24,6 +24,9 @@ msgstr "Blocco pubblicità attivato"
 msgid "Browser"
 msgstr "Browser"
 
+msgid "Browser mode needs qutebrowser, which isn't installed."
+msgstr "La modalità browser richiede qutebrowser, che non è installato."
+
 msgid "Closing browser."
 msgstr "Chiudo il browser."
 
@@ -69,6 +72,9 @@ msgstr "Cerco {query}."
 
 msgid "Software rendering on"
 msgstr "Rendering software attivato"
+
+msgid "Sorry, that didn't work in the browser."
+msgstr "Mi dispiace, nel browser non ha funzionato."
 
 msgid "The browser isn't running."
 msgstr "Il browser non è in esecuzione."
