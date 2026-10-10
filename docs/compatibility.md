@@ -20,7 +20,7 @@ replacement for that extension that doesn't exist yet.
 | Push-to-talk key | ✅ | ✅ |
 | Mouse grid | ✅ | ❌ |
 | Head tracking | ✅ | ❌ |
-| About dialog | ✅ | ✅[^about] |
+| About dialog | ✅ | ⚠️[^about] |
 | EasySpeak settings (e.g. start at login) | ✅ | ❌ |
 
 ✅ works · ⚠️ partly · ❌ not yet · — not applicable
@@ -31,8 +31,8 @@ replacement for that extension that doesn't exist yet.
 [^browser]: Pressing keys in browser mode ("press enter") needs GNOME.
 [^dictation]: The text can't be typed yet. It lands on the clipboard, ready to
     paste with Ctrl+V.
-[^about]: Needs GTK 4 and libadwaita. Without them, EasySpeak says its version
-    and shows the details in a notification.
+[^about]: Opens only if the optional GTK 4 and libadwaita are installed.
+    Otherwise EasySpeak says its version and shows the details in a notification.
 
 KDE Plasma support is new, so this table reflects a first test on Plasma 6. If you
 find something that works differently, please [report it][issues].
