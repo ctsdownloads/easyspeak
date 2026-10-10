@@ -29,6 +29,16 @@ def test_run(mock_easyspeak):
 
 
 @patch("easyspeak.core.main.EasySpeak")
+def test_run_ends_quietly_on_ctrl_c(mock_easyspeak, capsys):
+    """Ctrl+C while the models still load ends EasySpeak without a stack trace."""
+    mock_easyspeak.return_value.run.side_effect = KeyboardInterrupt
+
+    cli.run([])
+
+    assert "Stopped (Ctrl+C)." in capsys.readouterr().err
+
+
+@patch("easyspeak.core.main.EasySpeak")
 def test_run_language_overrides_the_environment(mock_easyspeak, monkeypatch):
     """--language sets EASYSPEAK_LANGUAGE before the app, and its config, load."""
     monkeypatch.setenv("EASYSPEAK_LANGUAGE", "en")

@@ -9,10 +9,13 @@ files and exit. All `EASYSPEAK_*` variables are listed in [`core.config`][core.c
 """
 
 import argparse
+import logging
 import os
 
 from . import log
 from .about import app_version
+
+logger = logging.getLogger(__name__)
 
 
 def parse_args(argv=None):
@@ -70,7 +73,8 @@ def run(argv=None):
     """Start the application, or run a one-shot subcommand and exit.
 
     `EasySpeak` is imported lazily so the one-shot subcommands work without the
-    audio stack (pyopen-wakeword, pyaudio, …) that `core.main` pulls in.
+    audio stack (pyopen-wakeword, pyaudio, …) that `core.main` pulls in. Ctrl+C
+    ends EasySpeak quietly even while its models are still loading.
     """
     args = parse_args(argv)
 
@@ -94,4 +98,7 @@ def run(argv=None):
 
     from .main import EasySpeak
 
-    EasySpeak().run()
+    try:
+        EasySpeak().run()
+    except KeyboardInterrupt:
+        logger.info("\nStopped (Ctrl+C).")
