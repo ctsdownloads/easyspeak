@@ -7588,9 +7588,7 @@ OS-level 'not listening' cue alongside our own muted glyph.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/core/tray.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-274">274</a></span>
-<span class="normal"><a href="#__codelineno-0-275">275</a></span>
-<span class="normal"><a href="#__codelineno-0-276">276</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-276">276</a></span>
 <span class="normal"><a href="#__codelineno-0-277">277</a></span>
 <span class="normal"><a href="#__codelineno-0-278">278</a></span>
 <span class="normal"><a href="#__codelineno-0-279">279</a></span>
@@ -7632,51 +7630,53 @@ OS-level 'not listening' cue alongside our own muted glyph.</p>
 <span class="normal"><a href="#__codelineno-0-315">315</a></span>
 <span class="normal"><a href="#__codelineno-0-316">316</a></span>
 <span class="normal"><a href="#__codelineno-0-317">317</a></span>
-<span class="normal"><a href="#__codelineno-0-318">318</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-274" name="__codelineno-0-274"></a><span class="k">def</span><span class="w"> </span><span class="nf">sleep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">release_mic</span><span class="p">,</span> <span class="n">acquire_mic</span><span class="p">,</span> <span class="n">announce</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="w">    </span><span class="sd">"""Release the mic and idle until reactivated, then greet and resume.</span>
-<a id="__codelineno-0-276" name="__codelineno-0-276"></a>
-<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">    Pushes the muted state first and refuses to sleep unless it lands:</span>
-<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="sd">    reactivation arrives via the tray (its menu or the Quick Settings</span>
-<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">    toggle), so releasing the mic while the indicator is missing (no</span>
-<a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">    extension, or no panel to show the icon) would strand the daemon with no</span>
-<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="sd">    way back. While asleep the muted state is re-asserted every</span>
-<a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="sd">    `MUTED_REPUSH_INTERVAL` seconds so the icon recovers if the panel or the</span>
-<a id="__codelineno-0-283" name="__codelineno-0-283"></a><span class="sd">    extension reloads (it would otherwise come back hidden).</span>
-<a id="__codelineno-0-284" name="__codelineno-0-284"></a>
-<a id="__codelineno-0-285" name="__codelineno-0-285"></a><span class="sd">    `announce` says whether to speak the deactivation confirmation: True for</span>
-<a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="sd">    a button mute, False for a voice "go to sleep" (the sleep plugin already</span>
-<a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="sd">    spoke, so speaking again would just repeat it). Reactivation always</span>
-<a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="sd">    greets, matching the startup greeting.</span>
-<a id="__codelineno-0-289" name="__codelineno-0-289"></a>
-<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="sd">    Freeing the stream also clears GNOME's privacy microphone indicator, an</span>
-<a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="sd">    OS-level 'not listening' cue alongside our own muted glyph.</span>
-<a id="__codelineno-0-292" name="__codelineno-0-292"></a><span class="sd">    """</span>
-<a id="__codelineno-0-293" name="__codelineno-0-293"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">STATE_MUTED</span><span class="p">):</span>
-<a id="__codelineno-0-294" name="__codelineno-0-294"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-<a id="__codelineno-0-295" name="__codelineno-0-295"></a>            <span class="s2">"Tray indicator unavailable; staying awake so you keep a way to "</span>
-<a id="__codelineno-0-296" name="__codelineno-0-296"></a>            <span class="s2">"reactivate."</span>
-<a id="__codelineno-0-297" name="__codelineno-0-297"></a>        <span class="p">)</span>
-<a id="__codelineno-0-298" name="__codelineno-0-298"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"I couldn't turn voice control off, so I'll keep listening."</span><span class="p">))</span>
-<a id="__codelineno-0-299" name="__codelineno-0-299"></a>        <span class="k">return</span> <span class="n">TrayAction</span><span class="o">.</span><span class="n">CONTINUE</span>
-<a id="__codelineno-0-300" name="__codelineno-0-300"></a>    <span class="n">release_mic</span><span class="p">()</span>
-<a id="__codelineno-0-301" name="__codelineno-0-301"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Muted; microphone released. Waiting for reactivation..."</span><span class="p">)</span>
-<a id="__codelineno-0-302" name="__codelineno-0-302"></a>    <span class="k">if</span> <span class="n">announce</span><span class="p">:</span>
-<a id="__codelineno-0-303" name="__codelineno-0-303"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Voice control turned off."</span><span class="p">))</span>
-<a id="__codelineno-0-304" name="__codelineno-0-304"></a>    <span class="n">next_repush</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">+</span> <span class="n">MUTED_REPUSH_INTERVAL</span>
-<a id="__codelineno-0-305" name="__codelineno-0-305"></a>    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-<a id="__codelineno-0-306" name="__codelineno-0-306"></a>        <span class="n">command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">take_command</span><span class="p">()</span>
-<a id="__codelineno-0-307" name="__codelineno-0-307"></a>        <span class="k">if</span> <span class="n">command</span> <span class="o">==</span> <span class="n">COMMAND_QUIT</span><span class="p">:</span>
-<a id="__codelineno-0-308" name="__codelineno-0-308"></a>            <span class="k">return</span> <span class="n">TrayAction</span><span class="o">.</span><span class="n">QUIT</span>
-<a id="__codelineno-0-309" name="__codelineno-0-309"></a>        <span class="k">if</span> <span class="n">command</span> <span class="o">==</span> <span class="n">COMMAND_UNMUTE</span><span class="p">:</span>
-<a id="__codelineno-0-310" name="__codelineno-0-310"></a>            <span class="n">acquire_mic</span><span class="p">()</span>
-<a id="__codelineno-0-311" name="__codelineno-0-311"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">STATE_LISTENING</span><span class="p">)</span>
-<a id="__codelineno-0-312" name="__codelineno-0-312"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Welcome! I'm ready."</span><span class="p">))</span>
-<a id="__codelineno-0-313" name="__codelineno-0-313"></a>            <span class="k">return</span> <span class="n">TrayAction</span><span class="o">.</span><span class="n">RESUME</span>
-<a id="__codelineno-0-314" name="__codelineno-0-314"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_run_menu_action</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
-<a id="__codelineno-0-315" name="__codelineno-0-315"></a>        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">next_repush</span><span class="p">:</span>
-<a id="__codelineno-0-316" name="__codelineno-0-316"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">STATE_MUTED</span><span class="p">)</span>
-<a id="__codelineno-0-317" name="__codelineno-0-317"></a>            <span class="n">next_repush</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">+</span> <span class="n">MUTED_REPUSH_INTERVAL</span>
-<a id="__codelineno-0-318" name="__codelineno-0-318"></a>        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">SLEEP_POLL_INTERVAL</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-318">318</a></span>
+<span class="normal"><a href="#__codelineno-0-319">319</a></span>
+<span class="normal"><a href="#__codelineno-0-320">320</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="k">def</span><span class="w"> </span><span class="nf">sleep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">release_mic</span><span class="p">,</span> <span class="n">acquire_mic</span><span class="p">,</span> <span class="n">announce</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="w">    </span><span class="sd">"""Release the mic and idle until reactivated, then greet and resume.</span>
+<a id="__codelineno-0-278" name="__codelineno-0-278"></a>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">    Pushes the muted state first and refuses to sleep unless it lands:</span>
+<a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">    reactivation arrives via the tray (its menu or the Quick Settings</span>
+<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="sd">    toggle), so releasing the mic while the indicator is missing (no</span>
+<a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="sd">    extension, or no panel to show the icon) would strand the daemon with no</span>
+<a id="__codelineno-0-283" name="__codelineno-0-283"></a><span class="sd">    way back. While asleep the muted state is re-asserted every</span>
+<a id="__codelineno-0-284" name="__codelineno-0-284"></a><span class="sd">    `MUTED_REPUSH_INTERVAL` seconds so the icon recovers if the panel or the</span>
+<a id="__codelineno-0-285" name="__codelineno-0-285"></a><span class="sd">    extension reloads (it would otherwise come back hidden).</span>
+<a id="__codelineno-0-286" name="__codelineno-0-286"></a>
+<a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="sd">    `announce` says whether to speak the deactivation confirmation: True for</span>
+<a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="sd">    a button mute, False for a voice "go to sleep" (the sleep plugin already</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289"></a><span class="sd">    spoke, so speaking again would just repeat it). Reactivation always</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="sd">    greets, matching the startup greeting.</span>
+<a id="__codelineno-0-291" name="__codelineno-0-291"></a>
+<a id="__codelineno-0-292" name="__codelineno-0-292"></a><span class="sd">    Freeing the stream also clears GNOME's privacy microphone indicator, an</span>
+<a id="__codelineno-0-293" name="__codelineno-0-293"></a><span class="sd">    OS-level 'not listening' cue alongside our own muted glyph.</span>
+<a id="__codelineno-0-294" name="__codelineno-0-294"></a><span class="sd">    """</span>
+<a id="__codelineno-0-295" name="__codelineno-0-295"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">STATE_MUTED</span><span class="p">):</span>
+<a id="__codelineno-0-296" name="__codelineno-0-296"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+<a id="__codelineno-0-297" name="__codelineno-0-297"></a>            <span class="s2">"Tray indicator unavailable; staying awake so you keep a way to "</span>
+<a id="__codelineno-0-298" name="__codelineno-0-298"></a>            <span class="s2">"reactivate."</span>
+<a id="__codelineno-0-299" name="__codelineno-0-299"></a>        <span class="p">)</span>
+<a id="__codelineno-0-300" name="__codelineno-0-300"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"I couldn't turn voice control off, so I'll keep listening."</span><span class="p">))</span>
+<a id="__codelineno-0-301" name="__codelineno-0-301"></a>        <span class="k">return</span> <span class="n">TrayAction</span><span class="o">.</span><span class="n">CONTINUE</span>
+<a id="__codelineno-0-302" name="__codelineno-0-302"></a>    <span class="n">release_mic</span><span class="p">()</span>
+<a id="__codelineno-0-303" name="__codelineno-0-303"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Muted; microphone released. Waiting for reactivation..."</span><span class="p">)</span>
+<a id="__codelineno-0-304" name="__codelineno-0-304"></a>    <span class="k">if</span> <span class="n">announce</span><span class="p">:</span>
+<a id="__codelineno-0-305" name="__codelineno-0-305"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Voice control turned off."</span><span class="p">))</span>
+<a id="__codelineno-0-306" name="__codelineno-0-306"></a>    <span class="n">next_repush</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">+</span> <span class="n">MUTED_REPUSH_INTERVAL</span>
+<a id="__codelineno-0-307" name="__codelineno-0-307"></a>    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+<a id="__codelineno-0-308" name="__codelineno-0-308"></a>        <span class="n">command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">take_command</span><span class="p">()</span>
+<a id="__codelineno-0-309" name="__codelineno-0-309"></a>        <span class="k">if</span> <span class="n">command</span> <span class="o">==</span> <span class="n">COMMAND_QUIT</span><span class="p">:</span>
+<a id="__codelineno-0-310" name="__codelineno-0-310"></a>            <span class="k">return</span> <span class="n">TrayAction</span><span class="o">.</span><span class="n">QUIT</span>
+<a id="__codelineno-0-311" name="__codelineno-0-311"></a>        <span class="k">if</span> <span class="n">command</span> <span class="o">==</span> <span class="n">COMMAND_UNMUTE</span><span class="p">:</span>
+<a id="__codelineno-0-312" name="__codelineno-0-312"></a>            <span class="n">acquire_mic</span><span class="p">()</span>
+<a id="__codelineno-0-313" name="__codelineno-0-313"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">STATE_LISTENING</span><span class="p">)</span>
+<a id="__codelineno-0-314" name="__codelineno-0-314"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Welcome! I'm ready."</span><span class="p">))</span>
+<a id="__codelineno-0-315" name="__codelineno-0-315"></a>            <span class="k">return</span> <span class="n">TrayAction</span><span class="o">.</span><span class="n">RESUME</span>
+<a id="__codelineno-0-316" name="__codelineno-0-316"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_run_menu_action</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+<a id="__codelineno-0-317" name="__codelineno-0-317"></a>        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">next_repush</span><span class="p">:</span>
+<a id="__codelineno-0-318" name="__codelineno-0-318"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">STATE_MUTED</span><span class="p">)</span>
+<a id="__codelineno-0-319" name="__codelineno-0-319"></a>            <span class="n">next_repush</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">+</span> <span class="n">MUTED_REPUSH_INTERVAL</span>
+<a id="__codelineno-0-320" name="__codelineno-0-320"></a>        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">SLEEP_POLL_INTERVAL</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7701,9 +7701,7 @@ OS-level 'not listening' cue alongside our own muted glyph.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/core/tray.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-320">320</a></span>
-<span class="normal"><a href="#__codelineno-0-321">321</a></span>
-<span class="normal"><a href="#__codelineno-0-322">322</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-322">322</a></span>
 <span class="normal"><a href="#__codelineno-0-323">323</a></span>
 <span class="normal"><a href="#__codelineno-0-324">324</a></span>
 <span class="normal"><a href="#__codelineno-0-325">325</a></span>
@@ -7721,27 +7719,29 @@ OS-level 'not listening' cue alongside our own muted glyph.</p>
 <span class="normal"><a href="#__codelineno-0-337">337</a></span>
 <span class="normal"><a href="#__codelineno-0-338">338</a></span>
 <span class="normal"><a href="#__codelineno-0-339">339</a></span>
-<span class="normal"><a href="#__codelineno-0-340">340</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-320" name="__codelineno-0-320"></a><span class="k">def</span><span class="w"> </span><span class="nf">set_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-<a id="__codelineno-0-321" name="__codelineno-0-321"></a><span class="w">    </span><span class="sd">"""Push the current display state to the panel indicator (best-effort)."""</span>
-<a id="__codelineno-0-322" name="__codelineno-0-322"></a>    <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span>
-<a id="__codelineno-0-323" name="__codelineno-0-323"></a>        <span class="s2">"gdbus"</span><span class="p">,</span>
-<a id="__codelineno-0-324" name="__codelineno-0-324"></a>        <span class="s2">"call"</span><span class="p">,</span>
-<a id="__codelineno-0-325" name="__codelineno-0-325"></a>        <span class="s2">"--session"</span><span class="p">,</span>
-<a id="__codelineno-0-326" name="__codelineno-0-326"></a>        <span class="s2">"--dest"</span><span class="p">,</span>
-<a id="__codelineno-0-327" name="__codelineno-0-327"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="p">,</span>
-<a id="__codelineno-0-328" name="__codelineno-0-328"></a>        <span class="s2">"--object-path"</span><span class="p">,</span>
-<a id="__codelineno-0-329" name="__codelineno-0-329"></a>        <span class="s2">"/org/easyspeak/Desktop"</span><span class="p">,</span>
-<a id="__codelineno-0-330" name="__codelineno-0-330"></a>        <span class="s2">"--method"</span><span class="p">,</span>
-<a id="__codelineno-0-331" name="__codelineno-0-331"></a>        <span class="s2">"org.easyspeak.Desktop.SetState"</span><span class="p">,</span>
-<a id="__codelineno-0-332" name="__codelineno-0-332"></a>        <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">),</span>
-<a id="__codelineno-0-333" name="__codelineno-0-333"></a>    <span class="p">]</span>
-<a id="__codelineno-0-334" name="__codelineno-0-334"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-335" name="__codelineno-0-335"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-<a id="__codelineno-0-336" name="__codelineno-0-336"></a>            <span class="n">cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">GDBUS_TIMEOUT</span>
-<a id="__codelineno-0-337" name="__codelineno-0-337"></a>        <span class="p">)</span>
-<a id="__codelineno-0-338" name="__codelineno-0-338"></a>        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
-<a id="__codelineno-0-339" name="__codelineno-0-339"></a>    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">):</span>
-<a id="__codelineno-0-340" name="__codelineno-0-340"></a>        <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># gdbus missing or a wedged bus</span>
+<span class="normal"><a href="#__codelineno-0-340">340</a></span>
+<span class="normal"><a href="#__codelineno-0-341">341</a></span>
+<span class="normal"><a href="#__codelineno-0-342">342</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-322" name="__codelineno-0-322"></a><span class="k">def</span><span class="w"> </span><span class="nf">set_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<a id="__codelineno-0-323" name="__codelineno-0-323"></a><span class="w">    </span><span class="sd">"""Push the current display state to the panel indicator (best-effort)."""</span>
+<a id="__codelineno-0-324" name="__codelineno-0-324"></a>    <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-0-325" name="__codelineno-0-325"></a>        <span class="s2">"gdbus"</span><span class="p">,</span>
+<a id="__codelineno-0-326" name="__codelineno-0-326"></a>        <span class="s2">"call"</span><span class="p">,</span>
+<a id="__codelineno-0-327" name="__codelineno-0-327"></a>        <span class="s2">"--session"</span><span class="p">,</span>
+<a id="__codelineno-0-328" name="__codelineno-0-328"></a>        <span class="s2">"--dest"</span><span class="p">,</span>
+<a id="__codelineno-0-329" name="__codelineno-0-329"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="p">,</span>
+<a id="__codelineno-0-330" name="__codelineno-0-330"></a>        <span class="s2">"--object-path"</span><span class="p">,</span>
+<a id="__codelineno-0-331" name="__codelineno-0-331"></a>        <span class="s2">"/org/easyspeak/Desktop"</span><span class="p">,</span>
+<a id="__codelineno-0-332" name="__codelineno-0-332"></a>        <span class="s2">"--method"</span><span class="p">,</span>
+<a id="__codelineno-0-333" name="__codelineno-0-333"></a>        <span class="s2">"org.easyspeak.Desktop.SetState"</span><span class="p">,</span>
+<a id="__codelineno-0-334" name="__codelineno-0-334"></a>        <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">),</span>
+<a id="__codelineno-0-335" name="__codelineno-0-335"></a>    <span class="p">]</span>
+<a id="__codelineno-0-336" name="__codelineno-0-336"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-337" name="__codelineno-0-337"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+<a id="__codelineno-0-338" name="__codelineno-0-338"></a>            <span class="n">cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">GDBUS_TIMEOUT</span>
+<a id="__codelineno-0-339" name="__codelineno-0-339"></a>        <span class="p">)</span>
+<a id="__codelineno-0-340" name="__codelineno-0-340"></a>        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
+<a id="__codelineno-0-341" name="__codelineno-0-341"></a>    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">):</span>
+<a id="__codelineno-0-342" name="__codelineno-0-342"></a>        <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># gdbus missing or a wedged bus</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7772,9 +7772,7 @@ in a race), rather than being silently dropped.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/core/tray.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-342">342</a></span>
-<span class="normal"><a href="#__codelineno-0-343">343</a></span>
-<span class="normal"><a href="#__codelineno-0-344">344</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-344">344</a></span>
 <span class="normal"><a href="#__codelineno-0-345">345</a></span>
 <span class="normal"><a href="#__codelineno-0-346">346</a></span>
 <span class="normal"><a href="#__codelineno-0-347">347</a></span>
@@ -7791,26 +7789,28 @@ in a race), rather than being silently dropped.</p>
 <span class="normal"><a href="#__codelineno-0-358">358</a></span>
 <span class="normal"><a href="#__codelineno-0-359">359</a></span>
 <span class="normal"><a href="#__codelineno-0-360">360</a></span>
-<span class="normal"><a href="#__codelineno-0-361">361</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-342" name="__codelineno-0-342"></a><span class="k">def</span><span class="w"> </span><span class="nf">take_command</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-343" name="__codelineno-0-343"></a><span class="w">    </span><span class="sd">"""Return and clear the latest menu command, or None if none is pending.</span>
-<a id="__codelineno-0-344" name="__codelineno-0-344"></a>
-<a id="__codelineno-0-345" name="__codelineno-0-345"></a><span class="sd">    Reads the one-shot control file the extension writes, then deletes it so</span>
-<a id="__codelineno-0-346" name="__codelineno-0-346"></a><span class="sd">    each menu click fires exactly once. A missing file is the common case</span>
-<a id="__codelineno-0-347" name="__codelineno-0-347"></a><span class="sd">    (every idle iteration), so it's checked cheaply first. The delete is</span>
-<a id="__codelineno-0-348" name="__codelineno-0-348"></a><span class="sd">    best-effort and kept separate from the read: a command that was read</span>
-<a id="__codelineno-0-349" name="__codelineno-0-349"></a><span class="sd">    successfully is returned even if the unlink fails (e.g. the file vanished</span>
-<a id="__codelineno-0-350" name="__codelineno-0-350"></a><span class="sd">    in a race), rather than being silently dropped.</span>
-<a id="__codelineno-0-351" name="__codelineno-0-351"></a><span class="sd">    """</span>
-<a id="__codelineno-0-352" name="__codelineno-0-352"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-353" name="__codelineno-0-353"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-<a id="__codelineno-0-354" name="__codelineno-0-354"></a>            <span class="k">return</span> <span class="kc">None</span>
-<a id="__codelineno-0-355" name="__codelineno-0-355"></a>        <span class="n">command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control_file</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-<a id="__codelineno-0-356" name="__codelineno-0-356"></a>    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-<a id="__codelineno-0-357" name="__codelineno-0-357"></a>        <span class="k">return</span> <span class="kc">None</span>
-<a id="__codelineno-0-358" name="__codelineno-0-358"></a>    <span class="c1"># already gone or a transient error; the command still stands</span>
-<a id="__codelineno-0-359" name="__codelineno-0-359"></a>    <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">suppress</span><span class="p">(</span><span class="ne">OSError</span><span class="p">):</span>
-<a id="__codelineno-0-360" name="__codelineno-0-360"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_control_file</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
-<a id="__codelineno-0-361" name="__codelineno-0-361"></a>    <span class="k">return</span> <span class="n">command</span> <span class="ow">or</span> <span class="kc">None</span>
+<span class="normal"><a href="#__codelineno-0-361">361</a></span>
+<span class="normal"><a href="#__codelineno-0-362">362</a></span>
+<span class="normal"><a href="#__codelineno-0-363">363</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-344" name="__codelineno-0-344"></a><span class="k">def</span><span class="w"> </span><span class="nf">take_command</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-0-345" name="__codelineno-0-345"></a><span class="w">    </span><span class="sd">"""Return and clear the latest menu command, or None if none is pending.</span>
+<a id="__codelineno-0-346" name="__codelineno-0-346"></a>
+<a id="__codelineno-0-347" name="__codelineno-0-347"></a><span class="sd">    Reads the one-shot control file the extension writes, then deletes it so</span>
+<a id="__codelineno-0-348" name="__codelineno-0-348"></a><span class="sd">    each menu click fires exactly once. A missing file is the common case</span>
+<a id="__codelineno-0-349" name="__codelineno-0-349"></a><span class="sd">    (every idle iteration), so it's checked cheaply first. The delete is</span>
+<a id="__codelineno-0-350" name="__codelineno-0-350"></a><span class="sd">    best-effort and kept separate from the read: a command that was read</span>
+<a id="__codelineno-0-351" name="__codelineno-0-351"></a><span class="sd">    successfully is returned even if the unlink fails (e.g. the file vanished</span>
+<a id="__codelineno-0-352" name="__codelineno-0-352"></a><span class="sd">    in a race), rather than being silently dropped.</span>
+<a id="__codelineno-0-353" name="__codelineno-0-353"></a><span class="sd">    """</span>
+<a id="__codelineno-0-354" name="__codelineno-0-354"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-355" name="__codelineno-0-355"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+<a id="__codelineno-0-356" name="__codelineno-0-356"></a>            <span class="k">return</span> <span class="kc">None</span>
+<a id="__codelineno-0-357" name="__codelineno-0-357"></a>        <span class="n">command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control_file</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<a id="__codelineno-0-358" name="__codelineno-0-358"></a>    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+<a id="__codelineno-0-359" name="__codelineno-0-359"></a>        <span class="k">return</span> <span class="kc">None</span>
+<a id="__codelineno-0-360" name="__codelineno-0-360"></a>    <span class="c1"># already gone or a transient error; the command still stands</span>
+<a id="__codelineno-0-361" name="__codelineno-0-361"></a>    <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">suppress</span><span class="p">(</span><span class="ne">OSError</span><span class="p">):</span>
+<a id="__codelineno-0-362" name="__codelineno-0-362"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_control_file</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+<a id="__codelineno-0-363" name="__codelineno-0-363"></a>    <span class="k">return</span> <span class="n">command</span> <span class="ow">or</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
