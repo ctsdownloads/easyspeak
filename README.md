@@ -4,7 +4,7 @@ Voice control for Linux desktops. Fully local, no cloud, Wayland-native.
 
 Say "Hey Jarvis" and control your desktop with your voice.
 
-[![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](https://github.com/ctsdownloads/easyspeak/blob/main/LICENSE)
+[![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](https://github.com/ctsdownloads/easyspeak/blob/main/LICENSES/GPL-3.0-only.txt)
 [![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)](https://easyspeak.dev/latest/installation/)
 [![Desktop](https://img.shields.io/badge/desktop-GNOME%20%7C%20Wayland-green.svg)](https://easyspeak.dev/latest/how-it-works/)
 [![Status](https://img.shields.io/badge/status-Alpha-orange.svg)](https://github.com/ctsdownloads/easyspeak/releases)
@@ -12,6 +12,7 @@ Say "Hey Jarvis" and control your desktop with your voice.
 [![Safety](https://github.com/ctsdownloads/easyspeak/actions/workflows/safety.yml/badge.svg)](https://github.com/ctsdownloads/easyspeak/actions/workflows/safety.yml)
 [![Release](https://github.com/ctsdownloads/easyspeak/actions/workflows/release.yml/badge.svg)](https://github.com/ctsdownloads/easyspeak/actions/workflows/release.yml)
 [![Docs](https://github.com/ctsdownloads/easyspeak/actions/workflows/docs.yml/badge.svg)](https://github.com/ctsdownloads/easyspeak/actions/workflows/docs.yml)
+[![REUSE status](https://api.reuse.software/badge/github.com/ctsdownloads/easyspeak)](https://api.reuse.software/info/github.com/ctsdownloads/easyspeak)
 
 > ⚠️ **Early development.** This project works but is not polished. Expect bugs, incomplete docs, and changes without notice.
 

@@ -41,7 +41,7 @@ contents:
 - src: ../easyspeak-extension-refresh.service
   dst: /usr/lib/systemd/user/gnome-session-pre.target.wants/easyspeak-extension-refresh.service
   type: symlink
-- src: ./LICENSE
+- src: ./LICENSES/GPL-3.0-only.txt
   dst: /usr/share/doc/easyspeak/LICENSE
 
 overrides:

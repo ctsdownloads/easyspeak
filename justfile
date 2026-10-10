@@ -52,7 +52,7 @@ lint-js *args:
 lint-yaml *args:
     git ls-files '*.yml' '*.yaml' | xargs uvx yamllint -s {{ args }}
 
-# Run the prek pre-commit hooks (file hygiene + shellcheck) over all files
+# Run the prek pre-commit hooks (file hygiene, shellcheck, REUSE) over all files
 [group('codestyle')]
 precommit *args=('run --all-files'):
     uvx prek {{ args }}

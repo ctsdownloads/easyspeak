@@ -7,7 +7,7 @@ name = "easyspeak-linux"
 dynamic = ["version"]
 description = "Voice control for Linux desktops. Fully local, no cloud, Wayland-native."
 license = "GPL-3.0-only"
-license-files = ["LICENSE"]
+license-files = ["LICENSES/GPL-3.0-only.txt"]
 authors = [
   {name = "Matt Hartley", email = "matt@matthartley.com"},
 ]
@@ -138,7 +138,7 @@ addopts = "--ignore=tests/acceptance --ignore=tests/integration"
 select = ["ALL"]
 ignore = [
   "COM812",  # missing-trailing-comma: formatter-owned; ruff warns if left enabled
-  "CPY001",  # no per-file copyright headers; the GPL-3.0 licence lives in LICENSE
+  "CPY001",  # no per-file copyright headers; REUSE.toml declares them centrally
   "ANN",     # type annotations not enforced project-wide; mypy covers used types
   "S603", "S607",  # PATH-resolved subprocess (piper, wl-copy, ...) is how the daemon works
   "PLC0415", # imports inside functions lazily load optional deps (cv2, ...)

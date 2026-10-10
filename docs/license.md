@@ -1,8 +1,8 @@
 # License
 
 EasySpeak is licensed under the **GNU General Public License v3.0**.
-The full text is reproduced below; see the `LICENSE` file at the repository
-root for the original.
+The full text is reproduced below; see `LICENSES/GPL-3.0-only.txt` in the
+repository for the original.
 
 ## Third-party models
 
@@ -23,5 +23,5 @@ under their own licenses. The About window lists them too.
 ## GNU General Public License
 
 ```text
---8<-- "LICENSE"
+--8<-- "LICENSES/GPL-3.0-only.txt"
 ```
