@@ -729,7 +729,12 @@ def handle(cmd, core):
         if core.in_browser_mode:
             return True  # already there; don't stack a second one
         if not _qutebrowser_running(core):
-            core.host_run(["qutebrowser"], background=True, clean_env=True)
+            try:
+                core.host_run(["qutebrowser"], background=True, clean_env=True)
+            except OSError as exc:
+                logger.warning("Couldn't start qutebrowser: %s", exc)
+                core.speak(_("Browser mode needs qutebrowser, which isn't installed."))
+                return True
         browser_mode(core)
         return True
 
@@ -745,6 +750,7 @@ def handle(cmd, core):
             return True
     except Exception:
         logger.exception("  ! Browser error")
+        core.speak(_("Sorry, that didn't work in the browser."))
         return True
 
     return None

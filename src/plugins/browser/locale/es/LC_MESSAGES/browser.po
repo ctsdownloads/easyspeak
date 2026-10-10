@@ -24,6 +24,9 @@ msgstr "Bloqueo de anuncios activado"
 msgid "Browser"
 msgstr "Navegador"
 
+msgid "Browser mode needs qutebrowser, which isn't installed."
+msgstr "El modo navegador necesita qutebrowser, que no está instalado."
+
 msgid "Closing browser."
 msgstr "Cierro el navegador."
 
@@ -69,6 +72,9 @@ msgstr "Busco {query}."
 
 msgid "Software rendering on"
 msgstr "Renderizado por software activado"
+
+msgid "Sorry, that didn't work in the browser."
+msgstr "Lo siento, eso no ha funcionado en el navegador."
 
 msgid "The browser isn't running."
 msgstr "El navegador no está en ejecución."
