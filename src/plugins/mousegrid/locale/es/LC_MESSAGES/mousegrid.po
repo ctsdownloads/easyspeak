@@ -36,6 +36,11 @@ msgstr "Cuadrícula cerrada"
 msgid "Holding"
 msgstr "Manteniendo"
 
+msgid "I couldn't show the grid. Is the EasySpeak extension enabled?"
+msgstr ""
+"No he podido mostrar la cuadrícula. ¿Está activada la extensión de "
+"EasySpeak?"
+
 msgid "Middle clicked"
 msgstr "Clic central"
 
@@ -44,6 +49,9 @@ msgstr "Clic derecho"
 
 msgid "Scrolled"
 msgstr "Desplazado"
+
+msgid "The mouse grid only works on GNOME so far."
+msgstr "Por ahora, la cuadrícula del ratón solo funciona en GNOME."
 
 msgid "again - reopen grid at last position"
 msgstr "again - reabrir la cuadrícula en la última posición"

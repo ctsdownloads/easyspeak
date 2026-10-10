@@ -36,6 +36,11 @@ msgstr "Raster geschlossen"
 msgid "Holding"
 msgstr "Halte"
 
+msgid "I couldn't show the grid. Is the EasySpeak extension enabled?"
+msgstr ""
+"Ich konnte das Raster nicht anzeigen. Ist die EasySpeak-Erweiterung "
+"aktiviert?"
+
 msgid "Middle clicked"
 msgstr "Mittelklick"
 
@@ -44,6 +49,9 @@ msgstr "Rechtsklick"
 
 msgid "Scrolled"
 msgstr "Gescrollt"
+
+msgid "The mouse grid only works on GNOME so far."
+msgstr "Das Mausraster funktioniert bisher nur unter GNOME."
 
 msgid "again - reopen grid at last position"
 msgstr "again - Raster an letzter Position wieder öffnen"

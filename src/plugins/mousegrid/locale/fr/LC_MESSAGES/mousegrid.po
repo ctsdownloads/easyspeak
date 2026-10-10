@@ -36,6 +36,11 @@ msgstr "Grille fermée"
 msgid "Holding"
 msgstr "Je maintiens"
 
+msgid "I couldn't show the grid. Is the EasySpeak extension enabled?"
+msgstr ""
+"Je n'ai pas pu afficher la grille. L'extension EasySpeak est-elle activée"
+" ?"
+
 msgid "Middle clicked"
 msgstr "Clic du milieu"
 
@@ -44,6 +49,9 @@ msgstr "Clic droit"
 
 msgid "Scrolled"
 msgstr "Défilé"
+
+msgid "The mouse grid only works on GNOME so far."
+msgstr "Pour l'instant, la grille de la souris ne fonctionne que sous GNOME."
 
 msgid "again - reopen grid at last position"
 msgstr "again - rouvrir la grille à la dernière position"
