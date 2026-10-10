@@ -79,7 +79,6 @@ sudo dnf install \
   wireplumber \
   at-spi2-core \
   python3-gobject \
-  libadwaita \
   qutebrowser \
   glib2 \
   ffmpeg-free \
@@ -97,11 +96,14 @@ insertion is silently ignored by Chromium-based applications — they accept the
 call, report success, and discard the text. Without `wl-clipboard`, dictation
 falls back to that path and quietly does nothing in a browser.
 
-`python3-gobject` and `libadwaita` power the tray menu's **About EasySpeak**
-dialog. They ship with any GNOME desktop, so they're usually already present.
-On other desktops you can leave out `libadwaita`: EasySpeak then tells you its
-version and shows the details in a notification instead. `python3-gobject` is
-still needed for dictation.
+`python3-gobject` is needed for dictation. The tray menu's **About EasySpeak**
+dialog also needs `libadwaita`, which ships with any GNOME desktop. Elsewhere it's
+optional: without it, EasySpeak tells you its version and shows the details in a
+notification instead. For the graphical dialog on other desktops, install it too:
+
+```bash
+sudo dnf install libadwaita
+```
 
 Optionally, `sudo dnf install python3-adblock` gives qutebrowser Brave's
 element-level ad blocker. EasySpeak configures the browser to use it when it is
