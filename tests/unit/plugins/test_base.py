@@ -87,6 +87,22 @@ def test_handle_help_commands(mock_show_help, mock_core, command, expected_retur
 
 
 @pytest.mark.parametrize(
+    "command",
+    [
+        "open the about dialog",
+        "Open the About box",
+        "about easyspeak",
+        "jarvis about easy speak",
+    ],
+)
+def test_handle_about_commands(mock_core, command):
+    """An About request confirms out loud and opens the About dialog."""
+    assert base.handle(command, mock_core) is True
+    mock_core.speak.assert_called_once_with("Opening the About dialog.")
+    mock_core.tray.open_about.assert_called_once()
+
+
+@pytest.mark.parametrize(
     ["command"],
     [
         ["open firefox"],

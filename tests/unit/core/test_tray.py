@@ -299,7 +299,7 @@ class TestMenuActions:
     )
     @patch("easyspeak.core.tray.subprocess.Popen")
     def test_about_uses_the_pygobject_interpreter_when_set(self, mock_popen):
-        """The About window needs GTK4/libadwaita, so it reuses the PyGObject
+        """The About dialog needs GTK4/libadwaita, so it reuses the PyGObject
         interpreter the AT-SPI helper runs in when EASYSPEAK_ATSPI_PYTHON is set.
         """
         self._started(mock_popen)
@@ -327,8 +327,7 @@ class TestMenuActions:
                 assert tray.poll(Mock(), Mock()) is TrayAction.CONTINUE
 
         assert mock_run.call_args.args[0][0] == "paplay"
-        tray._speak.assert_called_once()
-        assert "About window" in tray._speak.call_args.args[0]
+        tray._speak.assert_called_once_with("Sorry, I couldn't open the About dialog.")
 
     @patch("easyspeak.core.tray.subprocess.Popen")
     def test_help_does_not_release_the_mic(self, mock_popen):
@@ -370,7 +369,9 @@ class TestMenuActions:
 
         assert tray.poll(Mock(), Mock()) is TrayAction.CONTINUE
         assert mock_run.call_args.args[0][0] == "paplay"
-        tray._speak.assert_called_once()
+        tray._speak.assert_called_once_with(
+            "Sorry, I couldn't open the documentation page."
+        )
 
 
 class TestLifecycleHooks:
@@ -396,7 +397,7 @@ class TestLifecycleHooks:
     @patch("easyspeak.core.tray.subprocess.run")
     def test_started_discards_a_stale_command(self, mock_run):
         """A command left in the control file before startup is dropped, so it
-        can't fire (e.g. pop the About window) the moment polling begins.
+        can't fire (e.g. pop the About dialog) the moment polling begins.
         """
         mock_run.return_value = Mock(returncode=0)
         tray = Tray()

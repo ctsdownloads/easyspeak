@@ -41,7 +41,7 @@ const ABOUT = {
 };
 
 // The models EasySpeak ships or fetches, under their own licenses; the same
-// list as core/about.py, which the daemon's About window shows.
+// list as core/about.py, which the daemon's About dialog shows.
 const LICENSE_URLS = {
     'CC-BY-4.0': 'https://creativecommons.org/licenses/by/4.0/',
     'CC-BY-SA-4.0': 'https://creativecommons.org/licenses/by-sa/4.0/',

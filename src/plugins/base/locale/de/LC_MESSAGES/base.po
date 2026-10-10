@@ -30,6 +30,9 @@ msgstr "Modi nehmen Befehle jetzt direkt entgegen."
 msgid "Modes now wait for the wake word."
 msgstr "Modi warten jetzt auf das Aktivierungswort."
 
+msgid "Opening the About dialog."
+msgstr "Der Info-Dialog wird geöffnet."
+
 msgid "exit EasySpeak"
 msgstr "EasySpeak beenden"
 
@@ -41,3 +44,6 @@ msgstr "Modi nehmen Befehle wieder direkt entgegen"
 
 msgid "modes wait for the wake word each command"
 msgstr "Modi warten vor jedem Befehl auf das Aktivierungswort"
+
+msgid "show the About dialog"
+msgstr "den Info-Dialog anzeigen"

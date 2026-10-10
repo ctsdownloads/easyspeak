@@ -1,4 +1,4 @@
-"""Tests for the standalone About window's metadata (core.about).
+"""Tests for the standalone About dialog's metadata (core.about).
 
 The libadwaita UI itself can only run on a live GNOME session with a display,
 so it's excluded from coverage; these cover the gi-free parts: the version
@@ -30,7 +30,7 @@ class TestAppVersion:
 
 
 class TestCredits:
-    """Sanity checks on the metadata the About window advertises."""
+    """Sanity checks on the metadata the About dialog advertises."""
 
     def test_lists_author_and_contributors(self):
         """The author headlines the developers; contributors are listed too."""

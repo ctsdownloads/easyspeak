@@ -30,6 +30,9 @@ msgstr "Le modalità ora accettano i comandi direttamente."
 msgid "Modes now wait for the wake word."
 msgstr "Le modalità ora attendono la parola di attivazione."
 
+msgid "Opening the About dialog."
+msgstr "Apro la finestra Informazioni."
+
 msgid "exit EasySpeak"
 msgstr "esce da EasySpeak"
 
@@ -41,3 +44,6 @@ msgstr "le modalità accettano di nuovo i comandi direttamente"
 
 msgid "modes wait for the wake word each command"
 msgstr "le modalità attendono la parola di attivazione a ogni comando"
+
+msgid "show the About dialog"
+msgstr "mostra la finestra Informazioni"

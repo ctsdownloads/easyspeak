@@ -7,7 +7,7 @@ repository for the original.
 ## Third-party models
 
 The speech models EasySpeak ships in its packages, or fetches for you, come
-under their own licenses. The About window lists them too.
+under their own licenses. The About dialog lists them too.
 
 | Model | Owner | License |
 |-------|-------|---------|

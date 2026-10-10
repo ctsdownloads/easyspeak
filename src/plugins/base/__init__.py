@@ -1,4 +1,4 @@
-"""Base Plugin - Help and Exit."""
+"""Base Plugin - Help, About and Exit."""
 
 from easyspeak.core.i18n import translator
 from easyspeak.core.vocabulary import Vocabulary
@@ -8,10 +8,11 @@ vocab = Vocabulary(__file__)
 
 NAME = "base"
 PRIORITY = 100  # the catch-all for help and exit routes last
-DESCRIPTION = "Help and exit commands"
+DESCRIPTION = "Help, About and exit commands"
 
 COMMANDS = [
     f"{vocab.say('help', limit=1)} - " + _("list all commands"),
+    f"{vocab.say('about', limit=1)} - " + _("show the About dialog"),
     f"{vocab.say('require_wake_word', limit=1)} - "
     + _("modes wait for the wake word each command"),
     f"{vocab.say('free_listening', limit=1)} - "
@@ -29,10 +30,10 @@ def setup(c):
 
 
 def handle(cmd, core):
-    """Handle the help and exit commands; return None to pass others through.
+    """Handle the help, About and exit commands; return None to pass others through.
 
-    Returns False to signal the daemon to exit, True if help was shown, or None when the
-    command is for another plugin.
+    Returns False to signal the daemon to exit, True if the command was handled, or
+    None when the command is for another plugin.
     """
     cmd_lower = cmd.lower().strip()
 
@@ -54,6 +55,11 @@ def handle(cmd, core):
 
     if vocab.says(cmd_lower, "help"):
         show_help(core)
+        return True
+
+    if vocab.says(cmd_lower, "about"):
+        core.speak(_("Opening the About dialog."))
+        core.tray.open_about()
         return True
 
     return None  # Not handled
