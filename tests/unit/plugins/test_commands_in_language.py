@@ -47,9 +47,30 @@ def test_base_about_in_every_language(language, command, mock_core, monkeypatch)
 
 
 @pytest.mark.usefixtures("german")
-@pytest.mark.parametrize("command", ["beenden", "jarvis beenden", "quit"])
+@pytest.mark.parametrize(
+    "command",
+    ["beenden", "jarvis beenden", "anwendung beenden", "easyspeak schließen", "quit"],
+)
 def test_base_exit(command, mock_core):
     """ "Beenden" at the end of a command exits; "quit tracking" would not."""
+    assert base.handle(command, mock_core) is False
+
+
+@pytest.mark.usefixtures("german")
+@pytest.mark.parametrize(
+    ("language", "command"),
+    [
+        ("it", "chiudi l'applicazione"),
+        ("fr", "ferme l'application"),
+        ("es", "cierra la aplicación"),
+    ],
+)
+def test_base_exit_the_application_in_every_language(
+    language, command, mock_core, monkeypatch
+):
+    """Asking to close the application ends EasySpeak in each shipped language."""
+    monkeypatch.setattr(base, "vocab", Vocabulary(base.__file__, language=language))
+
     assert base.handle(command, mock_core) is False
 
 

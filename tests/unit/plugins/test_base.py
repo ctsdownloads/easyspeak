@@ -22,6 +22,11 @@ def test_setup(mock_core):
         ["bye", False],
         ["EXIT", False],
         ["QUIT", False],
+        ["exit the application", False],
+        ["please stop the application", False],
+        ["close the app", False],
+        ["quit easyspeak", False],
+        ["stop easy speak", False],
     ],
 )
 def test_handle_exit_commands(mock_core, command, expected_return):

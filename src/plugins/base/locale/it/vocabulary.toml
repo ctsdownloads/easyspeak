@@ -4,6 +4,6 @@
 [commands]
 require_wake_word = ["richiedi la parola di attivazione", "parola di attivazione obbligatoria"]
 free_listening = ["ascolto libero"]
-exit = ["esci", "arrivederci", "ciao", "termina"]
+exit = ["esci", "arrivederci", "ciao", "termina", "chiudi l'applicazione", "chiudi easyspeak", "esci dall'applicazione", "esci da easyspeak", "ferma l'applicazione", "ferma easyspeak"]
 help = ["aiuto", "cosa sai fare"]
 about = ["informazioni su easyspeak", "informazioni su easy speak", "apri le informazioni", "finestra informazioni", "finestra delle informazioni"]
