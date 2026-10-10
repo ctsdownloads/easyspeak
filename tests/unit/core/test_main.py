@@ -1952,16 +1952,24 @@ class TestOpenStream:
         assert easy.stream is stream
 
     def test_open_stream_no_device_exits_cleanly(self):
-        """A missing capture device exits with a message, not a raw traceback."""
+        """A missing capture device exits with a message, not a raw traceback.
+
+        The message is spoken and played in full before the exit.
+        """
         easy = EasySpeak()
         easy.audio = Mock()
         easy.audio.open.side_effect = OSError(-9996, "Invalid input device")
+        easy.speech = Mock()
 
         with pytest.raises(SystemExit) as exc_info:
             easy._open_stream()
 
         assert exc_info.value.code == 1
         assert easy.stream is None
+        easy.speech.speak.assert_called_once_with(
+            "I can't find a microphone, so I have to stop."
+        )
+        easy.speech.drain.assert_called_once()
 
 
 class TestWaitForWake:

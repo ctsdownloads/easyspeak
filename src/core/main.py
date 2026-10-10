@@ -356,7 +356,9 @@ class EasySpeak:
         intact. When there is no capture device at all PortAudio raises a bare OSError
         (e.g. errno -9996); surface that as an actionable message instead of a raw
         traceback, since it commonly means a headless host such as WSL with no
-        microphone bridged in.
+        microphone bridged in. The user hears it too, before the exit: they may have
+        woken EasySpeak from the tray after unplugging the microphone, with no terminal
+        in sight.
         """
         try:
             with suppressed_c_stderr():
@@ -374,6 +376,8 @@ class EasySpeak:
                 "missing under WSL, which bridges no microphone by default.",
                 exc,
             )
+            self.speak(_("I can't find a microphone, so I have to stop."))
+            self.speech.drain()
             raise SystemExit(1) from exc
 
     def _close_stream(self):
