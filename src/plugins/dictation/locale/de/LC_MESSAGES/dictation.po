@@ -27,6 +27,13 @@ msgstr "Fertig"
 msgid "Editing: backspace, backspace five, scratch that"
 msgstr "Bearbeiten: Rücktaste, Rücktaste fünf, das streichen"
 
+msgid ""
+"I can't type on this desktop yet. The text is on the clipboard, paste it "
+"with Control V."
+msgstr ""
+"Auf diesem Desktop kann ich noch nicht tippen. Der Text ist in der "
+"Zwischenablage, füge ihn mit Steuerung V ein."
+
 msgid "Keys: enter, tab, escape, page up, page down, press down five"
 msgstr "Tasten: Enter, Tab, Escape, Bild hoch, Bild runter, drücke runter fünf"
 

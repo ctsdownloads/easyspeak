@@ -27,6 +27,13 @@ msgstr "Hecho"
 msgid "Editing: backspace, backspace five, scratch that"
 msgstr "Edición: retroceso, retroceso cinco, borra eso"
 
+msgid ""
+"I can't type on this desktop yet. The text is on the clipboard, paste it "
+"with Control V."
+msgstr ""
+"Todavía no puedo escribir en este escritorio. El texto está en el "
+"portapapeles, pégalo con Control V."
+
 msgid "Keys: enter, tab, escape, page up, page down, press down five"
 msgstr "Teclas: intro, tab, escape, página arriba, página abajo, pulsa abajo cinco"
 

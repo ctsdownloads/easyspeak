@@ -170,6 +170,7 @@ def setup(c):
 INSERTED = "inserted"
 NO_FOCUS = "no_focus"
 BACKEND_ERROR = "backend_error"
+NO_KEYSTROKES = "no_keystrokes"
 
 ATSPI_HELPER = str(Path(__file__).with_name("_atspi_insert.py"))
 
@@ -490,12 +491,15 @@ def insert_text(text):
 
     try:
         mediakeys.tap_chord(chord)
-    except Exception:
+    except mediakeys.RemoteDesktopUnavailableError as exc:
         logger.warning(
-            "Could not send the paste keystroke. Dictation needs GNOME's "
-            "RemoteDesktop interface, which this session doesn't provide.",
-            exc_info=True,
+            "Could not send the paste keystroke (%s). Dictation needs GNOME's "
+            "RemoteDesktop interface, which this desktop doesn't provide.",
+            exc,
         )
+        return NO_KEYSTROKES
+    except Exception:
+        logger.warning("Could not send the paste keystroke.", exc_info=True)
         return BACKEND_ERROR
 
     logger.debug("pasted into %s", target or "an unknown window")
@@ -700,6 +704,14 @@ def _dictate_utterance(core, text):
         core.dictation_last_length = len(formatted)
     if status == NO_FOCUS:
         core.speak(_("No text field focused."))
+        return True
+    if status == NO_KEYSTROKES:
+        core.speak(
+            _(
+                "I can't type on this desktop yet. "
+                "The text is on the clipboard, paste it with Control V."
+            )
+        )
         return True
     if status == BACKEND_ERROR:
         core.speak(_("Dictation isn't set up on this system."))

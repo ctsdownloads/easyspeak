@@ -27,6 +27,13 @@ msgstr "Terminé"
 msgid "Editing: backspace, backspace five, scratch that"
 msgstr "Édition : retour arrière, retour arrière cinq, efface ça"
 
+msgid ""
+"I can't type on this desktop yet. The text is on the clipboard, paste it "
+"with Control V."
+msgstr ""
+"Je ne peux pas encore taper sur ce bureau. Le texte est dans le presse-"
+"papiers, collez-le avec Contrôle V."
+
 msgid "Keys: enter, tab, escape, page up, page down, press down five"
 msgstr ""
 "Touches : entrée, tab, échap, page précédente, page suivante, appuie bas "
