@@ -35,6 +35,9 @@ core = None
 tracking_active = False
 tracking_thread = None
 stop_event = threading.Event()
+tracking_started = threading.Event()
+start_failure = None
+STARTUP_TIMEOUT = 60.0
 cursor_x = 960
 cursor_y = 540
 frozen = False
@@ -140,15 +143,46 @@ def get_screen_size():
     return 1920, 1080
 
 
+def give_up(reason):
+    """End tracking from inside the tracking thread, leaving the reason for the user.
+
+    The thread doesn't speak itself: `start_tracking` waits for it and hands the
+    reason to the foreground, which speaks it in order and before listening again.
+    """
+    global tracking_active, start_failure
+    tracking_active = False
+    start_failure = reason
+    tracking_started.set()
+
+
 def run_tracking():
     """Main tracking loop."""
     global tracking_active, stop_event, cursor_x, cursor_y, frozen
 
-    import cv2
-    from sixdrepnet import SixDRepNet
+    try:
+        import cv2
+        from sixdrepnet import SixDRepNet
+    except ImportError as exc:
+        missing = isinstance(exc, ModuleNotFoundError)
+        if not missing or exc.name not in ("cv2", "sixdrepnet"):
+            logger.exception("The head tracking libraries are installed but broken")
+            give_up(_("Sorry, head tracking couldn't start."))
+            return
+        logger.warning(
+            "Head tracking isn't installed (%s). Install EasySpeak with the "
+            "head-tracking extra.",
+            exc,
+        )
+        give_up(_("Head tracking isn't installed."))
+        return
 
-    logger.info("Loading SixDRepNet model...")
-    model = SixDRepNet(gpu_id=-1)  # CPU mode
+    try:
+        logger.info("Loading SixDRepNet model...")
+        model = SixDRepNet(gpu_id=-1)  # CPU mode
+    except Exception:
+        logger.exception("The head tracking model couldn't be loaded")
+        give_up(_("Sorry, head tracking couldn't start."))
+        return
 
     SCREEN_W, SCREEN_H = get_screen_size()
     logger.debug("Screen: %sx%s", SCREEN_W, SCREEN_H)
@@ -159,9 +193,10 @@ def run_tracking():
     cap.set(cv2.CAP_PROP_FPS, 30)
 
     if not cap.isOpened():
-        logger.error("Cannot open webcam!")
-        tracking_active = False
+        logger.warning("Cannot open the webcam for head tracking.")
+        give_up(_("I couldn't open the webcam."))
         return
+    tracking_started.set()
 
     filter_yaw = OneEuroFilter(freq=30.0, min_cutoff=0.8, beta=0.005)
     filter_pitch = OneEuroFilter(freq=30.0, min_cutoff=0.8, beta=0.005)
@@ -346,17 +381,36 @@ def run_tracking():
 
 
 def start_tracking():
-    """Start the head-tracking thread; returns (started, message)."""
-    global tracking_active, tracking_thread, stop_event, frozen
+    """Start the head-tracking thread; returns (started, message).
+
+    Waits until the thread runs or gives up, at most `STARTUP_TIMEOUT` seconds, so
+    the message tells the truth: "Tracking", or why tracking couldn't start. A thread
+    from an earlier attempt that is still busy, e.g. still loading the model after a
+    timeout, must finish first: started anew, it would report into this attempt.
+    """
+    global tracking_active, tracking_thread, stop_event, frozen, start_failure
 
     if tracking_active:
         return False, _("Already tracking")
+    if tracking_thread is not None:
+        tracking_thread.join(timeout=1.0)
+        if tracking_thread.is_alive():
+            return False, _("Head tracking is still busy. Try again in a moment.")
 
     frozen = False
     stop_event.clear()
+    tracking_started.clear()
+    start_failure = None
     tracking_active = True
     tracking_thread = threading.Thread(target=run_tracking, daemon=True)
     tracking_thread.start()
+    if not tracking_started.wait(STARTUP_TIMEOUT):
+        logger.warning("Head tracking didn't start within %s seconds.", STARTUP_TIMEOUT)
+        stop_event.set()
+        tracking_active = False
+        return False, _("Sorry, head tracking couldn't start.")
+    if start_failure:
+        return False, start_failure
     return True, _("Tracking")
 
 
@@ -370,12 +424,18 @@ def stop_tracking():
 
 
 def recalibrate():
-    """Reset calibration - will auto-calibrate on next frames."""
+    """Reset calibration - will auto-calibrate on next frames.
+
+    Restarts tracking, so a restart that fails, e.g. because the webcam is gone,
+    ends tracking and returns the reason instead of "Recalibrating".
+    """
     # center_yaw/pitch are in the tracking thread scope, so restart tracking
     if tracking_active:
         stop_tracking()
         time.sleep(0.3)
-        start_tracking()
+        started, msg = start_tracking()
+        if not started:
+            return False, msg
         return True, _("Recalibrating")
     return False, _("Not tracking")
 
@@ -389,6 +449,8 @@ def handle(cmd, core):
     if any(
         w in cmd_lower for w in ["start tracking", "begin tracking", "enable tracking"]
     ):
+        if not tracking_active:
+            core.speak(_("Starting head tracking."))
         success, msg = start_tracking()
         core.speak(msg)
         if success:
@@ -505,8 +567,10 @@ def listen_for_tracking_commands(core):
         # Recalibrate
         if "recalibrate" in cmd_lower or "calibrate" in cmd_lower:
             frozen = False
-            recalibrate()
-            core.speak(_("Recalibrating"))
+            recalibrated, msg = recalibrate()
+            core.speak(msg)
+            if not recalibrated:
+                return
             continue
 
         # Click commands

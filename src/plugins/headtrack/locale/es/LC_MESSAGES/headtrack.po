@@ -24,11 +24,28 @@ msgstr "Siguiendo"
 msgid "Frozen"
 msgstr "Congelado"
 
+msgid "Head tracking is still busy. Try again in a moment."
+msgstr ""
+"El seguimiento de la cabeza todavía está ocupado. Inténtalo de nuevo en "
+"un momento."
+
+msgid "Head tracking isn't installed."
+msgstr "El seguimiento de la cabeza no está instalado."
+
+msgid "I couldn't open the webcam."
+msgstr "No he podido abrir la webcam."
+
 msgid "Not tracking"
 msgstr "Seguimiento inactivo"
 
 msgid "Recalibrating"
 msgstr "Recalibrando"
+
+msgid "Sorry, head tracking couldn't start."
+msgstr "Lo siento, el seguimiento de la cabeza no ha podido iniciarse."
+
+msgid "Starting head tracking."
+msgstr "Inicio el seguimiento de la cabeza."
 
 msgid "Stopped"
 msgstr "Detenido"

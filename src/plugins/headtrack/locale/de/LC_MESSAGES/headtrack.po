@@ -24,11 +24,28 @@ msgstr "Folge"
 msgid "Frozen"
 msgstr "Eingefroren"
 
+msgid "Head tracking is still busy. Try again in a moment."
+msgstr ""
+"Die Kopfbewegungsverfolgung ist noch beschäftigt. Versuch es gleich noch "
+"einmal."
+
+msgid "Head tracking isn't installed."
+msgstr "Die Kopfbewegungsverfolgung ist nicht installiert."
+
+msgid "I couldn't open the webcam."
+msgstr "Ich konnte die Webcam nicht öffnen."
+
 msgid "Not tracking"
 msgstr "Keine Verfolgung aktiv"
 
 msgid "Recalibrating"
 msgstr "Neu kalibrieren"
+
+msgid "Sorry, head tracking couldn't start."
+msgstr "Entschuldigung, die Kopfbewegungsverfolgung konnte nicht starten."
+
+msgid "Starting head tracking."
+msgstr "Kopfbewegungsverfolgung wird gestartet."
 
 msgid "Stopped"
 msgstr "Gestoppt"
