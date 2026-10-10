@@ -4,6 +4,6 @@
 [commands]
 require_wake_word = ["require wake word", "require the wake word"]
 free_listening = ["free listening", "stop requiring wake word"]
-exit = ["exit", "quit", "goodbye", "bye", "exit the application", "quit the application", "close the application", "stop the application", "exit the app", "quit the app", "close the app", "stop the app", "exit easyspeak", "quit easyspeak", "close easyspeak", "stop easyspeak", "quit easy speak", "close easy speak", "stop easy speak"]
+exit = ["exit", "quit", "goodbye", "bye", "exit the application", "quit the application", "close the application", "stop the application", "exit the app", "quit the app", "close the app", "stop the app", "exit easyspeak", "quit easyspeak", "close easyspeak", "stop easyspeak", "quit easy speak", "close easy speak", "stop easy speak", "exit easy speak"]
 help = ["help", "what can you do"]
 about = ["about easyspeak", "about easy speak", "about box", "about dialog", "about dialogue", "about window"]
