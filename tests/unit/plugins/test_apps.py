@@ -105,6 +105,42 @@ def test_find_app_prefers_kde_settings_on_plasma(mock_core_success, monkeypatch)
     assert apps.find_app("settings", mock_core_success) == ("local", "systemsettings")
 
 
+@pytest.mark.parametrize(
+    ["app_name", "binary_name"],
+    [
+        ["calculator", "kcalc"],
+        ["editor", "kwrite"],
+        ["music player", "elisa"],
+        ["software", "plasma-discover"],
+    ],
+)
+def test_find_app_prefers_kde_apps_on_plasma(
+    mock_core_success, monkeypatch, app_name, binary_name
+):
+    """On KDE Plasma an app's KDE counterpart opens, not the GNOME app."""
+    monkeypatch.setenv("XDG_CURRENT_DESKTOP", "KDE")
+
+    assert apps.find_app(app_name, mock_core_success) == ("local", binary_name)
+
+
+def test_find_app_takes_the_kde_alternative_that_is_installed(mock_core, monkeypatch):
+    """Of several KDE counterparts, the first one installed opens."""
+    monkeypatch.setenv("XDG_CURRENT_DESKTOP", "KDE")
+    mock_core.host_run.side_effect = lambda cmd, **kw: Mock(
+        returncode=0 if cmd[-1] == "kate" else 1
+    )
+
+    assert apps.find_app("editor", mock_core) == ("local", "kate")
+
+
+def test_find_app_ignores_kde_apps_on_gnome(mock_core_success):
+    """On GNOME the GNOME app opens, even when a KDE counterpart is installed."""
+    assert apps.find_app("editor", mock_core_success) == (
+        "local",
+        "gnome-text-editor",
+    )
+
+
 def test_find_app_falls_back_without_kde_settings(mock_core, monkeypatch):
     """On KDE Plasma without System Settings, the GNOME settings app still opens."""
     monkeypatch.setenv("XDG_CURRENT_DESKTOP", "KDE")
