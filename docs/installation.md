@@ -98,8 +98,10 @@ call, report success, and discard the text. Without `wl-clipboard`, dictation
 falls back to that path and quietly does nothing in a browser.
 
 `python3-gobject` and `libadwaita` power the tray menu's **About EasySpeak**
-window. They ship with any GNOME desktop, so they're usually already present;
-they're listed here for the sake of minimal or non-GNOME installs.
+dialog. They ship with any GNOME desktop, so they're usually already present.
+On other desktops you can leave out `libadwaita`: EasySpeak then tells you its
+version and shows the details in a notification instead. `python3-gobject` is
+still needed for dictation.
 
 Optionally, `sudo dnf install python3-adblock` gives qutebrowser Brave's
 element-level ad blocker. EasySpeak configures the browser to use it when it is

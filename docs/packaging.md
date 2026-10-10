@@ -154,7 +154,7 @@ helper via `atspiPython` / `giTypelibPath`).
 
 A `PKGBUILD` can reproduce the bundled-venv layout under `/opt/easyspeak`, or
 build against Arch's own Python. Declare the same runtime dependencies as the
-`.deb`/`.rpm` (PortAudio, GTK4, libadwaita, PyGObject, AT-SPI, and the optional
+`.deb`/`.rpm` (PortAudio, PyGObject, AT-SPI, and the optional GTK4/libadwaita,
 `piper`/`qutebrowser`/PipeWire/PulseAudio tooling).
 
 ### Fedora COPR

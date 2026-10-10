@@ -52,21 +52,22 @@ overrides:
     - python3-gi             # PyGObject for the helper + About dialog
     - gir1.2-glib-2.0        # core GLib/Gio/DBus typelibs (Atspi typelib needs DBus-1.0)
     - gir1.2-atspi-2.0       # Atspi typelib for dictation
-    - libgtk-4-1             # About dialog
-    - libadwaita-1-0         # About dialog
-    - gir1.2-gtk-4.0
-    - gir1.2-adw-1
     - adwaita-icon-theme     # provides the launcher icon
     - wl-clipboard           # dictation places text by pasting
     recommends:
     - easyspeak-lang-en      # default language data; repo installs pull it automatically
-    - gnome-shell            # provides `gnome-extensions` (mouse grid / indicator)
     - qutebrowser            # browser plugin
     - ffmpeg                 # ffplay TTS playback fallback
     - pipewire-bin           # pw-play
     - wireplumber            # wpctl volume control
     - pulseaudio-utils       # paplay (chime + TTS fallback)
     - sound-theme-freedesktop  # wake/error chime sounds
+    suggests:
+    - gnome-shell            # provides `gnome-extensions` (mouse grid / indicator)
+    - libgtk-4-1             # About dialog; without it EasySpeak speaks its version
+    - libadwaita-1-0
+    - gir1.2-gtk-4.0
+    - gir1.2-adw-1
   rpm:
     depends:
     - portaudio
@@ -74,16 +75,17 @@ overrides:
     - python3-gobject
     - gobject-introspection  # DBus-1.0 typelib that the Atspi typelib depends on
     - at-spi2-core
-    - gtk4
-    - libadwaita
     - adwaita-icon-theme
     - wl-clipboard           # dictation places text by pasting
     recommends:
     - easyspeak-lang-en
-    - gnome-shell
     - qutebrowser
     - ffmpeg-free
     - pipewire-utils
     - wireplumber
     - pulseaudio-utils
     - sound-theme-freedesktop
+    suggests:
+    - gnome-shell
+    - gtk4
+    - libadwaita
