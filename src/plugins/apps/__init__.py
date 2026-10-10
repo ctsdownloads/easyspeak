@@ -1,5 +1,7 @@
 """Apps Plugin - Launch and close applications."""
 
+import logging
+import os
 from pathlib import Path
 
 from easyspeak.core.i18n import translator
@@ -7,6 +9,7 @@ from easyspeak.core.vocabulary import Vocabulary
 
 _ = translator(__file__)
 vocab = Vocabulary(__file__)
+logger = logging.getLogger(__name__)
 
 NAME = "apps"
 DESCRIPTION = "Launch and close applications"
@@ -67,6 +70,11 @@ LOCAL_APPS = {
     "video player": "showtime",
     "weather": "gnome-weather",
     "web": "epiphany",
+}
+
+# KDE Plasma's own apps, preferred there over the GNOME ones above.
+KDE_APPS = {
+    "settings": "systemsettings",
 }
 
 TERMINAL_LAUNCHER = "xdg-terminal-exec"
@@ -160,18 +168,25 @@ def _register_from_argv(argv, core):
     return True
 
 
+def on_kde():
+    """Whether the session is KDE Plasma."""
+    return "KDE" in os.environ.get("XDG_CURRENT_DESKTOP", "").split(":")
+
+
 def find_app(name, core):
-    """Find app - returns (type, id)."""
+    """Find an installed app - returns (type, id), or (None, None) if it's missing."""
+    if on_kde() and name in KDE_APPS and _has(KDE_APPS[name], core):
+        return ("local", KDE_APPS[name])
+
     if name in FLATPAK_APPS:
         result = core.host_run(["flatpak", "info", FLATPAK_APPS[name]])
         if result.returncode == 0:
             return ("flatpak", FLATPAK_APPS[name])
 
-    if name in LOCAL_APPS:
+    if name in LOCAL_APPS and _has(LOCAL_APPS[name], core):
         return ("local", LOCAL_APPS[name])
 
-    result = core.host_run(["which", name])
-    if result.returncode == 0:
+    if _has(name, core):
         return ("local", name)
 
     return (None, None)
@@ -184,7 +199,11 @@ def launch_app(name, core):
         core.host_run(["flatpak", "run", app_id], background=True, clean_env=True)
         return True
     if app_type == "local":
-        core.host_run([app_id], background=True, clean_env=True)
+        try:
+            core.host_run([app_id], background=True, clean_env=True)
+        except OSError as exc:
+            logger.warning("Couldn't start %s: %s", app_id, exc)
+            return False
         return True
     return False
 

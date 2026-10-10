@@ -6,6 +6,12 @@ import pytest
 from easyspeak.plugins import apps
 
 
+@pytest.fixture(autouse=True)
+def gnome_session(monkeypatch):
+    """Run every test in a GNOME session unless it says otherwise."""
+    monkeypatch.setenv("XDG_CURRENT_DESKTOP", "GNOME")
+
+
 def test_setup(mock_core):
     """When setup is called, then core reference is stored."""
     apps.setup(mock_core)
@@ -64,12 +70,34 @@ def test_find_app_flatpak_not_installed(mock_core_failure, app_name):
         ["browser", "qutebrowser"],
     ],
 )
-def test_find_app_local(mock_core, app_name, binary_name):
+def test_find_app_local(mock_core_success, app_name, binary_name):
     """When local app exists, then it is found as local type."""
-    app_type, app_id = apps.find_app(app_name, mock_core)
+    app_type, app_id = apps.find_app(app_name, mock_core_success)
 
     assert app_type == "local"
     assert app_id == binary_name
+
+
+def test_find_app_local_but_missing(mock_core_failure):
+    """When a known app's binary isn't installed, then it isn't launched blindly."""
+    assert apps.find_app("nautilus", mock_core_failure) == (None, None)
+
+
+def test_find_app_prefers_kde_settings_on_plasma(mock_core_success, monkeypatch):
+    """On KDE Plasma "settings" opens System Settings, even next to GNOME's."""
+    monkeypatch.setenv("XDG_CURRENT_DESKTOP", "KDE")
+
+    assert apps.find_app("settings", mock_core_success) == ("local", "systemsettings")
+
+
+def test_find_app_falls_back_without_kde_settings(mock_core, monkeypatch):
+    """On KDE Plasma without System Settings, the GNOME settings app still opens."""
+    monkeypatch.setenv("XDG_CURRENT_DESKTOP", "KDE")
+    mock_core.host_run.side_effect = lambda cmd, **kw: Mock(
+        returncode=0 if cmd[-1] == "gnome-control-center" else 1
+    )
+
+    assert apps.find_app("settings", mock_core) == ("local", "gnome-control-center")
 
 
 def test_find_app_in_path(mock_core_success):
@@ -128,6 +156,15 @@ def test_launch_app_local(mock_find_app, mock_core):
         "background": True,
         "clean_env": True,
     }
+
+
+@patch("easyspeak.plugins.apps.find_app", return_value=("local", "systemsettings"))
+def test_launch_app_that_fails_to_start(mock_find_app, mock_core, readlog):
+    """When the binary can't be started after all, then it's reported, not raised."""
+    mock_core.host_run.side_effect = FileNotFoundError(2, "No such file")
+
+    assert apps.launch_app("settings", mock_core) is False
+    assert "systemsettings" in readlog().err
 
 
 @patch("easyspeak.plugins.apps.find_app", return_value=(None, None))
@@ -415,28 +452,28 @@ def test_setup_no_terminal_not_registered(mock_core_failure):
     assert "terminal" not in apps.LOCAL_APPS
 
 
-def test_launch_registered_terminal(mock_core):
+def test_launch_registered_terminal(mock_core_success):
     """When a registered terminal is launched, then its binary runs in the background."""
     apps.LOCAL_APPS["terminal"] = "ghostty"
 
-    result = apps.launch_app("terminal", mock_core)
+    result = apps.launch_app("terminal", mock_core_success)
 
     assert result is True
-    assert mock_core.host_run.call_args.args == (["ghostty"],)
-    assert mock_core.host_run.call_args.kwargs == {
+    assert mock_core_success.host_run.call_args.args == (["ghostty"],)
+    assert mock_core_success.host_run.call_args.kwargs == {
         "background": True,
         "clean_env": True,
     }
 
 
-def test_close_registered_terminal(mock_core):
+def test_close_registered_terminal(mock_core_success):
     """When a registered terminal is closed, then its binary is killed."""
     apps.LOCAL_APPS["terminal"] = "ghostty"
 
-    result = apps.close_app("terminal", mock_core)
+    result = apps.close_app("terminal", mock_core_success)
 
     assert result is True
-    assert mock_core.host_run.call_args.args == (["pkill", "-f", "ghostty"],)
+    assert mock_core_success.host_run.call_args.args == (["pkill", "-f", "ghostty"],)
 
 
 @patch("easyspeak.plugins.apps.launch_app", return_value=True)

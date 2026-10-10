@@ -199,6 +199,8 @@ e.g. "open music app" works the same as "open music player".
 "Open terminal" and "close terminal" are special: they open and close your
 system's default terminal, whichever one that is, rather than a fixed app.
 
+"Open settings" opens GNOME Settings, or System Settings on KDE Plasma.
+
 ## Files
 
 Folders open in whatever file manager your desktop is configured for (via
