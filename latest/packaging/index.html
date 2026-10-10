@@ -1061,8 +1061,9 @@
   (standalone CPython + all wheels, including the <code>piper</code> engine and the
   <code>hey_jarvis</code> wake word) under <code>/opt/easyspeak</code>. No <code>pip</code>/<code>uv</code> step and no compiler
   at install time. Desktop integration (launcher, GNOME Shell extension, AT-SPI
-  dictation helper) is wired to your system's GTK4 / PyGObject / AT-SPI packages,
-  declared as dependencies.</li>
+  dictation helper) is wired to your system's PyGObject / AT-SPI packages,
+  declared as dependencies. The graphical About dialog uses GTK4 / libadwaita
+  where installed, a suggested dependency that any GNOME desktop already has.</li>
 <li><strong><code>easyspeak-stt-parakeet</code></strong> (noarch) — the speech recognition model: NVIDIA's
   multilingual Parakeet TDT v3, one int8 ONNX model for the 25 European languages
   it covers, under <code>/opt/easyspeak/models/parakeet</code>. EasySpeak uses it by default.</li>
@@ -1099,7 +1100,7 @@ the app and pack version numbers are independent and need not match:</p>
 </div>
 </div>
 </div>
-<p>This is <strong>fully offline</strong> (assuming the system dependencies — GTK4, PortAudio,
+<p>This is <strong>fully offline</strong> (assuming the system dependencies — PortAudio,
 PyGObject, … — are already present, as on any GNOME desktop). Then launch
 <strong>EasySpeak</strong> from the applications menu, or run <code>easyspeak</code>.</p>
 <p>Dictation additionally needs <code>wl-clipboard</code>, since it places text by pasting
@@ -1184,7 +1185,7 @@ helper via <code>atspiPython</code> / <code>giTypelibPath</code>).</p>
 <h3 id="arch-aur">Arch (AUR)<a class="headerlink" href="#arch-aur" title="Permanent link">&para;</a></h3>
 <p>A <code>PKGBUILD</code> can reproduce the bundled-venv layout under <code>/opt/easyspeak</code>, or
 build against Arch's own Python. Declare the same runtime dependencies as the
-<code>.deb</code>/<code>.rpm</code> (PortAudio, GTK4, libadwaita, PyGObject, AT-SPI, and the optional
+<code>.deb</code>/<code>.rpm</code> (PortAudio, PyGObject, AT-SPI, and the optional GTK4/libadwaita,
 <code>piper</code>/<code>qutebrowser</code>/PipeWire/PulseAudio tooling).</p>
 <h3 id="fedora-copr">Fedora COPR<a class="headerlink" href="#fedora-copr" title="Permanent link">&para;</a></h3>
 <p>A source build from an RPM <code>.spec</code> — effectively the <code>.rpm</code> recipe, built on
