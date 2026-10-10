@@ -74,7 +74,7 @@ def run(argv=None):
 
     `EasySpeak` is imported lazily so the one-shot subcommands work without the
     audio stack (pyopen-wakeword, pyaudio, …) that `core.main` pulls in. Ctrl+C
-    ends EasySpeak quietly even while its models are still loading.
+    ends EasySpeak quietly even while that stack or its models are still loading.
     """
     args = parse_args(argv)
 
@@ -96,9 +96,9 @@ def run(argv=None):
         configure(args.configure)
         return
 
-    from .main import EasySpeak
-
     try:
+        from .main import EasySpeak
+
         EasySpeak().run()
     except KeyboardInterrupt:
         logger.info("\nStopped (Ctrl+C).")

@@ -38,6 +38,24 @@ def test_run_ends_quietly_on_ctrl_c(mock_easyspeak, capsys):
     assert "Stopped (Ctrl+C)." in capsys.readouterr().err
 
 
+def test_run_ends_quietly_on_ctrl_c_while_importing(capsys, monkeypatch):
+    """Ctrl+C while the audio stack is still being imported ends quietly too."""
+    import builtins
+
+    real_import = builtins.__import__
+
+    def interrupted_import(name, *args, **kwargs):
+        if name == "main" and args[2] and "EasySpeak" in args[2]:
+            raise KeyboardInterrupt
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", interrupted_import)
+
+    cli.run([])
+
+    assert "Stopped (Ctrl+C)." in capsys.readouterr().err
+
+
 @patch("easyspeak.core.main.EasySpeak")
 def test_run_language_overrides_the_environment(mock_easyspeak, monkeypatch):
     """--language sets EASYSPEAK_LANGUAGE before the app, and its config, load."""

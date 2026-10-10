@@ -277,12 +277,17 @@ class TestMenuActions:
 
     @patch("easyspeak.core.tray.subprocess.Popen")
     def test_help_opens_docs_in_default_browser(self, mock_popen):
-        """A 'help' command opens the docs URL via xdg-open and carries on."""
+        """A 'help' command opens the docs URL via xdg-open and carries on.
+
+        The browser runs in its own session, so Ctrl+C in EasySpeak's terminal
+        doesn't close it.
+        """
         self._started(mock_popen)
         tray = self._tray([COMMAND_HELP])
 
         assert tray.poll(Mock(), Mock()) is TrayAction.CONTINUE
         assert mock_popen.call_args.args[0] == ["xdg-open", DOCS_URL]
+        assert mock_popen.call_args.kwargs["start_new_session"] is True
 
     @patch.dict("easyspeak.core.tray.os.environ", {}, clear=True)
     @patch("easyspeak.core.tray.subprocess.Popen")
