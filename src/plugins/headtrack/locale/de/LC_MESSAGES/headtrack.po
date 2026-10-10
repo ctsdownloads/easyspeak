@@ -58,7 +58,7 @@ msgid "right click - right click"
 msgstr "right click - Rechtsklick"
 
 msgid "start tracking - begin head tracking"
-msgstr "start tracking - Kopfverfolgung starten"
+msgstr "start tracking - Kopfbewegungsverfolgung starten"
 
 msgid "stop tracking - end tracking"
 msgstr "stop tracking - Verfolgung beenden"
