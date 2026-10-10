@@ -3683,7 +3683,7 @@ exit.</p>
 
     <div class="doc doc-contents first">
 
-        <p>Base Plugin - Help and Exit.</p>
+        <p>Base Plugin - Help, About and Exit.</p>
 
 
 
@@ -3723,13 +3723,13 @@ exit.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/base/__init__.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-25">25</a></span>
-<span class="normal"><a href="#__codelineno-0-26">26</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-26">26</a></span>
 <span class="normal"><a href="#__codelineno-0-27">27</a></span>
-<span class="normal"><a href="#__codelineno-0-28">28</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
-<a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="w">    </span><span class="sd">"""Store the core reference for use by the plugin's handlers."""</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27"></a>    <span class="k">global</span> <span class="n">core</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28"></a>    <span class="n">core</span> <span class="o">=</span> <span class="n">c</span>
+<span class="normal"><a href="#__codelineno-0-28">28</a></span>
+<span class="normal"><a href="#__codelineno-0-29">29</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="w">    </span><span class="sd">"""Store the core reference for use by the plugin's handlers."""</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28"></a>    <span class="k">global</span> <span class="n">core</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29"></a>    <span class="n">core</span> <span class="o">=</span> <span class="n">c</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3749,15 +3749,14 @@ exit.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Handle the help and exit commands; return None to pass others through.</p>
-<p>Returns False to signal the daemon to exit, True if help was shown, or None when the
-command is for another plugin.</p>
+        <p>Handle the help, About and exit commands; return None to pass others through.</p>
+<p>Returns False to signal the daemon to exit, True if the command was handled, or
+None when the command is for another plugin.</p>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/base/__init__.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-31">31</a></span>
-<span class="normal"><a href="#__codelineno-0-32">32</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-32">32</a></span>
 <span class="normal"><a href="#__codelineno-0-33">33</a></span>
 <span class="normal"><a href="#__codelineno-0-34">34</a></span>
 <span class="normal"><a href="#__codelineno-0-35">35</a></span>
@@ -3784,35 +3783,46 @@ command is for another plugin.</p>
 <span class="normal"><a href="#__codelineno-0-56">56</a></span>
 <span class="normal"><a href="#__codelineno-0-57">57</a></span>
 <span class="normal"><a href="#__codelineno-0-58">58</a></span>
-<span class="normal"><a href="#__codelineno-0-59">59</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
-<a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="w">    </span><span class="sd">"""Handle the help and exit commands; return None to pass others through.</span>
-<a id="__codelineno-0-33" name="__codelineno-0-33"></a>
-<a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="sd">    Returns False to signal the daemon to exit, True if help was shown, or None when the</span>
-<a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="sd">    command is for another plugin.</span>
-<a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="sd">    """</span>
-<a id="__codelineno-0-37" name="__codelineno-0-37"></a>    <span class="n">cmd_lower</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-<a id="__codelineno-0-38" name="__codelineno-0-38"></a>
-<a id="__codelineno-0-39" name="__codelineno-0-39"></a>    <span class="k">if</span> <span class="n">vocab</span><span class="o">.</span><span class="n">says</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">,</span> <span class="s2">"require_wake_word"</span><span class="p">):</span>
-<a id="__codelineno-0-40" name="__codelineno-0-40"></a>        <span class="n">core</span><span class="o">.</span><span class="n">require_wake_word</span> <span class="o">=</span> <span class="kc">True</span>
-<a id="__codelineno-0-41" name="__codelineno-0-41"></a>        <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Modes now wait for the wake word."</span><span class="p">))</span>
-<a id="__codelineno-0-42" name="__codelineno-0-42"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-43" name="__codelineno-0-43"></a>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a>    <span class="k">if</span> <span class="n">vocab</span><span class="o">.</span><span class="n">says</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">,</span> <span class="s2">"free_listening"</span><span class="p">):</span>
-<a id="__codelineno-0-45" name="__codelineno-0-45"></a>        <span class="n">core</span><span class="o">.</span><span class="n">require_wake_word</span> <span class="o">=</span> <span class="kc">False</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a>        <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Modes now take commands on their own."</span><span class="p">))</span>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a>    <span class="c1"># The exit word must end the command ("jarvis quit"), so "quit tracking"</span>
-<a id="__codelineno-0-50" name="__codelineno-0-50"></a>    <span class="c1"># is left to head tracking.</span>
-<a id="__codelineno-0-51" name="__codelineno-0-51"></a>    <span class="k">if</span> <span class="n">vocab</span><span class="o">.</span><span class="n">ends</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">,</span> <span class="s2">"exit"</span><span class="p">):</span>
-<a id="__codelineno-0-52" name="__codelineno-0-52"></a>        <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Goodbye."</span><span class="p">))</span>
-<a id="__codelineno-0-53" name="__codelineno-0-53"></a>        <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># Signal to exit</span>
-<a id="__codelineno-0-54" name="__codelineno-0-54"></a>
-<a id="__codelineno-0-55" name="__codelineno-0-55"></a>    <span class="k">if</span> <span class="n">vocab</span><span class="o">.</span><span class="n">says</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">,</span> <span class="s2">"help"</span><span class="p">):</span>
-<a id="__codelineno-0-56" name="__codelineno-0-56"></a>        <span class="n">show_help</span><span class="p">(</span><span class="n">core</span><span class="p">)</span>
-<a id="__codelineno-0-57" name="__codelineno-0-57"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-58" name="__codelineno-0-58"></a>
-<a id="__codelineno-0-59" name="__codelineno-0-59"></a>    <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Not handled</span>
+<span class="normal"><a href="#__codelineno-0-59">59</a></span>
+<span class="normal"><a href="#__codelineno-0-60">60</a></span>
+<span class="normal"><a href="#__codelineno-0-61">61</a></span>
+<span class="normal"><a href="#__codelineno-0-62">62</a></span>
+<span class="normal"><a href="#__codelineno-0-63">63</a></span>
+<span class="normal"><a href="#__codelineno-0-64">64</a></span>
+<span class="normal"><a href="#__codelineno-0-65">65</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">core</span><span class="p">):</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="w">    </span><span class="sd">"""Handle the help, About and exit commands; return None to pass others through.</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34"></a>
+<a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="sd">    Returns False to signal the daemon to exit, True if the command was handled, or</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="sd">    None when the command is for another plugin.</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="sd">    """</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38"></a>    <span class="n">cmd_lower</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39"></a>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a>    <span class="k">if</span> <span class="n">vocab</span><span class="o">.</span><span class="n">says</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">,</span> <span class="s2">"require_wake_word"</span><span class="p">):</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41"></a>        <span class="n">core</span><span class="o">.</span><span class="n">require_wake_word</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42"></a>        <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Modes now wait for the wake word."</span><span class="p">))</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a>    <span class="k">if</span> <span class="n">vocab</span><span class="o">.</span><span class="n">says</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">,</span> <span class="s2">"free_listening"</span><span class="p">):</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a>        <span class="n">core</span><span class="o">.</span><span class="n">require_wake_word</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a>        <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Modes now take commands on their own."</span><span class="p">))</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a>    <span class="c1"># The exit word must end the command ("jarvis quit"), so "quit tracking"</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51"></a>    <span class="c1"># is left to head tracking.</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a>    <span class="k">if</span> <span class="n">vocab</span><span class="o">.</span><span class="n">ends</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">,</span> <span class="s2">"exit"</span><span class="p">):</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53"></a>        <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Goodbye."</span><span class="p">))</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54"></a>        <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># Signal to exit</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55"></a>
+<a id="__codelineno-0-56" name="__codelineno-0-56"></a>    <span class="k">if</span> <span class="n">vocab</span><span class="o">.</span><span class="n">says</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">,</span> <span class="s2">"help"</span><span class="p">):</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57"></a>        <span class="n">show_help</span><span class="p">(</span><span class="n">core</span><span class="p">)</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a>    <span class="k">if</span> <span class="n">vocab</span><span class="o">.</span><span class="n">says</span><span class="p">(</span><span class="n">cmd_lower</span><span class="p">,</span> <span class="s2">"about"</span><span class="p">):</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61"></a>        <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Opening the About dialog."</span><span class="p">))</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62"></a>        <span class="n">core</span><span class="o">.</span><span class="n">tray</span><span class="o">.</span><span class="n">open_about</span><span class="p">()</span>
+<a id="__codelineno-0-63" name="__codelineno-0-63"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-64" name="__codelineno-0-64"></a>
+<a id="__codelineno-0-65" name="__codelineno-0-65"></a>    <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Not handled</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3840,13 +3850,7 @@ appear regardless of the configured log verbosity.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/plugins/base/__init__.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-62">62</a></span>
-<span class="normal"><a href="#__codelineno-0-63">63</a></span>
-<span class="normal"><a href="#__codelineno-0-64">64</a></span>
-<span class="normal"><a href="#__codelineno-0-65">65</a></span>
-<span class="normal"><a href="#__codelineno-0-66">66</a></span>
-<span class="normal"><a href="#__codelineno-0-67">67</a></span>
-<span class="normal"><a href="#__codelineno-0-68">68</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-68">68</a></span>
 <span class="normal"><a href="#__codelineno-0-69">69</a></span>
 <span class="normal"><a href="#__codelineno-0-70">70</a></span>
 <span class="normal"><a href="#__codelineno-0-71">71</a></span>
@@ -3854,21 +3858,27 @@ appear regardless of the configured log verbosity.</p>
 <span class="normal"><a href="#__codelineno-0-73">73</a></span>
 <span class="normal"><a href="#__codelineno-0-74">74</a></span>
 <span class="normal"><a href="#__codelineno-0-75">75</a></span>
-<span class="normal"><a href="#__codelineno-0-76">76</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-62" name="__codelineno-0-62"></a><span class="k">def</span><span class="w"> </span><span class="nf">show_help</span><span class="p">(</span><span class="n">core</span><span class="p">):</span>
-<a id="__codelineno-0-63" name="__codelineno-0-63"></a><span class="w">    </span><span class="sd">"""List every plugin's commands on the terminal.</span>
-<a id="__codelineno-0-64" name="__codelineno-0-64"></a>
-<a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="sd">    Printed rather than logged: it is the direct reply to an explicit "help"</span>
-<a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">    request (the spoken reply tells the user to read the terminal), so it must</span>
-<a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">    appear regardless of the configured log verbosity.</span>
-<a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">    """</span>
-<a id="__codelineno-0-69" name="__codelineno-0-69"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== "</span> <span class="o">+</span> <span class="n">_</span><span class="p">(</span><span class="s2">"Available Commands"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" ==="</span><span class="p">)</span>  <span class="c1"># noqa: T201</span>
-<a id="__codelineno-0-70" name="__codelineno-0-70"></a>    <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">core</span><span class="o">.</span><span class="n">plugins</span><span class="p">:</span>
-<a id="__codelineno-0-71" name="__codelineno-0-71"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="s2">"COMMANDS"</span><span class="p">):</span>
-<a id="__codelineno-0-72" name="__codelineno-0-72"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="n">plugin</span><span class="o">.</span><span class="n">NAME</span><span class="si">}</span><span class="s2">:"</span><span class="p">)</span>  <span class="c1"># noqa: T201</span>
-<a id="__codelineno-0-73" name="__codelineno-0-73"></a>            <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="n">plugin</span><span class="o">.</span><span class="n">COMMANDS</span><span class="p">:</span>
-<a id="__codelineno-0-74" name="__codelineno-0-74"></a>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  • </span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>  <span class="c1"># noqa: T201</span>
-<a id="__codelineno-0-75" name="__codelineno-0-75"></a>    <span class="nb">print</span><span class="p">()</span>  <span class="c1"># noqa: T201</span>
-<a id="__codelineno-0-76" name="__codelineno-0-76"></a>    <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Check the terminal for available commands."</span><span class="p">))</span>
+<span class="normal"><a href="#__codelineno-0-76">76</a></span>
+<span class="normal"><a href="#__codelineno-0-77">77</a></span>
+<span class="normal"><a href="#__codelineno-0-78">78</a></span>
+<span class="normal"><a href="#__codelineno-0-79">79</a></span>
+<span class="normal"><a href="#__codelineno-0-80">80</a></span>
+<span class="normal"><a href="#__codelineno-0-81">81</a></span>
+<span class="normal"><a href="#__codelineno-0-82">82</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="k">def</span><span class="w"> </span><span class="nf">show_help</span><span class="p">(</span><span class="n">core</span><span class="p">):</span>
+<a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="w">    </span><span class="sd">"""List every plugin's commands on the terminal.</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70"></a>
+<a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">    Printed rather than logged: it is the direct reply to an explicit "help"</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">    request (the spoken reply tells the user to read the terminal), so it must</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">    appear regardless of the configured log verbosity.</span>
+<a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">    """</span>
+<a id="__codelineno-0-75" name="__codelineno-0-75"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== "</span> <span class="o">+</span> <span class="n">_</span><span class="p">(</span><span class="s2">"Available Commands"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" ==="</span><span class="p">)</span>  <span class="c1"># noqa: T201</span>
+<a id="__codelineno-0-76" name="__codelineno-0-76"></a>    <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">core</span><span class="o">.</span><span class="n">plugins</span><span class="p">:</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="s2">"COMMANDS"</span><span class="p">):</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="n">plugin</span><span class="o">.</span><span class="n">NAME</span><span class="si">}</span><span class="s2">:"</span><span class="p">)</span>  <span class="c1"># noqa: T201</span>
+<a id="__codelineno-0-79" name="__codelineno-0-79"></a>            <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="n">plugin</span><span class="o">.</span><span class="n">COMMANDS</span><span class="p">:</span>
+<a id="__codelineno-0-80" name="__codelineno-0-80"></a>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  • </span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>  <span class="c1"># noqa: T201</span>
+<a id="__codelineno-0-81" name="__codelineno-0-81"></a>    <span class="nb">print</span><span class="p">()</span>  <span class="c1"># noqa: T201</span>
+<a id="__codelineno-0-82" name="__codelineno-0-82"></a>    <span class="n">core</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">"Check the terminal for available commands."</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3897,10 +3907,10 @@ appear regardless of the configured log verbosity.</p>
     <div class="doc doc-contents first">
 
         <p>Sleep Plugin - Deactivate the assistant by voice.</p>
-<p>"Go to sleep" (or "stop listening") releases the microphone and stops wake-word
-detection until the user reactivates EasySpeak from the GNOME tray indicator or
-the Quick Settings toggle — whichever the extension is showing, the one way back
-since voice control is off until reactivated.</p>
+<p>"Go to sleep" (or "stop listening", "deactivate yourself") releases the
+microphone and stops wake-word detection until the user reactivates EasySpeak from
+the GNOME tray indicator or the Quick Settings toggle — whichever the extension is
+showing, the one way back since voice control is off until reactivated.</p>
 
 
 
