@@ -13,7 +13,7 @@ scenarios drive the real `EasySpeak` object with the **subprocess boundary
 stubbed** and assert the observable contract (model loaded once, blank
 ignored, flushed on shutdown, recovery).
 
-Like `tests/integration` and `tests/benchmarks`, this folder is **excluded
+Like `tests/integration`, this folder is **excluded
 from default discovery** (see `pyproject.toml`) and is opt-in:
 
 ```sh
