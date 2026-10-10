@@ -509,7 +509,10 @@ class TestOtherDesktops:
     @patch("easyspeak.core.tray.subprocess.run")
     @patch("easyspeak.core.tray.subprocess.Popen")
     def test_started_launches_the_helper(self, mock_popen, mock_run, monkeypatch):
-        """Startup runs the helper with our interpreter and the control file."""
+        """Startup runs the helper with our interpreter and the control file.
+
+        It runs in its own session, so Ctrl+C in the terminal doesn't reach it.
+        """
         monkeypatch.setenv("XDG_CURRENT_DESKTOP", "KDE")
         mock_run.return_value = Mock(returncode=0)
         tray = Tray(control_file="/tmp/control")
@@ -518,6 +521,7 @@ class TestOtherDesktops:
 
         cmd = mock_popen.call_args.args[0]
         assert cmd == [sys.executable, TRAY_HELPER, "/tmp/control"]
+        assert mock_popen.call_args.kwargs["start_new_session"] is True
 
     @patch("easyspeak.core.tray.subprocess.run")
     @patch("easyspeak.core.tray.subprocess.Popen")

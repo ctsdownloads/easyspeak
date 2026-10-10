@@ -66,7 +66,9 @@ class TestEasySpeakUtilities:
 
     @patch("subprocess.Popen")
     def test_host_run_background(self, mock_popen):
-        """Test host_run method in background mode."""
+        """Background programs run detached, in their own session, so Ctrl+C in
+        EasySpeak's terminal doesn't close them.
+        """
         easy = EasySpeak()
         mock_process = Mock()
         mock_popen.return_value = mock_process
@@ -78,6 +80,7 @@ class TestEasySpeakUtilities:
         assert call_args[0][0] == ["echo", "test"]
         assert call_args[1]["stdout"] == subprocess.DEVNULL
         assert call_args[1]["stderr"] == subprocess.DEVNULL
+        assert call_args[1]["start_new_session"] is True
         assert result == mock_process
 
     def test_speak_delegates_to_pipeline(self):
@@ -1050,7 +1053,7 @@ class TestEasySpeakRun:
 
         # Check output
         captured = readlog()
-        assert "Bye!" in captured.out
+        assert "Stopped (Ctrl+C)." in captured.out
 
     @patch("subprocess.run")
     @patch("time.time")

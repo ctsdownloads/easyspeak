@@ -252,11 +252,16 @@ class Tray:
             self._speak(_("This is {name}.").format(name=name))
 
     def _start_helper(self):
-        """Start the StatusNotifierItem tray helper for desktops other than GNOME."""
+        """Start the StatusNotifierItem tray helper for desktops other than GNOME.
+
+        It runs in its own session, so Ctrl+C in the terminal doesn't reach it: it
+        leaves on its own once the daemon is gone, without a stack trace.
+        """
         try:
             self._helper = subprocess.Popen(
                 [sys.executable, TRAY_HELPER, str(self._control_file)],
                 stdout=subprocess.DEVNULL,
+                start_new_session=True,
             )
         except OSError:
             logger.warning("Couldn't start the tray icon.", exc_info=True)
@@ -271,14 +276,21 @@ class Tray:
         that's caught here so the caller can tell the user, and the menu click isn't
         silently lost.
 
-        stderr is captured to an anonymous temp file rather than a pipe: a long-lived
+        The helper runs in its own session, so Ctrl+C in the terminal quits EasySpeak
+        without killing an open About dialog or browser. stderr is captured to an
+        anonymous temp file rather than a pipe: a long-lived
         helper keeps writing to it (GTK logs to stderr) without ever blocking on a full
         pipe buffer we've stopped draining, and the file is reclaimed by the OS once the
         helper exits.
         """
         with tempfile.TemporaryFile() as errlog:
             try:
-                proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=errlog)
+                proc = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.DEVNULL,
+                    stderr=errlog,
+                    start_new_session=True,
+                )
             except OSError:
                 logger.warning("Couldn't open the %s.", what, exc_info=True)
                 return False

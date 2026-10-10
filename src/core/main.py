@@ -158,6 +158,9 @@ class EasySpeak:
         ones. A glib/GIO build mismatch there wedges GTK apps such as the file
         manager. Pass clean_env=True when launching external GUI programs so they
         run in the plain host environment.
+
+        A background program gets its own session, so pressing Ctrl+C in the terminal
+        EasySpeak runs in quits EasySpeak only, not the apps it opened.
         """
         env = None
         if clean_env:
@@ -168,7 +171,11 @@ class EasySpeak:
             }
         if background:
             return subprocess.Popen(
-                cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env
+                cmd,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                env=env,
+                start_new_session=True,
             )
         return subprocess.run(cmd, capture_output=True, text=True, env=env)
 
@@ -969,7 +976,7 @@ class EasySpeak:
                     logger.info("Listening for wake word...")
 
         except KeyboardInterrupt:
-            logger.info("\nBye!")
+            logger.info("\nStopped (Ctrl+C).")
         finally:
             # Hide the indicator so the daemon's exit doesn't leave a stale icon.
             self.tray.stopped()
