@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, Mock, call, patch
 
 import numpy as np
 import pytest
+from easyspeak.core.config import MISUNDERSTAND_GRACE
 from easyspeak.core.main import EasySpeak
 from easyspeak.core.tray import STATE_MUTED, TrayAction
 
@@ -447,10 +448,8 @@ class TestEasySpeakRouteCommand:
 
     @patch.object(EasySpeak, "_show_help")
     @patch.object(EasySpeak, "speak")
-    @patch("time.time")
     def test_route_command_failed_command_ends_the_miss_streak(
         self,
-        mock_time,
         mock_speak,
         mock_show_help,
         mock_plugin_with_error,
@@ -460,14 +459,16 @@ class TestEasySpeakRouteCommand:
 
         So a miss, a failed command and another miss apologise twice instead of
         showing the help as if the user had been misunderstood twice in a row.
+        The second miss is moved out of the grace period by backdating the first,
+        rather than by faking `time.time`, which logging calls too.
         """
-        mock_time.side_effect = [100.0, 200.0]
         easy = EasySpeak()
 
         easy.plugins = [mock_plugin_no_handle]
         easy.route_command("unknown command")
         easy.plugins = [mock_plugin_with_error]
         easy.route_command("open settings")
+        easy.last_misunderstand_time -= MISUNDERSTAND_GRACE
         easy.plugins = [mock_plugin_no_handle]
         easy.route_command("unknown command")
 
