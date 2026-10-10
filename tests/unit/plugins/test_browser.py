@@ -665,6 +665,23 @@ def test_handle_browser_command_exception(
 
 
 @patch.object(browser, "browser_mode")
+def test_handle_open_browser_that_fails_to_start(mock_browser_mode, mock_core, readlog):
+    """When qutebrowser is there but can't start, then don't call it missing."""
+
+    def host_run(cmd, background=False, **kw):
+        if background:
+            raise PermissionError(13, "Permission denied", "qutebrowser")
+        return Mock(returncode=1)
+
+    mock_core.host_run.side_effect = host_run
+
+    assert browser.handle("open browser", mock_core) is True
+    mock_core.speak.assert_called_once_with("Sorry, I couldn't start qutebrowser.")
+    assert "Permission denied" in readlog().err
+    assert not mock_browser_mode.called
+
+
+@patch.object(browser, "browser_mode")
 def test_handle_open_browser_without_qutebrowser(mock_browser_mode, mock_core, readlog):
     """When qutebrowser isn't installed then say so instead of crashing."""
 
