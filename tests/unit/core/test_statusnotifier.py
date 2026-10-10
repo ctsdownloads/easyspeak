@@ -327,6 +327,17 @@ class TestMenu:
             ],
         )
 
+    def test_start_at_login_state_read_on_its_own_is_a_number(self, control):
+        """Asking for just the checkmark state returns an INT32, as dbusmenu wants."""
+        bus = FakeBus()
+        tray = started(bus, control)
+
+        reply = answer(
+            tray, bus, call(MENU_PATH, MENU, "GetProperty", "is", (7, "toggle-state"))
+        )
+
+        assert reply.body == (("i", 0),)
+
     def test_clicking_start_at_login_toggles_it(self, control, home):
         """A click turns starting at login off and back on, and the menu follows."""
         system = home / "xdg" / "autostart" / "easyspeak.desktop"

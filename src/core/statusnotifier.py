@@ -270,7 +270,7 @@ class StatusNotifier:
 
     def _on_get_property(self, msg, item_id, name):
         props = dict(self._menu_items()).get(item_id, {})
-        self._reply(msg, "v", (("s", props.get(name, "")),))
+        self._reply(msg, "v", (self._variant(props.get(name, "")),))
 
     def _on_event(self, msg, item_id, event, _data, _timestamp):
         self._menu_event(item_id, event)
@@ -322,10 +322,12 @@ class StatusNotifier:
         return menu_items(self._state, autostart.is_enabled())
 
     def _variants(self, props):
-        return {
-            key: ("i", value) if isinstance(value, int) else ("s", value)
-            for key, value in props.items()
-        }
+        return {key: self._variant(value) for key, value in props.items()}
+
+    @staticmethod
+    def _variant(value):
+        """Wrap a menu property for D-Bus: numbers as INT32, the rest as text."""
+        return ("i", value) if isinstance(value, int) else ("s", value)
 
     def _menu_event(self, item_id, event):
         if event != "clicked":
