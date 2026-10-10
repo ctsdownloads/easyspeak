@@ -75,25 +75,25 @@ LOCAL_APPS = {
 # KDE Plasma's own apps, preferred there over the GNOME ones above; the first
 # one installed wins.
 KDE_APPS = {
-    "alarm": ("kclock",),
-    "calculator": ("kcalc",),
-    "calendar": ("merkuro-calendar", "korganizer"),
-    "camera": ("kamoso",),
-    "characters": ("kcharselect",),
-    "clocks": ("kclock",),
-    "connections": ("krdc",),
-    "contacts": ("merkuro-contact", "kaddressbook"),
-    "editor": ("kwrite", "kate"),
-    "logs": ("kjournaldbrowser",),
-    "maps": ("marble",),
-    "music app": ("elisa",),
-    "music player": ("elisa",),
-    "scanner": ("skanpage",),
-    "settings": ("systemsettings",),
-    "software": ("plasma-discover",),
-    "timer": ("kclock",),
-    "video player": ("haruna", "dragon"),
-    "weather": ("kweather",),
+    "alarm": ["kclock"],
+    "calculator": ["kcalc"],
+    "calendar": ["merkuro-calendar", "korganizer"],
+    "camera": ["kamoso"],
+    "characters": ["kcharselect"],
+    "clocks": ["kclock"],
+    "connections": ["krdc"],
+    "contacts": ["merkuro-contact", "kaddressbook"],
+    "editor": ["kwrite", "kate"],
+    "logs": ["kjournaldbrowser"],
+    "maps": ["marble"],
+    "music app": ["elisa"],
+    "music player": ["elisa"],
+    "scanner": ["skanpage"],
+    "settings": ["systemsettings"],
+    "software": ["plasma-discover"],
+    "timer": ["kclock"],
+    "video player": ["haruna", "dragon"],
+    "weather": ["kweather"],
 }
 
 TERMINAL_LAUNCHER = "xdg-terminal-exec"
@@ -195,7 +195,7 @@ def on_kde():
 def find_app(name, core):
     """Find an installed app - returns (type, id), or (None, None) if it's missing."""
     if on_kde():
-        kde_app = next((app for app in KDE_APPS.get(name, ()) if _has(app, core)), None)
+        kde_app = next((app for app in KDE_APPS.get(name, []) if _has(app, core)), None)
         if kde_app:
             return ("local", kde_app)
 
