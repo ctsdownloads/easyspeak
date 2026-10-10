@@ -110,9 +110,12 @@ def close_file_manager(core):
 def handle(cmd, core):
     """Open a named folder or the file manager, or close the file manager.
 
-    None if neither matched.
+    Closing a folder ("close downloads") closes the file manager too, all of its
+    windows: which one shows the folder can't be told reliably. None if neither
+    matched.
     """
-    if vocab.says(cmd, "close") and vocab.says(cmd, "file_manager"):
+    folder = vocab.which(cmd, "folders")
+    if vocab.says(cmd, "close") and (vocab.says(cmd, "file_manager") or folder):
         if close_file_manager(core):
             core.speak(_("Closing the file manager."))
         else:
@@ -122,7 +125,6 @@ def handle(cmd, core):
     if not vocab.says(cmd, "open"):
         return None
 
-    folder = vocab.which(cmd, "folders")
     if folder in FOLDERS:
         _open(FOLDERS[folder], folder, core)
         return True
