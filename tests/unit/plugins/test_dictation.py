@@ -361,6 +361,27 @@ def test_handle_enters_dictation_on_note_word(
     ]
 
 
+@pytest.mark.parametrize("command", ["dictation", "start dictation", "dictate"])
+@patch("easyspeak.plugins.dictation.insert_text")
+def test_handle_enters_dictation_on_its_own_name(
+    mock_insert, command, mock_core_with_audio
+):
+    """ "Dictation", the word EasySpeak confirms with, enters dictation mode too,
+    and "stop dictation" ends it.
+    """
+    mock_core_with_audio.transcribe = Mock(return_value="stop dictation")
+
+    assert dictation.handle(command, mock_core_with_audio) is True
+    spoken = [call.args[0] for call in mock_core_with_audio.speak.call_args_list]
+    assert spoken == ["Dictation", "Done"]
+    mock_insert.assert_not_called()
+
+
+def test_handle_stop_dictation_is_not_an_entry(mock_core):
+    """Asking to stop dictation outside dictation mode doesn't start it."""
+    assert dictation.handle("stop dictation", mock_core) is None
+
+
 def german_entry(monkeypatch):
     """Make the plugin listen for the German entry word, English still accepted."""
     german = dictation.load_vocabulary("de")
@@ -1650,7 +1671,7 @@ def test_english_prompt_names_the_spoken_punctuation():
     assert dictation.DICTATION_PROMPT.startswith(
         "space, new sentence, new paragraph, new line, comma, period"
     )
-    assert dictation.DICTATION_PROMPT.endswith("backslash, stop notes")
+    assert dictation.DICTATION_PROMPT.endswith("backslash, stop dictation")
     assert "scratch that" not in dictation.DICTATION_PROMPT
 
 

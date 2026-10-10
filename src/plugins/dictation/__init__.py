@@ -750,11 +750,11 @@ def run_push_to_talk(core, should_continue):
 
 
 def handle(cmd, core):
-    """Enter dictation mode on the entry word, "notes" or the active language's.
+    """Enter dictation mode on the entry word, "dictation" or the active language's.
 
     The words come from the vocabulary tables, matched whole so "notebook" or
     "noted" do not trigger it, and a command that also names leaving ("stop
-    notes") is not an entry. While in dictation mode core drives the listening
+    dictation") is not an entry. While in dictation mode core drives the listening
     (see [`listen_modal`][core.main.EasySpeak.listen_modal]), transcribing speech
     and inserting it into the focused field until the exit phrase is heard — or
     until the mode ends on its own, so an open microphone can't be left dictating
