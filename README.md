@@ -4,7 +4,7 @@ Voice control for Linux desktops. Fully local, no cloud, Wayland-native.
 
 Say "Hey Jarvis" and control your desktop with your voice.
 
-[![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](https://github.com/ctsdownloads/easyspeak/blob/main/LICENSES/GPL-3.0-only.txt)
+[![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](https://easyspeak.dev/latest/license/)
 [![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)](https://easyspeak.dev/latest/installation/)
 [![Desktop](https://img.shields.io/badge/desktop-GNOME%20%7C%20Wayland-green.svg)](https://easyspeak.dev/latest/how-it-works/)
 [![Status](https://img.shields.io/badge/status-Alpha-orange.svg)](https://github.com/ctsdownloads/easyspeak/releases)
