@@ -3,10 +3,7 @@ Whisper transcription benchmarks.
 
 Each variant times EasySpeak.transcribe() so the benchmark covers the WAV
 temp-file round-trip and prompt/VAD defaults, not just the bare faster-whisper
-call. Results upload to bencher.dev via:
-
-    bencher run --adapter python_pytest --file results.json \\
-        "pytest --benchmark-json=results.json tests/benchmarks/"
+call.
 """
 
 from __future__ import annotations

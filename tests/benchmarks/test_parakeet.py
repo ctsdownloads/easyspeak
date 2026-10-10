@@ -2,8 +2,8 @@
 Parakeet transcription benchmark, on the same sample and path as the Whisper ones.
 
 The first run fetches the int8 ONNX model (about 640 MB) into the models
-directory, which is why CI runs `just benchmark` with `EASYSPEAK_OFFLINE=relaxed`
-and caches that directory.
+directory, which is why `just benchmark` needs `EASYSPEAK_OFFLINE=relaxed` on
+a machine that doesn't have it yet.
 """
 
 from __future__ import annotations

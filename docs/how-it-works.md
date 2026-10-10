@@ -58,7 +58,7 @@ easyspeak/
 │       └── system/            # Volume, brightness, DND
 ├── tests/
 │   ├── acceptance/            # Gherkin scenarios (pytest-bdd)
-│   ├── benchmarks/            # pytest-benchmark suites for bencher.dev
+│   ├── benchmarks/            # transcription timings (pytest-benchmark)
 │   ├── integration/           # tests against real binaries
 │   └── unit/                  # tests for src/core/ and src/plugins/
 └── pyproject.toml
