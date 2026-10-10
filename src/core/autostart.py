@@ -22,16 +22,24 @@ def user_entry():
     """The user's own autostart entry, which overrides the system-wide one.
 
     It lives in the XDG user config directory, `~/.config` unless
-    `XDG_CONFIG_HOME` says otherwise, where the desktop looks for it too.
+    `XDG_CONFIG_HOME` says otherwise, where the desktop looks for it too. As the
+    XDG specification demands, a relative `XDG_CONFIG_HOME` is ignored.
     """
-    config = os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config"
+    config = os.environ.get("XDG_CONFIG_HOME", "")
+    if not Path(config).is_absolute():
+        config = Path.home() / ".config"
     return Path(config) / "autostart" / ENTRY_NAME
 
 
 def system_entries():
-    """Where packages put the system-wide autostart entry, most important first."""
-    dirs = os.environ.get("XDG_CONFIG_DIRS") or "/etc/xdg"
-    return [Path(d) / "autostart" / ENTRY_NAME for d in dirs.split(":") if d]
+    """Where packages put the system-wide autostart entry, most important first.
+
+    Relative entries in `XDG_CONFIG_DIRS` are ignored, as the XDG specification
+    demands.
+    """
+    dirs = os.environ.get("XDG_CONFIG_DIRS", "").split(":")
+    absolute = [Path(d) for d in dirs if d and Path(d).is_absolute()]
+    return [d / "autostart" / ENTRY_NAME for d in absolute or [Path("/etc/xdg")]]
 
 
 def read(path):
