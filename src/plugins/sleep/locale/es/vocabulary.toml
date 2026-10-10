@@ -2,4 +2,4 @@
 # transcripción en minúsculas de Whisper; las confusiones frecuentes también van aquí.
 
 [commands]
-sleep = ["vete a dormir", "duerme", "deja de escuchar"]
+sleep = ["vete a dormir", "duerme", "deja de escuchar", "desactívate"]

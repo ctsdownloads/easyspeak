@@ -12,6 +12,7 @@ from easyspeak.plugins import sleep
         "goto sleep",
         "GO TO SLEEP",
         "stop listening",
+        "deactivate yourself",
     ],
 )
 def test_handle_sleep_commands(mock_core, command):

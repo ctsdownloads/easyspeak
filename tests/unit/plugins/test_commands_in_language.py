@@ -139,7 +139,8 @@ def test_media_stop_alone_is_not_ours():
 
 @pytest.mark.usefixtures("german")
 @pytest.mark.parametrize(
-    "command", ["geh schlafen", "hör auf zuzuhören", "stop listening"]
+    "command",
+    ["geh schlafen", "hör auf zuzuhören", "deaktiviere dich", "stop listening"],
 )
 def test_sleep_in_german(command, mock_core):
     """The German sleep phrases deactivate, and the English one still does."""
@@ -154,6 +155,10 @@ def test_sleep_in_german(command, mock_core):
         ("it", "smetti di ascoltare"),
         ("fr", "arrête d'écouter"),
         ("es", "deja de escuchar"),
+        ("de", "deaktiviere dich"),
+        ("it", "disattivati"),
+        ("fr", "désactive-toi"),
+        ("es", "desactívate"),
     ],
 )
 def test_stop_listening_in_every_language(language, command, mock_core, monkeypatch):
