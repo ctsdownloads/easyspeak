@@ -58,6 +58,7 @@ exclude_docs: |
 nav:
 - Home: index.md
 - Installation: installation.md
+- Compatibility: compatibility.md
 - Packaging: packaging.md
 - Dependencies: dependencies.md
 - Usage: usage.md
