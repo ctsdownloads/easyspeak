@@ -36,6 +36,9 @@ msgstr "Mi dispiace, non sono riuscito ad aprire la documentazione."
 msgid "Sorry, I didn't understand."
 msgstr "Mi dispiace, non ho capito."
 
+msgid "Sorry, something went wrong with that command."
+msgstr "Mi dispiace, qualcosa è andato storto con questo comando."
+
 #, python-brace-format
 msgid "This is {name}."
 msgstr "Sono {name}."
