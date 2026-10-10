@@ -6,8 +6,9 @@ EasySpeak ships **distro `.deb` and `.rpm` packages**, split into three:
   (standalone CPython + all wheels, including the `piper` engine and the
   `hey_jarvis` wake word) under `/opt/easyspeak`. No `pip`/`uv` step and no compiler
   at install time. Desktop integration (launcher, GNOME Shell extension, AT-SPI
-  dictation helper) is wired to your system's GTK4 / PyGObject / AT-SPI packages,
-  declared as dependencies.
+  dictation helper) is wired to your system's PyGObject / AT-SPI packages,
+  declared as dependencies. The graphical About dialog uses GTK4 / libadwaita
+  where installed, a suggested dependency that any GNOME desktop already has.
 - **`easyspeak-stt-parakeet`** (noarch) — the speech recognition model: NVIDIA's
   multilingual Parakeet TDT v3, one int8 ONNX model for the 25 European languages
   it covers, under `/opt/easyspeak/models/parakeet`. EasySpeak uses it by default.
@@ -46,7 +47,7 @@ the app and pack version numbers are independent and need not match:
     sudo dnf install ./easyspeak-*.x86_64.rpm ./easyspeak-stt-parakeet-*.noarch.rpm ./easyspeak-lang-en-*.noarch.rpm
     ```
 
-This is **fully offline** (assuming the system dependencies — GTK4, PortAudio,
+This is **fully offline** (assuming the system dependencies — PortAudio,
 PyGObject, … — are already present, as on any GNOME desktop). Then launch
 **EasySpeak** from the applications menu, or run `easyspeak`.
 
