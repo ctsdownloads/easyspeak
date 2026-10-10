@@ -16,6 +16,7 @@ from pathlib import Path
 
 from easyspeak.data import data_text
 
+from .autostart import user_entry
 from .gnome_extension import (
     activate_extension,
     extension_dest_dir,
@@ -34,7 +35,7 @@ INSTALLED_DESKTOP_NAME = "easyspeak.desktop"
 
 def autostart_path():
     """User-local autostart entry, read by the session at login."""
-    return Path.home() / ".config" / "autostart" / INSTALLED_DESKTOP_NAME
+    return user_entry()
 
 
 def desktop_path():

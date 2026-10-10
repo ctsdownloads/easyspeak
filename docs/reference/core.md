@@ -58,6 +58,10 @@ instance and use its small public API (`speak`, `host_run`, `transcribe`,
 
 ::: core.gnome_extension
 
+## core.autostart
+
+::: core.autostart
+
 ## core.desktop_integration
 
 ::: core.desktop_integration

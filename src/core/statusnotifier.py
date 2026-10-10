@@ -22,6 +22,7 @@ import sys
 from collections import deque
 from pathlib import Path
 
+from easyspeak.core import autostart
 from jeepney import (
     DBusAddress,
     HeaderFields,
@@ -56,6 +57,7 @@ MENU_TOGGLE = 1
 MENU_HELP = 3
 MENU_ABOUT = 4
 MENU_QUIT = 6
+MENU_AUTOSTART = 7
 
 
 def is_muted(state):
@@ -83,12 +85,23 @@ def toggle_command(state):
     return "unmute" if is_muted(state) else "mute"
 
 
-def menu_items(state):
-    """Return the menu entries as `(id, properties)` pairs, in display order."""
+def menu_items(state, starts_at_login=False):
+    """Return the menu entries as `(id, properties)` pairs, in display order.
+
+    "Start at Login" is a checkmark entry, ticked when `starts_at_login`.
+    """
     toggle = "Reactivate EasySpeak" if is_muted(state) else "Deactivate EasySpeak"
     return [
         (MENU_TOGGLE, {"label": toggle}),
         (2, {"type": "separator"}),
+        (
+            MENU_AUTOSTART,
+            {
+                "label": "Start at Login",
+                "toggle-type": "checkmark",
+                "toggle-state": int(starts_at_login),
+            },
+        ),
         (MENU_HELP, {"label": "Help"}),
         (MENU_ABOUT, {"label": "About EasySpeak"}),
         (5, {"type": "separator"}),
@@ -237,7 +250,7 @@ class StatusNotifier:
     def _on_get_layout(self, msg, _parent, _depth, _names):
         children = [
             ("(ia{sv}av)", (item_id, self._variants(props), []))
-            for item_id, props in menu_items(self._state)
+            for item_id, props in self._menu_items()
         ]
         root = (0, {"children-display": ("s", "submenu")}, children)
         self._reply(msg, "u(ia{sv}av)", (self._revision, root))
@@ -245,13 +258,13 @@ class StatusNotifier:
     def _on_get_group_properties(self, msg, ids, _names):
         found = [
             (item_id, self._variants(props))
-            for item_id, props in menu_items(self._state)
+            for item_id, props in self._menu_items()
             if not ids or item_id in ids
         ]
         self._reply(msg, "a(ia{sv})", (found,))
 
     def _on_get_property(self, msg, item_id, name):
-        props = dict(menu_items(self._state)).get(item_id, {})
+        props = dict(self._menu_items()).get(item_id, {})
         self._reply(msg, "v", (("s", props.get(name, "")),))
 
     def _on_event(self, msg, item_id, event, _data, _timestamp):
@@ -300,13 +313,35 @@ class StatusNotifier:
             "Menu": ("o", MENU_PATH),
         }
 
+    def _menu_items(self):
+        return menu_items(self._state, autostart.is_enabled())
+
     def _variants(self, props):
-        return {key: ("s", value) for key, value in props.items()}
+        return {
+            key: ("i", value) if isinstance(value, int) else ("s", value)
+            for key, value in props.items()
+        }
 
     def _menu_event(self, item_id, event):
+        if event != "clicked":
+            return
+        if item_id == MENU_AUTOSTART:
+            self._toggle_autostart()
+            return
         command = menu_command(item_id, self._state)
-        if event == "clicked" and command:
+        if command:
             write_command(self._control_file, command)
+
+    def _toggle_autostart(self):
+        """Flip "Start at Login" and show the new checkmark."""
+        try:
+            autostart.set_enabled(not autostart.is_enabled())
+        except OSError as exc:
+            sys.stderr.write(f"EasySpeak: couldn't change starting at login: {exc}\n")
+            return
+        self._revision += 1
+        menu = DBusAddress(MENU_PATH, interface="com.canonical.dbusmenu")
+        self._bus.send(new_signal(menu, "LayoutUpdated", "ui", (self._revision, 0)))
 
     def _set_state(self, state):
         """Show a new daemon state: status, icon, tooltip and menu labels."""
