@@ -2,4 +2,4 @@
 # trascrizione in minuscolo di Whisper; ci vanno anche gli errori di ascolto.
 
 [commands]
-sleep = ["vai a dormire", "dormi", "smetti di ascoltare"]
+sleep = ["vai a dormire", "dormi", "smetti di ascoltare", "disattivati"]
