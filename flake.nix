@@ -76,6 +76,7 @@
           pipewire # pw-play, preferred over paplay when present
           xdg-utils # xdg-open: the files plugin
           procps # pgrep/pkill: the browser and apps plugins
+          kdePackages.kdialog # native About window on KDE Plasma (see core.tray)
         ];
 
         # Native toolchain needed when uv compiles wheels from source
