@@ -147,6 +147,7 @@ class Tray:
         self._control_file = Path(control_file)
         self._service = SHELL_SERVICE if on_gnome() else TRAY_SERVICE
         self._helper = None
+        self._about = None
         self._sleep_requested = False
         self._speak = speak or (lambda _text: None)
 
@@ -238,16 +239,33 @@ class Tray:
         the user still hears who they're talking to, with the details in a notification.
 
         Outside GNOME, KDE's `kdialog` shows the information first where it's
-        installed, in the desktop's own look.
+        installed, in the desktop's own look. An About dialog that is already
+        showing is closed and opened again, which brings it to the front: Wayland
+        desktops don't let one program raise another one's window.
         """
+        self.close_about()
         if not on_gnome() and shutil.which("kdialog"):
             kdialog = ["kdialog", "--title", "About EasySpeak"]
             kdialog += ["--icon", APPLICATION_ICON, "--msgbox", about_html()]
-            if self._spawn(kdialog, "About dialog (kdialog)"):
+            self._about = self._spawn(kdialog, "About dialog (kdialog)")
+            if self._about:
                 return
         python = os.environ.get("EASYSPEAK_ATSPI_PYTHON", sys.executable)
-        if not self._spawn([python, ABOUT_HELPER], "About dialog"):
+        self._about = self._spawn([python, ABOUT_HELPER], "About dialog")
+        if not self._about:
             self._tell_about()
+
+    def about_open(self):
+        """Whether an About dialog EasySpeak opened is still showing."""
+        return self._about is not None and self._about.poll() is None
+
+    def close_about(self):
+        """Close the About dialog EasySpeak opened; False if none is showing."""
+        if not self.about_open():
+            return False
+        self._about.terminate()
+        self._about = None
+        return True
 
     def _tell_about(self):
         """Present EasySpeak without the About dialog: spoken, plus a notification."""
@@ -277,7 +295,7 @@ class Tray:
             logger.warning("Couldn't start the tray icon.", exc_info=True)
 
     def _spawn(self, cmd, what):
-        """Launch a helper process; False, with the cause logged, if it fails to start.
+        """Launch a helper process and return it; None if it fails to start.
 
         Fire-and-forget for the success case: a helper whose window opens keeps running
         and is left detached (never waited on or reaped). But a helper that *can't*
@@ -303,7 +321,7 @@ class Tray:
                 )
             except OSError:
                 logger.warning("Couldn't open the %s.", what, exc_info=True)
-                return False
+                return None
             returncode = self._await_startup(proc)
             if returncode not in (None, 0):
                 errlog.seek(0)
@@ -316,8 +334,8 @@ class Tray:
                     logger.debug(
                         "The %s exited with code %s:\n%s", what, returncode, detail
                     )
-                return False
-        return True
+                return None
+        return proc
 
     def _await_startup(self, proc):
         """Return the helper's exit code if it dies during startup, else None.
