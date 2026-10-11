@@ -1164,6 +1164,8 @@ optional: without it, EasySpeak tells you its version and shows the details in a
 notification instead. For the graphical dialog on other desktops, install it too:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>libadwaita
 </code></pre></div>
+<p>On KDE Plasma, <code>kdialog</code> shows the About information in Plasma's own look
+instead, if it's installed (<code>sudo dnf install kdialog</code>).</p>
 <p>Optionally, <code>sudo dnf install python3-adblock</code> gives qutebrowser Brave's
 element-level ad blocker. EasySpeak configures the browser to use it when it is
 present and falls back to host blocking when it is not, so this is worth having:

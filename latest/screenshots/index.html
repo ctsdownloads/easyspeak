@@ -964,7 +964,9 @@
 voice-control workflow, from launching the daemon to driving the mouse and
 browser entirely by voice.</p>
 <h2 id="starting-the-daemon">Starting the daemon<a class="headerlink" href="#starting-the-daemon" title="Permanent link">&para;</a></h2>
-<p><img alt="EasySpeak starting in a terminal: OpenWakeWord and Whisper load, each plugin reports &quot;Loaded&quot;, and the daemon begins listening for the wake word" src="../media/daemon-startup.png" width="100%" /></p>
+<p><img alt="EasySpeak starting in a terminal: OpenWakeWord and Whisper load, each plugin
+reports &quot;Loaded&quot;, and the daemon begins listening for the wake
+word" src="../media/daemon-startup.png" width="100%" /></p>
 <p>An earlier version of EasySpeak running from a terminal. On start it loads the
 wake-word model (OpenWakeWord) and the speech recognizer (Whisper), then brings
 up each plugin in turn — head tracking, mouse grid, apps, browser, dictation,
@@ -978,9 +980,17 @@ it, or reach its settings. It shows up either as a panel tray icon (when asleep)
 or as a <a href="https://help.gnome.org/gnome-help/quick-settings.html">Quick Settings</a>
 toggle -- a single switch in its extension settings decides which.</p>
 <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start; justify-content: center;">
-<p><img alt="The EasySpeak tray menu open in the GNOME top bar, the panel icon showing a muted microphone; the menu lists &quot;Reactivate EasySpeak&quot; (hovered), &quot;Settings…&quot;, &quot;Help&quot;, &quot;About EasySpeak&quot;, and &quot;Quit EasySpeak&quot;" src="../media/tray-menu.png" width="124" /></p>
-<p><img alt="The GNOME Quick Settings menu with an active-microphone EasySpeak toggle expanded into its sub-menu: an &quot;EasySpeak&quot; heading, a &quot;Help&quot; entry, and &quot;EasySpeak Settings&quot; (hovered)" src="../media/quick-settings.png" width="206" /></p>
-<p><img alt="EasySpeak's extension settings — a &quot;Configure EasySpeak&quot; panel with two toggles, &quot;Start EasySpeak on login&quot; and &quot;Show EasySpeak in Quick Settings Menu&quot;, both on, above an &quot;About EasySpeak&quot; row" src="../media/extension-settings.png" width="344" /></p>
+<p><img alt="The EasySpeak tray menu open in the GNOME top bar, the panel icon showing a
+muted microphone; the menu lists &quot;Reactivate EasySpeak&quot; (hovered), &quot;Settings…&quot;,
+&quot;Help&quot;, &quot;About EasySpeak&quot;, and &quot;Quit
+EasySpeak&quot;" src="../media/tray-menu.png" width="124" /></p>
+<p><img alt="The GNOME Quick Settings menu with an active-microphone EasySpeak toggle
+expanded into its sub-menu: an &quot;EasySpeak&quot; heading, a &quot;Help&quot; entry, and
+&quot;EasySpeak Settings&quot; (hovered)" src="../media/quick-settings.png" width="206" /></p>
+<p><img alt="EasySpeak's extension settings — a &quot;Configure EasySpeak&quot; panel with two
+toggles, &quot;Start EasySpeak on login&quot; and &quot;Show EasySpeak in Quick Settings Menu&quot;,
+both on, above an &quot;About EasySpeak&quot;
+row" src="../media/extension-settings.png" width="344" /></p>
 </div>
 <p>Say, <a href="../commands/#general">"stop listening"</a>, to make EasySpeak stop
 responding to your voice. The panel icon (left) switches to a muted
@@ -996,28 +1006,35 @@ point reaches the very same extension settings — the panel GNOME's Extensions
 app exposes for EasySpeak, which also makes it <strong>start on login</strong> and opens
 <strong>About EasySpeak</strong>.</p>
 <h2 id="kde-plasma">KDE Plasma<a class="headerlink" href="#kde-plasma" title="Permanent link">&para;</a></h2>
-<p><img alt="KDE Plasma 6.7.5 with Plasma's &quot;Status and Notifications&quot; popup open from the system tray, listing EasySpeak's microphone icon among the system icons; its context menu shows &quot;Deactivate EasySpeak&quot;, &quot;Help&quot;, &quot;About EasySpeak&quot; (hovered) and &quot;Quit EasySpeak&quot;. Behind it, KWrite holds dictated text and EasySpeak's reply that the text is on the clipboard, ready to paste with Ctrl+V" src="../media/kde-tray-icon-menu.png" width="100%" /></p>
+<p><img alt="KDE Plasma's system tray popup with EasySpeak's microphone icon and its menu:
+&quot;Deactivate EasySpeak&quot;, &quot;Start at Login&quot; (ticked), &quot;Help&quot;, &quot;About EasySpeak&quot; and
+&quot;Quit EasySpeak&quot;. Behind it, KWrite shows dictated text that EasySpeak placed on
+the clipboard" src="../media/kde-tray-icon-menu.png" width="100%" /></p>
 <p>On KDE Plasma, EasySpeak sits in the system tray. While it listens, the icon
 waits among the hidden icons, behind the arrow in the tray; when it's asleep,
-it moves into the panel, where you can't miss it. Its menu offers the same
-entries as on GNOME: <strong>Deactivate</strong> or <strong>Reactivate EasySpeak</strong>, <strong>Help</strong>,
+it moves into the panel, where you can't miss it. Its menu offers
+<strong>Deactivate</strong> or <strong>Reactivate EasySpeak</strong>, <strong>Start at Login</strong>, <strong>Help</strong>,
 <strong>About EasySpeak</strong>, and <strong>Quit EasySpeak</strong>.</p>
 <p>Dictation can't type on Plasma yet, so EasySpeak puts the text on the clipboard
 and tells you to paste it with Ctrl+V, as in KWrite above. See
 <a href="../compatibility/">Compatibility</a> for what works on which desktop.</p>
 <h2 id="mouse-grid">Mouse grid<a class="headerlink" href="#mouse-grid" title="Permanent link">&para;</a></h2>
-<p><img alt="A 3x3 numbered grid overlaying the GNOME Files window, with a red crosshair centered on cell 5" src="../media/mouse-grid-files.png" width="100%" /></p>
+<p><img alt="A 3x3 numbered grid overlaying the GNOME Files window, with a red crosshair
+centered on cell 5" src="../media/mouse-grid-files.png" width="100%" /></p>
 <p>The <strong>mouse grid</strong> (<a href="../commands/#mouse-grid">"grid" command</a>) overlays a
 numbered 3×3 grid on the whole screen. Saying a digit zooms the grid into
 that cell; repeat until the crosshair sits over your target, then say
 <strong>"click"</strong>. Here it is layered over the GNOME Files manager — the grid
 works over any window.</p>
-<p><img alt="The same numbered grid overlaying the qutebrowser window on the DuckDuckGo start page" src="../media/mouse-grid-browser.png" width="100%" /></p>
+<p><img alt="The same numbered grid overlaying the qutebrowser window on the DuckDuckGo
+start page" src="../media/mouse-grid-browser.png" width="100%" /></p>
 <p>The same grid driving the cursor inside the browser. Because the overlay is
 compositor-level, the identical "say a number to zoom, then click" flow reaches
 anything on screen, web pages included.</p>
 <h2 id="browser-link-hints">Browser link hints<a class="headerlink" href="#browser-link-hints" title="Permanent link">&para;</a></h2>
-<p><img alt="qutebrowser in hint mode on the DuckDuckGo start page, with yellow numbered labels tagging every clickable element" src="../media/browser-link-hints.png" width="100%" /></p>
+<p><img alt="qutebrowser in hint mode on the DuckDuckGo start page, with yellow numbered
+labels tagging every clickable
+element" src="../media/browser-link-hints.png" width="100%" /></p>
 <p><strong>Browser control</strong> via qutebrowser's hint mode
 (<a href="../commands/#browser-qutebrowser">"numbers" command</a>). Every clickable
 element — the search box, the Search / Duck.ai toggles, the
