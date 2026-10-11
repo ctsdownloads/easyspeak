@@ -21,6 +21,9 @@ msgstr "Commandes disponibles"
 msgid "Check the terminal for available commands."
 msgstr "Les commandes disponibles sont dans le terminal."
 
+msgid "Closing the About dialog."
+msgstr "Je ferme la boîte de dialogue À propos."
+
 msgid "Goodbye."
 msgstr "Au revoir."
 
@@ -32,6 +35,9 @@ msgstr "Les modes attendent maintenant le mot d'activation."
 
 msgid "Opening the About dialog."
 msgstr "J'ouvre la boîte de dialogue À propos."
+
+msgid "The About dialog isn't open."
+msgstr "La boîte de dialogue À propos n'est pas ouverte."
 
 msgid "exit EasySpeak"
 msgstr "quitter EasySpeak"

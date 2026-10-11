@@ -289,6 +289,44 @@ class TestMenuActions:
         assert mock_popen.call_args.args[0] == ["xdg-open", DOCS_URL]
         assert mock_popen.call_args.kwargs["start_new_session"] is True
 
+    @patch.dict("easyspeak.core.tray.os.environ", {}, clear=True)
+    @patch("easyspeak.core.tray.on_gnome", return_value=True)
+    @patch("easyspeak.core.tray.subprocess.Popen")
+    def test_about_opens_once_and_closes(self, mock_popen, _gnome):
+        """Showing an open About dialog again reopens it, so it comes to the front,
+        and there is only ever one; closing ends just it.
+        """
+        self._started(mock_popen)
+        mock_popen.return_value.poll.return_value = None  # the window stays up
+        tray = self._tray([])
+
+        tray.open_about()
+        tray.open_about()
+
+        assert mock_popen.call_count == 2
+        mock_popen.return_value.terminate.assert_called_once()
+        mock_popen.return_value.terminate.reset_mock()
+        assert tray.about_open() is True
+        assert tray.close_about() is True
+        mock_popen.return_value.terminate.assert_called_once()
+        assert tray.about_open() is False
+        assert tray.close_about() is False
+
+    @patch.dict("easyspeak.core.tray.os.environ", {}, clear=True)
+    @patch("easyspeak.core.tray.on_gnome", return_value=True)
+    @patch("easyspeak.core.tray.subprocess.Popen")
+    def test_about_closed_by_hand_counts_as_closed(self, mock_popen, _gnome):
+        """Once the user closed the dialog, closing it again has nothing to do."""
+        self._started(mock_popen)
+        mock_popen.return_value.poll.return_value = 0  # the window is gone
+        tray = self._tray([])
+
+        tray.open_about()
+
+        assert tray.about_open() is False
+        assert tray.close_about() is False
+        mock_popen.return_value.terminate.assert_not_called()
+
     @patch("easyspeak.core.tray.shutil.which", return_value="/usr/bin/kdialog")
     @patch("easyspeak.core.tray.on_gnome", return_value=False)
     @patch("easyspeak.core.tray.subprocess.Popen")

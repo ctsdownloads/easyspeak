@@ -58,11 +58,22 @@ def handle(cmd, core):
         return True
 
     if vocab.says(cmd_lower, "about"):
-        core.speak(_("Opening the About dialog."))
-        core.tray.open_about()
+        about(cmd_lower, core)
         return True
 
     return None  # Not handled
+
+
+def about(cmd, core):
+    """Open the About dialog, or bring it to the front, or close it, as asked."""
+    if vocab.says(cmd, "close"):
+        if core.tray.close_about():
+            core.speak(_("Closing the About dialog."))
+        else:
+            core.speak(_("The About dialog isn't open."))
+    else:
+        core.speak(_("Opening the About dialog."))
+        core.tray.open_about()
 
 
 def show_help(core):

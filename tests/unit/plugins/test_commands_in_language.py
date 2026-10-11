@@ -46,6 +46,25 @@ def test_base_about_in_every_language(language, command, mock_core, monkeypatch)
     mock_core.tray.open_about.assert_called_once()
 
 
+@pytest.mark.parametrize(
+    ("language", "command"),
+    [
+        ("de", "info-dialog schließen"),
+        ("it", "chiudi la finestra informazioni"),
+        ("fr", "ferme la boîte à propos"),
+        ("es", "cierra el diálogo acerca de"),
+    ],
+)
+def test_base_close_about_in_every_language(language, command, mock_core, monkeypatch):
+    """Closing the About dialog works in each shipped language, without reopening."""
+    monkeypatch.setattr(base, "vocab", Vocabulary(base.__file__, language=language))
+    mock_core.tray.close_about.return_value = True
+
+    assert base.handle(command, mock_core) is True
+    mock_core.tray.close_about.assert_called_once()
+    mock_core.tray.open_about.assert_not_called()
+
+
 @pytest.mark.usefixtures("german")
 @pytest.mark.parametrize(
     "command",

@@ -112,6 +112,29 @@ def test_handle_about_commands(mock_core, command):
 
 
 @pytest.mark.parametrize(
+    "command",
+    ["close the about dialogue", "Close the About box", "hide the about window"],
+)
+def test_handle_closes_the_about_dialog(mock_core, command):
+    """Asking to close the About dialog closes it, rather than opening another."""
+    mock_core.tray.close_about.return_value = True
+
+    assert base.handle(command, mock_core) is True
+    mock_core.tray.close_about.assert_called_once()
+    mock_core.tray.open_about.assert_not_called()
+    mock_core.speak.assert_called_once_with("Closing the About dialog.")
+
+
+def test_handle_close_without_an_about_dialog(mock_core):
+    """With no About dialog open, closing it says so and opens nothing."""
+    mock_core.tray.close_about.return_value = False
+
+    assert base.handle("close the about box", mock_core) is True
+    mock_core.tray.open_about.assert_not_called()
+    mock_core.speak.assert_called_once_with("The About dialog isn't open.")
+
+
+@pytest.mark.parametrize(
     ["command"],
     [
         ["open firefox"],

@@ -21,6 +21,9 @@ msgstr "Verfügbare Befehle"
 msgid "Check the terminal for available commands."
 msgstr "Die verfügbaren Befehle stehen im Terminal."
 
+msgid "Closing the About dialog."
+msgstr "Der Info-Dialog wird geschlossen."
+
 msgid "Goodbye."
 msgstr "Auf Wiedersehen."
 
@@ -32,6 +35,9 @@ msgstr "Modi warten jetzt auf das Aktivierungswort."
 
 msgid "Opening the About dialog."
 msgstr "Der Info-Dialog wird geöffnet."
+
+msgid "The About dialog isn't open."
+msgstr "Der Info-Dialog ist nicht geöffnet."
 
 msgid "exit EasySpeak"
 msgstr "EasySpeak beenden"
