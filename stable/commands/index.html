@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://easyspeak.dev/latest/0.12.0/commands/">
+        <link rel="canonical" href="https://easyspeak.dev/latest/0.13.0/commands/">
       
       
         <link rel="prev" href="../screenshots/">
@@ -305,6 +305,33 @@
     
   
     Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compatibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compatibility
   
 
     
@@ -738,10 +765,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
         
           
-          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
             
   
   
@@ -759,8 +786,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_11">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1393,11 +1420,11 @@ included, so they can be tuned without touching code.</p>
 </thead>
 <tbody>
 <tr>
-<td>notes</td>
+<td>dictation / notes</td>
 <td>Start dictation mode</td>
 </tr>
 <tr>
-<td>stop notes</td>
+<td>stop dictation / stop notes</td>
 <td>End dictation mode</td>
 </tr>
 <tr>
@@ -1549,6 +1576,8 @@ terminal, browser, music player, and more. Some accept spoken aliases —
 e.g. "open music app" works the same as "open music player".</p>
 <p>"Open terminal" and "close terminal" are special: they open and close your
 system's default terminal, whichever one that is, rather than a fixed app.</p>
+<p>On KDE Plasma, EasySpeak opens the KDE counterpart of an app where there is one,
+e.g. System Settings for "settings", KCalc for "calculator" or KWrite for "editor".</p>
 <h2 id="files">Files<a class="headerlink" href="#files" title="Permanent link">&para;</a></h2>
 <p>Folders open in whatever file manager your desktop is configured for (via
 <code>xdg-open</code>).</p>
@@ -1567,6 +1596,10 @@ system's default terminal, whichever one that is, rather than a fixed app.</p>
 <tr>
 <td>close files / file manager</td>
 <td>Close your default file manager</td>
+</tr>
+<tr>
+<td>close [folder], e.g. close downloads</td>
+<td>Close your default file manager, all its windows</td>
 </tr>
 <tr>
 <td>open documents</td>
@@ -1599,6 +1632,10 @@ system's default terminal, whichever one that is, rather than a fixed app.</p>
 <tr>
 <td>open desktop</td>
 <td>Open Desktop folder</td>
+</tr>
+<tr>
+<td>open trash</td>
+<td>Open the trash</td>
 </tr>
 </tbody>
 </table>
@@ -1697,11 +1734,19 @@ browser. When one does, you'll hear what changed:</p>
 <td>List all commands</td>
 </tr>
 <tr>
-<td>go to sleep / stop listening</td>
+<td>about EasySpeak / [show the] About box / About dialog</td>
+<td>Show the About dialog</td>
+</tr>
+<tr>
+<td>close / hide the About dialog</td>
+<td>Close the About dialog</td>
+</tr>
+<tr>
+<td>go to sleep / stop listening / deactivate yourself</td>
 <td>Release the mic (reactivate from the tray icon or the Quick Settings toggle)</td>
 </tr>
 <tr>
-<td>quit / exit / goodbye</td>
+<td>quit / exit / goodbye, or e.g. "close the application", "stop EasySpeak"</td>
 <td>Exit EasySpeak</td>
 </tr>
 </tbody>
