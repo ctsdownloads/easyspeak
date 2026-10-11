@@ -50,6 +50,8 @@ def test_base_about_in_every_language(language, command, mock_core, monkeypatch)
     ("language", "command"),
     [
         ("de", "info-dialog schließen"),
+        ("de", "schließ über easyspeak"),
+        ("de", "mach den info-dialog zu"),
         ("it", "chiudi la finestra informazioni"),
         ("fr", "ferme la boîte à propos"),
         ("es", "cierra el diálogo acerca de"),
