@@ -13,6 +13,7 @@ ignore=
 warnings=0
 ignoreerrors=
   ^https://www\.freedesktop\.org/ ^418
+  ^https://github\.com/ ^50[0-9]
 
 [text]
 parts=url,parenturl,realurl,result,warning,info,stats,outro
