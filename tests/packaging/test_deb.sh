@@ -24,4 +24,24 @@ has easyspeak/gnome/metadata.json
 has easyspeak/gnome/schemas/org.gnome.shell.extensions.easyspeak.gschema.xml
 has easyspeak/gnome/schemas/gschemas.compiled
 
+echo "The .deb ships the license and the tray helper for other desktops"
+has /usr/share/doc/easyspeak/LICENSE
+has easyspeak/core/statusnotifier.py
+has easyspeak/core/statusnotifier.xml
+has easyspeak/core/autostart.py
+has easyspeak/core/about.py
+
+# Package names a control field lists, one per line, without versions.
+names() { dpkg-deb --field "$deb" "$1" | tr ',|' '\n' | sed 's/^ *//; s/[ (].*//'; }
+lists() { grep -qx -- "$2" <<<"$(names "$1")" || { echo "  NOT IN $1: $2" >&2; exit 1; }; }
+avoids() { ! grep -qx -- "$2" <<<"$(names "$1")" || { echo "  IN $1: $2" >&2; exit 1; }; }
+
+echo "The .deb only suggests GNOME's parts and kdialog, so other desktops stay lean"
+for package in gnome-shell libgtk-4-1 libadwaita-1-0 gir1.2-gtk-4.0 gir1.2-adw-1 kdialog; do
+    lists Suggests "$package"
+    avoids Depends "$package"
+    avoids Recommends "$package"
+done
+lists Depends python3-gi
+
 echo "✔  Debian package looks good."
