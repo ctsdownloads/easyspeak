@@ -45,9 +45,9 @@ theme:
 docs_dir: docs
 
 extra_css:
-- stylesheets/diagram-overlay.css
+- stylesheets/figure-overlay.css
 extra_javascript:
-- javascripts/diagram-overlay.js
+- javascripts/figure-overlay.js
 
 # These assets live under docs/media/ but are not referenced by any page, so
 # keep them out of the built site (the demo video is a 23 MB LFS object).

@@ -1,8 +1,9 @@
-.mermaid {
+.mermaid,
+.md-content img:not(a img) {
   cursor: zoom-in;
 }
 
-.diagram-overlay {
+.figure-overlay {
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -13,7 +14,7 @@
   cursor: zoom-out;
 }
 
-.diagram-overlay__bar {
+.figure-overlay__bar {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -24,7 +25,7 @@
   border-bottom: 1px solid var(--md-default-fg-color--lightest);
 }
 
-.diagram-overlay__bar button {
+.figure-overlay__bar button {
   padding: 0 0.3rem;
   font-size: 1.4rem;
   line-height: 1;
@@ -34,11 +35,11 @@
   border: 0;
 }
 
-.diagram-overlay__bar button:hover {
+.figure-overlay__bar button:hover {
   color: var(--md-accent-fg-color);
 }
 
-.diagram-overlay__stage {
+.figure-overlay__stage {
   display: flex;
   flex: 1;
   padding: 1rem;
@@ -46,10 +47,12 @@
   overscroll-behavior: contain;
 }
 
-/* Auto margins centre the diagram when it fits and let the stage scroll
+/* Auto margins centre the figure when it fits and let the stage scroll
    when it does not, which flex centring would clip. */
-.diagram-overlay .mermaid {
+.figure-overlay .mermaid,
+.figure-overlay img {
   flex: none;
+  max-width: none;
   margin: auto;
   cursor: zoom-out;
 }
