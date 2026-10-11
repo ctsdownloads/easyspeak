@@ -5,6 +5,59 @@ canonical, GitHub-independent record of releases. It is updated once per
 release. The format loosely follows [Keep a Changelog](https://keepachangelog.com/),
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.13.0 · Welcome, KDE Plasma! · 2026-10-11
+
+**EasySpeak Comes to KDE Plasma, Says What Went Wrong, and Licenses Every File
+the REUSE Way**
+
+EasySpeak now runs on KDE Plasma too. Its tray icon puts it to sleep, wakes it
+up, opens Help and About, and switches "Start at Login" on or off. "Open
+settings", "open calculator" and other app names open the KDE counterparts, and
+the About information appears in Plasma's own look where `kdialog` is installed.
+A new Compatibility page shows which features work on which desktop; the mouse
+grid, head tracking and typing dictated text still need GNOME. The packages no
+longer pull GNOME's libraries onto other desktops, and every file's copyright and
+license is declared following the REUSE specification.
+
+When something goes wrong, EasySpeak now says so out loud instead of only in the
+terminal, and Ctrl+C ends it quietly. It also understands more ways of asking:
+"dictation", "deactivate yourself", "exit the application", "open trash", "close
+downloads", and opening or closing the About dialog by name.
+
+### What's Changed
+
+- Settings raises the open preferences dialog by @bittner in [#201](https://github.com/ctsdownloads/easyspeak/pull/201)
+- "Stop listening" releases the mic at once by @bittner in [#200](https://github.com/ctsdownloads/easyspeak/pull/200)
+- Dictation Plugin: compare Title Classes with lowercase, remove unneccessary "inserted 0 chars" when triggered
+  by has_focused_text_field() by @SolanumForte in [#202](https://github.com/ctsdownloads/easyspeak/pull/202)
+- Remove the Bencher integration by @bittner in [#205](https://github.com/ctsdownloads/easyspeak/pull/205)
+- Tray icon for KDE Plasma and other desktops by @bittner in [#204](https://github.com/ctsdownloads/easyspeak/pull/204)
+- REUSE-compliant licensing by @bittner in [#206](https://github.com/ctsdownloads/easyspeak/pull/206)
+- About dialog by voice, more natural replies by @bittner in [#208](https://github.com/ctsdownloads/easyspeak/pull/208)
+- Dictation fails gracefully on KDE Plasma by @bittner in [#209](https://github.com/ctsdownloads/easyspeak/pull/209)
+- Open System Settings on KDE Plasma by @bittner in [#210](https://github.com/ctsdownloads/easyspeak/pull/210)
+- Open KDE apps on KDE Plasma by @bittner in [#212](https://github.com/ctsdownloads/easyspeak/pull/212)
+- About dialog works on NixOS by @bittner in [#211](https://github.com/ctsdownloads/easyspeak/pull/211)
+- No GNOME libraries forced on other desktops by @bittner in [#218](https://github.com/ctsdownloads/easyspeak/pull/218)
+- Mouse grid says why it can't appear by @bittner in [#214](https://github.com/ctsdownloads/easyspeak/pull/214)
+- Core reports failures out loud by @bittner in [#217](https://github.com/ctsdownloads/easyspeak/pull/217)
+- More ways to ask for the About dialog by @bittner in [#219](https://github.com/ctsdownloads/easyspeak/pull/219)
+- Browser plugin reports failures out loud by @bittner in [#215](https://github.com/ctsdownloads/easyspeak/pull/215)
+- Fix test failing on Python 3.10–3.12 by @bittner in [#222](https://github.com/ctsdownloads/easyspeak/pull/222)
+- Ctrl+C quits without a stack trace by @bittner in [#220](https://github.com/ctsdownloads/easyspeak/pull/220)
+- More ways to ask EasySpeak to quit by @bittner in [#221](https://github.com/ctsdownloads/easyspeak/pull/221)
+- Head tracking says why it stopped by @bittner in [#216](https://github.com/ctsdownloads/easyspeak/pull/216)
+- Say "dictation" to dictate by @bittner in [#224](https://github.com/ctsdownloads/easyspeak/pull/224)
+- Compatibility page, KDE in the desktop badge by @bittner in [#223](https://github.com/ctsdownloads/easyspeak/pull/223)
+- Native About window on KDE Plasma by @bittner in [#226](https://github.com/ctsdownloads/easyspeak/pull/226)
+- "Start at Login" in the KDE tray menu by @bittner in [#225](https://github.com/ctsdownloads/easyspeak/pull/225)
+- Trash, and closing folders, by voice by @bittner in [#227](https://github.com/ctsdownloads/easyspeak/pull/227)
+- KDE docs: Start at Login, native About by @bittner in [#228](https://github.com/ctsdownloads/easyspeak/pull/228)
+- Close the About dialog by voice by @bittner in [#229](https://github.com/ctsdownloads/easyspeak/pull/229)
+- Package checks for KDE support by @bittner in [#230](https://github.com/ctsdownloads/easyspeak/pull/230)
+
+**Full Changelog**: [`0.12.0...0.13.0`](https://github.com/ctsdownloads/easyspeak/compare/0.12.0...0.13.0)
+
 ## 0.12.0 · A Faster Ear · 2026-09-14
 
 **Parakeet Recognizes the Speech by Default, in Its Own Package, and Dictation
