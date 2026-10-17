@@ -5,7 +5,8 @@
 - Author: Elifarley (with Claude Code)
 - Intent: `docs/superpowers/intents/2026-10-17-compositor-agnostic-typing-for-easyspeak-intent.md`
 - Depends on: ctsdownloads/easyspeak#233 — this branch is stacked directly on
-  its head (`dac70d2`, branch `69-prototype-compositor-agnostic-easyspeak-backend-layer-shell-overlay-ydotool`
+  its head (`41ef508` at plan time — re-resolve at execution, the head moves;
+  branch `69-prototype-compositor-agnostic-easyspeak-backend-layer-shell-overlay-ydotool`
   on `elifarley/easyspeak`); merge order: #233 lands, then this
 - Verification basis: live tests on the `easyspeak-cosmic` VM (Pop!_OS 24.04 / COSMIC, libvirt, SSH + framebuffer screenshots), 2026-10-17
 
@@ -284,8 +285,8 @@ single key instead of chord. Browser mode: same gate via `press_key`.
 
 **Repeats batch into one invocation.** Daemonless ydotool pays a fresh uinput
 device plus a settle delay per invocation (measured on a live COSMIC session:
-`--delay 0` delivers nothing, the default 100ms delivers,
-`_ydotool.py:415-425`), and `press_key` loops `tap_chord` per repeat up to
+`--delay 0` delivers nothing, the default 100ms delivers —
+the grid backend's `legacy_delay_args()`), and `press_key` loops `tap_chord` per repeat up to
 `MAX_KEY_REPEATS = 200`. The uinput synthesis therefore emits repeats as ONE
 `key` argv — `14:1 14:0 14:1 14:0 …` for "backspace ten" — one device, one
 settle, not ten. The examples above are the modern dialect's grammar; the
@@ -390,8 +391,9 @@ swallowing, no fallback that strands the user without a way back.
 2. browser-mode "press enter" lands
 3. voice "volume up" pops COSMIC's own OSD (screenshot)
 4. keystroke commands: "backspace ten" removes ten chars as ONE batched
-   invocation, inside ~2s on the VM (one device creation + settle; baseline
-   measured during acceptance and the bound tightened to it)
+   invocation — the daemon log shows a single `key` argv for the batch
+   (primary discriminator); the wall-clock number is recorded from the
+   measured baseline, not asserted ahead of it
 5. `EASYSPEAK_KEY_BACKEND` forces a backend regardless of session (unit-tested
    on both session kinds); an unknown value warns and proceeds with auto
 6. key-verb argv grammar captured from BOTH dialects' `key --help` usage
@@ -407,7 +409,7 @@ line, so the log lines are secondary evidence, never the gate.
 ## 10. Sequencing and reconciliation with #233
 
 Hard ordering softened into stacking: this branch sits directly on #233's
-head (`dac70d2`), so the extraction reads the landed `_ydotool` in-tree —
+head (`41ef508` at plan time), so the extraction reads the landed `_ydotool` in-tree —
 no guessing. Merge order stays: #233 lands first, this follows. This PR then:
 
 1. Extract to core exactly the reusable plumbing: the bounded run seam
@@ -420,7 +422,8 @@ no guessing. Merge order stays: #233 lands first, this follows. This PR then:
    mouse verbs and imports the shared module
    (the consolidation #233's review asked for; the grid's conversation loops
    are untouched). The `EASYSPEAK_GRID_DRY_RUN` silent-ran bypass
-   (`_ydotool.py:353-355`) is **excluded from the shared seam**: dry-run
+   (the env check at the top of `_run_bounded` in the grid backend) is
+   **excluded from the shared seam**: dry-run
    becomes an explicit parameter the grid supplies at its own boundary
    (keeping its env check), the core plumbing reads no `EASYSPEAK_GRID_*`
    env of its own, and key injection ships no dry-run variable — the §9

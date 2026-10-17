@@ -25,11 +25,11 @@
 - [ ] Both fixture files exist and contain a `key` verb usage/section captured from a real client's `--help` output
 - [ ] The legacy fixture comes from the `easyspeak-cosmic` VM (Pop 24.04, ydotool 0.1.8); the modern fixture from a 1.0.x client (Ubuntu 26.04 VM) or, failing that, from the ydotool 1.0.x source tree with the source URL recorded in the file header
 
-**Verify:** `hug -C ~/src/easyspeak.WT.compositor-agnostic-typing-for-easyspeak ll -3` shows only our docs commits on top of `eb2a003`; `head -3 tests/unit/core/fixtures/ydotool_key_usage_*.txt` names the client version each was captured from.
+**Verify:** `hug -C ~/src/easyspeak.WT.compositor-agnostic-typing-for-easyspeak ll -20` — our docs commits stack directly on #233's CURRENT head (resolve it fresh: `gh pr view 233 --repo ctsdownloads/easyspeak --json headRefOid`; it was `41ef508` at plan time and moves). Count-explicit, hash-free: `git log --oneline <that-head>..HEAD | wc -l` equals the number of our docs commits (8 at plan time). `head -3 tests/unit/core/fixtures/ydotool_key_usage_*.txt` names the client version each was captured from.
 
 **Steps:**
 
-- [ ] **Step 1: Rebase.** `hug -C ~/src/easyspeak.WT.compositor-agnostic-typing-for-easyspeak fetch`, then `hug -C … rb origin/69-prototype-compositor-agnostic-easyspeak-backend-layer-shell-overlay-ydotool -y`. If #233 gained code commits since `eb2a003`, re-read `_ydotool.py` and reconcile line references in Tasks 1–3 before proceeding (the spec's §10 reconciliation checklist).
+- [ ] **Step 1: Rebase.** `hug -C ~/src/easyspeak.WT.compositor-agnostic-typing-for-easyspeak fetch`, then `hug -C … rb origin/69-prototype-compositor-agnostic-easyspeak-backend-layer-shell-overlay-ydotool -y`. If #233 gained code commits since `41ef508`, re-read `_ydotool.py` and reconcile ALL line references in Tasks 1–3 before proceeding (the spec's §10 reconciliation checklist) — cite by name from here on; the tree moved under `41ef508` ("Point KDE Plasma users at the ydotoold device").
 - [ ] **Step 2: Capture legacy grammar (VM).** From the host:
   ```sh
   ssh -i ~/.ssh/id_ed25519 pop-os@$(virsh --connect qemu:///system domifaddr easyspeak-cosmic | awk '/ipv4/{print $4; exit}' | cut -d/ -f1) 'ydotool key --help 2>&1; ydotool --help 2>&1 | grep -A1 key'
@@ -51,6 +51,7 @@
 - Create: `src/core/ydotool.py`
 - Modify: `src/plugins/mousegrid/_ydotool.py` (delete moved definitions, add re-imports, pass `dry_run=` at call sites)
 - Test: `tests/unit/core/test_ydotool_plumbing.py` (new, small)
+- Test: `tests/unit/plugins/test_mousegrid_ydotool.py` (mechanical mock retarget, Step 2)
 
 **Moved verbatim** (from `_ydotool.py`; line ranges below are approximate, locate by name): constants `PROBE_TIMEOUT`, `INJECT_TIMEOUT`, `REAP_GRACE`, `PRESENT_TIMEOUT`, `PROBE_TIMEOUT_PER_USE`, `YDTOOL_SOCKET`, `YDTOOL_SOCKET_NAME`, `YDTOOL_SOCKET_TYPES`, `ERROR_SIGNATURES`, `FALLBACK_NOTICE`, `YDTOOL_DIALECT_*`, `YDTOOL_ABSOLUTE_FLAG`, `YDTOOL_NOOP_LEGACY`, `YDTOOL_NOOP_MODERN` (`:64-126`); functions `_probe_dialect`, `dialect`, `ydotool_socket_candidates`, `_socket_owned`, `_socket_env_key`, `injector_socket`, `_client_env`, `_spawn`, `_run_bounded`, `run_ydotool` (`:136-404`), `_socket_accepts`, `parse_tool_list`, `_probe_tools` (`:609-685`). NOT moved: `YDTOOL_VERBS`, `BUTTONS`/`MODERN_BUTTONS`, `legacy_delay_args`, pointer verbs, helper plumbing, gate policy, conversation — those are grid-owned.
 
@@ -100,7 +101,9 @@
   from easyspeak.core.ydotool import (  # noqa: F401 — re-exported for the grid
       ERROR_SIGNATURES,
       INJECT_TIMEOUT,
+      PRESENT_TIMEOUT,
       PROBE_TIMEOUT,
+      PROBE_TIMEOUT_PER_USE,
       REAP_GRACE,
       YDTOOL_ABSOLUTE_FLAG,
       YDTOOL_DIALECT_LEGACY,
@@ -125,11 +128,14 @@
       ydotool_socket_candidates,
   )
   ```
-  At each former `_run_bounded(args…)` call site in the grid (the injector
-  probe and the verb runners), the flag reaches the seam through
-  `run_ydotool(args, dry_run=_grid_dry_run())` — the passthrough is the whole
-  path; a `_run_bounded`-only parameter would silently disarm the flag at the
-  verb runners. Exactly one grid-side definition of the env read:
+  At each former `_run_bounded(args…)` call site: the **verb runners** route
+  through `run_ydotool(args, dry_run=_grid_dry_run())` — the passthrough is
+  the whole path; a `_run_bounded`-only parameter would silently disarm the
+  flag at the verb runners. The **injector probe keeps calling
+  `_run_bounded(args, timeout, dry_run=_grid_dry_run())` directly**: routing
+  it through `run_ydotool` would add a WARNING log per failed probe (today's
+  probe failures are silent — an undisclosed log delta if changed). Exactly
+  one grid-side definition of the env read:
   ```python
   def _grid_dry_run():
       return bool(os.environ.get("EASYSPEAK_GRID_DRY_RUN"))
@@ -380,24 +386,51 @@
       assert any("unknown" in r.message for r in caplog.records)
 
 
+  class FakeConn:
+      """Context-manager connection standing in for conn_factory."""
+
+      def __init__(self, outcome):
+          self.outcome = outcome
+
+      def send_and_get_reply(self, message, timeout=None):
+          if self.outcome == "timeout":
+              raise TimeoutError
+          raise AssertionError(f"unexpected message: {message}")
+
+      def __enter__(self):
+          return self
+
+      def __exit__(self, *exc):
+          return False
+
+
   def test_remote_desktop_translates_jeepney_timeout(monkeypatch):
       # through the MODULE dispatch — the TimeoutError/OSError translation
-      # lives in tap_chord's arm, not inside the backend body
+      # lives in tap_chord's arm, not inside the backend body; the fake
+      # connection preserves the one-connection-per-chord contract
       monkeypatch.setattr(mk, "select_backend", lambda: mk.RemoteDesktopBackend(
-          caller=lambda msg: (_ for _ in ()).throw(TimeoutError)))
+          conn_factory=lambda: FakeConn("timeout")))
       with pytest.raises(mk.InjectionUnavailableError):
           mk.tap_chord([29, 47])
 
 
   def test_uinput_default_runner_signature():
-      """The DEFAULT runner path with the real run_ydotool: a 2-arg stub
-      runner would mask a TypeError at the true call site, so this test uses
-      the real one against a guaranteed-refusing argv — it must raise
-      InjectionUnavailableError, never TypeError."""
-      monkeypatch.delenv("EASYSPEAK_KEY_BACKEND", raising=False)
-      monkeypatch.setattr(mk, "on_gnome", lambda: False)
+      """The DEFAULT runner path with the real run_ydotool against a
+      guaranteed-refusing, NON-injecting argv (unknown verb: the client
+      usage-errors without emitting events). A 2-arg stub runner would mask
+      a TypeError at the true call site; a real Ctrl+V would type into
+      whoever is focused on a provisioned dev host."""
+      backend = mk.UinputBackend()
       with pytest.raises(mk.InjectionUnavailableError):
-          mk.tap_chord((29, 47))  # refuses: no ydotool binary / no verb in CI
+          backend._inject(("ydotool", "definitely-not-a-verb", "x"),
+                          ydotool.key_timeout(1))
+
+
+  def test_auto_value_is_documented_and_silent(monkeypatch, caplog):
+      monkeypatch.setenv("EASYSPEAK_KEY_BACKEND", "auto")
+      mk._resolve_backend(owned=lambda: True, probe_error=lambda: False,
+                          cache=mk._GateCache())
+      assert not any("EASYSPEAK_KEY_BACKEND" in r.message for r in caplog.records)
   ```
 - [ ] **Step 2: Run** → FAIL.
 - [ ] **Step 3: Implement the gate** in `mediakeys.py` (the vocabulary — `KEYS`, `KEY_ALIASES`, `KEY_NAMES`, `MAX_KEY_REPEATS`, `parse_key_request` — stays untouched):
@@ -412,43 +445,59 @@
   class RemoteDesktopBackend:
       KIND = "remote-desktop"
 
-      def __init__(self, caller=None):
-          self._caller = caller or self._jeepney_call
+      def __init__(self, conn_factory=None):
+          # ONE connection per chord — the session lives only as long as the
+          # D-Bus connection that created it (the module invariant), so
+          # CreateSession, every NotifyKeyboardKeycode and Stop ride the SAME
+          # connection, closed in finally. This is today's tap_chord body with
+          # exactly two deltas: the rename and the bounded send timeout.
+          self._conn_factory = conn_factory or (
+              lambda: open_dbus_connection(bus="SESSION"))
 
-      def _jeepney_call(self, message):
-          from jeepney.io.blocking import open_dbus_connection
-          with open_dbus_connection("SESSION") as conn:
-              reply = conn.send_and_get_reply(message, timeout=DBUS_TIMEOUT)
+      def _call(self, conn, message):
+          reply = conn.send_and_get_reply(message, timeout=GDBUS_TIMEOUT)
           if reply.header.message_type is MessageType.error:
               raise InjectionUnavailableError(" ".join(map(str, reply.body)))
           return reply
 
       def tap_chord(self, keycodes):
-          conn = self._session()  # CreateSession → Start, as today
-          try:
-              for keycode in keycodes:
-                  self._caller(self._keycode_message(conn, keycode, True))
-              for keycode in reversed(keycodes):
-                  self._caller(self._keycode_message(conn, keycode, False))
-          finally:
-              self._stop(conn)
+          with self._conn_factory() as conn:
+              reply = self._call(
+                  conn, new_method_call(_REMOTE_DESKTOP, "CreateSession"))
+              session = DBusAddress(
+                  reply.body[0], bus_name=_BUS, interface=f"{_BUS}.Session")
+              try:
+                  self._call(conn, new_method_call(session, "Start"))
+                  for keycode in keycodes:
+                      self._call(conn, new_method_call(
+                          session, "NotifyKeyboardKeycode", "ub", (keycode, True)))
+                  for keycode in reversed(keycodes):
+                      self._call(conn, new_method_call(
+                          session, "NotifyKeyboardKeycode", "ub", (keycode, False)))
+                  self._call(conn, new_method_call(session, "Stop"))
+              finally:
+                  conn.close()
 
       def tap_key(self, keycode, repeats=1):
           for _ in range(repeats):      # per-repeat loop: GNOME stays byte-for-byte
               self.tap_chord([keycode])
+  ```
+  (`open_dbus_connection`, `new_method_call`, `DBusAddress`, `MessageType`,
+  `_REMOTE_DESKTOP`, `_BUS` come from today's imports unchanged;
+  `GDBUS_TIMEOUT` is imported from `core.tray`, not redefined. The test seam
+  is `conn_factory` — a fake connection object — never a per-message caller.)
   ```
   (The session/message helpers are today's `tap_chord` body factored so `caller` is injectable — the moved code is otherwise verbatim; `TimeoutError` from the bounded call escapes `_jeepney_call` as `TimeoutError`, and the module-level dispatch below translates it. Keep it that way only if the translation test above passes via the dispatch; otherwise translate here.)
   ```python
   class UinputBackend:
       KIND = "uinput"
 
-      def __init__(self, runner=None, owned=None):
+      def __init__(self, runner=None):
           # bind with a lambda, never the bare function: the real run_ydotool
           # takes (args, …) and the call site is 2-arg — a direct bind would
           # TypeError on the first real injection, invisible to 2-arg stubs
           self._runner = runner or (
               lambda args, timeout: yd.run_ydotool(args, timeout=timeout))
-          self._owned = owned or yd.injector_socket
 
       def tap_chord(self, keycodes):
           self._inject(yd.key_argv(tuple(keycodes)), yd.key_timeout(1))
@@ -476,9 +525,32 @@
       backend = None
 
 
-  def _mutter_owned():
-      from easyspeak.core.ydotool import _client_env  # not used here; see probe below
-      raise NotImplementedError  # replaced by the gdbus probe in the real body
+  _gate = _GateCache()  # module-level; tests use fresh _GateCache()s or reset
+  # _gate.backend = None in an autouse fixture — one real-gate test would
+  # otherwise pollute every later sticky-selection test.
+
+
+  _DBUS = DBusAddress("/org/freedesktop/DBus", bus_name="org.freedesktop.DBus",
+                      interface="org.freedesktop.DBus")
+
+
+  def _mutter_state():
+      """owned / unowned / error — one bounded NameHasOwner call, retried once
+      on a bus-level failure (spec §4.2's bounded retry). jeepney blocks by
+      default, hence the explicit timeout."""
+      for _attempt in (1, 2):
+          try:
+              with open_dbus_connection(bus="SESSION") as conn:
+                  reply = conn.send_and_get_reply(
+                      new_method_call(_DBUS, "NameHasOwner", "s",
+                                      ("org.gnome.Mutter.RemoteDesktop",)),
+                      timeout=GDBUS_TIMEOUT)
+          except (TimeoutError, OSError):
+              continue
+          if reply.header.message_type is MessageType.error:
+              return "error"
+          return "owned" if reply.body[0] else "unowned"
+      return "error"
 
 
   def _resolve_backend(owned, probe_error, cache):
@@ -491,7 +563,7 @@
       elif forced == "uinput":
           backend = UinputBackend()
       else:
-          if forced:  # unknown value: warn, proceed with auto (EASYSPEAK_PASTE_KEYS precedent)
+          if forced and forced != "auto":  # documented value stays silent
               logger.warning(
                   "Ignoring EASYSPEAK_KEY_BACKEND=%r: unknown backend. "
                   "Known: remote-desktop, uinput, auto.", forced)
@@ -506,11 +578,11 @@
 
 
   def select_backend():
-      """Resolve once per process (sticky). The Mutter probe is one bounded
-      gdbus NameHasOwner call; its errors arm counts as probe-error."""
+      """Resolve once per process (sticky)."""
+      state = _mutter_state()
       return _resolve_backend(
-          owned=_mutter_owned,
-          probe_error=_mutter_probe_errored,
+          owned=lambda: state == "owned",
+          probe_error=lambda: state == "error",
           cache=_gate,
       )
   ```
@@ -578,7 +650,7 @@
 - [ ] **Step 1: Failing test** in `tests/unit/plugins/test_dictation.py`:
   ```python
   def test_no_focus_off_gnome_proceeds_to_clipboard(monkeypatch, tmp_path):
-      monkeypatch.setattr(dictation, "on_gnome", lambda: False)  # imported in Task 3
+      monkeypatch.setattr(dictation, "on_gnome", lambda: False)  # Task 4's own import from core.tray
       monkeypatch.setattr(dictation, "insert_via_atspi", lambda text: "no_focus")
       called = {}
       monkeypatch.setattr(dictation, "write_clipboard", lambda cmd, text: called.update(text=text) or True)
@@ -587,7 +659,7 @@
       monkeypatch.setattr(dictation, "_restore_clipboard_later", lambda *a, **k: None)
       monkeypatch.setattr(dictation, "focused_wm_class", lambda: None)
       assert dictation.insert_text("hello") == dictation.INSERTED
-      assert called["text"] == " hello" or called["text"] == "hello"
+      assert called["text"] == "hello"  # insert_text adds no space; _dictate_utterance does
   ```
 - [ ] **Step 2: Implement** — in `insert_text`, replace the bare probe gate:
   ```python
@@ -676,8 +748,7 @@
 - [ ] **Step 1: VM prep** per the OB runbook (`virsh start easyspeak-cosmic`, SSH check, `wayland-1` present, watcher host registered). Install the freshly built deb (Task 6's `check-python-packages` artifact or `just check-deb-package` output) — NOT the checkout venv — so the clean-install criterion is honest. Apply the documented uinput provisioning from `docs/troubleshooting.md`.
 - [ ] **Step 2: Scenarios 1-5** — start the daemon (`systemd-run --user --unit=easyspeak-acceptance --setenv=XDG_CURRENT_DESKTOP=COSMIC ~/easyspeak/.venv/bin/easyspeak` only if running from the checkout; the deb installs its own autostart), then per scenario: actuate (voice/`gdbus`), `virsh --connect qemu:///system screenshot`, convert + crop (ImageMagick), and paste transcript + image into the receipts file. Backspace-ten latency: read the daemon log's single `key` invocation + `time` the command.
 - [ ] **Step 3: GNOME regression** on the dev host (Pop 22.04/GNOME 42): run the daemon, dictate into a field (text lands), press a volume key via voice (OSD fires), assert the log line `key injection backend: remote-desktop`.
-- [ ] **Step 4: Calibrate** `KEY_PER_REPEAT_BUDGET` in `core/ydotool.py` from the measured batch cost (Task 2's 0.05 is provisional) and note the number in the receipts file.
-- [ ] **Step 4: Commit receipts** (fork-only file). `hug c -m "test: acceptance receipts for the compatibility column (fork-only)"`
+- [ ] **Step 5: Commit receipts** (fork-only file). `hug c -m "test: acceptance receipts for the compatibility column (fork-only)"`
 
 ---
 
