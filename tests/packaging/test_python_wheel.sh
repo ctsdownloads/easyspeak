@@ -14,6 +14,11 @@ echo "The wheel ships the core module and the plugins"
 has core
 has core/statusnotifier.xml
 has plugins
+has plugins/mousegrid/__init__.py
+has plugins/mousegrid/_common.py
+has plugins/mousegrid/_extension.py
+has plugins/mousegrid/_overlay.py
+has plugins/mousegrid/_ydotool.py
 has locale/de/LC_MESSAGES/dictation.po
 has locale/de/vocabulary.toml
 

@@ -52,6 +52,11 @@ Chain numbers to go faster: **"3 6 3"** zooms three times at once.
 | again | Reopen at last spot |
 | close | Hide grid |
 
+On a compositor where EasySpeak's Shell extension cannot run (COSMIC, wlroots,
+KDE), the same mousegrid plugin serves the grid through its ydotool backend
+instead. It understands the navigation, click and close verbs above; `nudge`,
+`scroll` and `mark`/`drag` are not available there yet.
+
 ## Head tracking (experimental)
 
 Requires a webcam and additional dependencies — see [Installation](installation.md#head-tracking-optional).

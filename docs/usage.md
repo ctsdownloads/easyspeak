@@ -126,3 +126,23 @@ PyGObject and the AT-SPI typelib, which the application's own virtual environmen
 usually lacks, so candidate interpreters are probed with the helper's real import
 chain and the first that works is kept. Set the variable to point straight at one
 (the Nix flake does).
+
+### [`plugins.mousegrid`][plugins.mousegrid]
+
+The mouse grid is served by the GNOME Shell extension on GNOME and by the
+plugin's ydotool backend elsewhere. The backend activates only where the stack
+works — a compositor with layer-shell support (COSMIC, wlroots, KDE), `ydotool`
+with write access to `/dev/uinput`, and, on ydotool 1.0.x, a running `ydotoold`
+(0.1.8 works without one, at the cost of the latency its own notice names)
+— and leaves the words to the extension backend everywhere else. Installing
+`ydotool` and granting that access is input-injection grade access, the same
+class as the `input` group hold-to-dictate needs; [Troubleshooting](troubleshooting.md)
+has the package names, the udev rule and what to do when the layer-shell stack is
+not packaged.
+
+| Variable                 | Default | Effect                                                         |
+| ------------------------ | ------- | -------------------------------------------------------------- |
+| `EASYSPEAK_GRID_BACKEND` | probed  | `uinput` or `gnome`: force one grid backend instead of probing. `uinput` skips the probes entirely. |
+| `EASYSPEAK_GRID_PYTHON`  | probed  | Path to an interpreter with PyGObject and the gtk4-layer-shell typelib, if the probe cannot find one. |
+| `EASYSPEAK_GRID_TYPELIB` | unset   | Path to an uninstalled gtk4-layer-shell build tree's `src` directory, prepended to `GI_TYPELIB_PATH` and `LD_LIBRARY_PATH` for the helper and its probes — the fallback where no distro packages the layer-shell stack. |
+| `EASYSPEAK_GRID_DRY_RUN` | unset   | Test seam: every injection reports `ran` without spawning `ydotool`. Leave unset outside the test harness — a session with it set answers clicks without touching the pointer. |
