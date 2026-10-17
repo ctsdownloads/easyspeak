@@ -197,7 +197,10 @@ class EasySpeak:
 
             mediakeys.tap_key(keycode)
             return True
-        except Exception:
+        except Exception as exc:
+            logger.warning(
+                "media-key injection failed; using the direct fallback: %s", exc
+            )
             return False
 
     def deactivate(self):

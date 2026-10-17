@@ -102,7 +102,7 @@ class TestEasySpeakUtilities:
         assert result is True
         mock_tap.assert_called_once_with(115)
 
-    def test_tap_key_returns_false_when_unavailable(self):
+    def test_tap_key_returns_false_when_unavailable(self, readlog):
         """tap_key reports failure when injection raises (e.g. non-GNOME session)."""
         easy = EasySpeak()
 
@@ -110,6 +110,7 @@ class TestEasySpeakUtilities:
             result = easy.tap_key(115)
 
         assert result is False
+        assert "media-key injection failed" in readlog().err
 
     def test_deactivate_delegates_to_tray(self):
         """EasySpeak.deactivate just queues a sleep on the tray controller."""
