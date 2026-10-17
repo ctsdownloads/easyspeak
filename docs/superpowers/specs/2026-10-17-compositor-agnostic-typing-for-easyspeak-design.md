@@ -155,8 +155,14 @@ behind the gate, verbatim. Same CreateSession → Start →
 NotifyKeyboardKeycode → Stop on one connection; same exception on refusal.
 
 **Ydotool backend** — delegates to plumbing extracted from #233's
-`_ydotool` (reconciliation contract in §10): uinput access probing,
-ydotoold socket discovery / daemonless fallback, and recovery guidance.
+`_ydotool` (reconciliation contract in §10): the capability probes (binary
+presence, dialect, verb list, daemon-socket ownership, functional no-op),
+socket discovery and ownership authentication, and the bounded run seam
+(`_spawn`/`_run_bounded`/`run_ydotool` — the `ran`/`errored`/`unknown`
+vocabulary). Recovery is carried by the uinput backend's exception message,
+which names the remedy (install ydotool; grant `/dev/uinput` via udev rule
+or the `input` group; start `ydotoold` on 1.0.x) — that is how §6's
+"log names the fix" promise is implemented.
 New surface needed beyond the grid's verbs: keycode-level synthesis mapping
 `tap_key(keycode, repeats=1)` and `tap_chord(keycodes)` onto the ydotool
 `key` verb. **The repeats channel lives in the backend**: the uinput backend
@@ -406,8 +412,11 @@ no guessing. Merge order stays: #233 lands first, this follows. This PR then:
 
 1. Extract to core exactly the reusable plumbing: the bounded run seam
    (`_spawn` / `_run_bounded` / `run_ydotool` — the `ran`/`errored`/`unknown`
-   vocabulary §4.3 maps), the uinput access probe, ydotool 0.1.8 daemonless
-   and 1.0.x daemon-socket support, recovery diagnostics. The grid keeps its
+   vocabulary §4.3 maps), the capability probes (binary presence, dialect,
+   verb list, daemon-socket ownership, functional no-op), ydotool 0.1.8
+   daemonless and 1.0.x daemon-socket support. Recovery is not extracted —
+   it is synthesized: the uinput backend's exception message names the
+   remedy (§4.3). The grid keeps its
    mouse verbs and imports the shared module
    (the consolidation #233's review asked for; the grid's conversation loops
    are untouched). The `EASYSPEAK_GRID_DRY_RUN` silent-ran bypass

@@ -21,7 +21,7 @@
 - Create: `tests/unit/core/fixtures/ydotool_key_usage_modern.txt`
 
 **Acceptance Criteria:**
-- [ ] `hug ll -1` shows the branch's tip directly on `origin/69-prototype-compositor-agnostic-easyspeak-backend-layer-shell-overlay-ydotool` (currently `eb2a003`)
+- [ ] `hug ll -1` shows the branch's tip directly on `origin/69-prototype-compositor-agnostic-easyspeak-backend-layer-shell-overlay-ydotool` (currently `41ef508`; re-resolve at execution time, the head moves)
 - [ ] Both fixture files exist and contain a `key` verb usage/section captured from a real client's `--help` output
 - [ ] The legacy fixture comes from the `easyspeak-cosmic` VM (Pop 24.04, ydotool 0.1.8); the modern fixture from a 1.0.x client (Ubuntu 26.04 VM) or, failing that, from the ydotool 1.0.x source tree with the source URL recorded in the file header
 
@@ -52,12 +52,12 @@
 - Modify: `src/plugins/mousegrid/_ydotool.py` (delete moved definitions, add re-imports, pass `dry_run=` at call sites)
 - Test: `tests/unit/core/test_ydotool_plumbing.py` (new, small)
 
-**Moved verbatim** (from `_ydotool.py`, current layout): constants `PROBE_TIMEOUT`, `INJECT_TIMEOUT`, `REAP_GRACE`, `PRESENT_TIMEOUT`, `PROBE_TIMEOUT_PER_USE`, `YDTOOL_SOCKET`, `YDTOOL_SOCKET_NAME`, `YDTOOL_SOCKET_TYPES`, `ERROR_SIGNATURES`, `FALLBACK_NOTICE`, `YDTOOL_DIALECT_*`, `YDTOOL_ABSOLUTE_FLAG`, `YDTOOL_NOOP_LEGACY`, `YDTOOL_NOOP_MODERN` (`:64-126`); functions `_probe_dialect`, `dialect`, `ydotool_socket_candidates`, `_socket_owned`, `_socket_env_key`, `injector_socket`, `_client_env`, `_spawn`, `_run_bounded`, `run_ydotool` (`:136-404`), `_socket_accepts`, `parse_tool_list`, `_probe_tools` (`:609-685`). NOT moved: `YDTOOL_VERBS`, `BUTTONS`/`MODERN_BUTTONS`, `legacy_delay_args`, pointer verbs, helper plumbing, gate policy, conversation — those are grid-owned.
+**Moved verbatim** (from `_ydotool.py`; line ranges below are approximate, locate by name): constants `PROBE_TIMEOUT`, `INJECT_TIMEOUT`, `REAP_GRACE`, `PRESENT_TIMEOUT`, `PROBE_TIMEOUT_PER_USE`, `YDTOOL_SOCKET`, `YDTOOL_SOCKET_NAME`, `YDTOOL_SOCKET_TYPES`, `ERROR_SIGNATURES`, `FALLBACK_NOTICE`, `YDTOOL_DIALECT_*`, `YDTOOL_ABSOLUTE_FLAG`, `YDTOOL_NOOP_LEGACY`, `YDTOOL_NOOP_MODERN` (`:64-126`); functions `_probe_dialect`, `dialect`, `ydotool_socket_candidates`, `_socket_owned`, `_socket_env_key`, `injector_socket`, `_client_env`, `_spawn`, `_run_bounded`, `run_ydotool` (`:136-404`), `_socket_accepts`, `parse_tool_list`, `_probe_tools` (`:609-685`). NOT moved: `YDTOOL_VERBS`, `BUTTONS`/`MODERN_BUTTONS`, `legacy_delay_args`, pointer verbs, helper plumbing, gate policy, conversation — those are grid-owned.
 
 **Acceptance Criteria:**
 - [ ] `core/ydotool.py` contains no `os.environ.get("EASYSPEAK_GRID_` read; `_run_bounded` takes `dry_run=None` as a parameter
 - [ ] `_ydotool.py` exposes the moved names via `from easyspeak.core.ydotool import …` re-exports and passes `dry_run=bool(os.environ.get("EASYSPEAK_GRID_DRY_RUN"))` where it called `_run_bounded`
-- [ ] `just pytest tests/unit/plugins/test_mousegrid_ydotool.py -q` passes unchanged
+- [ ] `just pytest tests/unit/plugins/test_mousegrid_ydotool.py -q` passes after the mechanical mock-site retarget (patches move from `mousegrid._ydotool` to `easyspeak.core.ydotool`, Step 3)
 - [ ] New plumbing test passes
 
 **Verify:** `just pytest tests/unit/core/test_ydotool_plumbing.py tests/unit/plugins/test_mousegrid_ydotool.py -q` → all pass.
@@ -82,6 +82,18 @@
           logger.warning("ydotool timed out after %ss: %s", timeout, " ".join(args))
           return "unknown"
       # … remainder verbatim from _ydotool.py:360-395
+  ```
+  The second edit: `run_ydotool` gains the passthrough. Without it the
+  parameter dead-ends at `_run_bounded` — every verb runner calls
+  `run_ydotool(args)`, so `EASYSPEAK_GRID_DRY_RUN` would silently disarm and
+  `just integration` would fire real pointer events:
+  ```python
+  def run_ydotool(args, timeout=INJECT_TIMEOUT, dry_run=None):
+      """Run an injection, logging whatever it was that happened."""
+      outcome = _run_bounded(args, timeout=timeout, dry_run=dry_run)
+      if outcome != "ran":
+          logger.warning("injection outcome: %s", outcome)
+      return outcome
   ```
 - [ ] **Step 2: Rewire `_ydotool.py`.** Delete the moved definitions; at the top add:
   ```python
@@ -113,19 +125,41 @@
       ydotool_socket_candidates,
   )
   ```
-  At each former `_run_bounded(args…)` call site in the grid (the injector probe and the verb runners), pass `dry_run=bool(os.environ.get("EASYSPEAK_GRID_DRY_RUN"))` — keep exactly one definition of that env read, grid-side.
+  At each former `_run_bounded(args…)` call site in the grid (the injector
+  probe and the verb runners), the flag reaches the seam through
+  `run_ydotool(args, dry_run=_grid_dry_run())` — the passthrough is the whole
+  path; a `_run_bounded`-only parameter would silently disarm the flag at the
+  verb runners. Exactly one grid-side definition of the env read:
+  ```python
+  def _grid_dry_run():
+      return bool(os.environ.get("EASYSPEAK_GRID_DRY_RUN"))
+  ```
+  Then retarget the grid test file mechanically: every patch site on the
+  moved names (roast-counted ~45 occurrences of `g._spawn` / `g._run_bounded`
+  / `g.run_ydotool` … in `tests/unit/plugins/test_mousegrid_ydotool.py`)
+  moves to the core namespace (`monkeypatch.setattr(easyspeak.core.ydotool,
+  "_spawn", …)`), because the moved functions resolve their internal calls in
+  core's module globals — patching the grid's re-export can no longer
+  intercept them, and blind mocks here fire REAL clicks before failing. The
+  dry-run unit test (`test_mousegrid_ydotool.py:408-413`) asserts the REMOVED
+  env-read behavior and is rewritten:
+  ```python
+  def test_dry_run_records_without_spawning(self, monkeypatch):
+      spawn = Mock()
+      monkeypatch.setattr(core_ydotool, "_spawn", spawn)
+      monkeypatch.setattr(g, "_grid_dry_run", lambda: True)
+      assert g._run_bounded(["ydotool", "click", "1"], dry_run=True) == "ran"
+      spawn.assert_not_called()
+  ```
 - [ ] **Step 3: Write the plumbing test** `tests/unit/core/test_ydotool_plumbing.py`:
   ```python
   """The core run seam reads no grid env of its own."""
   import easyspeak.core.ydotool as yd
 
 
-  def test_core_reads_no_grid_env(monkeypatch):
-      monkeypatch.setenv("EASYSPEAK_GRID_DRY_RUN", "1")
-      assert yd._run_bounded(("ydotool", "type", "x"), dry_run=None) != "ran" or True
-      # the real assertion: dry_run=None never short-circuits, so the call
-      # reaches _spawn — proven by the outcome NOT being the dry-run "ran"
-      # with a guaranteed-refusing argv:
+  def test_core_reads_no_grid_env():
+      # dry_run=None never short-circuits: a guaranteed-refusing argv reaches
+      # _spawn and comes back as a failure outcome, not the dry-run "ran"
       assert yd._run_bounded(("nonexistent-ydotool-binary",), dry_run=None) in {
           "errored",
           "unknown",
@@ -184,25 +218,25 @@
 
 
   def test_chord_order_down_then_up_reverse():
-      argv = yd.key_argv((29, 47))
+      argv = ydotool.key_argv((29, 47))
       codes = [tok for tok in argv if ":" in str(tok)]
       assert codes == ["29:1", "47:1", "47:0", "29:0"]
 
 
   def test_repeats_batch_into_one_argv():
-      argv = yd.key_argv((14,), repeats=10)
+      argv = ydotool.key_argv((14,), repeats=10)
       pairs = [tok for tok in argv if ":" in str(tok)]
       assert pairs == ["14:1", "14:0"] * 10
 
 
   def test_key_timeout_scales_with_repeats():
-      assert yd.key_timeout(1) >= yd.INJECT_TIMEOUT
-      assert yd.key_timeout(200) > yd.key_timeout(10)
+      assert ydotool.key_timeout(1) >= ydotool.INJECT_TIMEOUT
+      assert ydotool.key_timeout(200) > ydotool.key_timeout(10)
 
 
   @pytest.mark.parametrize("dialect", ["legacy", "modern"])
   def test_argv_matches_captured_fixture(dialect, monkeypatch):
-      monkeypatch.setattr(yd, "dialect", lambda: dialect)
+      monkeypatch.setattr(ydotool, "dialect", lambda: dialect)
       argv = yd.key_argv((29, 47))
       assert all(str(tok) in grammar_tokens(dialect) or str(tok) in ("ydotool", "key")
                  for tok in argv)
@@ -211,7 +245,7 @@
 - [ ] **Step 2: Run** → FAIL (no `key_argv`).
 - [ ] **Step 3: Implement** in `core/ydotool.py`:
   ```python
-  KEY_PER_REPEAT_BUDGET = 0.05  # s; calibrated against the VM acceptance run
+  KEY_PER_REPEAT_BUDGET = 0.05  # s; PROVISIONAL — Task 7 calibrates it on the VM
 
 
   def key_usage_grammar(text):
@@ -346,11 +380,24 @@
       assert any("unknown" in r.message for r in caplog.records)
 
 
-  def test_remote_desktop_translates_jeepney_timeout():
-      backend = mk.RemoteDesktopBackend(
-          caller=lambda msg: (_ for _ in ()).throw(TimeoutError))
+  def test_remote_desktop_translates_jeepney_timeout(monkeypatch):
+      # through the MODULE dispatch — the TimeoutError/OSError translation
+      # lives in tap_chord's arm, not inside the backend body
+      monkeypatch.setattr(mk, "select_backend", lambda: mk.RemoteDesktopBackend(
+          caller=lambda msg: (_ for _ in ()).throw(TimeoutError)))
       with pytest.raises(mk.InjectionUnavailableError):
-          backend.tap_chord([29, 47])
+          mk.tap_chord([29, 47])
+
+
+  def test_uinput_default_runner_signature():
+      """The DEFAULT runner path with the real run_ydotool: a 2-arg stub
+      runner would mask a TypeError at the true call site, so this test uses
+      the real one against a guaranteed-refusing argv — it must raise
+      InjectionUnavailableError, never TypeError."""
+      monkeypatch.delenv("EASYSPEAK_KEY_BACKEND", raising=False)
+      monkeypatch.setattr(mk, "on_gnome", lambda: False)
+      with pytest.raises(mk.InjectionUnavailableError):
+          mk.tap_chord((29, 47))  # refuses: no ydotool binary / no verb in CI
   ```
 - [ ] **Step 2: Run** → FAIL.
 - [ ] **Step 3: Implement the gate** in `mediakeys.py` (the vocabulary — `KEYS`, `KEY_ALIASES`, `KEY_NAMES`, `MAX_KEY_REPEATS`, `parse_key_request` — stays untouched):
@@ -396,7 +443,11 @@
       KIND = "uinput"
 
       def __init__(self, runner=None, owned=None):
-          self._runner = runner or yd.run_ydotool
+          # bind with a lambda, never the bare function: the real run_ydotool
+          # takes (args, …) and the call site is 2-arg — a direct bind would
+          # TypeError on the first real injection, invisible to 2-arg stubs
+          self._runner = runner or (
+              lambda args, timeout: yd.run_ydotool(args, timeout=timeout))
           self._owned = owned or yd.injector_socket
 
       def tap_chord(self, keycodes):
@@ -411,9 +462,13 @@
       def _inject(self, args, timeout):
           outcome = self._runner(args, timeout)
           if outcome != "ran":
-              # the outcome stays distinct in the log; the spoken fallback is shared
+              # the outcome stays distinct in the log; the spoken fallback is shared;
+              # the message names the remedy — §6's "log names the fix" promise
               logger.warning("uinput injection %s: %s", outcome, " ".join(args))
-              raise InjectionUnavailableError(f"injection {outcome}: {' '.join(args)}")
+              raise InjectionUnavailableError(
+                  f"injection {outcome}: {' '.join(args)} — check ydotool is "
+                  f"installed, /dev/uinput access (udev rule or input group), "
+                  f"and ydotoold on 1.0.x")
   ```
   Gate:
   ```python
@@ -465,15 +520,24 @@
       """Inject a chord (down in order, up in reverse). Raises, never returns status."""
       try:
           select_backend().tap_chord(tuple(keycodes))
-      except TimeoutError as exc:  # bounded D-Bus wait (jeepney) — OSError family anyway
-          raise InjectionUnavailableError(f"injection timed out: {exc}") from exc
+      except InjectionUnavailableError:
+          raise
+      except (TimeoutError, OSError) as exc:
+          # TimeoutError: the bounded D-Bus wait (jeepney); OSError: a missing
+          # binary or spawn failure from the uinput runner — both mean "no
+          # usable backend", and both must land in the spoken-refusal ladder
+          # (press_key catches RuntimeError/OSError by family; dictation's
+          # paste path keys on InjectionUnavailableError for the clipboard hint)
+          raise InjectionUnavailableError(f"injection unavailable: {exc}") from exc
 
 
   def tap_key(keycode, repeats=1):
       try:
           select_backend().tap_key(keycode, repeats=repeats)
-      except TimeoutError as exc:
-          raise InjectionUnavailableError(f"injection timed out: {exc}") from exc
+      except InjectionUnavailableError:
+          raise
+      except (TimeoutError, OSError) as exc:
+          raise InjectionUnavailableError(f"injection unavailable: {exc}") from exc
   ```
 - [ ] **Step 4: Update `press_key`** — its message stops naming GNOME:
   ```python
@@ -566,7 +630,7 @@
 
 - [ ] **Step 1: nfpm.yaml** — add `- ydotool  # key injection on non-GNOME desktops` beside each wl-clipboard line (`:56`, `:80`).
 - [ ] **Step 2: browser string** — `core.speak(_("Keystrokes need a working injection backend — see the troubleshooting guide."))`; then `just translations de && just translations es && just translations fr && just translations it`.
-- [ ] **Step 3: docs sweep** — usage.md rows; commands.md → "Dictation places text by pasting it, which needs `wl-clipboard` installed. Off GNOME a missed focus probe no longer blocks the paste."; compatibility.md COSMIC column per spec §8 (mark only what Task 7 verifies); troubleshooting.md gains "Key injection backend" section (three-arm gate, `EASYSPEAK_KEY_BACKEND`, uinput provisioning recap, mis-stuck-session recovery: restart the daemon or force `remote-desktop`); packaging.md + installation.md gain ydotool beside wl-clipboard; how-it-works.md dictation line gains "via the platform's injection backend (Mutter RemoteDesktop or ydotool)".
+- [ ] **Step 3: docs sweep** — usage.md rows; commands.md → "Dictation places text by pasting it, which needs `wl-clipboard` installed. Off GNOME a missed focus probe no longer blocks the paste." AND commands.md:249-250's "Volume changes are silent — GNOME's own on-screen display and chime acknowledge them." loses its silence claim (on COSMIC/KDE the desktop's own OSD now renders); compatibility.md COSMIC column per spec §8 (mark only what Task 7 verifies); troubleshooting.md gains "Key injection backend" section (three-arm gate, `EASYSPEAK_KEY_BACKEND`, uinput provisioning recap, mis-stuck-session recovery: restart the daemon or force `remote-desktop`); packaging.md + installation.md gain ydotool beside wl-clipboard; how-it-works.md dictation line gains "via the platform's injection backend (Mutter RemoteDesktop or ydotool)".
 - [ ] **Step 4: Commit.** `hug a -u && hug c -m "docs+packaging: ydotool dep, backend docs sweep, refusal string"`
 
 ---
@@ -600,7 +664,7 @@
 - [ ] VM: dictated text lands in a focused field without manual paste (screenshot)
 - [ ] VM: "press enter" lands in browser mode
 - [ ] VM: voice "volume up" pops COSMIC's own OSD (screenshot)
-- [ ] VM: "backspace ten" removes ten chars as one batched invocation inside ~2s (log line shows ONE `key` invocation)
+- [ ] VM: "backspace ten" removes ten chars; the PRIMARY discriminator is the daemon log showing ONE `key` invocation for the whole batch — the ~2s wall-clock bound is secondary only, since ten × 100ms settles straddle it and cannot detect a per-repeat regression alone
 - [ ] VM: `EASYSPEAK_KEY_BACKEND=uinput` forces the backend on any session; unknown value warns + auto
 - [ ] Dev host (GNOME 42): dictated text lands end-to-end; volume replay fires; routing log says `remote-desktop`
 - [ ] Clean-VM package check: after `sudo apt install ./easyspeak*.deb` + the documented uinput provisioning, dictation works with no other manual steps (0.1.8 daemonless dialect)
@@ -612,6 +676,7 @@
 - [ ] **Step 1: VM prep** per the OB runbook (`virsh start easyspeak-cosmic`, SSH check, `wayland-1` present, watcher host registered). Install the freshly built deb (Task 6's `check-python-packages` artifact or `just check-deb-package` output) — NOT the checkout venv — so the clean-install criterion is honest. Apply the documented uinput provisioning from `docs/troubleshooting.md`.
 - [ ] **Step 2: Scenarios 1-5** — start the daemon (`systemd-run --user --unit=easyspeak-acceptance --setenv=XDG_CURRENT_DESKTOP=COSMIC ~/easyspeak/.venv/bin/easyspeak` only if running from the checkout; the deb installs its own autostart), then per scenario: actuate (voice/`gdbus`), `virsh --connect qemu:///system screenshot`, convert + crop (ImageMagick), and paste transcript + image into the receipts file. Backspace-ten latency: read the daemon log's single `key` invocation + `time` the command.
 - [ ] **Step 3: GNOME regression** on the dev host (Pop 22.04/GNOME 42): run the daemon, dictate into a field (text lands), press a volume key via voice (OSD fires), assert the log line `key injection backend: remote-desktop`.
+- [ ] **Step 4: Calibrate** `KEY_PER_REPEAT_BUDGET` in `core/ydotool.py` from the measured batch cost (Task 2's 0.05 is provisional) and note the number in the receipts file.
 - [ ] **Step 4: Commit receipts** (fork-only file). `hug c -m "test: acceptance receipts for the compatibility column (fork-only)"`
 
 ---
