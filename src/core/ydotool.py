@@ -498,7 +498,7 @@ KEY_LEGACY_NAMES = {
 }
 
 
-def key_timeout(repeats, floor=None, per_repeat=KEY_PER_REPEAT_BUDGET):
+def key_timeout(repeats, floor=None, per_repeat=None):
     """Upper bound for one batched `key` invocation; grows with `repeats`.
 
     A batched argv spends the client's key-delay pacing between keystrokes
@@ -506,8 +506,31 @@ def key_timeout(repeats, floor=None, per_repeat=KEY_PER_REPEAT_BUDGET):
     fixture line 85), so "backspace ten" cannot share the fixed
     `INJECT_TIMEOUT` a single keystroke uses. The bound scales with the batch
     and keeps `INJECT_TIMEOUT` as the floor.
+
+    `per_repeat` is a `None` sentinel resolved in the body, deliberately not
+    `per_repeat=KEY_PER_REPEAT_BUDGET`: a default argument binds at def time,
+    so recalibrating the constant (Task 7, on the VM) would silently leave
+    every caller on the plan-time guess.
     """
-    return (floor if floor is not None else INJECT_TIMEOUT) + repeats * per_repeat
+    budget = KEY_PER_REPEAT_BUDGET if per_repeat is None else per_repeat
+    return (floor if floor is not None else INJECT_TIMEOUT) + repeats * budget
+
+
+def _check_batch(chord, repeats):
+    """Reject a batch no client could honor, loudly, before any process runs.
+
+    `parse_key_request` can hand back `repeats=0` ("backspace 0" — spoken
+    digits are accepted): GNOME's `range(0)` loop there is a clean no-op,
+    while here a zero would make 1.0.x emit a keyless argv the client refuses
+    and 0.1.8 silently press the key ONCE — a deletion the user never asked
+    for. An empty chord fails its client the same way. Both are caller bugs,
+    so both are named as errors, in `key_argv`'s and `key_legacy_argv`'s
+    shared entry.
+    """
+    if not chord:
+        raise ValueError("chord must name at least one key")
+    if repeats < 1:
+        raise ValueError("repeats must be >= 1")
 
 
 def key_argv(chord, repeats=1):
@@ -524,6 +547,7 @@ def key_argv(chord, repeats=1):
     0.1.8 takes ONE name combo joined with '+' plus a `--repeat <times>` flag
     (legacy fixture lines 18-27), so the flag does the repeating.
     """
+    _check_batch(chord, repeats)
     if dialect() == YDTOOL_DIALECT_MODERN:
         tokens = []
         for _ in range(repeats):
@@ -538,12 +562,15 @@ def key_legacy_argv(chord, repeats=1):
 
     Per the legacy fixture's usage line (its lines 18-19 and 93): options
     first, then ONE `<key sequence>` — NAMES joined with '+' (lines 21-22),
-    each combo emitted by the client as a full press+release, up in reverse
-    (corroboration section, line 120). `--repeat <times>` (line 102) repeats
-    that sequence inside the same invocation. The other flags stay off
-    because their documented defaults already serve: `--repeat-delay` is 0ms
-    (line 103) and `--key-delay` is the client's own 12ms pacing (line 101).
+    each combo emitted by the client as a full press+release (corroboration
+    section, line 120), the release running in reverse per that source's
+    `EmitKeyCodes` (upstream v0.1.8 Tools/Key/Key.cpp — URL in the fixture's
+    corroboration header). `--repeat <times>` (line 102) repeats that
+    sequence inside the same invocation. The other flags stay off because
+    their documented defaults already serve: `--repeat-delay` is 0ms (line
+    103) and `--key-delay` is the client's own 12ms pacing (line 101).
     """
+    _check_batch(chord, repeats)
     combo = "+".join(_legacy_combo_name(code) for code in chord)
     argv = ["ydotool", "key"]
     if repeats > 1:

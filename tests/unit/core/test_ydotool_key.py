@@ -38,9 +38,11 @@ def _pin_dialect(monkeypatch, dialect):
 
 def test_modern_chord_downs_in_order_then_ups_in_reverse(monkeypatch):
     # Modern fixture line 28: ":1 = key down, :0 = key up; a combo is spelled
-    # as consecutive tokens". Line 29's own "LOL" example downs its chord in
-    # order (42:1 38:1) before any up comes, and ups in reverse — the same
-    # contract mediakeys.tap_chord documents for chords.
+    # as consecutive tokens" — that pins the token grammar. (Its line 29 "LOL"
+    # example is a typing sequence — shift down, letters pressed and released
+    # one by one — not a chord cycle, so it pins nothing about ordering.) The
+    # down-in-order/up-in-reverse shape is mediakeys.tap_chord's documented
+    # contract, which key_argv exists to mirror on this dialect.
     _pin_dialect(monkeypatch, yd.YDTOOL_DIALECT_MODERN)
     assert yd.key_argv((29, 47)) == (
         "ydotool",
@@ -117,6 +119,35 @@ def test_unknown_legacy_code_raises_naming_the_code(monkeypatch):
         yd.key_legacy_argv((9999,))
 
 
+# --- the loud programming-error guards --------------------------------------
+
+
+def test_a_zero_repeat_is_a_loud_programming_error_on_both_dialects(monkeypatch):
+    # `parse_key_request` can hand back repeats=0 ("backspace 0" — spoken
+    # digits are accepted). GNOME's `range(0)` loop there is a clean no-op;
+    # here a zero would make 1.0.x emit a keyless argv the client refuses and
+    # 0.1.8 silently press the key ONCE — a deletion the user never asked
+    # for. The seam raises before any process runs, on either branch.
+    _pin_dialect(monkeypatch, yd.YDTOOL_DIALECT_MODERN)
+    with pytest.raises(ValueError, match="repeats"):
+        yd.key_argv((14,), repeats=0)
+    _pin_dialect(monkeypatch, yd.YDTOOL_DIALECT_LEGACY)
+    with pytest.raises(ValueError, match="repeats"):
+        yd.key_argv((14,), repeats=0)
+
+
+def test_an_empty_chord_is_a_loud_programming_error_on_both_dialects(monkeypatch):
+    # A keyless batch would hand 1.0.x a bare `key` argv (its help text and a
+    # non-injection exit) and 0.1.8 its "Which keys do you want to press?"
+    # refusal — a caller bug, so it is named as one before any process runs.
+    _pin_dialect(monkeypatch, yd.YDTOOL_DIALECT_MODERN)
+    with pytest.raises(ValueError, match="chord"):
+        yd.key_argv(())
+    _pin_dialect(monkeypatch, yd.YDTOOL_DIALECT_LEGACY)
+    with pytest.raises(ValueError, match="chord"):
+        yd.key_argv(())
+
+
 # --- the batched timeout ----------------------------------------------------
 
 
@@ -126,3 +157,7 @@ def test_key_timeout_never_drops_below_the_floor_and_grows_with_repeats():
     # "backspace two hundred" must outlast "backspace ten": the bound scales
     # with the batch, never a fixed one-size timeout.
     assert yd.key_timeout(200) > yd.key_timeout(10)
+    # The exact formula, so a `*`-for-`+` slip cannot stay green: floor plus
+    # one budget per repeat. `per_repeat` resolves the constant in the body
+    # (a def-time default would freeze Task 7's recalibration out).
+    assert yd.key_timeout(3) == yd.INJECT_TIMEOUT + 3 * yd.KEY_PER_REPEAT_BUDGET
