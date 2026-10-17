@@ -105,11 +105,14 @@ process lifetime**:
    *backend* is uinput). Unknown value → log a warning listing the accepted
    values and continue with auto (precedent: the grid gate's own
    unknown-value handling, `mousegrid/__init__.py:91-104`).
-2. Auto: GNOME session (`on_gnome()`) **and** `org.gnome.Mutter.RemoteDesktop`
-   owned → RemoteDesktop backend; else → ydotool backend. The odd corner of a
-   GNOME session with Mutter unexpectedly unowned therefore degrades to the
-   ydotool attempt (and from there to the fail-closed paths of §6) rather
-   than crashing.
+2. Auto, three arms: **owned** (GNOME session AND `org.gnome.Mutter.RemoteDesktop`
+   answers true) → RemoteDesktop backend; **probe error** (the ownership
+   call itself fails — a wedged bus is not an honest "no") → RemoteDesktop
+   as well on a GNOME session, after ONE bounded retry: the session stays on
+   its native path, and a genuinely dead Mutter fails inside the
+   well-tested CreateSession path with the spoken fallbacks — never a
+   silent reroute of GNOME input through uinput; **not owned** (definitive
+   false, or non-GNOME session) → uinput backend.
 3. Neither usable (e.g. ydotool absent, uinput inaccessible) → raise the
    unavailable error at injection time; consumers keep their existing
    fail-closed fallbacks (§6).
@@ -119,11 +122,19 @@ Row nouns used in §6, defined against the sticky gate: a backend is
 answers at *injection* time. A backend that dies mid-session (ydotoold
 crashes, socket goes stale, uinput perms revoked) keeps its sticky selection
 and fails closed per injection via `InjectionUnavailableError` — the §6
-"injection-time failure" row — with no re-resolution and no retry. Disclosed
-corner: a Mutter restart window at *first* injection can stick a GNOME
-session to the uinput backend for its lifetime; benign (an injected key is a
-real event and still renders the OSD), accepted, and visible in the
-selected-backend log line.
+"injection-time failure" row — with no re-resolution and no retry. The
+ownership probe and every RemoteDesktop D-Bus call carry an **explicit
+timeout** (the `GDBUS_TIMEOUT` precedent): jeepney's `send_and_get_reply`
+blocks indefinitely by default, and today's `mediakeys._call` inherits that.
+Disclosed delta on the GNOME path: success-path behavior unchanged; a wedged
+session bus now fails closed in seconds instead of hanging the injection.
+Disclosed corner: a Mutter restart window at *first* injection can stick a
+GNOME session to the uinput backend for its lifetime — benign **where uinput
+is provisioned** (an injected key is a real event and still renders the
+OSD), but for an unprovisioned GNOME user it degrades to the fail-closed
+spoken fallbacks until recovery. Recovery is user-facing and documented in
+troubleshooting.md: restart the EasySpeak daemon, or set
+`EASYSPEAK_KEY_BACKEND=remote-desktop` for the session.
 
 Rationale for stickiness: the backend set cannot change mid-session (switching
 compositor requires re-login), and per-utterance `NameHasOwner` round trips on
@@ -186,9 +197,12 @@ boundary translates that vocabulary completely into exceptions:
   missing backend in the logs, but it lands in the same spoken fallback
   (§6). Every failure mode the backend can hit (binary absent, spawn
   `OSError`, `subprocess.TimeoutExpired`, non-zero exit / stderr refusal)
-  resolves to that one exception type at the boundary — nothing foreign
-  escapes to the dispatcher's catch-all (`core/main.py:306-308`), which
-  would swallow the spoken refusal.
+  resolves to that one exception type at the boundary. The stake is the
+  *right* fallback, not bare silence: dictation's paste path catches broadly
+  and would speak "isn't set up" — losing the clipboard hint even though the
+  text is already on the clipboard — while a foreign raise past
+  `press_key`'s narrow ladder reaches the dispatcher's catch-all
+  (`core/main.py:306-308`), where nothing is spoken at all.
 
 ### 4.4 Consumer migration
 
@@ -200,6 +214,9 @@ boundary translates that vocabulary completely into exceptions:
   desktop-neutrally (it would name a bus irrelevant to the now-common uinput
   failure). Log strings are developer-facing English, not `_()`-wrapped, so
   this costs no catalog churn. `NO_KEYSTROKES` spoken messaging unchanged.
+  The keystroke-path refusal "Dictation isn't set up on this system."
+  (`dictation/__init__.py:676`) is pinned as-is — desktop-neutral, and it
+  names a setup remedy, which is exactly what a failed injection calls for.
 - `plugins/browser`: no exception handling of its own — it calls
   `mediakeys.press_key` and speaks only on a `False` return
   (`browser/__init__.py:992-993`). The real migration site is
@@ -278,11 +295,12 @@ swallowing, no fallback that strands the user without a way back.
   package.
 - "Out of the box" is defined against #233's own security stance: package
   installation does NOT grant `/dev/uinput` write access. The documented
-  one-time provisioning step (`docs/troubleshooting.md:63-75`: a udev rule or
-  the `input` group — "a deployment step, not a session tweak") remains the
-  user's single manual step, shared with hold-to-dictate's existing
-  `input`-group need; everything else works with no package-level manual
-  steps. Packaging a silent, input-injection-grade udev grant from a
+  one-time provisioning step (`docs/troubleshooting.md:63-75`: a **udev
+  rule** — `setfacl` does not survive a reboot — with `input`-group
+  membership as the alternative hold-to-dictate already needs; "a deployment
+  step, not a session tweak") remains the
+  user's single manual step; everything else works with no package-level
+  manual steps. Packaging a silent, input-injection-grade udev grant from a
   desktop-app package would reverse the stance #233 set — not done here;
   revisiting that is its own conversation.
 - uinput provisioning guidance is **reused from #233**, not reinvented; this
@@ -312,6 +330,12 @@ swallowing, no fallback that strands the user without a way back.
 - `docs/commands.md`: the dictation precondition ("needs `wl-clipboard`
   installed and a text field focused", `:140-141`) is reworded — off GNOME a
   missed focus probe no longer blocks the paste (§4.5).
+- `docs/packaging.md` and `docs/installation.md`: both carry the dependency
+  prose dictation readers actually use (`packaging.md:54`,
+  `installation.md:88-97`) — they gain ydotool and the provisioning note in
+  the same sweep.
+- usage.md's `EASYSPEAK_GRID_DRY_RUN` row (`:148`) is updated to state the
+  grid-only scope (§10).
 - `docs/troubleshooting.md`: uinput perms, `input` group, ydotoold socket,
   `EASYSPEAK_KEY_BACKEND` override.
 - `docs/how-it-works.md`: the dictation line gains "…synthetic paste keystroke
@@ -334,8 +358,10 @@ swallowing, no fallback that strands the user without a way back.
   `unknown` instead of raising must still produce the spoken-refusal paths
   (the test that fails any return-style implementation, §4.3)
 - probe leniency: NO_FOCUS × {GNOME → refuse, non-GNOME → proceed}
-- full repo gates: unit across 5 Pythons, integration, acceptance, types,
-  REUSE, translations, docs strict, wheel/sdist — via make targets.
+- full repo gates as just recipes: `just test-pythons` (unit × 5 Pythons),
+  `just integration`, `just acceptance`, `just types`, `just precommit`
+  (REUSE / file hygiene), `just check-translations`, `just check-docs`,
+  `just check-python-packages` (wheel/sdist)
 
 **Acceptance** (easyspeak-cosmic VM, harness pattern from #233's
 `test_mousegrid_ydotool_harness.py`; framebuffer screenshots via
@@ -369,7 +395,13 @@ no guessing. Merge order stays: #233 lands first, this follows. This PR then:
    ydotool 0.1.8 daemonless and 1.0.x daemon-socket support, recovery
    diagnostics. The grid keeps its mouse verbs and imports the shared module
    (the consolidation #233's review asked for; the grid's conversation loops
-   are untouched).
+   are untouched). The `EASYSPEAK_GRID_DRY_RUN` silent-ran bypass
+   (`_ydotool.py:353-355`) is **excluded from the shared seam**: dry-run
+   becomes an explicit parameter the grid supplies at its own boundary
+   (keeping its env check), the core plumbing reads no `EASYSPEAK_GRID_*`
+   env of its own, and key injection ships no dry-run variable — the §9
+   outcome-mapping tests use stub backends, so a documented grid-debug var
+   can never silently report a paste that went nowhere.
 2. Add the `key`-verb synthesis the grid never needed (chords/keycodes),
    pinning the argv grammar from BOTH dialects' own `key --help` usage lines
    (the same client-derived probing the dialect detection uses) and batching
@@ -441,5 +473,6 @@ points at this design when the PR opens.
       steps; on 1.0.x dialects the ydotoold step is documented
       (troubleshooting.md:85-96)
 - [ ] compatibility.md COSMIC column reflects only verified results
-- [ ] Full repo gates green (unit×5 pythons, integration, acceptance, types,
-      REUSE, translations, docs strict, wheel/sdist)
+- [ ] Full repo gates green: `just test-pythons`, `integration`,
+      `acceptance`, `types`, `precommit`, `check-translations`,
+      `check-docs`, `check-python-packages`
