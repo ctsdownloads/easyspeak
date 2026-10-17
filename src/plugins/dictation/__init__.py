@@ -14,6 +14,7 @@ from pathlib import Path
 from easyspeak.core import mediakeys
 from easyspeak.core.config import LANGUAGE
 from easyspeak.core.i18n import translator
+from easyspeak.core.tray import on_gnome
 from easyspeak.core.vocabulary import load_table
 
 logger = logging.getLogger(__name__)
@@ -442,8 +443,21 @@ def has_focused_text_field():
 
     Any failure answers yes. A probe that can't run is no reason to refuse to
     paste -- the old behaviour, blind but willing, is the better fallback.
+
+    Off GNOME even an explicit "nothing is focused" is doubted: the AT-SPI tree
+    there is unreliable (COSMIC-native apps may expose nothing at all), so the
+    paste, which usually works, is trusted over the probe. On GNOME the tree is
+    sound, so a miss still refuses -- a paste into nothing vanishes without a
+    trace, and that answer is worth hearing.
     """
-    return insert_via_atspi("") != NO_FOCUS
+    focus = insert_via_atspi("")
+    if focus != NO_FOCUS:
+        return True
+    if not on_gnome():
+        # The probe's evidence is only as good as the tree behind it.
+        logger.debug("focus probe found nothing; proceeding (non-GNOME leniency)")
+        return True
+    return False
 
 
 def insert_text(text):
