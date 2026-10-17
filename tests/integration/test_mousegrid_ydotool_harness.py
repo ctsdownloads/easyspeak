@@ -45,6 +45,7 @@ import time
 from pathlib import Path
 
 import pytest
+from easyspeak.core import ydotool as core_ydotool
 from easyspeak.plugins import mousegrid
 from easyspeak.plugins.mousegrid import _ydotool as backend
 
@@ -68,11 +69,14 @@ def _fresh_backend_state(monkeypatch):
     failure whose 1s cooldown would otherwise short-circuit the next test's
     resolver into a false skip, and setup() rebinds the dispatcher's globals.
     The same discipline the unit suite's `_fresh_client_state` enforces."""
-    monkeypatch.setattr(backend, "_dialect", None)
+    # The dialect cache and the socket-discovery state moved to the core run
+    # seam; the moved functions resolve that state in core's globals, so the
+    # reset has to land THERE (the grid's re-exports are read-only aliases).
+    monkeypatch.setattr(core_ydotool, "_dialect", None)
     monkeypatch.setattr(backend, "_active", False)
-    monkeypatch.setattr(backend, "_socket_last_good", None)
-    monkeypatch.setattr(backend, "_socket_last_good_env", None)
-    monkeypatch.setattr(backend, "_socket_search_failed", None)
+    monkeypatch.setattr(core_ydotool, "_socket_last_good", None)
+    monkeypatch.setattr(core_ydotool, "_socket_last_good_env", None)
+    monkeypatch.setattr(core_ydotool, "_socket_search_failed", None)
     monkeypatch.setattr(backend, "_grid_python", None)
     monkeypatch.setattr(backend, "_grid_python_override", None)
     monkeypatch.setattr(backend, "_grid_python_found", False)

@@ -17,6 +17,7 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
+from easyspeak.core import ydotool as core_ydotool
 from easyspeak.plugins import mousegrid
 from easyspeak.plugins.mousegrid import _common, _extension
 from easyspeak.plugins.mousegrid import _ydotool as g
@@ -24,6 +25,36 @@ from easyspeak.plugins.mousegrid import _ydotool as g
 # The fixture pins this daemonless; tests that exercise the real resolver
 # re-pin it to the function captured here at import time.
 _real_injector_socket = g.injector_socket
+
+
+def _pin_real_resolver(monkeypatch):
+    """Re-pin the real daemon resolver in BOTH namespaces.
+
+    `injector_socket` moved to core, so its name now lives in two module
+    dicts: the grid-owned callers (`legacy_delay_args`, `_probe_injector`)
+    resolve the grid global, the moved `_client_env` resolves core's. A
+    one-sided re-pin would leave the other side on the fixture's daemonless
+    stub.
+    """
+    monkeypatch.setattr(core_ydotool, "injector_socket", _real_injector_socket)
+    monkeypatch.setattr(g, "injector_socket", _real_injector_socket)
+
+
+def _pin_argv_recorder(monkeypatch, seen):
+    """Record every injected argv, on both namespaces.
+
+    The verb runners reach the seam through core's `run_ydotool` (which
+    resolves `_run_bounded` in core's globals), `_probe_injector` through the
+    grid's re-export — one recorder, two module dicts.
+    """
+
+    def record(args, **k):
+        return seen.append(list(args)) or "ran"
+
+    monkeypatch.setattr(core_ydotool, "_run_bounded", record)
+    monkeypatch.setattr(g, "_run_bounded", record)
+
+
 # Snapshotted before any fixture runs: `test_inert_at_import` asserts the
 # module's import-time shape, which the autouse reset would otherwise
 # make unfalsifiable (the RH-5 class: a test that asserts its own setup).
@@ -119,7 +150,7 @@ def _fresh_client_state(monkeypatch):
     The daemon resolver is pinned daemonless so argv expectations are
     deterministic — a host with a running ydotoold would otherwise flip the
     legacy delay arguments mid-suite; daemon-mode tests override it."""
-    monkeypatch.setattr(g, "_dialect", None)
+    monkeypatch.setattr(core_ydotool, "_dialect", None)
     monkeypatch.setattr(g, "_monitor_origin", (0, 0))
     monkeypatch.setattr(g, "_active", False)
     monkeypatch.setattr(g, "_bounds", None)
@@ -127,10 +158,17 @@ def _fresh_client_state(monkeypatch):
     monkeypatch.setattr(g, "_grid_python", None)
     monkeypatch.setattr(g, "_grid_python_override", None)
     monkeypatch.setattr(g, "_grid_python_found", False)
-    monkeypatch.setattr(g, "injector_socket", lambda *a, **k: None)
-    monkeypatch.setattr(g, "_socket_last_good", None)
-    monkeypatch.setattr(g, "_socket_last_good_env", None)
-    monkeypatch.setattr(g, "_socket_search_failed", None)
+
+    def _daemonless(*a, **k):
+        return None
+
+    # Both namespaces, for the same two-dicts reason `_pin_real_resolver`
+    # documents below.
+    monkeypatch.setattr(core_ydotool, "injector_socket", _daemonless)
+    monkeypatch.setattr(g, "injector_socket", _daemonless)
+    monkeypatch.setattr(core_ydotool, "_socket_last_good", None)
+    monkeypatch.setattr(core_ydotool, "_socket_last_good_env", None)
+    monkeypatch.setattr(core_ydotool, "_socket_search_failed", None)
     # TestGate's setup() calls rebind the dispatcher's module globals (the
     # selected backend and the help surface); reset them too, so no test
     # inherits another's gate decision — the same file-order discipline the
@@ -263,15 +301,15 @@ class TestOutcomeClassification:
         return Mock(returncode=returncode, stderr=stderr, stdout=stdout)
 
     def test_ran_is_the_measured_clients_exit_code(self, monkeypatch):
-        monkeypatch.setattr(g, "_spawn", lambda *a, **k: self._result(0))
+        monkeypatch.setattr(core_ydotool, "_spawn", lambda *a, **k: self._result(0))
         assert g._run_bounded(["ydotool", "mousemove", "0", "0"]) == "ran"
 
     def test_ran_accepts_the_argv_shaped_success_code(self, monkeypatch):
         """A legacy build that forwards Exec's argc return still classifies: the
         code the tool computes is `len(args) - 1`, which this argv makes 3. The
         dialect is pinned because the tolerance is legacy-only."""
-        monkeypatch.setattr(g, "_dialect", g.YDTOOL_DIALECT_LEGACY)
-        monkeypatch.setattr(g, "_spawn", lambda *a, **k: self._result(3))
+        monkeypatch.setattr(core_ydotool, "_dialect", g.YDTOOL_DIALECT_LEGACY)
+        monkeypatch.setattr(core_ydotool, "_spawn", lambda *a, **k: self._result(3))
         assert g._run_bounded(["ydotool", "mousemove", "0", "0"]) == "ran"
 
     def test_the_argv_shaped_code_is_never_a_modern_success(self, monkeypatch):
@@ -280,29 +318,33 @@ class TestOutcomeClassification:
         not, the shape alone must never read as `ran` there, or one wording
         drift in a 1.0.x variant turns every daemon-less click into silent
         success."""
-        monkeypatch.setattr(g, "_dialect", g.YDTOOL_DIALECT_MODERN)
-        monkeypatch.setattr(g, "_spawn", lambda *a, **k: self._result(2))
+        monkeypatch.setattr(core_ydotool, "_dialect", g.YDTOOL_DIALECT_MODERN)
+        monkeypatch.setattr(core_ydotool, "_spawn", lambda *a, **k: self._result(2))
         assert g._run_bounded(["ydotool", "click", "0xC0"]) == "errored"
 
     def test_legacy_accepts_both_argc_shapes(self, monkeypatch):
         """The draft's own forwarding table disagrees with itself by one: the
         noop row reports the full argc, the click row one less. A legacy build
         that forwards either shape still classifies as `ran`."""
-        monkeypatch.setattr(g, "_dialect", g.YDTOOL_DIALECT_LEGACY)
+        monkeypatch.setattr(core_ydotool, "_dialect", g.YDTOOL_DIALECT_LEGACY)
         noop = ["ydotool", "type", "", "--delay", "0"]
-        monkeypatch.setattr(g, "_spawn", lambda *a, **k: self._result(len(noop)))
+        monkeypatch.setattr(
+            core_ydotool, "_spawn", lambda *a, **k: self._result(len(noop))
+        )
         assert g._run_bounded(noop) == "ran"
         click = ["ydotool", "click", "1"]
-        monkeypatch.setattr(g, "_spawn", lambda *a, **k: self._result(len(click) - 1))
+        monkeypatch.setattr(
+            core_ydotool, "_spawn", lambda *a, **k: self._result(len(click) - 1)
+        )
         assert g._run_bounded(click) == "ran"
 
     def test_a_refusal_on_stdout_refuses_too(self, monkeypatch):
         """Both streams are scanned, like the probe seams: a build that moves
         its refusal from stderr to stdout must not turn a rejection into a
         `ran`."""
-        monkeypatch.setattr(g, "_dialect", g.YDTOOL_DIALECT_MODERN)
+        monkeypatch.setattr(core_ydotool, "_dialect", g.YDTOOL_DIALECT_MODERN)
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_spawn",
             lambda *a, **k: self._result(0, stdout="failed to connect socket"),
         )
@@ -310,12 +352,16 @@ class TestOutcomeClassification:
 
     def test_errored_on_an_error_signature(self, monkeypatch):
         monkeypatch.setattr(
-            g, "_spawn", lambda *a, **k: self._result(1, stderr="Unknown tool: x")
+            core_ydotool,
+            "_spawn",
+            lambda *a, **k: self._result(1, stderr="Unknown tool: x"),
         )
         assert g._run_bounded(["ydotool", "bogus"]) == "errored"
 
     def test_unknown_on_a_signal_kill(self, monkeypatch):
-        monkeypatch.setattr(g, "_spawn", lambda *a, **k: self._result(-9, stderr=""))
+        monkeypatch.setattr(
+            core_ydotool, "_spawn", lambda *a, **k: self._result(-9, stderr="")
+        )
         assert g._run_bounded(["ydotool", "click", "1"]) == "unknown"
 
     def test_unknown_on_a_timeout(self, monkeypatch):
@@ -324,11 +370,13 @@ class TestOutcomeClassification:
         def boom(*_a, **_k):
             raise subprocess.TimeoutExpired(cmd="ydotool", timeout=2.0)
 
-        monkeypatch.setattr(g, "_spawn", boom)
+        monkeypatch.setattr(core_ydotool, "_spawn", boom)
         assert g._run_bounded(["ydotool", "click", "1"]) == "unknown"
 
     def test_unknown_when_the_binary_is_missing(self, monkeypatch):
-        monkeypatch.setattr(g, "_spawn", Mock(side_effect=FileNotFoundError("ydotool")))
+        monkeypatch.setattr(
+            core_ydotool, "_spawn", Mock(side_effect=FileNotFoundError("ydotool"))
+        )
         assert g._run_bounded(["ydotool", "click", "1"]) == "unknown"
 
     def test_zero_exit_is_ran_even_with_the_daemonless_notice(
@@ -338,7 +386,7 @@ class TestOutcomeClassification:
         on stderr: no daemon is a latency caveat, not a failure, and the log
         names the per-invocation mode."""
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_spawn",
             lambda *a, **k: self._result(
                 0, stderr="ydotool: notice: ydotoold backend unavailable ...\n"
@@ -349,7 +397,7 @@ class TestOutcomeClassification:
         assert any("per-invocation" in r.message for r in caplog.records)
 
     def test_a_nonzero_exit_matching_no_success_code_is_errored(self, monkeypatch):
-        monkeypatch.setattr(g, "_spawn", lambda *a, **k: self._result(7))
+        monkeypatch.setattr(core_ydotool, "_spawn", lambda *a, **k: self._result(7))
         assert g._run_bounded(["ydotool", "click", "1", "--delay", "0"]) == "errored"
 
     def test_a_rejected_argv_that_exits_zero_is_errored(self, monkeypatch, caplog):
@@ -359,7 +407,7 @@ class TestOutcomeClassification:
         and the seam's `ran` is the only positive signal the plugin has — so a
         rejected argv is classified as the refusal it is."""
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_spawn",
             lambda *a, **k: self._result(
                 0, stderr="click: unrecognized option '--delay'\n"
@@ -375,7 +423,7 @@ class TestOutcomeClassification:
         """The same argv on `mousemove` does not even exit cleanly: 1.0.4 aborts
         with the option error plus `*** stack smashing detected ***` (134)."""
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_spawn",
             lambda *a, **k: self._result(
                 134,
@@ -393,7 +441,7 @@ class TestOutcomeClassification:
         """1.0.4 without a daemon: nothing is emitted and the client says so —
         the "failed to" signature this module already treats as a refusal."""
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_spawn",
             lambda *a, **k: self._result(
                 2,
@@ -406,10 +454,14 @@ class TestOutcomeClassification:
         assert g._run_bounded(["ydotool", "click", "0xC0"]) == "errored"
 
     def test_dry_run_records_without_spawning(self, monkeypatch):
+        """Dry-run is a parameter of the seam now, not an env read in it: the
+        short-circuit needs no spawn, and core stays ignorant of the grid's
+        flag — the grid passes it down (proven end-to-end at the runner in
+        TestAdapterArgv)."""
         spawn = Mock()
-        monkeypatch.setattr(g, "_spawn", spawn)
-        monkeypatch.setenv("EASYSPEAK_GRID_DRY_RUN", "1")
-        assert g._run_bounded(["ydotool", "click", "1"]) == "ran"
+        monkeypatch.setattr(core_ydotool, "_spawn", spawn)
+        monkeypatch.setattr(g, "_grid_dry_run", lambda: True)
+        assert g._run_bounded(["ydotool", "click", "1"], dry_run=True) == "ran"
         spawn.assert_not_called()
 
 
@@ -424,7 +476,7 @@ class TestDialect:
 
     def test_the_modern_move_help_selects_the_modern_dialect(self, monkeypatch):
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_spawn",
             lambda cmd, timeout: Mock(returncode=0, stdout=MODERN_MOVE_HELP, stderr=""),
         )
@@ -434,7 +486,7 @@ class TestDialect:
         self, monkeypatch
     ):
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_spawn",
             lambda cmd, timeout: Mock(returncode=1, stdout=LEGACY_MOVE_HELP, stderr=""),
         )
@@ -449,17 +501,19 @@ class TestDialect:
         def boom(cmd, timeout):
             raise subprocess.TimeoutExpired(cmd="ydotool", timeout=5.0)
 
-        monkeypatch.setattr(g, "_spawn", boom)
+        monkeypatch.setattr(core_ydotool, "_spawn", boom)
         assert g._probe_dialect() == g.YDTOOL_DIALECT_LEGACY
 
     def test_a_missing_binary_keeps_the_legacy_dialect(self, monkeypatch):
-        monkeypatch.setattr(g, "_spawn", Mock(side_effect=FileNotFoundError("ydotool")))
+        monkeypatch.setattr(
+            core_ydotool, "_spawn", Mock(side_effect=FileNotFoundError("ydotool"))
+        )
         assert g._probe_dialect() == g.YDTOOL_DIALECT_LEGACY
 
     def test_the_dialect_is_resolved_once(self, monkeypatch):
         calls = []
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_probe_dialect",
             lambda: calls.append(1) or g.YDTOOL_DIALECT_MODERN,
         )
@@ -468,9 +522,9 @@ class TestDialect:
         assert calls == [1]
 
     def test_the_noop_is_built_in_the_dialect(self, monkeypatch):
-        monkeypatch.setattr(g, "_dialect", g.YDTOOL_DIALECT_LEGACY)
+        monkeypatch.setattr(core_ydotool, "_dialect", g.YDTOOL_DIALECT_LEGACY)
         assert g.noop_argv() == ("ydotool", "type", "", "--delay", "0")
-        monkeypatch.setattr(g, "_dialect", g.YDTOOL_DIALECT_MODERN)
+        monkeypatch.setattr(core_ydotool, "_dialect", g.YDTOOL_DIALECT_MODERN)
         assert g.noop_argv() == ("ydotool", "type", "")
 
 
@@ -519,13 +573,13 @@ class TestSocketDiscovery:
         this test re-pins it, or the checks below would never execute).
         """
         monkeypatch.setenv("YDOTOOL_SOCKET", "/tmp/.ydotool_socket")
-        monkeypatch.setattr(g, "injector_socket", _real_injector_socket)
+        _pin_real_resolver(monkeypatch)
         monkeypatch.setattr(
-            g, "ydotool_socket_candidates", lambda: ["/tmp/.ydotool_socket"]
+            core_ydotool, "ydotool_socket_candidates", lambda: ["/tmp/.ydotool_socket"]
         )
         # Two calls must both reach the ownership check: without this, the
         # first failed walk's rediscovery cooldown would swallow the second.
-        monkeypatch.setattr(g, "REDISCOVERY_COOLDOWN", 0)
+        monkeypatch.setattr(core_ydotool, "REDISCOVERY_COOLDOWN", 0)
         socket_mode = 0o140600  # S_IFSOCK | 0600, without importing stat
         plain_mode = 0o100600  # S_IFREG | 0600: same uid, but not a socket
         answers = [
@@ -538,14 +592,14 @@ class TestSocketDiscovery:
         monkeypatch.setattr(Path, "stat", lambda self, **_kwargs: answers.pop(0))
         asked = []
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_socket_accepts",
             lambda path, timeout=g.PROBE_TIMEOUT: asked.append(path) or True,
         )
         assert g.injector_socket() is None  # a foreign uid: never offered
         assert g.injector_socket() is None  # own uid, but not a socket: same
         assert asked == []
-        assert g._socket_last_good is None
+        assert core_ydotool._socket_last_good is None
 
     def test_an_owned_listening_socket_is_trusted_and_cached(
         self, monkeypatch, tmp_path
@@ -569,10 +623,12 @@ class TestSocketDiscovery:
         try:
             sock.bind(str(path))
             sock.listen(1)
-            monkeypatch.setattr(g, "injector_socket", _real_injector_socket)
-            monkeypatch.setattr(g, "ydotool_socket_candidates", lambda: [str(path)])
+            _pin_real_resolver(monkeypatch)
+            monkeypatch.setattr(
+                core_ydotool, "ydotool_socket_candidates", lambda: [str(path)]
+            )
             assert g.injector_socket() == str(path)
-            assert g._socket_last_good == str(path)
+            assert core_ydotool._socket_last_good == str(path)
         finally:
             sock.close()
 
@@ -589,8 +645,8 @@ class TestSocketDiscovery:
         seam: none
         """
         asked = []
-        monkeypatch.setattr(g, "_socket_owned", lambda _path: True)
-        monkeypatch.setattr(g, "injector_socket", _real_injector_socket)
+        monkeypatch.setattr(core_ydotool, "_socket_owned", lambda _path: True)
+        _pin_real_resolver(monkeypatch)
         monkeypatch.delenv("YDOTOOL_SOCKET", raising=False)
         monkeypatch.setenv("XDG_RUNTIME_DIR", "/xdg")
         order = [
@@ -598,11 +654,13 @@ class TestSocketDiscovery:
             f"/run/user/{os.getuid()}/.ydotool_socket",
             "/tmp/.ydotool_socket",
         ]
-        monkeypatch.setattr(g, "ydotool_socket_candidates", lambda: list(order))
+        monkeypatch.setattr(
+            core_ydotool, "ydotool_socket_candidates", lambda: list(order)
+        )
         # First call: the highest-priority candidate is dead, the second one
         # answers — and becomes the cache.
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_socket_accepts",
             lambda path, timeout=g.PROBE_TIMEOUT: (
                 asked.append(path) or path == order[1]
@@ -617,20 +675,20 @@ class TestSocketDiscovery:
         asked.clear()
         assert g.injector_socket() == order[1]
         assert asked == [order[1]]
-        assert g._socket_last_good == order[1]
+        assert core_ydotool._socket_last_good == order[1]
 
         # Third call: the cached path stops answering — the cache is
         # invalidated and the full walk runs again (last-good first, then the
         # priority order), instead of the dead path being trusted.
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_socket_accepts",
             lambda path, timeout=g.PROBE_TIMEOUT: asked.append(path) or False,
         )
         asked.clear()
         assert g.injector_socket() is None
         assert asked == [order[1], order[0], order[1], "/tmp/.ydotool_socket"]
-        assert g._socket_last_good is None
+        assert core_ydotool._socket_last_good is None
 
         # Fifth call: the resolution environment changes (a nested compositor
         # repoints YDOTOOL_SOCKET) — the last-good cache is keyed to that
@@ -640,12 +698,12 @@ class TestSocketDiscovery:
         # while the old path was probed first and reused).
         monkeypatch.setenv("YDOTOOL_SOCKET", "/override/.ydotool_socket")
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "ydotool_socket_candidates",
             lambda: ["/override/.ydotool_socket", order[1]],
         )
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_socket_accepts",
             lambda path, timeout=g.PROBE_TIMEOUT: (
                 asked.append(path) or path == "/override/.ydotool_socket"
@@ -654,7 +712,7 @@ class TestSocketDiscovery:
         asked.clear()
         assert g.injector_socket() == "/override/.ydotool_socket"
         assert asked == ["/override/.ydotool_socket"]
-        assert g._socket_last_good == "/override/.ydotool_socket"
+        assert core_ydotool._socket_last_good == "/override/.ydotool_socket"
 
     def test_repeated_paths_are_collapsed(self, monkeypatch):
         uid = os.getuid()
@@ -667,21 +725,27 @@ class TestSocketDiscovery:
 
     def test_the_first_socket_that_answers_is_the_one_used(self, monkeypatch):
         monkeypatch.setattr(
-            g, "ydotool_socket_candidates", lambda: ["/dead", "/alive", "/tmp/.x"]
+            core_ydotool,
+            "ydotool_socket_candidates",
+            lambda: ["/dead", "/alive", "/tmp/.x"],
         )
-        monkeypatch.setattr(g, "_socket_owned", lambda _path: True)
-        monkeypatch.setattr(g, "injector_socket", _real_injector_socket)
+        monkeypatch.setattr(core_ydotool, "_socket_owned", lambda _path: True)
+        _pin_real_resolver(monkeypatch)
         monkeypatch.setattr(
-            g, "_socket_accepts", lambda path, timeout=g.PROBE_TIMEOUT: path == "/alive"
+            core_ydotool,
+            "_socket_accepts",
+            lambda path, timeout=g.PROBE_TIMEOUT: path == "/alive",
         )
         assert g.injector_socket() == "/alive"
 
     def test_no_answer_is_none_not_a_guess(self, monkeypatch):
-        monkeypatch.setattr(g, "ydotool_socket_candidates", lambda: ["/dead"])
-        monkeypatch.setattr(g, "_socket_owned", lambda _path: True)
-        monkeypatch.setattr(g, "injector_socket", _real_injector_socket)
         monkeypatch.setattr(
-            g, "_socket_accepts", lambda path, timeout=g.PROBE_TIMEOUT: False
+            core_ydotool, "ydotool_socket_candidates", lambda: ["/dead"]
+        )
+        monkeypatch.setattr(core_ydotool, "_socket_owned", lambda _path: True)
+        _pin_real_resolver(monkeypatch)
+        monkeypatch.setattr(
+            core_ydotool, "_socket_accepts", lambda path, timeout=g.PROBE_TIMEOUT: False
         )
         assert g.injector_socket() is None
 
@@ -699,23 +763,25 @@ class TestSocketDiscovery:
         every probe answer are stubbed.
         seam: time.monotonic is pinned; `_socket_accepts` counts its asks.
         """
-        monkeypatch.setattr(g, "injector_socket", _real_injector_socket)
-        monkeypatch.setattr(g, "ydotool_socket_candidates", lambda: ["/dead"])
-        monkeypatch.setattr(g, "_socket_owned", lambda _path: True)
+        _pin_real_resolver(monkeypatch)
+        monkeypatch.setattr(
+            core_ydotool, "ydotool_socket_candidates", lambda: ["/dead"]
+        )
+        monkeypatch.setattr(core_ydotool, "_socket_owned", lambda _path: True)
         now = 1000.0
         monkeypatch.setattr(g.time, "monotonic", lambda: now)
         asked = []
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_socket_accepts",
             lambda path, timeout=g.PROBE_TIMEOUT: asked.append(path) or False,
         )
         assert g.injector_socket() is None
         assert asked == ["/dead"]  # the walk ran once
-        now += g.REDISCOVERY_COOLDOWN / 2
+        now += core_ydotool.REDISCOVERY_COOLDOWN / 2
         assert g.injector_socket() is None
         assert asked == ["/dead"]  # inside the window: the answer is shared
-        now += g.REDISCOVERY_COOLDOWN
+        now += core_ydotool.REDISCOVERY_COOLDOWN
         assert g.injector_socket() is None
         assert asked == ["/dead", "/dead"]  # the window closed: walk again
 
@@ -729,14 +795,16 @@ class TestSocketDiscovery:
         answer is stubbed.
         seam: time.monotonic is pinned; `_socket_accepts` counts its asks.
         """
-        monkeypatch.setattr(g, "injector_socket", _real_injector_socket)
-        monkeypatch.setattr(g, "ydotool_socket_candidates", lambda: ["/dead"])
-        monkeypatch.setattr(g, "_socket_owned", lambda _path: True)
+        _pin_real_resolver(monkeypatch)
+        monkeypatch.setattr(
+            core_ydotool, "ydotool_socket_candidates", lambda: ["/dead"]
+        )
+        monkeypatch.setattr(core_ydotool, "_socket_owned", lambda _path: True)
         now = 1000.0
         monkeypatch.setattr(g.time, "monotonic", lambda: now)
         asked = []
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_socket_accepts",
             lambda path, timeout=g.PROBE_TIMEOUT: asked.append(path) or False,
         )
@@ -759,25 +827,27 @@ class TestSocketDiscovery:
         seam: time.monotonic is pinned; `_socket_accepts` answers from a
         script.
         """
-        monkeypatch.setattr(g, "injector_socket", _real_injector_socket)
-        monkeypatch.setattr(g, "ydotool_socket_candidates", lambda: ["/dead"])
-        monkeypatch.setattr(g, "_socket_owned", lambda _path: True)
+        _pin_real_resolver(monkeypatch)
+        monkeypatch.setattr(
+            core_ydotool, "ydotool_socket_candidates", lambda: ["/dead"]
+        )
+        monkeypatch.setattr(core_ydotool, "_socket_owned", lambda _path: True)
         now = 1000.0
         monkeypatch.setattr(g.time, "monotonic", lambda: now)
         asked = []
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_socket_accepts",
             lambda path, timeout=g.PROBE_TIMEOUT: asked.append(path) or False,
         )
         assert g.injector_socket() is None  # the walk fails; memory set
-        assert g._socket_search_failed is not None
-        now += g.REDISCOVERY_COOLDOWN
+        assert core_ydotool._socket_search_failed is not None
+        now += core_ydotool.REDISCOVERY_COOLDOWN
         monkeypatch.setattr(
-            g, "_socket_accepts", lambda path, timeout=g.PROBE_TIMEOUT: True
+            core_ydotool, "_socket_accepts", lambda path, timeout=g.PROBE_TIMEOUT: True
         )
         assert g.injector_socket() == "/dead"  # window closed: the walk runs
-        assert g._socket_search_failed is None  # ...and the memory is gone
+        assert core_ydotool._socket_search_failed is None  # ...and the memory is gone
 
 
 class TestClientEnv:
@@ -785,7 +855,9 @@ class TestClientEnv:
 
     def test_a_found_socket_is_exported_to_the_client(self, monkeypatch):
         monkeypatch.setattr(
-            g, "injector_socket", lambda timeout=g.PROBE_TIMEOUT: "/alive.sock"
+            core_ydotool,
+            "injector_socket",
+            lambda timeout=g.PROBE_TIMEOUT: "/alive.sock",
         )
         env = g._client_env()
         assert env["YDOTOOL_SOCKET"] == "/alive.sock"
@@ -808,19 +880,23 @@ class TestClientEnv:
             seen["timeout"] = timeout
             return "/alive.sock"
 
-        monkeypatch.setattr(g, "injector_socket", spy)
+        monkeypatch.setattr(core_ydotool, "injector_socket", spy)
         assert g._client_env()["YDOTOOL_SOCKET"] == "/alive.sock"
         assert seen["timeout"] == g.PROBE_TIMEOUT_PER_USE
 
     def test_with_no_socket_the_environment_is_inherited(self, monkeypatch):
-        monkeypatch.setattr(g, "injector_socket", lambda timeout=g.PROBE_TIMEOUT: None)
+        monkeypatch.setattr(
+            core_ydotool, "injector_socket", lambda timeout=g.PROBE_TIMEOUT: None
+        )
         assert g._client_env() is None
 
     def test_the_spawn_is_the_thing_that_carries_it(self, monkeypatch):
         """`_spawn` is the only place a client starts, so it is the only place
         that needs to know: `_run_bounded` and the probe stay unchanged."""
         monkeypatch.setattr(
-            g, "injector_socket", lambda timeout=g.PROBE_TIMEOUT: "/alive.sock"
+            core_ydotool,
+            "injector_socket",
+            lambda timeout=g.PROBE_TIMEOUT: "/alive.sock",
         )
         seen = {}
         monkeypatch.setattr(
@@ -1040,10 +1116,8 @@ class TestInterpreterResolution:
 class TestAdapterArgv:
     def test_move_applies_the_monitor_origin(self, monkeypatch):
         seen = []
-        monkeypatch.setattr(
-            g, "_run_bounded", lambda args, **k: seen.append(args) or "ran"
-        )
-        monkeypatch.setattr(g, "_dialect", g.YDTOOL_DIALECT_LEGACY)
+        _pin_argv_recorder(monkeypatch, seen)
+        monkeypatch.setattr(core_ydotool, "_dialect", g.YDTOOL_DIALECT_LEGACY)
         g._monitor_origin = (1920, 0)
         g.move_to(1351, 280)
         # Daemonless: no --delay, so ydotool's default settle runs before the
@@ -1056,10 +1130,8 @@ class TestAdapterArgv:
         a double-click pair keeps its timing headroom."""
         monkeypatch.setattr(g, "injector_socket", lambda *a, **k: "/tmp/sock")
         seen = []
-        monkeypatch.setattr(
-            g, "_run_bounded", lambda args, **k: seen.append(args) or "ran"
-        )
-        monkeypatch.setattr(g, "_dialect", g.YDTOOL_DIALECT_LEGACY)
+        _pin_argv_recorder(monkeypatch, seen)
+        monkeypatch.setattr(core_ydotool, "_dialect", g.YDTOOL_DIALECT_LEGACY)
         g._monitor_origin = (1920, 0)
         g.move_to(1351, 280)
         assert seen == [["ydotool", "mousemove", "3271", "280", "--delay", "0"]]
@@ -1084,10 +1156,8 @@ class TestAdapterArgv:
 
     def test_click_buttons(self, monkeypatch):
         seen = []
-        monkeypatch.setattr(
-            g, "_run_bounded", lambda args, **k: seen.append(args) or "ran"
-        )
-        monkeypatch.setattr(g, "_dialect", g.YDTOOL_DIALECT_LEGACY)
+        _pin_argv_recorder(monkeypatch, seen)
+        monkeypatch.setattr(core_ydotool, "_dialect", g.YDTOOL_DIALECT_LEGACY)
         g.click("click")
         g.click("right")
         g.click("middle")
@@ -1102,10 +1172,8 @@ class TestAdapterArgv:
         given, so the flag is the difference between "the cell's centre" and
         "somewhere off the current pointer"."""
         seen = []
-        monkeypatch.setattr(
-            g, "_run_bounded", lambda args, **k: seen.append(args) or "ran"
-        )
-        monkeypatch.setattr(g, "_dialect", g.YDTOOL_DIALECT_MODERN)
+        _pin_argv_recorder(monkeypatch, seen)
+        monkeypatch.setattr(core_ydotool, "_dialect", g.YDTOOL_DIALECT_MODERN)
         g._monitor_origin = (1920, 0)
         g.move_to(1351, 280)
         assert seen == [
@@ -1117,10 +1185,8 @@ class TestAdapterArgv:
         `0xC1` as 3 (right) and `0xC2` as 2 (middle), where 0.1.8's own
         `click 1` emits nothing at all on 1.0.x — it is a bare selector."""
         seen = []
-        monkeypatch.setattr(
-            g, "_run_bounded", lambda args, **k: seen.append(args) or "ran"
-        )
-        monkeypatch.setattr(g, "_dialect", g.YDTOOL_DIALECT_MODERN)
+        _pin_argv_recorder(monkeypatch, seen)
+        monkeypatch.setattr(core_ydotool, "_dialect", g.YDTOOL_DIALECT_MODERN)
         g.click("click")
         g.click("right")
         g.click("middle")
@@ -1132,10 +1198,8 @@ class TestAdapterArgv:
 
     def test_double_click_is_two_calls_in_order(self, monkeypatch):
         seen = []
-        monkeypatch.setattr(
-            g, "_run_bounded", lambda args, **k: seen.append(args) or "ran"
-        )
-        monkeypatch.setattr(g, "_dialect", g.YDTOOL_DIALECT_LEGACY)
+        _pin_argv_recorder(monkeypatch, seen)
+        monkeypatch.setattr(core_ydotool, "_dialect", g.YDTOOL_DIALECT_LEGACY)
         g.double_click()
         assert [a[2] for a in seen] == ["1", "1"]
 
@@ -1174,17 +1238,17 @@ class TestAdapterArgv:
         """The VM's ydotool offers five verbs and no `mousemove_relative`:
         every argv the adapter and the probe build must come from its list."""
         seen = []
+        _pin_argv_recorder(monkeypatch, seen)
         monkeypatch.setattr(
-            g, "_run_bounded", lambda args, **k: seen.append(list(args)) or "ran"
-        )
-        monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_spawn",
             lambda cmd, timeout: Mock(returncode=1, stdout="", stderr=UBUNTU_HELP),
         )
         monkeypatch.setattr(g.shutil, "which", lambda name: f"/usr/bin/{name}")
         monkeypatch.setattr(
-            g, "_socket_accepts", lambda path=None, timeout=g.PROBE_TIMEOUT: False
+            core_ydotool,
+            "_socket_accepts",
+            lambda path=None, timeout=g.PROBE_TIMEOUT: False,
         )
         g._monitor_origin = (0, 0)
         g.move_to(10, 20)
@@ -1202,13 +1266,11 @@ class TestAdapterArgv:
 
     def test_the_modern_argv_stays_inside_the_modern_verb_list(self, monkeypatch):
         seen = []
-        monkeypatch.setattr(
-            g, "_run_bounded", lambda args, **k: seen.append(list(args)) or "ran"
-        )
+        _pin_argv_recorder(monkeypatch, seen)
         monkeypatch.setattr(
             g, "injector_socket", lambda: "/run/user/1000/.ydotool_socket"
         )
-        monkeypatch.setattr(g, "_spawn", _modern_client)
+        monkeypatch.setattr(core_ydotool, "_spawn", _modern_client)
         monkeypatch.setattr(g.shutil, "which", lambda name: f"/usr/bin/{name}")
         g.move_to(10, 20)
         g.click("right")
@@ -1225,6 +1287,20 @@ class TestAdapterArgv:
         # No `--delay` anywhere: 1.0.x has no such option, and passing it turns
         # the move into an abort and the click into a silently rejected argv.
         assert all("--delay" not in argv for argv in seen)
+
+    def test_the_grid_dry_run_flag_still_reaches_the_core_seam(self, monkeypatch):
+        """The env flag survived the extraction: the runner passes the grid's
+        own `_grid_dry_run()` down as the seam's `dry_run` parameter, so a dry
+        run still reports `ran` without spawning — asserted at the CORE `_spawn`
+        seam, where a wiring gap would show up as a real client start."""
+        spawn = Mock(return_value=Mock(returncode=0, stdout="", stderr=""))
+        monkeypatch.setattr(core_ydotool, "_spawn", spawn)
+        monkeypatch.setattr(
+            core_ydotool, "_dialect", core_ydotool.YDTOOL_DIALECT_LEGACY
+        )
+        monkeypatch.setenv("EASYSPEAK_GRID_DRY_RUN", "1")
+        assert g.move_to(10, 20) == "ran"
+        spawn.assert_not_called()
 
 
 class TestToolListParsing:
@@ -1268,7 +1344,7 @@ class TestToolListParsing:
 
     def test_the_probe_reads_the_list_from_stderr(self, monkeypatch):
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_spawn",
             lambda cmd, timeout: Mock(returncode=1, stdout="", stderr=UBUNTU_HELP),
         )
@@ -1432,12 +1508,12 @@ class TestGate:
     def test_socket_check_is_a_bare_connect_that_cannot_raise(self, monkeypatch):
         stub = Mock()
         stub.connect.side_effect = OSError("connection refused")
-        monkeypatch.setattr(g.socket, "socket", Mock(return_value=stub))
+        monkeypatch.setattr(socket, "socket", Mock(return_value=stub))
         assert g._socket_accepts() is False
         assert stub.close.call_count == len(g.YDTOOL_SOCKET_TYPES)
 
     def test_socket_check_reports_the_daemon_mode(self, monkeypatch):
-        monkeypatch.setattr(g.socket, "socket", Mock(return_value=Mock()))
+        monkeypatch.setattr(socket, "socket", Mock(return_value=Mock()))
         assert g._socket_accepts() is True
 
     def test_a_wrong_socket_type_is_not_the_same_as_no_daemon(self, monkeypatch):
@@ -1450,13 +1526,13 @@ class TestGate:
         def make(kind, stype):
             asked.append(stype)
             stub = Mock()
-            if stype == g.socket.SOCK_STREAM:
+            if stype == socket.SOCK_STREAM:
                 stub.connect.side_effect = OSError(91, "Protocol wrong type for socket")
             return stub
 
-        monkeypatch.setattr(g.socket, "socket", make)
+        monkeypatch.setattr(socket, "socket", make)
         assert g._socket_accepts("/run/user/1000/.ydotool_socket") is True
-        assert asked == [g.socket.SOCK_STREAM, g.socket.SOCK_DGRAM]
+        assert asked == [socket.SOCK_STREAM, socket.SOCK_DGRAM]
 
     def test_a_socket_that_refuses_both_types_is_not_a_daemon(self, monkeypatch):
         asked = []
@@ -1467,22 +1543,22 @@ class TestGate:
             stub.connect.side_effect = OSError(111, "Connection refused")
             return stub
 
-        monkeypatch.setattr(g.socket, "socket", make)
+        monkeypatch.setattr(socket, "socket", make)
         assert g._socket_accepts("/tmp/.ydotool_socket") is False
-        assert asked == [g.socket.SOCK_STREAM, g.socket.SOCK_DGRAM]
+        assert asked == [socket.SOCK_STREAM, socket.SOCK_DGRAM]
 
     def test_injector_probe_is_portable_and_daemonless(self, monkeypatch, caplog):
         """The 0.1.8 shape: Ubuntu's five verbs, no ydotoold, a no-op that reports
         `ran` — there the socket is a logged mode, not a gate condition."""
         monkeypatch.setattr(g.shutil, "which", lambda name: f"/usr/bin/{name}")
         monkeypatch.setattr(
-            g, "_socket_accepts", lambda path=None, timeout=g.PROBE_TIMEOUT: False
+            core_ydotool,
+            "_socket_accepts",
+            lambda path=None, timeout=g.PROBE_TIMEOUT: False,
         )
-        monkeypatch.setattr(g, "_spawn", lambda cmd, timeout: _help_result())
+        monkeypatch.setattr(core_ydotool, "_spawn", lambda cmd, timeout: _help_result())
         seen = []
-        monkeypatch.setattr(
-            g, "_run_bounded", lambda args, **k: seen.append(list(args)) or "ran"
-        )
+        _pin_argv_recorder(monkeypatch, seen)
         with caplog.at_level("INFO"):
             assert g._probe_injector() is True
         assert seen == [["ydotool", "type", "", "--delay", "0"]]
@@ -1493,14 +1569,18 @@ class TestGate:
     ):
         monkeypatch.setattr(g.shutil, "which", lambda name: f"/usr/bin/{name}")
         monkeypatch.setattr(
-            g, "ydotool_socket_candidates", lambda: ["/run/user/1000/.ydotool_socket"]
+            core_ydotool,
+            "ydotool_socket_candidates",
+            lambda: ["/run/user/1000/.ydotool_socket"],
         )
-        monkeypatch.setattr(g, "_socket_owned", lambda _path: True)
-        monkeypatch.setattr(g, "injector_socket", _real_injector_socket)
+        monkeypatch.setattr(core_ydotool, "_socket_owned", lambda _path: True)
+        _pin_real_resolver(monkeypatch)
         monkeypatch.setattr(
-            g, "_socket_accepts", lambda path=None, timeout=g.PROBE_TIMEOUT: True
+            core_ydotool,
+            "_socket_accepts",
+            lambda path=None, timeout=g.PROBE_TIMEOUT: True,
         )
-        monkeypatch.setattr(g, "_spawn", lambda cmd, timeout: _help_result())
+        monkeypatch.setattr(core_ydotool, "_spawn", lambda cmd, timeout: _help_result())
         monkeypatch.setattr(g, "_run_bounded", lambda args, **k: "ran")
         with caplog.at_level("INFO"):
             assert g._probe_injector() is True
@@ -1516,9 +1596,11 @@ class TestGate:
         could prove."""
         monkeypatch.setattr(g.shutil, "which", lambda name: f"/usr/bin/{name}")
         monkeypatch.setattr(
-            g, "_socket_accepts", lambda path=None, timeout=g.PROBE_TIMEOUT: False
+            core_ydotool,
+            "_socket_accepts",
+            lambda path=None, timeout=g.PROBE_TIMEOUT: False,
         )
-        monkeypatch.setattr(g, "_spawn", _modern_client)
+        monkeypatch.setattr(core_ydotool, "_spawn", _modern_client)
         monkeypatch.setattr(g, "_run_bounded", Mock(side_effect=AssertionError))
         with caplog.at_level("INFO"):
             assert g._probe_injector() is False
@@ -1531,18 +1613,20 @@ class TestGate:
         modern no-op (`type ""`, no `--delay` to be rejected) reporting `ran`."""
         monkeypatch.setattr(g.shutil, "which", lambda name: f"/usr/bin/{name}")
         monkeypatch.setattr(
-            g, "ydotool_socket_candidates", lambda: ["/run/user/1000/.ydotool_socket"]
+            core_ydotool,
+            "ydotool_socket_candidates",
+            lambda: ["/run/user/1000/.ydotool_socket"],
         )
-        monkeypatch.setattr(g, "_socket_owned", lambda _path: True)
-        monkeypatch.setattr(g, "injector_socket", _real_injector_socket)
+        monkeypatch.setattr(core_ydotool, "_socket_owned", lambda _path: True)
+        _pin_real_resolver(monkeypatch)
         monkeypatch.setattr(
-            g, "_socket_accepts", lambda path=None, timeout=g.PROBE_TIMEOUT: True
+            core_ydotool,
+            "_socket_accepts",
+            lambda path=None, timeout=g.PROBE_TIMEOUT: True,
         )
-        monkeypatch.setattr(g, "_spawn", _modern_client)
+        monkeypatch.setattr(core_ydotool, "_spawn", _modern_client)
         seen = []
-        monkeypatch.setattr(
-            g, "_run_bounded", lambda args, **k: seen.append(list(args)) or "ran"
-        )
+        _pin_argv_recorder(monkeypatch, seen)
         with caplog.at_level("INFO"):
             assert g._probe_injector() is True
         assert seen == [["ydotool", "type", ""]]
@@ -1553,7 +1637,7 @@ class TestGate:
         text = "Usage: ydotool <cmd> <args>\nAvailable commands:\n  type\n  click\n"
         monkeypatch.setattr(g.shutil, "which", lambda name: f"/usr/bin/{name}")
         monkeypatch.setattr(
-            g,
+            core_ydotool,
             "_spawn",
             lambda cmd, timeout: Mock(returncode=1, stdout="", stderr=text),
         )
@@ -1564,7 +1648,7 @@ class TestGate:
         self, monkeypatch
     ):
         monkeypatch.setattr(g.shutil, "which", lambda name: f"/usr/bin/{name}")
-        monkeypatch.setattr(g, "_spawn", lambda cmd, timeout: _help_result())
+        monkeypatch.setattr(core_ydotool, "_spawn", lambda cmd, timeout: _help_result())
         monkeypatch.setattr(g, "_run_bounded", lambda args, **k: "errored")
         assert g._probe_injector() is False
 
@@ -1580,7 +1664,7 @@ class TestGate:
         def boom(cmd, timeout):
             raise subprocess.TimeoutExpired(cmd="ydotool", timeout=5.0)
 
-        monkeypatch.setattr(g, "_spawn", boom)
+        monkeypatch.setattr(core_ydotool, "_spawn", boom)
         assert g._probe_injector() is False
 
 
