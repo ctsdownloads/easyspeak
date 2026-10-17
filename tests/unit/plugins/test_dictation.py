@@ -906,15 +906,15 @@ def test_insert_text_leaves_an_empty_clipboard_alone(
 @patch.object(dictation, "has_focused_text_field", return_value=True)
 @patch(
     "easyspeak.core.mediakeys.tap_chord",
-    side_effect=mediakeys.RemoteDesktopUnavailableError("The name is not activatable"),
+    side_effect=mediakeys.InjectionUnavailableError("The name is not activatable"),
 )
 def test_insert_text_reports_a_desktop_without_keystrokes(
     mock_chord, mock_focus, clipboard, readlog
 ):
-    """Without GNOME's RemoteDesktop, e.g. on KDE Plasma, say why in one log line."""
+    """With no injection backend answering, e.g. an unprovisioned desktop, say why."""
     assert dictation.insert_text("hello") == dictation.NO_KEYSTROKES
     log = readlog().err
-    assert "RemoteDesktop" in log
+    assert "injection backend" in log
     assert "Traceback" not in log
 
 

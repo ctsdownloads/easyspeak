@@ -19,7 +19,6 @@ it and nothing here derives from those lines.
 """
 
 import pytest
-
 from easyspeak.core import ydotool as yd
 
 

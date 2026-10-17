@@ -528,9 +528,11 @@ def _check_batch(chord, repeats):
     shared entry.
     """
     if not chord:
-        raise ValueError("chord must name at least one key")
+        message = "chord must name at least one key"
+        raise ValueError(message)
     if repeats < 1:
-        raise ValueError("repeats must be >= 1")
+        message = "repeats must be >= 1"
+        raise ValueError(message)
 
 
 def key_argv(chord, repeats=1):
@@ -590,8 +592,9 @@ def _legacy_combo_name(code):
     try:
         return KEY_LEGACY_NAMES[code]
     except (KeyError, TypeError):
-        raise ValueError(
+        message = (
             f"no legacy combo name for evdev code {code!r}: the 0.1.8 key "
             "verb takes names, not codes (ydotool_key_usage_legacy.txt "
             "lines 21-27)"
-        ) from None
+        )
+        raise ValueError(message) from None

@@ -491,10 +491,10 @@ def insert_text(text):
 
     try:
         mediakeys.tap_chord(chord)
-    except mediakeys.RemoteDesktopUnavailableError as exc:
+    except mediakeys.InjectionUnavailableError as exc:
         logger.warning(
-            "Could not send the paste keystroke (%s). Dictation needs GNOME's "
-            "RemoteDesktop interface, which this desktop doesn't provide.",
+            "Could not inject the paste keystroke (%s). Dictation needs a working "
+            "injection backend — check ydotool, /dev/uinput access, ydotoold.",
             exc,
         )
         return NO_KEYSTROKES
