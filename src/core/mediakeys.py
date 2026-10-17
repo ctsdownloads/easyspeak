@@ -296,8 +296,9 @@ def tap_chord(keycodes):
         # TimeoutError: the bounded D-Bus wait (jeepney); OSError: a missing
         # binary or spawn failure from the uinput runner — both mean "no usable
         # backend", and both must land in the spoken-refusal ladder
-        # (press_key catches RuntimeError/OSError by family; dictation's paste
-        # path keys on InjectionUnavailableError for its refusal message).
+        # (press_key catches RuntimeError/OSError/ValueError by family;
+        # dictation's paste path keys on InjectionUnavailableError for its
+        # refusal message).
         message = f"injection unavailable: {exc}"
         raise InjectionUnavailableError(message) from exc
 
@@ -399,7 +400,13 @@ def press_key(keycode, repeats=1):
     """Tap `keycode` `repeats` times; True when the keystrokes were delivered."""
     try:
         select_backend().tap_key(keycode, repeats=repeats)
-    except (RuntimeError, OSError) as exc:
+    except (RuntimeError, OSError, ValueError) as exc:
+        # ValueError: the uinput backend's argv builder raises it for a code
+        # the 0.1.8 name tables cannot spell (the media keys — see
+        # ydotool.KEY_LEGACY_NAMES). A refusal is not a crash: the caller
+        # answers with its own fallback (dictation's spoken refusal, the
+        # system plugin's wpctl call) instead of the error escaping to the
+        # dispatcher's generic apology.
         logger.warning("Keystrokes could not be injected: %s", exc)
         return False
     return True

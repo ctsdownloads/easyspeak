@@ -108,14 +108,42 @@ def test_unknown_legacy_code_raises_naming_the_code(monkeypatch):
     # "no matching keycode" — and a guessed name would be worse than an abort,
     # because the client's single-letter fallback presses the wrong key
     # silently. Codes with no grounded legacy name therefore raise here,
-    # before any process is spawned. 104 has none: its repo name is the
-    # two-word spoken form "page up" (mediakeys.KEYS), and a space is not a
-    # combo name.
+    # before any process is spawned. The media codes have none: the name
+    # tables the key verb consults (libevdevPlus 0.1.1 Table_FunctionKeys,
+    # quoted in ydotool.py) carry no media keys at all — the KEY_*-prefixed
+    # names `strings` shows live in Table_KeyCodes, which the verb never
+    # reads. 113 is mute and 115 volume up: the system plugin's replay codes,
+    # so on 0.1.8 the OSD path must refuse loudly and fall back.
     _pin_dialect(monkeypatch, yd.YDTOOL_DIALECT_LEGACY)
-    with pytest.raises(ValueError, match="104"):
-        yd.key_argv((104,))
+    with pytest.raises(ValueError, match="113"):
+        yd.key_argv((113,))
+    with pytest.raises(ValueError, match="115"):
+        yd.key_argv((115,))
     with pytest.raises(ValueError, match="9999"):
         yd.key_legacy_argv((9999,))
+
+
+def test_legacy_page_navigation_uses_the_clients_pageup_pagedown(monkeypatch):
+    # Codes 104/109 were long absent because their repo names are the two-word
+    # spoken forms "page up"/"page down" — no combo name — while the library
+    # defining the client's tables was unreachable to cite. Grounded now:
+    # libevdevPlus 0.1.1's Table_FunctionKeys (statically linked into the VM's
+    # ydotool 0.1.8-3build1, per its libevdevplus-dev 0.1.1-2) spells them
+    # PAGEUP/PAGEDOWN, and KeyStroke2Code (the ydotool_0.1.8.orig.tar.gz
+    # source) consults exactly that table.
+    _pin_dialect(monkeypatch, yd.YDTOOL_DIALECT_LEGACY)
+    assert yd.key_argv((104,)) == ("ydotool", "key", "pageup")
+    assert yd.key_argv((109,)) == ("ydotool", "key", "pagedown")
+
+
+def test_legacy_escape_is_the_clients_esc_spelling(monkeypatch):
+    # The client's table has ESC only (libevdevPlus 0.1.1
+    # Table_FunctionKeys): the repo's spoken form "escape" would survive no
+    # name table and fall through to the single-character fallback, pressing
+    # `e` silently. The table emits the verified spelling instead — the loud
+    # design only works when every listed name is grounded.
+    _pin_dialect(monkeypatch, yd.YDTOOL_DIALECT_LEGACY)
+    assert yd.key_argv((1,)) == ("ydotool", "key", "esc")
 
 
 # --- the loud programming-error guards --------------------------------------

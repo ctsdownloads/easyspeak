@@ -459,42 +459,50 @@ def noop_argv():
 
 KEY_PER_REPEAT_BUDGET = 0.05  # s; PROVISIONAL — Task 7 calibrates it on the VM
 
-# evdev keycode -> 0.1.8 combo NAME, reversed from the repo's two name->code
-# tables: `core.mediakeys.KEYS` (spoken key names) and the dictation plugin's
-# `KEYCODES` (paste-chord names). This is a literal, not a programmatic
-# reverse of those tables: core cannot import the plugin (plugins import
-# core), and key injection will make mediakeys import from here, so either
-# import would close a cycle. Case is the client's problem, not ours — it
-# uppercases names before lookup (upstream v0.1.8 Key.cpp, cited by the
-# legacy fixture's corroboration section), and the fixture's own examples mix
-# cases ("CTRL+alt+f3", "ctrl+Backspace", its lines 22 and 105). We emit
-# lowercase for determinism.
+# evdev keycode -> 0.1.8 combo NAME, grounded in the 0.1.8 client's OWN name
+# tables, not the repo's spoken names. `key` resolves each '+'-part by
+# uppercasing it and looking it up first in libevdevPlus's Table_ModifierKeys
+# (CTRL/SHIFT/ALT/SUPER/META and their _L/_R twins), then in
+# Table_FunctionKeys (UP DOWN LEFT RIGHT TAB CAPSLOCK NUMLOCK SCROLLLOCK ESC
+# ENTER BACKSPACE DELETE INSERT HOME END PAGEUP PAGEDOWN SYSRQ PAUSE F1-F12),
+# falling back to Table_LowerKeys on the part's first character ALONE
+# (Key.cpp KeyStroke2Code, byte-identical in the ydotool_0.1.8.orig.tar.gz
+# Ubuntu's 0.1.8-3build1 was built from; the VM statically links the
+# libevdevplus 0.1.1-2 whose Resource.cpp defines those tables). Case is the
+# client's problem, not ours — it uppercases names before lookup — and the
+# fixture's own examples mix cases ("CTRL+alt+f3", "ctrl+Backspace", its
+# lines 22 and 105). We emit lowercase for determinism.
 #
-# Deliberately absent: codes 104 and 109. Their repo names are the two-word
-# spoken forms "page up"/"page down", and a space is not a combo name — the
-# 0.1.8 resolver would fall through to its single-letter table and silently
-# press `P` instead (the abort the fixture documents at its lines 25-27 only
-# covers unknown single names). Upstream's full name table is unreachable
-# (the evdevPlus repo 404s), so rather than guess a spelling no grounded
-# source documents, these codes raise; Task 7's VM calibration can ground the
-# real names (`strings /usr/bin/ydotool`) and extend this table.
+# The media keys the system plugin replays (113/114/115, 224/225) stay OUT,
+# loudly: their names exist only in the KEY_*-prefixed Table_KeyCodes (the
+# names `strings /usr/bin/ydotool` shows), which KeyStroke2Code never
+# consults — a spoken-shaped guess like "volumeup" would survive both name
+# tables, fall through to the single-character fallback, and press `v`
+# silently. A wrong keypress is far worse than a refusal, so an unlisted code
+# raises (see _legacy_combo_name) and press_key's ladder turns that into the
+# plugins' own fallbacks (wpctl for volume, the power D-Bus call for
+# brightness). "escape" is the same trap sprung the other way: it is not in
+# the client's table — the name is "esc" — and this table's first draft
+# carried the spoken form, which would have pressed `e`.
 KEY_LEGACY_NAMES = {
-    28: "enter",  # mediakeys.KEYS["enter"]
-    15: "tab",  # mediakeys.KEYS["tab"]
-    1: "escape",  # mediakeys.KEYS["escape"]
-    14: "backspace",  # mediakeys.KEYS["backspace"]; fixture lines 22/105
-    103: "up",  # mediakeys.KEYS["up"]
-    108: "down",  # mediakeys.KEYS["down"]
-    105: "left",  # mediakeys.KEYS["left"]
-    106: "right",  # mediakeys.KEYS["right"]
-    102: "home",  # mediakeys.KEYS["home"]
-    107: "end",  # mediakeys.KEYS["end"]
-    29: "ctrl",  # dictation.KEYCODES["ctrl"]; fixture lines 22/105
-    42: "shift",  # dictation.KEYCODES["shift"]; fixture line 106 ("Shift+#")
-    56: "alt",  # dictation.KEYCODES["alt"]; fixture lines 22/105
-    125: "super",  # dictation.KEYCODES["super"]
-    110: "insert",  # dictation.KEYCODES["insert"]
-    47: "v",  # dictation.KEYCODES["v"]; letters per the client's "alt+r", line 22
+    28: "enter",  # mediakeys.KEYS; client: ENTER
+    15: "tab",  # mediakeys.KEYS; client: TAB
+    1: "esc",  # KEYS["escape"]; client: ESC — see the "escape" note above
+    14: "backspace",  # mediakeys.KEYS; client: BACKSPACE; fixture lines 22/105
+    103: "up",  # mediakeys.KEYS; client: UP
+    108: "down",  # mediakeys.KEYS; client: DOWN
+    105: "left",  # mediakeys.KEYS; client: LEFT
+    106: "right",  # mediakeys.KEYS; client: RIGHT
+    102: "home",  # mediakeys.KEYS; client: HOME
+    107: "end",  # mediakeys.KEYS; client: END
+    104: "pageup",  # KEYS["page up"]; client: PAGEUP
+    109: "pagedown",  # KEYS["page down"]; client: PAGEDOWN
+    29: "ctrl",  # dictation.KEYCODES; client modifier table: CTRL; fixture 22/105
+    42: "shift",  # dictation.KEYCODES; client: SHIFT; fixture line 106 ("Shift+#")
+    56: "alt",  # dictation.KEYCODES; client: ALT; fixture lines 22/105
+    125: "super",  # dictation.KEYCODES; client modifier table: SUPER
+    110: "insert",  # dictation.KEYCODES; client: INSERT
+    47: "v",  # dictation.KEYCODES; client single-char table; "alt+r", line 22
 }
 
 

@@ -183,3 +183,20 @@ def test_press_key_survives_an_oserror_from_the_backend(mock_select, readlog):
     mock_select.return_value.tap_key.side_effect = FileNotFoundError("ydotool")
     assert mediakeys.press_key(mediakeys.KEYS["enter"]) is False
     assert "could not be injected" in readlog().err
+
+
+@patch("easyspeak.core.ydotool.key_argv")
+@patch("easyspeak.core.mediakeys.select_backend")
+def test_press_key_survives_an_unspellable_code(mock_select, mock_argv, readlog):
+    """A code the 0.1.8 name tables cannot spell raises ValueError from
+    key_argv on the uinput path; the ladder catches it so dictation speaks its
+    proper refusal (and the system plugin falls back) instead of the error
+    escaping to the dispatcher's generic apology. 113 (mute) spells no legacy
+    combo name — the media keys are absent from the client's tables (see
+    ydotool.KEY_LEGACY_NAMES)."""
+    mock_select.return_value = mediakeys.UinputBackend(
+        runner=lambda args, timeout: "ran"
+    )
+    mock_argv.side_effect = ValueError("no legacy combo name for evdev code 113")
+    assert mediakeys.press_key(113) is False
+    assert "could not be injected" in readlog().err

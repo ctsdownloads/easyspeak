@@ -25,7 +25,7 @@ Fork-only receipts for the compatibility-column acceptance run of 2026-10-17.
 |---|---------------------|---------|----------|
 | 1 | COSMIC VM: dictation pastes into a focused field, no manual paste | **PENDING-HUMAN** | Provisioning gap below; probe-leniency half verified: `insert_text` on non-GNOME proceeded past the NO_FOCUS probe into the clipboard branch and only the missing `wl-clipboard` diverted it to AT-SPI (`insert_text -> no_focus elapsed 0.162s`) |
 | 2 | COSMIC VM: "press enter" keystroke lands | **PENDING-HUMAN** | Same gap; argv + graceful-failure transcript captured (`ydotool key enter`, single invocation) |
-| 3 | COSMIC VM: volume replay pops COSMIC's OSD | **FAIL on 0.1.8 — code finding F1** (+ same provisioning gap) | `core.tap_key(115) -> False` with "no legacy combo name for evdev code 115"; falls back silently to `wpctl`, no OSD possible on this dialect. Works on 1.0.x (modern argv sends raw codes) |
+| 3 | COSMIC VM: volume replay pops COSMIC's OSD | **FAIL on 0.1.8 — code finding F1** (+ same provisioning gap) | `core.tap_key(115) -> False` with "no legacy combo name for evdev code 115"; falls back silently to `wpctl`, no OSD possible on this dialect. Works on 1.0.x (modern argv sends raw codes). Fix round: grounded as a client-grammar limit, not a fillable table gap — see Fix round below |
 | 4 | COSMIC VM: "backspace ten" = ONE batched invocation within the latency bound | **PARTIAL: single-invocation proven; ten deletions PENDING-HUMAN** | argv `('ydotool', 'key', '--repeat', '10', 'backspace')` — one client invocation; failure path 1.087s ≤ `key_timeout(10)` = 2.5s. Calibration of the provisional `KEY_PER_REPEAT_BUDGET` (0.05s) needs a successful batch — blocked by the same gap |
 | 5 | `EASYSPEAK_KEY_BACKEND` override honored; unknown warns + auto | **PASS** (3 of 4 arms fully; `uinput`-succeeds arm pending the provisioning gap, its failure arm fully exercised) | Transcripts below |
 | 6 | GNOME host: dictated text lands end-to-end; volume key fires; routing log says `remote-desktop` | **PASS** | Buffer read via AT-SPI: LEN 0 → 26, `'easyspeak host paste 0.1.8'` after one `ctrl+v` chord (0.008s); volume 28% → changed, restored to the exact raw 18352; log line `key injection backend: remote-desktop` on both |
@@ -141,6 +141,9 @@ failure transcript verbatim).
   `media-key injection failed; using the direct fallback: no legacy combo name
   for evdev code 115…`) but the COSMIC OSD can never appear on this dialect.
   On 1.0.x (modern) `key_argv` sends raw codes and volume replay works.
+  *(Resolved in the Fix round: the client's tables were located and carry NO
+  media-key names at all — the names stay out loudly by design. See the Fix
+  round below.)*
 - **F2 — `ValueError` escapes `press_key`'s graceful contract.** `press_key`
   catches only `(RuntimeError, OSError)` (`src/core/mediakeys.py:402`), so for
   any keycode outside the legacy table it raises instead of returning False.
@@ -152,6 +155,72 @@ failure transcript verbatim).
   `route_command`'s apology handler (`src/core/main.py:288-300`) instead of
   the intended "Dictation isn't set up on this system." refusal. Bounded: no
   crash (dispatch guard), legacy dialect only.
+  *(Fixed in the Fix round: the ladder catches `ValueError`; 104/109 also
+  gained their verified client names. See below.)*
+
+## Fix round (F1/F2) — same day, follow-up commit on this branch
+
+Both findings were grounded against the 0.1.8 client's own name tables before
+any name was written, and the grounding **overturned F1's premise**: the
+legacy `key` verb has no media-key names to add. What changed:
+
+- **F1 resolved as "verified absent", not "filled in".** The client resolves
+  each `+`-part by uppercasing it and looking it up in libevdevPlus's
+  `Table_ModifierKeys`, then `Table_FunctionKeys`, falling back to a
+  single-character lookup on the part's first letter alone (`Key.cpp
+  KeyStroke2Code` — the v0.1.8 tag file is byte-identical to the
+  `ydotool_0.1.8.orig.tar.gz` Ubuntu's `0.1.8-3build1` was built from,
+  `diff`-verified). The media names `strings` shows in the binary
+  (`KEY_VOLUMEUP`, `KEY_MUTE`, …) live in the KEY_*-prefixed
+  `Table_KeyCodes`, which the verb never consults. `Table_FunctionKeys` in
+  `libevdevplus 0.1.1-2` — the exact `-dev` package installed on the VM and
+  statically linked into its binary — holds 31 entries (UP DOWN LEFT RIGHT
+  TAB CAPSLOCK NUMLOCK SCROLLLOCK ESC ENTER BACKSPACE DELETE INSERT HOME END
+  PAGEUP PAGEDOWN SYSRQ PAUSE F1–F12) and **no media keys**. A spoken-shaped
+  guess like `volumeup` would therefore fall through to the single-character
+  fallback and press `v` silently — so the media codes (113/114/115, 224/225)
+  stay OUT of `KEY_LEGACY_NAMES` and raise loudly, which is the design the
+  finding already described. The volume OSD remains impossible on this
+  dialect; the `wpctl` fallback (which changes the volume) stays the 0.1.8
+  path, and the OSD works on 1.0.x (raw codes).
+- **Two grounded additions and one correction in `KEY_LEGACY_NAMES`:**
+  - `104 → pageup`, `109 → pagedown` (client `PAGEUP`/`PAGEDOWN`): spoken
+    "press page up"/"press page down" now build a valid legacy argv — F2's
+    original reproduction is fixed at the table level too.
+  - `1 → esc` (was the spoken form `escape`, which survives no client name
+    table and would have pressed `e` silently — the same fallback trap,
+    surfaced by the same grounding).
+- **F2 fixed as prescribed:** `press_key`'s ladder widened to
+  `(RuntimeError, OSError, ValueError)` (`src/core/mediakeys.py`), same log
+  line — an unspellable code returns False, dictation speaks "Dictation isn't
+  set up on this system." and the system plugin runs its fallback, instead of
+  the error escaping to `route_command`'s apology. (`core.tap_key`, the
+  system plugin's own path, was already safe — its `except Exception` catches
+  the raise.)
+- **Tests:** 3 new unit tests — legacy argv for 104/109 (`pageup`/`pagedown`),
+  legacy argv for 1 (`esc`, not `escape`), and the media-code refusal (113 and
+  115 raise, naming the code) — plus `press_key` surviving a patched
+  `yd.key_argv` `ValueError` (real `UinputBackend` in the ladder) → False with
+  the warning logged. `just pytest tests/unit -q`: **2052 passed, 1 skipped**
+  (was 2049 + 1); `just lint` clean.
+
+Grounding sources (all 2026-10-17): `strings /usr/bin/ydotool` on the VM
+(192.168.122.173 — only KEY_*-prefixed media names, in `Table_KeyCodes`
+initialization order); `ydotool_0.1.8.orig.tar.gz` and
+`libevdevplus_0.1.1.orig.tar.gz` from Launchpad, the exact versions the VM's
+`dpkg` reports (`0.1.8-3build1`, `libevdevplus-dev 0.1.1-2`); kernel
+`input-event-codes.h` for the code numbers (KEY_PAGEUP 104, KEY_PAGEDOWN 109,
+KEY_MUTE 113, KEY_VOLUMEUP 115, KEY_BRIGHTNESSDOWN 224, KEY_BRIGHTNESSUP 225).
+Live name-resolution probes on the VM are unobservable — the client opens
+`/dev/uinput` before parsing its argv (legacy fixture lines 62–75) — so the
+library sources above are the evidence, cross-checked against the binary's
+string layout.
+
+**Scenario 3 after this round:** the COSMIC OSD screenshot remains pending the
+`input`-group provisioning (the human step documented above) — and on 0.1.8
+the volume OSD cannot render even once provisioned: the key verb cannot spell
+the media keys, so the fallback runs. On a 1.0.x system the modern argv
+(`ydotool key 115:1 115:0`) pops the OSD once provisioned.
 
 ### Dictation probe leniency (scenario 1's off-GNOME half)
 
