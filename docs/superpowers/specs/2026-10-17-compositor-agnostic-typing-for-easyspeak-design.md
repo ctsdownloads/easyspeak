@@ -63,7 +63,10 @@ level — and its `type` verb works under COSMIC.
 4. Works from deb/rpm on a clean COSMIC install after the documented one-time
    uinput provisioning — the same deployment step #233 documents and the same
    `input`-group grant hold-to-dictate already needs — with no other manual
-   steps. (Package installation cannot grant `/dev/uinput` write access;
+   steps **on the 0.1.8 daemonless dialect (Ubuntu 24.04, the acceptance
+   VM's)**. On 1.0.x dialects a running `ydotoold` is additionally required
+   (`docs/troubleshooting.md:85-96`); that step is documented, not packaged —
+   see §7. (Package installation cannot grant `/dev/uinput` write access;
    #233 deliberately made that a deployment step, not a session tweak, and
    packaging a silent input-injection-grade grant from a desktop-app package
    would reverse that security stance.)
@@ -142,7 +145,12 @@ NotifyKeyboardKeycode → Stop on one connection; same exception on refusal.
 `_ydotool` (reconciliation contract in §10): uinput access probing,
 ydotoold socket discovery / daemonless fallback, and recovery guidance.
 New surface needed beyond the grid's verbs: keycode-level synthesis mapping
-`tap_key(keycode)` and `tap_chord(keycodes)` onto the ydotool `key` verb.
+`tap_key(keycode, repeats=1)` and `tap_chord(keycodes)` onto the ydotool
+`key` verb. **The repeats channel lives in the backend**: the uinput backend
+emits `repeats` as ONE batched argv (`code:1 code:0` × repeats — one device,
+one settle), while the RemoteDesktop backend keeps its per-repeat loop so the
+GNOME path stays byte-for-byte identical; `press_key` passes `repeats`
+through unchanged (`mediakeys.py:168-176`).
 The argv is the keycodes **in the order given, each as `code:1`, then in
 reverse, each as `code:0`** — identical to `tap_chord`'s documented contract
 ("keys go down in the order given and come up in reverse", `mediakeys.py:52-53`);
@@ -199,7 +207,7 @@ boundary translates that vocabulary completely into exceptions:
   (`mediakeys.py:174`) and is reworded with the rename. The spoken refusal
   "Keystrokes need GNOME." becomes **false** on the desktops this PR
   targets, so it is reworded to name the actual remedy (one new `_()`
-  string ×5 catalogs, §8); compatibility footnotes [^browser], [^dictation],
+  string ×4 catalogs, §8); compatibility footnotes [^browser], [^dictation],
   and [^volume] are all updated in the same sweep.
 - `plugins/system` / `core.tap_key`: unchanged call sites; on GNOME the
   RemoteDesktop backend preserves today's OSD semantics; off GNOME the
@@ -280,9 +288,13 @@ swallowing, no fallback that strands the user without a way back.
 - uinput provisioning guidance is **reused from #233**, not reinvented; this
   PR extends `docs/troubleshooting.md` with the recovery path for perms lost
   at reboot.
-- Open packaging question deferred to reconciliation: whether #233's helper
-  model expects `ydotoold` (system service) or daemonless mode; whatever it
-  landed becomes the single documented path.
+- The daemon model is dialect-dependent by design, not an open question:
+  0.1.8 (Ubuntu 24.04) injects daemonless per invocation; 1.0.x requires a
+  running `ydotoold` (`docs/troubleshooting.md:85-96`). The extraction keeps
+  #233's dual-mode support as the single documented path, and
+  troubleshooting.md covers the daemon step for 1.0.x distros — where the
+  `ydotool` package is CLI-only on 24.04/25.10 and the daemon ships
+  separately (`ydotoold` package / user unit).
 
 ## 8. Docs and translations
 
@@ -305,15 +317,15 @@ swallowing, no fallback that strands the user without a way back.
 - `docs/how-it-works.md`: the dictation line gains "…synthetic paste keystroke
   via the platform's injection backend (Mutter RemoteDesktop or ydotool)".
 - Spoken strings: exactly ONE new `_()` string (the browser refusal, §4.4)
-  → all five `.po` catalogs per repo convention (`just translations
-  <lang>`). The reworded failure-path logs are developer-facing English
-  (not `_()`-wrapped) and cost nothing.
+  → the four `.po` catalogs (de/es/fr/it) per repo convention (`just
+  translations <lang>`). The reworded failure-path logs are developer-facing
+  English (not `_()`-wrapped) and cost nothing.
 
 ## 9. Testing strategy
 
 **Unit** (alongside existing core tests; gate logic pure and injected):
 
-- selection matrix: override×{remote-desktop, ydotool, auto, unknown-value} ×
+- selection matrix: override×{remote-desktop, uinput, auto, unknown-value} ×
   {GNOME, non-GNOME} × {Mutter owned, unowned}
 - stickiness (second call does not re-resolve), backend log line
 - `tap_key`/`tap_chord` routing per backend; exception rename fallout; the
@@ -390,6 +402,11 @@ points at this design when the PR opens.
   measured at 100ms on COSMIC): owned by batching repeats into one argv
   (§5); the acceptance criterion carries a latency bound so a regression to
   per-repeat invocations is visible instead of merely sluggish.
+- **Partial-repeat accounting** (pre-existing, amplified off GNOME): a
+  keystroke failing mid-loop leaves `dictation_last_length` stale, so a later
+  "scratch that" over-deletes. Batching shrinks the window — one invocation,
+  one outcome — but the accounting stays repeat-level; noted, not redesigned
+  here.
 - **AT-SPI leniency pastes into nothing** off GNOME when truly nothing is
   focused: harmless (Ctrl+V lands nowhere), and strictly better than refusing
   a path that works most of the time.
@@ -419,8 +436,10 @@ points at this design when the PR opens.
 - [ ] Probe leniency: non-GNOME NO_FOCUS proceeds to clipboard path; GNOME
       unchanged
 - [ ] deb/rpm deps include ydotool (wl-clipboard already shipped)
-- [ ] Clean-VM install: dictation works after the documented one-time uinput
-      provisioning, with no other manual steps
+- [ ] Clean-VM install (Ubuntu 24.04 base, 0.1.8 daemonless): dictation works
+      after the documented one-time uinput provisioning, with no other manual
+      steps; on 1.0.x dialects the ydotoold step is documented
+      (troubleshooting.md:85-96)
 - [ ] compatibility.md COSMIC column reflects only verified results
 - [ ] Full repo gates green (unit×5 pythons, integration, acceptance, types,
       REUSE, translations, docs strict, wheel/sdist)
