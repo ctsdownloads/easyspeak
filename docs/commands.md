@@ -248,8 +248,10 @@ Folders open in whatever file manager your desktop is configured for (via
 
 The desktop's own on-screen display and chime acknowledge the volume steps —
 the command replays a media key, which GNOME renders through Mutter and other
-desktops receive as an ordinary key press. "very loud" and "very silent" set
-the level directly and stay silent.
+desktops receive as an ordinary key press when their ydotool client is a 1.0.x
+one; on a 0.1.x client (e.g. Pop!_OS 24.04's) the media key cannot be spelled,
+so the level changes directly through the fallback, without the display or
+chime. "very loud" and "very silent" set the level directly and stay silent.
 
 ## Speakers playing audio
 

@@ -308,7 +308,9 @@ def tap_key(keycode, repeats=1):
 
     Raises [`InjectionUnavailableError`][core.mediakeys.InjectionUnavailableError]
     when no injection backend answered (e.g. a non-GNOME session) so the caller
-    can fall back to a silent change.
+    can fall back to a silent change. A code the 0.1.8 client cannot spell
+    raises the argv builder's plain ValueError instead — injection is
+    available, the key is just not nameable on that dialect.
     """
     try:
         select_backend().tap_key(keycode, repeats=repeats)

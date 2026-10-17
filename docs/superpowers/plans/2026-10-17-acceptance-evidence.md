@@ -72,7 +72,7 @@ ARGV backspace x10: ('ydotool', 'key', '--repeat', '10', 'backspace')
 ARGV press enter:   ('ydotool', 'key', 'enter')
 # modern 1.0.x (argv built with the dialect forced; repeats are ten
 # consecutive down/up cycles, still one invocation)
-modern backspace x10: ('ydotool', 'key', '14:1', '14:0', '14:1', '14:0', … '14:1', '14:0')  # 40 tokens
+modern backspace x10: ('ydotool', 'key', '14:1', '14:0', '14:1', '14:0', … '14:1', '14:0')  # 22 tokens = 2 + 10×2
 modern volume tap:    ('ydotool', 'key', '115:1', '115:0')
 ```
 
@@ -129,6 +129,9 @@ the F1 `ValueError`; with a table-covered key it reproduces the backspace-ten
 failure transcript verbatim).
 
 ### Code findings surfaced by the VM run (0.1.8 legacy dialect only)
+
+Line references in this section cite the pinned base `9d22b75`; the Fix round
+below moved them.
 
 - **F1 — volume/media-key replay cannot work on 0.1.8.** The legacy `key`
   verb takes NAMES (`KEY_LEGACY_NAMES`, `src/core/ydotool.py:481-498`) and the
@@ -198,10 +201,11 @@ legacy `key` verb has no media-key names to add. What changed:
   system plugin's own path, was already safe — its `except Exception` catches
   the raise.)
 - **Tests:** 3 new unit tests — legacy argv for 104/109 (`pageup`/`pagedown`),
-  legacy argv for 1 (`esc`, not `escape`), and the media-code refusal (113 and
-  115 raise, naming the code) — plus `press_key` surviving a patched
+  legacy argv for 1 (`esc`, not `escape`), and `press_key` surviving a patched
   `yd.key_argv` `ValueError` (real `UinputBackend` in the ladder) → False with
-  the warning logged. `just pytest tests/unit -q`: **2052 passed, 1 skipped**
+  the warning logged; the existing unknown-code refusal test was extended to
+  the media codes (113 and 115 raise, naming the code) rather than added.
+  `just pytest tests/unit -q`: **2052 passed, 1 skipped**
   (was 2049 + 1); `just lint` clean.
 
 Grounding sources (all 2026-10-17): `strings /usr/bin/ydotool` on the VM

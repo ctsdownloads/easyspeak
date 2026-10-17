@@ -55,8 +55,11 @@ Dictation additionally needs `wl-clipboard`, since it places text by pasting
 rather than through the accessibility bridge, which Chromium-based applications
 ignore. Off GNOME, the same keystrokes — dictation's paste, the browser's
 "press enter", the media keys — are injected by `ydotool`, which replays them
-as real input events, so a volume key still pops your desktop's own display
-there too. Both are hard dependencies, so they come with the package.
+as real input events; with a 1.0.x ydotool client the replayed volume key pops
+your desktop's own display, while a 0.1.x client (e.g. Pop!_OS 24.04's) cannot
+spell a media key's name, so the volume still changes directly through the
+`wpctl` fallback — without the on-screen display. Both are hard dependencies,
+so they come with the package.
 
 Installing the app **without** the packs also works: the wake word is built in,
 the speech model then downloads on first run if you allow it (see

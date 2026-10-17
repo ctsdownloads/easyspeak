@@ -50,8 +50,9 @@ def setup(c):
 def _media_key(core, keycode, fallback):
     """Replay a multimedia key for the desktop's native OSD (and chime for volume).
 
-    Falls back to the given command if key injection is unavailable (e.g. a non-GNOME
-    session); the setting still changes, just without the feedback.
+    Falls back to the given command when the key cannot be replayed — no
+    injection backend, or a 0.1.x ydotool that cannot spell a media key —
+    so the setting still changes, just without the on-screen feedback.
     """
     if not core.tap_key(keycode):
         core.host_run(fallback)

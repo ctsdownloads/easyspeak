@@ -28,9 +28,12 @@ features still have no counterpart there.
 
 [^apps]: Opens the KDE counterpart where there is one, e.g. KCalc for "calculator"
     or System Settings for "settings".
-[^volume]: The desktop's own on-screen indicator acknowledges the change — the
+[^volume]: The level change is real either way: with a 1.0.x ydotool client the
     command replays a real media key, which the desktop renders like one of your
-    own key presses.
+    own key presses — its on-screen indicator acknowledges the change. On a
+    0.1.x client (e.g. Pop!_OS 24.04's) the media key cannot be spelled, so the
+    desktop's own OSD does not render; the level still changes, directly through
+    the fallback command.
 [^browser]: "Press enter" and the other keystrokes go through the injection
     backend (Mutter RemoteDesktop on GNOME, `ydotool` elsewhere) and land like
     real key presses.
@@ -48,8 +51,9 @@ features still have no counterpart there.
     gtk4-layer-shell typelib. That access is input-injection grade — the same
     class as the `input` group hold-to-dictate needs — and on ydotool 1.0.x
     (Ubuntu 26.04) it also needs a running `ydotoold`: that client refuses to emit
-    without a socket. 0.1.8 (25.10) works without one and only warns about
-    latency. Click precision follows the desktop's pointer-acceleration
+    without a socket. 0.1.8 (Ubuntu 25.10; Pop!_OS 24.04 ships `0.1.8-3build1`
+    too) works without one and only warns about latency. Click precision follows
+    the desktop's pointer-acceleration
     profile: on COSMIC and KDE Plasma 6 alike, the default (adaptive)
     profile lands clicks roughly twice the aimed distance; the Flat profile
     lands them exactly.

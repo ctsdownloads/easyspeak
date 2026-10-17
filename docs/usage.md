@@ -116,7 +116,9 @@ to turn it off, and an unrecognized key disables it too. See
 Every injected keystroke — dictation's paste, the browser's "press enter", the
 media keys — goes through one backend, chosen at the first injection and sticky
 for the process lifetime: Mutter RemoteDesktop where GNOME provides it,
-`ydotool`/uinput elsewhere. `auto` picks between them by probing the session;
+`ydotool`/uinput elsewhere (the media keys replay through it only on a 1.0.x
+ydotool client — a 0.1.x one cannot spell them).
+`auto` picks between them by probing the session;
 `remote-desktop` and `uinput` force one; an unknown value logs a warning and
 falls back to `auto`. The variable is read once, so changing it means
 restarting EasySpeak. The uinput arm needs `ydotool` installed with write

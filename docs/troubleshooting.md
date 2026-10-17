@@ -222,6 +222,11 @@ injected, and the log names the remedy:
   backend is picked at the first injection, so log out and back in first.
 - **No running `ydotoold` on ydotool 1.0.x** — the daemon the grid needs; the
   grid section above has the package names and the user-unit recipe.
+- **A 0.1.x ydotool client and the media keys** — those clients (e.g.
+  Pop!_OS 24.04's `0.1.8-3build1`) take key NAMES, and their table cannot
+  spell a media key, so the volume/brightness replay is refused loudly and the
+  setting still changes through its direct fallback — without the desktop's
+  own on-screen display. Only a 1.0.x client (raw keycodes) renders it.
 
 If the backend resolved wrong for the session at hand — say the daemon started
 under one desktop and now runs under GNOME — restart the daemon to let the
