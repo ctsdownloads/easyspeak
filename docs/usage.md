@@ -107,6 +107,22 @@ to turn it off, and an unrecognized key disables it too. See
 | --------------------- | ------- | --------------------------------------------- |
 | `EASYSPEAK_LOG_LEVEL` | `INFO`  | Logging level when no `-v`/`-q` flag is given |
 
+### [`core.mediakeys`][core.mediakeys]
+
+| Variable                | Default | Effect                                                                    |
+| ----------------------- | ------- | ------------------------------------------------------------------------- |
+| `EASYSPEAK_KEY_BACKEND` | `auto`  | Key injection backend: `remote-desktop`, `uinput` or `auto` (probe GNOME) |
+
+Every injected keystroke — dictation's paste, the browser's "press enter", the
+media keys — goes through one backend, chosen at the first injection and sticky
+for the process lifetime: Mutter RemoteDesktop where GNOME provides it,
+`ydotool`/uinput elsewhere. `auto` picks between them by probing the session;
+`remote-desktop` and `uinput` force one; an unknown value logs a warning and
+falls back to `auto`. The variable is read once, so changing it means
+restarting EasySpeak. The uinput arm needs `ydotool` installed with write
+access to `/dev/uinput` — [Troubleshooting](troubleshooting.md#key-injection-backend)
+has the remedies when an injection fails.
+
 ### [`plugins.dictation`][plugins.dictation]
 
 | Variable                 | Default   | Effect                                             |
@@ -145,4 +161,4 @@ not packaged.
 | `EASYSPEAK_GRID_BACKEND` | probed  | `uinput` or `gnome`: force one grid backend instead of probing. `uinput` skips the probes entirely. |
 | `EASYSPEAK_GRID_PYTHON`  | probed  | Path to an interpreter with PyGObject and the gtk4-layer-shell typelib, if the probe cannot find one. |
 | `EASYSPEAK_GRID_TYPELIB` | unset   | Path to an uninstalled gtk4-layer-shell build tree's `src` directory, prepended to `GI_TYPELIB_PATH` and `LD_LIBRARY_PATH` for the helper and its probes — the fallback where no distro packages the layer-shell stack. |
-| `EASYSPEAK_GRID_DRY_RUN` | unset   | Test seam: every injection reports `ran` without spawning `ydotool`. Leave unset outside the test harness — a session with it set answers clicks without touching the pointer. |
+| `EASYSPEAK_GRID_DRY_RUN` | unset   | Test seam: the grid's own injections report `ran` without spawning `ydotool` — key injection ignores it. Leave unset outside the test harness: a session with it set answers clicks without touching the pointer. |

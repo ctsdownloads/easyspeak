@@ -1,41 +1,46 @@
 # Compatibility
 
 EasySpeak runs on Wayland desktops. GNOME is where it started, and where a bundled
-Shell extension provides everything. On other desktops, some features need a
-replacement for that extension that doesn't exist yet.
+Shell extension provides everything. On other desktops, key injection runs through
+`ydotool` and a StatusNotifier icon takes the tray's place; a few extension
+features still have no counterpart there.
 
-| Feature | GNOME | KDE Plasma |
-|---------|:-----:|:----------:|
-| Wake word, voice commands, spoken replies | ✅ | ✅ |
-| Sleep and wake from the tray icon | ✅ | ✅ |
-| Quick Settings toggle | ✅ | — |
-| Open and close apps | ✅ | ✅[^apps] |
-| Folders and file manager | ✅ | ✅ |
-| Media playback | ✅ | ✅ |
-| Volume | ✅ | ⚠️[^volume] |
-| Brightness | ✅ | ❌ |
-| Do not disturb | ✅ | ❌ |
-| Browser control | ✅ | ⚠️[^browser] |
-| Dictation | ✅ | ⚠️[^dictation] |
-| Push-to-talk key | ✅ | ✅ |
-| Mouse grid | ✅ | ⚠️[^grid] |
-| Head tracking | ✅ | ❌ |
-| About dialog | ✅ | ⚠️[^about] |
-| EasySpeak settings (e.g. start at login) | ✅ | ⚠️[^settings] |
+| Feature | GNOME | KDE Plasma | COSMIC |
+|---------|:-----:|:----------:|:------:|
+| Wake word, voice commands, spoken replies | ✅ | ✅ | ✅ |
+| Sleep and wake from the tray icon | ✅ | ✅ | ✅ |
+| Quick Settings toggle | ✅ | — | — |
+| Open and close apps | ✅ | ✅[^apps] | ✅ |
+| Folders and file manager | ✅ | ✅ | ✅ |
+| Media playback | ✅ | ✅ | ✅ |
+| Volume | ✅ | ✅[^volume] | ✅[^volume] |
+| Brightness | ✅ | ❌ | ❌ |
+| Do not disturb | ✅ | ❌ | ❌ |
+| Browser control | ✅ | ✅[^browser] | ✅[^browser] |
+| Dictation | ✅ | ✅[^dictation] | ✅[^dictation] |
+| Push-to-talk key | ✅ | ✅ | ✅ |
+| Mouse grid | ✅ | ✅[^grid] | ✅[^grid] |
+| Head tracking | ✅ | ❌ | ❌ |
+| About dialog | ✅ | ⚠️[^about] | ⚠️[^about] |
+| EasySpeak settings (e.g. start at login) | ✅ | ⚠️[^settings] | ⚠️[^settings] |
 
 ✅ works · ⚠️ partly · ❌ not yet · — not applicable
 
 [^apps]: Opens the KDE counterpart where there is one, e.g. KCalc for "calculator"
     or System Settings for "settings".
-[^volume]: Changes the volume, but without the on-screen indicator.
-[^browser]: Pressing keys in browser mode ("press enter") needs GNOME.
-[^dictation]: The text can't be typed yet. It lands on the clipboard, ready to
-    paste with Ctrl+V.
-[^about]: Opens in Plasma's own look if the optional `kdialog` is installed,
-    else as GNOME's dialog if GTK 4 and libadwaita are. Without either, EasySpeak
-    says its version and shows the details in a notification.
+[^volume]: The desktop's own on-screen indicator acknowledges the change — the
+    command replays a real media key, which the desktop renders like one of your
+    own key presses.
+[^browser]: "Press enter" and the other keystrokes go through the injection
+    backend (Mutter RemoteDesktop on GNOME, `ydotool` elsewhere) and land like
+    real key presses.
+[^dictation]: The text is pasted automatically now, through the injection
+    backend; `wl-clipboard` is still needed for the clipboard half.
+[^about]: Opens in Plasma's own look on KDE if the optional `kdialog` is
+    installed, else as GNOME's dialog if GTK 4 and libadwaita are. Without
+    either, EasySpeak says its version and shows the details in a notification.
 [^settings]: "Start at Login" is in the tray icon's menu; there are no other
-    settings yet. System Settings → Autostart shows the same entry.
+    settings yet. KDE's System Settings → Autostart shows the same entry.
 [^grid]: GNOME's grid is the bundled Shell extension. Elsewhere (KDE Plasma,
     COSMIC, wlroots) the mousegrid plugin uses its ydotool backend when that
     stack is installed: a compositor with layer-shell support, `ydotool` with write
@@ -49,7 +54,8 @@ replacement for that extension that doesn't exist yet.
     profile lands clicks roughly twice the aimed distance; the Flat profile
     lands them exactly.
 
-KDE Plasma support is new, so this table reflects a first test on Plasma 6. If you
-find something that works differently, please [report it][issues].
+KDE Plasma and COSMIC support are new: this table reflects a first test on
+Plasma 6 and on Pop!_OS 24.04's COSMIC 1.x. If you find something that works
+differently, please [report it][issues].
 
 [issues]: https://github.com/ctsdownloads/easyspeak/issues

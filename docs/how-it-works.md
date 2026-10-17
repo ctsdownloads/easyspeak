@@ -9,7 +9,8 @@
   mousegrid plugin's ydotool backend) on the compositors where no GNOME Shell
   can run
 - **Browser scroll** — JavaScript injection via qutebrowser IPC
-- **Dictation** — clipboard and a synthetic paste keystroke, with AT-SPI used to
+- **Dictation** — clipboard and a synthetic paste keystroke via the platform's
+  injection backend (Mutter RemoteDesktop or ydotool), with AT-SPI used to
   check something is focused (and as a fallback where no clipboard tool exists)
 
 All processing happens locally. No data leaves your machine.
@@ -29,7 +30,8 @@ easyspeak/
 │   │   ├── i18n.py            # Spoken-reply translations (gettext .po)
 │   │   ├── log.py             # Logging setup
 │   │   ├── main.py            # EasySpeak class + main loop
-│   │   ├── mediakeys.py       # Replays multimedia keys via Mutter
+│   │   ├── mediakeys.py       # Key injection: Mutter RemoteDesktop or ydotool/uinput
+│   │   ├── ydotool.py         # ydotool client seam: dialects, sockets, bounded runs
 │   │   ├── speech.py          # Persistent piper -> player pipeline
 │   │   ├── statusnotifier.py  # Tray icon outside GNOME (StatusNotifierItem)
 │   │   └── tray.py            # Panel indicator + asleep lifecycle

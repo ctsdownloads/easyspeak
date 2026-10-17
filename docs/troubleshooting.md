@@ -195,6 +195,38 @@ wl-clipboard is not installed, so dictation is falling back to AT-SPI, ...
 If you hear **"No text field focused"**, click into a text field first, or use
 the browser's `numbers` command and pick the hint on the field you want.
 
+If you hear **"I can't type on this desktop yet. The text is on the clipboard,
+paste it with Control V."**, the paste keystroke couldn't be injected — see the
+next section.
+
+## Key injection backend
+
+Every injected keystroke — dictation's paste, the browser's "press enter", the
+media keys — goes through one backend, chosen at the first injection and sticky
+for the rest of the process: Mutter RemoteDesktop where the session is GNOME
+and Mutter owns its RemoteDesktop name, the ydotool/uinput stack (the same one
+the mouse grid uses) everywhere else. `EASYSPEAK_KEY_BACKEND` forces the
+choice: `remote-desktop`, `uinput`, or `auto` (the default, which probes as
+above; an unknown value warns and falls back to it). The choice is read once,
+so a change takes effect when the EasySpeak daemon restarts, not mid-session.
+
+When an injection fails, nothing is silent: the refusal above is spoken, and
+the log names the remedy:
+
+- **`ydotool` missing** — the prebuilt packages ship it as a dependency; on a
+  source install, install it yourself (`sudo dnf install ydotool`).
+- **No write access to `/dev/uinput`** — a udev rule or membership in the
+  `input` group, exactly the grant [the mouse grid's ydotool backend](#mouse-grid-the-grid-never-appears-on-a-non-gnome-desktop)
+  needs. Permission changes reach only processes started after them, and the
+  backend is picked at the first injection, so log out and back in first.
+- **No running `ydotoold` on ydotool 1.0.x** — the daemon the grid needs; the
+  grid section above has the package names and the user-unit recipe.
+
+If the backend resolved wrong for the session at hand — say the daemon started
+under one desktop and now runs under GNOME — restarting the EasySpeak daemon
+lets the gate probe again, or set `EASYSPEAK_KEY_BACKEND=remote-desktop` to
+pin the GNOME path for a GNOME session.
+
 ## Browser plugin: link numbers don't work
 
 EasySpeak appends the lines below to `~/.config/qutebrowser/config.py` on first

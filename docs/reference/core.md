@@ -54,6 +54,10 @@ instance and use its small public API (`speak`, `host_run`, `transcribe`,
 
 ::: core.mediakeys
 
+## core.ydotool
+
+::: core.ydotool
+
 ## core.gnome_extension
 
 ::: core.gnome_extension

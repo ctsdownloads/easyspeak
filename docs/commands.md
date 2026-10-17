@@ -137,9 +137,9 @@ Keystrokes need `press` in front here, apart from `enter`: `down`, `up`, `tab` a
 
 ## Dictation
 
-Dictation places text by pasting it, which needs `wl-clipboard` installed and a
-text field focused. In the browser, use `numbers` and pick the hint on the field
-first.
+Dictation places text by pasting it, which needs `wl-clipboard` installed. Off
+GNOME, a missed focus probe no longer blocks the paste. In the browser, use
+`numbers` and pick the hint on the field first.
 
 The words below are the English ones. When you dictate in another language
 (`EASYSPEAK_LANGUAGE`), the control words are that language's: "Diktat" to
@@ -246,8 +246,10 @@ Folders open in whatever file manager your desktop is configured for (via
 | brightness up/down | Adjust brightness |
 | do not disturb on/off | Toggle notifications |
 
-Volume changes are silent — GNOME's own on-screen display and chime acknowledge
-them.
+The desktop's own on-screen display and chime acknowledge the volume steps —
+the command replays a media key, which GNOME renders through Mutter and other
+desktops receive as an ordinary key press. "very loud" and "very silent" set
+the level directly and stay silent.
 
 ## Speakers playing audio
 
