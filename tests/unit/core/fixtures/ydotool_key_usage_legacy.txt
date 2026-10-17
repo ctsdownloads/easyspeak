@@ -1,0 +1,121 @@
+# Captured from ydotool 0.1.8-3build1 on Pop!_OS 24.04 (easyspeak-cosmic VM), 2026-10-17
+#
+# Provenance: live capture over SSH from the easyspeak-cosmic VM
+# (virsh domain easyspeak-cosmic, guest Pop!_OS 24.04 LTS, package from
+# http://apt.pop-os.org/ubuntu noble/universe). Every output block below is
+# verbatim output of the labeled command, captured with stderr merged (2>&1);
+# the only normalization is trailing-whitespace stripping (repo pre-commit
+# hygiene) -- one trailing space on the binary's "For example:" help line.
+#
+# Dialect: LEGACY (0.1.8). No `--version` verb, no per-verb `--help`.
+# The only surface where this client documents the `key` argv grammar is the
+# help text embedded in the binary (captured via strings(1) below), and its
+# companion source, upstream tag v0.1.8.
+#
+# ---------------------------------------------------------------------------
+# KEY VERB ARGV GRAMMAR -- LEGACY (0.1.8)
+#
+#   ydotool key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] \
+#               [--repeat-delay <ms>] <key sequence> ...
+#
+#   <key sequence>  =  one combo: key and modifier NAMES joined with '+',
+#                      e.g. "alt+r", "CTRL+alt+f3", "ctrl+Backspace"
+#   NOT the <KEYCODE>:<PRESSED> pair syntax -- that is the 1.0.x (modern)
+#   dialect; see ydotool_key_usage_modern.txt.
+#   Names are resolved against the client's built-in tables; an unknown name
+#   aborts with "no matching keycode" (upstream v0.1.8 Tools/Key/Key.cpp
+#   throws std::invalid_argument at that message).
+#   `key` is the only verb with --repeat/--repeat-delay in this dialect.
+# ---------------------------------------------------------------------------
+
+$ ydotool --version
+ydotool: Unknown tool: --version
+Run 'ydotool help' if you want a tools list
+
+$ ydotool --help
+Usage: ydotool <cmd> <args>
+Available commands:
+  type
+  recorder
+  mousemove
+  key
+  click
+
+$ ydotool help
+Usage: ydotool <cmd> <args>
+Available commands:
+  type
+  recorder
+  mousemove
+  key
+  click
+
+$ ydotool help key
+Usage: ydotool <cmd> <args>
+Available commands:
+  type
+  recorder
+  mousemove
+  key
+  click
+
+$ ydotool key --help
+ydotool: notice: ydotoold backend unavailable (may have latency+delay issues)
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  failed to open uinput device
+bash: line 1:  2692 Aborted                 (core dumped) ydotool key --help 2>&1
+[exit=134]
+
+# `--help` is not special-cased on the key verb: the client opens /dev/uinput
+# FIRST and aborts before ever looking at its argv. Probes below all crashed
+# identically (same notice + abort, exit=134), including malformed argv --
+# parse errors are unobservable without input-injection-grade access:
+$ ydotool key zz:1        # identical abort
+$ ydotool key 29          # identical abort
+$ ydotool key 29:1 29:0   # identical abort
+
+$ dpkg -l ydotool
+ii  ydotool        0.1.8-3build1 amd64        Command-line automation tool - cli
+
+$ apt policy ydotool
+ydotool:
+  Installed: 0.1.8-3build1
+  Candidate: 0.1.8-3build1
+  Version table:
+ *** 0.1.8-3build1 500
+        500 http://apt.pop-os.org/ubuntu noble/universe amd64 Packages
+
+# The key verb's own usage lines, as embedded in the installed binary:
+$ strings /usr/bin/ydotool | grep '^Usage:'
+Usage: ydotool <cmd> <args>
+Usage: click [--delay <ms>] <button>
+Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N][--file <filepath>] <things to type>
+Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...
+
+$ strings /usr/bin/ydotool | grep -B3 -A3 'key sequence'
+ydotool: type: reading from stdin
+ydotool: type: error: failed to open %s: %s
+ydotool: type: error: read %s failed: %s
+Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...
+  --delay ms            Delay time before start pressing keys. Default 100ms.
+  --key-delay ms        Delay time between keystrokes. Default 12ms.
+  --repeat times        Times to repeat the key sequence.
+  --repeat-delay ms     Delay time between repetitions. Default 0ms.
+Each key sequence can be any number of modifiers and keys, separated by plus (+)
+For example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace
+Since we are emulating keyboard input, combination like Shift+# is invalid.
+Because typing a `#' involves pressing Shift and 3.
+
+$ strings /usr/bin/ydotool | grep -i 'no matching keycode'
+no matching keycode
+
+# ---------------------------------------------------------------------------
+# Corroboration (not a live capture): upstream tag v0.1.8
+# https://github.com/ReimuNotMoe/ydotool/blob/v0.1.8/Tools/Key/Key.cpp
+# (tag object 19ff218870311206c8fa47a3fcbe174d72373c8c) carries the same
+# usage + combo lines, and shows the grammar mechanics:
+#   - argv tokens are exploded on '+' (ExplodeString(keys, '+'))
+#   - each part is looked up as a key/modifier NAME
+#   - unknown name -> std::invalid_argument("no matching keycode")
+#   - each resolved combo is emitted as a press+release pair
+# ---------------------------------------------------------------------------
