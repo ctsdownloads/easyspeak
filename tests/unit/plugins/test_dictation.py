@@ -906,15 +906,15 @@ def test_insert_text_leaves_an_empty_clipboard_alone(
 @patch.object(dictation, "has_focused_text_field", return_value=True)
 @patch(
     "easyspeak.core.mediakeys.tap_chord",
-    side_effect=mediakeys.RemoteDesktopUnavailableError("The name is not activatable"),
+    side_effect=mediakeys.InjectionUnavailableError("The name is not activatable"),
 )
 def test_insert_text_reports_a_desktop_without_keystrokes(
     mock_chord, mock_focus, clipboard, readlog
 ):
-    """Without GNOME's RemoteDesktop, e.g. on KDE Plasma, say why in one log line."""
+    """With no injection backend answering, e.g. an unprovisioned desktop, say why."""
     assert dictation.insert_text("hello") == dictation.NO_KEYSTROKES
     log = readlog().err
-    assert "RemoteDesktop" in log
+    assert "injection backend" in log
     assert "Traceback" not in log
 
 
@@ -1285,13 +1285,14 @@ def test_insert_text_still_pastes_over_an_image(mock_chord, mock_focus, monkeypa
 # --- Where the keystroke actually lands ---------------------------------------
 
 
+@patch.object(dictation, "on_gnome", return_value=True)
 @patch.object(dictation, "insert_via_atspi", return_value=dictation.NO_FOCUS)
-def test_insert_text_refuses_with_nothing_focused(mock_atspi):
+def test_insert_text_refuses_with_nothing_focused_on_gnome(_atspi, _gnome):
     """A paste into a page with no field focused vanishes without a trace.
 
     The keystroke is sent, the clipboard held the text, and nothing reports a
-    problem -- so the user is left wondering. Asking first turns that into
-    "No text field focused."
+    problem -- so the user is left wondering. GNOME's AT-SPI tree is sound
+    enough to trust the probe's answer and say "No text field focused." instead.
     """
     assert dictation.insert_text("hello") == dictation.NO_FOCUS
 
@@ -1315,6 +1316,41 @@ def test_the_focus_probe_writes_nothing(mock_atspi):
     dictation.has_focused_text_field()
 
     assert mock_atspi.call_args.args[0] == ""
+
+
+# --- Probe leniency off GNOME (spec 4.5) --------------------------------------
+
+
+@patch.object(dictation, "on_gnome", return_value=False)
+@patch.object(dictation, "insert_via_atspi", return_value=dictation.NO_FOCUS)
+@patch("easyspeak.core.mediakeys.tap_chord")
+def test_a_missed_focus_probe_off_gnome_pastes_anyway(
+    _chord, _atspi, _gnome, clipboard, readlog
+):
+    """Off GNOME a "nothing is focused" answer is not a reason to refuse.
+
+    COSMIC-native apps may expose nothing to AT-SPI at all, so a probe's miss is
+    weak evidence against a paste that usually works: pasting into nothing is
+    harmless, refusing is not.
+    """
+    assert dictation.insert_text("hello") == dictation.INSERTED
+
+    copied = [text for tool, text in clipboard if tool == "wl-copy"]
+    assert copied[0] == "hello"
+    assert "proceeding" in readlog().err  # the leniency is logged, at debug
+
+
+@pytest.mark.parametrize("gnome", [True, False])
+@patch.object(dictation, "on_gnome")
+@patch.object(dictation, "insert_via_atspi", return_value=dictation.BACKEND_ERROR)
+@patch("easyspeak.core.mediakeys.tap_chord")
+def test_a_focus_probe_that_cannot_run_still_falls_open(
+    _chord, _atspi, mock_gnome, gnome, clipboard
+):
+    """A helper that won't start answers "yes, willing" on every desktop."""
+    mock_gnome.return_value = gnome
+
+    assert dictation.insert_text("hello") == dictation.INSERTED
 
 
 @patch.object(dictation, "has_focused_text_field", return_value=True)

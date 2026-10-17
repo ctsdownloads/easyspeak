@@ -54,6 +54,7 @@ overrides:
     - gir1.2-atspi-2.0       # Atspi typelib for dictation
     - adwaita-icon-theme     # provides the launcher icon
     - wl-clipboard           # dictation places text by pasting
+    - ydotool                # key injection off GNOME (paste, media keys, browser keys)
     recommends:
     - easyspeak-lang-en      # default language data; repo installs pull it automatically
     - qutebrowser            # browser plugin
@@ -78,6 +79,7 @@ overrides:
     - at-spi2-core
     - adwaita-icon-theme
     - wl-clipboard           # dictation places text by pasting
+    - ydotool                # key injection off GNOME (paste, media keys, browser keys)
     recommends:
     - easyspeak-lang-en
     - qutebrowser

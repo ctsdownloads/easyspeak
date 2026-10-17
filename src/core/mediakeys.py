@@ -1,16 +1,20 @@
-"""Replay multimedia keys through GNOME (Mutter) for native desktop feedback.
+"""Key injection with per-desktop backends.
 
-This lets the desktop render its own volume OSD and chime rather than imitating them.
-Pressing a volume key does not run any command: gnome-settings-daemon grabs the raw
-evdev key and handles the volume change, OSD and chime itself. The only way to reproduce
-that exactly is to replay the key. We inject it through Mutter's RemoteDesktop
-interface, which needs no special privileges. A RemoteDesktop session lives only as long
-as the D-Bus connection that created it, so the whole CreateSession -> Start ->
-NotifyKeyboardKeycode -> Stop sequence runs on one connection.
+Mutter RemoteDesktop where the session provides it (GNOME, unchanged behavior —
+a RemoteDesktop session lives only as long as its creating D-Bus connection, so
+each chord runs CreateSession → Start → keycodes → Stop on ONE connection,
+closed when the chord's connection scope exits); ydotool/uinput everywhere
+else. Both backends are
+raise-only: every failure becomes InjectionUnavailableError. The replay story
+(media keys for native desktop feedback) is one consumer, not the module's
+reason to exist.
 """
 
 import logging
+import os
 
+from easyspeak.core import ydotool as yd
+from easyspeak.core.tray import GDBUS_TIMEOUT, on_gnome
 from jeepney import DBusAddress, MessageType, new_method_call
 from jeepney.io.blocking import open_dbus_connection
 
@@ -25,25 +29,250 @@ _REMOTE_DESKTOP = DBusAddress(
 )
 
 
-class RemoteDesktopUnavailableError(RuntimeError):
-    """GNOME's RemoteDesktop interface refused or is missing, e.g. on KDE Plasma."""
+class InjectionUnavailableError(RuntimeError):
+    """No injection backend answered: refused, missing, or timed out."""
 
 
-def _call(conn, message):
-    """Send `message` and return its reply, raising if D-Bus answers with an error."""
-    reply = conn.send_and_get_reply(message)
-    if reply.header.message_type is MessageType.error:
-        raise RemoteDesktopUnavailableError(" ".join(map(str, reply.body)))
-    return reply
+class RemoteDesktopBackend:
+    """Mutter RemoteDesktop injection — the native GNOME path, unchanged."""
+
+    KIND = "remote-desktop"
+
+    def __init__(self, conn_factory=None):
+        """Take an optional connection factory; tests inject fakes here."""
+        # ONE connection per chord — the session lives only as long as the
+        # D-Bus connection that created it (the module invariant), so
+        # CreateSession, every NotifyKeyboardKeycode and Stop ride the SAME
+        # connection. This is today's tap_chord body with exactly two deltas:
+        # the rename and the bounded send timeout.
+        self._conn_factory = conn_factory or (
+            lambda: open_dbus_connection(bus="SESSION")
+        )
+
+    def _call(self, conn, message):
+        """Send `message`, return its reply; raise if D-Bus answers with an error."""
+        reply = conn.send_and_get_reply(message, timeout=GDBUS_TIMEOUT)
+        if reply.header.message_type is MessageType.error:
+            raise InjectionUnavailableError(" ".join(map(str, reply.body)))
+        return reply
+
+    def tap_chord(self, keycodes):
+        """Hold a chord of evdev keycodes together, then release it.
+
+        The chord-order contract (down in the order given, up in reverse) and the
+        failure modes are documented on the module-level `tap_chord`, which is
+        the entry point every consumer goes through.
+        """
+        # The with-scope is today's `finally: conn.close()`: it closes the
+        # connection on every path, success or error (jeepney's __exit__
+        # closes), and test fakes bind the same context-manager contract.
+        try:
+            conn = self._conn_factory()
+        except (KeyError, RuntimeError, ValueError, TimeoutError, OSError) as exc:
+            # A bus that will not open — no session-bus address (KeyError), an
+            # unsupported transport (RuntimeError), auth refusal
+            # (AuthenticationError, a ValueError) — is "no usable backend",
+            # not a crash: the totality promise covers the open, not just the
+            # calls on it. TimeoutError/OSError are here for runner-shaped
+            # factories; the dispatch would translate them anyway.
+            message = f"no usable injection backend: {exc}"
+            raise InjectionUnavailableError(message) from exc
+        with conn:
+            reply = self._call(conn, new_method_call(_REMOTE_DESKTOP, "CreateSession"))
+            session = DBusAddress(
+                reply.body[0],
+                bus_name=_BUS,
+                interface=f"{_BUS}.Session",
+            )
+            self._call(conn, new_method_call(session, "Start"))
+            # Synchronous replies guarantee Mutter has processed each event before
+            # we move on, so no settling delay is needed before Stop.
+            for keycode in keycodes:
+                self._call(
+                    conn,
+                    new_method_call(
+                        session, "NotifyKeyboardKeycode", "ub", (keycode, True)
+                    ),
+                )
+            for keycode in reversed(keycodes):
+                self._call(
+                    conn,
+                    new_method_call(
+                        session, "NotifyKeyboardKeycode", "ub", (keycode, False)
+                    ),
+                )
+            self._call(conn, new_method_call(session, "Stop"))
+
+    def tap_key(self, keycode, repeats=1):
+        """Tap `keycode` `repeats` times, one RemoteDesktop session per tap."""
+        if repeats < 1:
+            return  # spoken "backspace 0" — same no-op range(0) gives today
+        for _ in range(repeats):  # per-repeat loop: GNOME stays byte-for-byte
+            self.tap_chord([keycode])
 
 
-def tap_key(keycode):
-    """Press and release one evdev keycode via Mutter RemoteDesktop.
+class UinputBackend:
+    """ydotool/uinput injection — the compositor-agnostic path."""
 
-    Raises if RemoteDesktop is unavailable (e.g. a non-GNOME session) so the caller can
-    fall back to a silent change.
+    KIND = "uinput"
+
+    def __init__(self, runner=None):
+        """Take an optional runner; tests inject outcome stubs here."""
+        # bind with a lambda, never the bare function: the real run_ydotool
+        # takes (args, …) and the call site is 2-arg — a direct bind would
+        # TypeError on the first real injection, invisible to 2-arg stubs
+        self._runner = runner or (
+            lambda args, timeout: yd.run_ydotool(args, timeout=timeout)
+        )
+
+    def tap_chord(self, keycodes):
+        """Inject one chord as a single batched `key` invocation."""
+        self._inject(yd.key_argv(tuple(keycodes)), yd.key_timeout(1))
+
+    def tap_key(self, keycode, repeats=1):
+        """Tap `keycode` `repeats` times in one batched invocation."""
+        if repeats < 1:
+            # Spoken "backspace 0": today's press_key loop no-ops it, so the
+            # batch is never built and key_argv's ValueError guard — the loud
+            # check for beyond-the-boundary bugs — stays out of the way.
+            return
+        self._inject(
+            yd.key_argv((keycode,), repeats=repeats),
+            yd.key_timeout(repeats),
+        )
+
+    def _inject(self, args, timeout):
+        """Run one invocation; anything but `ran` raises, so callers fail closed.
+
+        `run_ydotool` reports outcomes instead of raising, which suits the mouse
+        grid's retry ladder but would strand a raise-only caller with a silent
+        success: the mapping to `InjectionUnavailableError` happens here, at the
+        only place the outcome string is still in scope.
+        """
+        outcome = self._runner(args, timeout)
+        if outcome != "ran":
+            # the outcome stays distinct in the log; the spoken fallback is shared;
+            # the message names the remedy — the "log names the fix" promise
+            logger.warning("uinput injection %s: %s", outcome, " ".join(args))
+            message = (
+                f"injection {outcome}: {' '.join(args)} — check ydotool is "
+                "installed, /dev/uinput access (udev rule or input group), "
+                "and ydotoold on 1.0.x"
+            )
+            raise InjectionUnavailableError(message)
+
+
+class _GateCache:
+    """One attribute of process-level state; tests swap in fresh instances.
+
+    Until resolve writes the instance attr, reads see the class-attr default
+    (None), which is what makes the sticky check a plain attribute read.
     """
-    tap_chord([keycode])
+
+    backend = None
+
+
+_gate = _GateCache()  # module-level; tests reset it (see test_injection_gate)
+
+_DBUS = DBusAddress(
+    "/org/freedesktop/DBus",
+    bus_name="org.freedesktop.DBus",
+    interface="org.freedesktop.DBus",
+)
+
+
+def _mutter_state():
+    """Return owned / unowned / error for `org.gnome.Mutter.RemoteDesktop`.
+
+    One bounded NameHasOwner call, retried once on a bus-level failure (spec
+    4.2's bounded retry — a wedged bus is not an honest "no"). jeepney blocks
+    by default, hence the explicit timeout. An error REPLY is an answer, not a
+    wedge, so it settles at once; a call that never got through (no bus to
+    open, timeout, socket error) is retried once, then settles on "error" —
+    a busless host is "no Mutter", not a crash.
+    """
+    for _attempt in (1, 2):
+        try:
+            with open_dbus_connection(bus="SESSION") as conn:
+                reply = conn.send_and_get_reply(
+                    new_method_call(
+                        _DBUS,
+                        "NameHasOwner",
+                        "s",
+                        ("org.gnome.Mutter.RemoteDesktop",),
+                    ),
+                    timeout=GDBUS_TIMEOUT,
+                )
+        except (KeyError, RuntimeError, ValueError, TimeoutError, OSError):
+            # KeyError: no session-bus address; RuntimeError: unsupported
+            # transport; ValueError: auth refusal (AuthenticationError).
+            continue
+        if reply.header.message_type is MessageType.error:
+            return "error"
+        return "owned" if reply.body[0] else "unowned"
+    return "error"
+
+
+def _resolve_backend(owned, probe_error, cache):
+    """Sticky three-arm selection (spec 4.2); testable, no I/O.
+
+    `owned`/`probe_error` are callables so the caller decides when — and
+    whether — the Mutter probe is paid: once the cache holds a backend, neither
+    is consulted.
+    """
+    if cache.backend is not None:
+        return cache.backend
+    forced = os.environ.get("EASYSPEAK_KEY_BACKEND", "").strip().lower()
+    if forced == "remote-desktop":
+        backend = RemoteDesktopBackend()
+    elif forced == "uinput":
+        backend = UinputBackend()
+    else:
+        if forced and forced != "auto":  # documented value stays silent
+            logger.warning(
+                "Ignoring EASYSPEAK_KEY_BACKEND=%r: unknown backend. "
+                "Known: remote-desktop, uinput, auto.",
+                forced,
+            )
+        gnome = on_gnome()
+        # The Mutter verdict is consulted exactly once per resolution — the
+        # probe is the memoized callable select_backend handed in — so the
+        # native arm reads as one predicate: Mutter answered, or the probe
+        # itself failed, AND this is a GNOME session. Owned, or a wedged
+        # probe: stay on the native path, where a genuinely dead Mutter fails
+        # inside the well-tested CreateSession path with the spoken fallbacks
+        # — never a silent reroute of GNOME input through uinput.
+        native = owned() or probe_error()
+        backend = RemoteDesktopBackend() if gnome and native else UinputBackend()
+    logger.info("key injection backend: %s", backend.KIND)
+    cache.backend = backend
+    return backend
+
+
+def select_backend():
+    """Resolve once per process (sticky); every later injection reuses it.
+
+    The cache check here is what keeps the ownership probe a first-injection
+    cost, and the probe itself is handed to `_resolve_backend` as a lazy,
+    memoized callable — a forced override returns before the auto arm ever
+    consults it, so `EASYSPEAK_KEY_BACKEND` works on a wedged or entirely
+    absent bus, the very environment the escape hatch exists for.
+    """
+    if _gate.backend is not None:
+        return _gate.backend
+    state = None
+
+    def from_bus():
+        nonlocal state
+        if state is None:
+            state = _mutter_state()
+        return state
+
+    return _resolve_backend(
+        owned=lambda: from_bus() == "owned",
+        probe_error=lambda: from_bus() == "error",
+        cache=_gate,
+    )
 
 
 def tap_chord(keycodes):
@@ -55,38 +284,42 @@ def tap_chord(keycodes):
     implements paste, whereas accessibility-level insertion is widely stubbed out
     (Chromium-based apps accept it and discard it).
 
-    A desktop without RemoteDesktop makes this raise
-    [`RemoteDesktopUnavailableError`][core.mediakeys.RemoteDesktopUnavailableError],
-    so the caller can report why.
+    Raises [`InjectionUnavailableError`][core.mediakeys.InjectionUnavailableError]
+    when no injection backend answered, so the caller can report why.
     """
-    conn = open_dbus_connection(bus="SESSION")
     try:
-        reply = _call(conn, new_method_call(_REMOTE_DESKTOP, "CreateSession"))
-        session = DBusAddress(
-            reply.body[0],
-            bus_name=_BUS,
-            interface=f"{_BUS}.Session",
-        )
-        _call(conn, new_method_call(session, "Start"))
-        # Synchronous replies guarantee Mutter has processed each event before
-        # we move on, so no settling delay is needed before Stop.
-        for keycode in keycodes:
-            _call(
-                conn,
-                new_method_call(
-                    session, "NotifyKeyboardKeycode", "ub", (keycode, True)
-                ),
-            )
-        for keycode in reversed(keycodes):
-            _call(
-                conn,
-                new_method_call(
-                    session, "NotifyKeyboardKeycode", "ub", (keycode, False)
-                ),
-            )
-        _call(conn, new_method_call(session, "Stop"))
-    finally:
-        conn.close()
+        select_backend().tap_chord(tuple(keycodes))
+    except InjectionUnavailableError:
+        # Already translated by a backend: re-raise unchanged, never re-wrapped.
+        raise
+    except (TimeoutError, OSError) as exc:
+        # TimeoutError: the bounded D-Bus wait (jeepney); OSError: a missing
+        # binary or spawn failure from the uinput runner — both mean "no usable
+        # backend", and both must land in the spoken-refusal ladder
+        # (press_key catches RuntimeError/OSError/ValueError by family;
+        # dictation's paste path keys on InjectionUnavailableError for its
+        # refusal message).
+        message = f"injection unavailable: {exc}"
+        raise InjectionUnavailableError(message) from exc
+
+
+def tap_key(keycode, repeats=1):
+    """Press and release one evdev keycode via the selected backend.
+
+    Raises [`InjectionUnavailableError`][core.mediakeys.InjectionUnavailableError]
+    when no injection backend answered (e.g. a non-GNOME session) so the caller
+    can fall back to a silent change. A code the 0.1.8 client cannot spell
+    raises the argv builder's plain ValueError instead — injection is
+    available, the key is just not nameable on that dialect.
+    """
+    try:
+        select_backend().tap_key(keycode, repeats=repeats)
+    except InjectionUnavailableError:
+        # Already translated by a backend: re-raise unchanged, never re-wrapped.
+        raise
+    except (TimeoutError, OSError) as exc:
+        message = f"injection unavailable: {exc}"
+        raise InjectionUnavailableError(message) from exc
 
 
 KEYS = {
@@ -168,9 +401,14 @@ def parse_key_request(words, bare_allowed, *, names=None, counts=None, prefixes=
 def press_key(keycode, repeats=1):
     """Tap `keycode` `repeats` times; True when the keystrokes were delivered."""
     try:
-        for _ in range(repeats):
-            tap_chord([keycode])
-    except (RuntimeError, OSError) as exc:
-        logger.warning("Keystrokes need GNOME's RemoteDesktop interface: %s", exc)
+        select_backend().tap_key(keycode, repeats=repeats)
+    except (RuntimeError, OSError, ValueError) as exc:
+        # ValueError: the uinput backend's argv builder raises it for a code
+        # the 0.1.8 name tables cannot spell (the media keys — see
+        # ydotool.KEY_LEGACY_NAMES). A refusal is not a crash: the caller
+        # answers with its own fallback (dictation's spoken refusal, the
+        # system plugin's wpctl call) instead of the error escaping to the
+        # dispatcher's generic apology.
+        logger.warning("Keystrokes could not be injected: %s", exc)
         return False
     return True

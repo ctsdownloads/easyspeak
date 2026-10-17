@@ -133,10 +133,12 @@ lint-docstrings:
         exit 1
     fi
 
-# Lint Markdown structure in all tracked *.md (lenient on style; config in pyproject.toml)
+# Lint Markdown structure in all tracked *.md (lenient on style; config in pyproject.toml).
+# docs/superpowers/ is excluded: fork-only planning notes, never part of the
+# published docs the structure rules are written for.
 [group('docs')]
 lint-md *args:
-    git ls-files '*.md' | xargs uvx --from pymarkdownlnt pymarkdown {{ args }} scan
+    git ls-files '*.md' | xargs uvx --from pymarkdownlnt pymarkdown {{ args }} scan --exclude 'docs/superpowers/*'
 
 # Build the docs (use `serve` to serve them locally with live-reload)
 [group('docs')]

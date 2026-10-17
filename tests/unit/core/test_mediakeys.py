@@ -1,25 +1,49 @@
-"""Tests for the mediakeys module."""
+"""Tests for the mediakeys module.
 
-from unittest.mock import Mock, patch
+The RemoteDesktop choreography tests target `RemoteDesktopBackend` directly:
+the module-level `tap_key`/`tap_chord` dispatch through the sticky gate
+(covered by `test_injection_gate.py`), and going through it here would resolve
+a backend from the real session bus.
+"""
+
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from easyspeak.core import mediakeys
 from jeepney import new_error, new_method_call
 
 
-@patch("easyspeak.core.mediakeys.open_dbus_connection")
-def test_tap_key_replays_press_and_release(mock_open):
-    """tap_key drives one RemoteDesktop session, pressing then releasing the key."""
-    conn = Mock()
+def _session_conn(reply=None, side_effect=None):
+    """A MagicMock honoring the connection contract the backend binds with.
+
+    The backend takes the connection through ``with``, and jeepney's
+    ``__enter__`` yields the connection itself — a bare MagicMock would hand
+    the body a fresh auto-configured child, so ``__enter__`` is pinned here.
+    """
+    conn = MagicMock()
+    conn.__enter__.return_value = conn
+    if reply is not None:
+        conn.send_and_get_reply.return_value = reply
+    if side_effect is not None:
+        conn.send_and_get_reply.side_effect = side_effect
+    return conn
+
+
+def _connected_backend():
+    """A RemoteDesktopBackend whose every chord rides one scripted connection."""
+    conn = _session_conn(reply=Mock(body=("/session/1",)))
+    return mediakeys.RemoteDesktopBackend(conn_factory=lambda: conn), conn
+
+
+def test_tap_key_replays_press_and_release():
+    """One RemoteDesktop session per key: CreateSession, Start, press, release, Stop."""
     create_reply = Mock()
     create_reply.body = ["/org/gnome/Mutter/RemoteDesktop/Session/u0"]
-    conn.send_and_get_reply.return_value = create_reply
-    mock_open.return_value = conn
+    conn = _session_conn(reply=create_reply)
+    backend = mediakeys.RemoteDesktopBackend(conn_factory=lambda: conn)
 
     with patch("easyspeak.core.mediakeys.new_method_call") as mock_call:
-        mediakeys.tap_key(115)
-
-    mock_open.assert_called_once_with(bus="SESSION")
+        backend.tap_key(115)
 
     # CreateSession -> Start -> key press -> key release -> Stop, in order.
     methods = [call.args[1] for call in mock_call.call_args_list]
@@ -39,42 +63,44 @@ def test_tap_key_replays_press_and_release(mock_open):
     ]
     assert key_events == [(115, True), (115, False)]
 
-    conn.close.assert_called_once()
+    # The connection's lifetime is the with-scope: exiting it is what closes
+    # the connection (jeepney's __exit__ closes), success or error.
+    conn.__exit__.assert_called_once()
+    # The disclosed bounded-wait delta: no D-Bus send waits indefinitely.
+    for call in conn.send_and_get_reply.call_args_list:
+        assert call.kwargs["timeout"] == mediakeys.GDBUS_TIMEOUT
 
 
-@patch("easyspeak.core.mediakeys.open_dbus_connection")
-def test_tap_key_closes_connection_on_error(mock_open):
+def test_tap_key_closes_connection_on_error():
     """The connection is closed even when a D-Bus call fails."""
-    conn = Mock()
-    conn.send_and_get_reply.side_effect = RuntimeError("no RemoteDesktop")
-    mock_open.return_value = conn
+    conn = _session_conn(side_effect=RuntimeError("no RemoteDesktop"))
+    backend = mediakeys.RemoteDesktopBackend(conn_factory=lambda: conn)
 
     with pytest.raises(RuntimeError):
-        mediakeys.tap_key(115)
+        backend.tap_key(115)
 
-    conn.close.assert_called_once()
+    conn.__exit__.assert_called_once()  # the with-scope closed it on the way out
 
 
-@patch("easyspeak.core.mediakeys.open_dbus_connection")
-def test_tap_chord_raises_when_remotedesktop_is_missing(mock_open):
+def test_tap_chord_raises_when_remotedesktop_is_missing():
     """On a desktop without Mutter, e.g. KDE Plasma, D-Bus answers with an error.
 
     That error is reported as such, not mistaken for a session path.
     """
-    conn = mock_open.return_value
-    conn.send_and_get_reply.return_value = new_error(
-        new_method_call(mediakeys._REMOTE_DESKTOP, "CreateSession"),
-        "org.freedesktop.DBus.Error.ServiceUnknown",
-        "s",
-        ("The name is not activatable",),
+    conn = _session_conn(
+        reply=new_error(
+            new_method_call(mediakeys._REMOTE_DESKTOP, "CreateSession"),
+            "org.freedesktop.DBus.Error.ServiceUnknown",
+            "s",
+            ("The name is not activatable",),
+        )
     )
+    backend = mediakeys.RemoteDesktopBackend(conn_factory=lambda: conn)
 
-    with pytest.raises(
-        mediakeys.RemoteDesktopUnavailableError, match="not activatable"
-    ):
-        mediakeys.tap_chord([29, 47])
+    with pytest.raises(mediakeys.InjectionUnavailableError, match="not activatable"):
+        backend.tap_chord([29, 47])
 
-    conn.close.assert_called_once()
+    conn.__exit__.assert_called_once()  # the with-scope closed it on the way out
 
 
 def test_tap_chord_presses_together_and_releases_in_reverse():
@@ -83,11 +109,8 @@ def test_tap_chord_presses_together_and_releases_in_reverse():
     Keys go down in order and come up backwards, which is what an application
     reads as a modifier being held while another key is struck.
     """
-    conn = Mock()
-    conn.send_and_get_reply = Mock(return_value=Mock(body=("/session/1",)))
-
-    with patch("easyspeak.core.mediakeys.open_dbus_connection", return_value=conn):
-        mediakeys.tap_chord([29, 47])
+    backend, conn = _connected_backend()
+    backend.tap_chord([29, 47])
 
     keys = [
         call.args[0].body
@@ -99,10 +122,29 @@ def test_tap_chord_presses_together_and_releases_in_reverse():
 
 def test_tap_key_is_a_single_key_chord():
     """The volume-key path still works, now expressed through tap_chord."""
-    with patch("easyspeak.core.mediakeys.tap_chord") as mock_chord:
-        mediakeys.tap_key(115)
+    backend = mediakeys.RemoteDesktopBackend()
+    with patch.object(backend, "tap_chord") as mock_chord:
+        backend.tap_key(115)
 
     assert mock_chord.call_args.args[0] == [115]
+
+
+def test_tap_key_repeats_stay_per_repeat_sessions():
+    """Repeats are one RemoteDesktop session each, as today's press_key loop ran."""
+
+    def factory():
+        return _session_conn(reply=Mock(body=("/session/1",)))
+
+    conns = [factory(), factory(), factory()]
+    handed_out = iter(conns)
+    backend = mediakeys.RemoteDesktopBackend(conn_factory=lambda: next(handed_out))
+
+    backend.tap_key(mediakeys.KEYS["enter"], repeats=3)
+
+    assert len(conns) == 3  # one connection (and session) per repeat
+    for conn in conns:
+        # CreateSession, Start, press, release, Stop.
+        assert conn.send_and_get_reply.call_count == 5
 
 
 def test_parse_key_request_needs_a_key_after_press():
@@ -115,18 +157,46 @@ def test_parse_key_request_rejects_an_unrecognised_count():
     assert mediakeys.parse_key_request(["press", "enter", "banana"], set()) is None
 
 
-@patch("easyspeak.core.mediakeys.tap_chord")
-def test_press_key_taps_once_per_repeat(mock_chord):
-    """Each repeat is one tap_chord, and a delivered chord reports True."""
+@patch("easyspeak.core.mediakeys.select_backend")
+def test_press_key_hands_the_whole_repeat_run_to_the_backend(mock_select):
+    """press_key delegates one call with the repeats; True when delivered."""
     assert mediakeys.press_key(mediakeys.KEYS["enter"], repeats=3) is True
-    assert mock_chord.call_count == 3
+    mock_select.return_value.tap_key.assert_called_once_with(
+        mediakeys.KEYS["enter"], repeats=3
+    )
 
 
-@patch(
-    "easyspeak.core.mediakeys.tap_chord",
-    side_effect=mediakeys.RemoteDesktopUnavailableError("The name is not activatable"),
-)
-def test_press_key_reports_a_missing_remotedesktop(mock_chord, readlog):
-    """Without GNOME's RemoteDesktop the keys can't be sent, so False, not a crash."""
+@patch("easyspeak.core.mediakeys.select_backend")
+def test_press_key_reports_an_unavailable_backend(mock_select, readlog):
+    """With no backend answering, the keys can't be sent: False, not a crash."""
+    mock_select.return_value.tap_key.side_effect = mediakeys.InjectionUnavailableError(
+        "The name is not activatable"
+    )
     assert mediakeys.press_key(mediakeys.KEYS["enter"]) is False
-    assert "RemoteDesktop" in readlog().err
+    assert "could not be injected" in readlog().err
+
+
+@patch("easyspeak.core.mediakeys.select_backend")
+def test_press_key_survives_an_oserror_from_the_backend(mock_select, readlog):
+    """A missing injection binary is a False, not a crash: press_key's ladder
+    catches RuntimeError (the InjectionUnavailableError family) and OSError."""
+    mock_select.return_value.tap_key.side_effect = FileNotFoundError("ydotool")
+    assert mediakeys.press_key(mediakeys.KEYS["enter"]) is False
+    assert "could not be injected" in readlog().err
+
+
+@patch("easyspeak.core.ydotool.key_argv")
+@patch("easyspeak.core.mediakeys.select_backend")
+def test_press_key_survives_an_unspellable_code(mock_select, mock_argv, readlog):
+    """A code the 0.1.8 name tables cannot spell raises ValueError from
+    key_argv on the uinput path; the ladder catches it so dictation speaks its
+    proper refusal (and the system plugin falls back) instead of the error
+    escaping to the dispatcher's generic apology. 113 (mute) spells no legacy
+    combo name — the media keys are absent from the client's tables (see
+    ydotool.KEY_LEGACY_NAMES)."""
+    mock_select.return_value = mediakeys.UinputBackend(
+        runner=lambda args, timeout: "ran"
+    )
+    mock_argv.side_effect = ValueError("no legacy combo name for evdev code 113")
+    assert mediakeys.press_key(113) is False
+    assert "could not be injected" in readlog().err

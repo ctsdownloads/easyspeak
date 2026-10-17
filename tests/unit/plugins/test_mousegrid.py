@@ -1,11 +1,16 @@
-"""Tests for the mousegrid plugin module."""
+"""Tests for the mousegrid plugin's extension backend.
+
+The conversation under test lives in `mousegrid._extension` (the GNOME/D-Bus
+backend); the plugin package (`easyspeak.plugins.mousegrid`) adds only the
+backend gate and the routing on top of it.
+"""
 
 import importlib
 from unittest.mock import Mock, patch
 
 import pytest
 
-mousegrid_plugin = importlib.import_module("easyspeak.plugins.mousegrid")
+mousegrid_plugin = importlib.import_module("easyspeak.plugins.mousegrid._extension")
 
 
 @pytest.fixture(autouse=True)
@@ -269,7 +274,7 @@ def test_show_grid_when_already_active(mock_screen_size, mock_dbus_call, mock_co
     ("desktop", "reply"),
     [
         ("GNOME", "I couldn't show the grid. Is the EasySpeak extension enabled?"),
-        ("KDE", "The mouse grid only works on GNOME so far."),
+        ("KDE", "The mouse grid needs either the GNOME extension or ydotool."),
     ],
 )
 def test_show_grid_with_failure(
@@ -683,7 +688,7 @@ def test_handle_again_command_when_the_grid_cant_show(
     assert mousegrid_plugin.handle("again", mock_core) is True
     assert mousegrid_plugin.grid_active is False
     mock_core.speak.assert_called_once_with(
-        "The mouse grid only works on GNOME so far."
+        "The mouse grid needs either the GNOME extension or ydotool."
     )
     assert not mock_listen.called
 

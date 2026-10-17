@@ -86,6 +86,7 @@ sudo dnf install \
   pulseaudio-utils \
   sound-theme-freedesktop \
   wl-clipboard \
+  ydotool \
   portaudio-devel \
   python3-devel \
   gcc
@@ -96,6 +97,15 @@ text on the clipboard and sending a paste keystroke, because accessibility-level
 insertion is silently ignored by Chromium-based applications — they accept the
 call, report success, and discard the text. Without `wl-clipboard`, dictation
 falls back to that path and quietly does nothing in a browser.
+
+`ydotool` is the injector behind that paste keystroke off GNOME — along with
+the browser's "press enter" and the media keys. On GNOME, Mutter's
+RemoteDesktop service injects instead and `ydotool` stays unused. Off GNOME it
+needs write access to `/dev/uinput` (a udev rule or the `input` group) — see
+[Troubleshooting](troubleshooting.md#key-injection-backend). Mind the client's
+dialect there too: a 0.1.x ydotool cannot spell the media keys, so off GNOME
+those replay only on a 1.0.x client — the volume still changes, via the
+fallback.
 
 `python3-gobject` is needed for dictation. The tray menu's **About EasySpeak**
 dialog also needs `libadwaita`, which ships with any GNOME desktop. Elsewhere it's

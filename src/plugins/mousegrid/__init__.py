@@ -1,18 +1,38 @@
-"""Mouse Grid Plugin - Voice-controlled mouse via GNOME Shell D-Bus extension.
+"""Mouse Grid Plugin - the voice-controlled pointer grid, for every desktop.
 
-Features:
-- Chained numbers: "3 7 5" zooms three times in one utterance
-- Repetition: "nudge up 5", "scroll down 3"
-- Drag support: "mark" to start, "drag" to end
+One plugin, two backends, chosen once at daemon startup by a capability gate:
+
+- The GNOME backend (`_extension`) drives the bundled GNOME Shell extension
+  over D-Bus. It is the original implementation and the full verb surface:
+  nudge, scroll, mark/drag.
+- The ydotool backend (`_ydotool`) draws the same grid as a layer-shell
+  overlay (gtk4-layer-shell) and clicks through ydotool at kernel level, so
+  the grid works where no GNOME Shell can run (COSMIC, sway, KDE Wayland,
+  Hyprland).
+
+The gate (see `_ydotool.resolve_active`) claims the ydotool backend only where
+a layer-shell-capable compositor AND a working injector are both present, and
+fails closed: everywhere else the GNOME backend keeps serving, so on GNOME
+47+ backend selection is unchanged — the one disclosed delta is the shared
+click vocabulary (`lick`/`clique` now click on GNOME too, where they used to
+fall through and be dropped). `EASYSPEAK_GRID_BACKEND=uinput|gnome` forces
+either side — a deliberate override that short-circuits the probes, which is
+what the integration harness uses to observe the overlay without a daemon.
+
+Zone math, trigger words and the number tables are shared (`_common`), so one
+utterance lands on the same pixel whichever backend answers. The verbs the
+ydotool backend cannot honour (scroll, drag) remain extension-only; ydotool
+0.1.8 has no wheel verb, and a hold-drag needs a timing design its
+one-invocation press+release cannot express.
 """
 
 import atexit
 import logging
-import re
-import subprocess
+import os
 
 from easyspeak.core.i18n import translator
-from easyspeak.core.tray import on_gnome
+
+from . import _extension, _ydotool
 
 logger = logging.getLogger(__name__)
 
@@ -34,593 +54,78 @@ COMMANDS = [
     _("close/cancel - hide grid"),
 ]
 
-core = None
-grid_active = False
-grid_bounds = None
-screen_size = None
-last_bounds = None
-drag_start = None
+# The verbs the ydotool backend cannot honour (nudge, scroll, mark/drag)
+# stay out of the help surface it serves. Core reads `COMMANDS` at help
+# time, so `setup()` rebinds it to the list matching the gate's selection;
+# the import-time default is the full list, under the same contract as
+# `_backend` below (importing without running `setup()` behaves exactly
+# like the original single-backend plugin).
+COMMANDS_YDOTOOL = [
+    _("grid/mouse/pointer - show mouse grid"),
+    _("1-9 or chains like '3 7 5' - zoom to zone(s)"),
+    _("click - left click"),
+    _("right click / double click / middle click"),
+    _("again - reopen grid at last position"),
+    _("close/cancel - hide grid"),
+]
 
-NUDGE_AMOUNT = 20
+_COMMANDS_FULL = COMMANDS
 
-# Trigger words
-GRID_TRIGGERS = {
-    "grid",
-    "grit",
-    "grip",
-    "great",
-    "greed",
-    "grade",
-    "grad",
-    "grill",
-    "guild",
-    "greet",
-    "grin",
-    "green",
-    "grey",
-    "gray",
-    "grab",
-    "grand",
-    "greek",
-    "grew",
-    "mouse",
-    "pointer",
-    "cursor",
-    "crosshair",
-}
-
-# Number parsing - word to digit
-WORD_TO_NUM = {
-    "one": 1,
-    "won": 1,
-    "wan": 1,
-    "two": 2,
-    "to": 2,
-    "too": 2,
-    "tu": 2,
-    "three": 3,
-    "tree": 3,
-    "free": 3,
-    "four": 4,
-    "for": 4,
-    "fore": 4,
-    "five": 5,
-    "six": 6,
-    "sex": 6,
-    "seven": 7,
-    "eight": 8,
-    "ate": 8,
-    "nine": 9,
-    "nein": 9,
-}
-
-DIRECTIONS = {
-    "up": ["up", "north", "top", "upper", "above"],
-    "down": ["down", "south", "bottom", "lower", "below"],
-    "left": ["left", "west", "lift", "let", "lef", "laughed", "loft"],
-    "right": ["right", "east", "write", "rite", "wright"],
-}
+# The backend serving the conversation. Defaults to the extension backend so
+# that importing the module without running `setup()` (as older tests and any
+# direct consumer do) behaves exactly like the original single-backend plugin.
+_backend = _extension
 
 
-# This plugin drives the GNOME Shell extension over D-Bus (see dbus_call); core
-# owns installing, refreshing, and enabling it (easyspeak.core.gnome_extension).
+def setup(core):
+    """Choose the backend once, at daemon startup.
 
-
-def setup(c):
-    """Store the core reference for use by the plugin's handlers."""
-    global core
-    core = c
-
-
-def host_run(cmd):
-    """Run a command and capture its output (the plugin's own subprocess seam).
-
-    A missing executable returns a failed result (returncode 1) rather than
-    raising, so callers treat an absent `gdbus`—e.g. on a headless host such as
-    WSL with no GNOME session—as a plain D-Bus failure. Without this the atexit
-    cleanup would raise FileNotFoundError on exit.
+    Runs in the loader's guarded `setup()` slot, so a raise here would only
+    unload the plugin — but the probes are still bounded internally, because a
+    hang is worse than a failure and the guard catches raises, not waits.
+    The parameter is named for the keyword the integration harness pins
+    (`setup(core=None)`); the loader itself calls it positionally.
     """
-    try:
-        return subprocess.run(cmd, capture_output=True, text=True)
-    except FileNotFoundError as exc:
-        logger.debug("Command not found: %s", exc)
-        return subprocess.CompletedProcess(
-            cmd, returncode=1, stdout="", stderr=str(exc)
-        )
+    _extension.setup(core)
+    global _backend, COMMANDS
+    forced = os.environ.get("EASYSPEAK_GRID_BACKEND")
+    if forced == "uinput":
+        _backend = _ydotool
+        _ydotool.activate()
+    elif forced == "gnome":
+        _backend = _extension
+        logger.info("grid: forced extension backend by EASYSPEAK_GRID_BACKEND=gnome")
+    else:
+        if forced is not None:
+            # A typo'd value ("uinpt") would otherwise silently degrade to the
+            # probes, and the user would never learn their override did
+            # nothing.
+            logger.warning(
+                "grid: ignoring unknown EASYSPEAK_GRID_BACKEND=%r; probing", forced
+            )
+        _backend = _ydotool if _ydotool.resolve_active() else _extension
+    logger.info("grid backend: %s", _backend.KIND)
+    # The help surface matches the backend that will answer: a ydotool
+    # desktop is not advertised the verbs that answer "That needs the GNOME
+    # extension." there.
+    COMMANDS = COMMANDS_YDOTOOL if _backend is _ydotool else _COMMANDS_FULL
 
 
-def dbus_call(method, *args):
-    """Call a method on the grid extension over D-Bus; True on success."""
-    cmd = [
-        "gdbus",
-        "call",
-        "--session",
-        "--dest",
-        "org.gnome.Shell",
-        "--object-path",
-        "/org/easyspeak/Desktop",
-        "--method",
-        f"org.easyspeak.Desktop.{method}",
-    ]
-    cmd.extend(str(a) for a in args)
-    result = host_run(cmd)
-    return result.returncode == 0
+def handle(cmd, core):
+    """Route the grid conversation to the backend the gate selected.
 
-
-def get_screen_size():
-    """Get screen size from GNOME Shell extension (accurate for Wayland)."""
-    result = host_run(
-        [
-            "gdbus",
-            "call",
-            "--session",
-            "--dest",
-            "org.gnome.Shell",
-            "--object-path",
-            "/org/easyspeak/Desktop",
-            "--method",
-            "org.easyspeak.Desktop.GetScreenSize",
-        ]
-    )
-
-    if result.returncode == 0:
-        # Parse output like "((1920, 1200),)"
-
-        match = re.search(r"\((\d+),\s*(\d+)\)", result.stdout)
-        if match:
-            return int(match.group(1)), int(match.group(2))
-
-    # Fallback to /sys/class/drm
-    for card in [
-        "card0-eDP-1",
-        "card1-eDP-1",
-        "card0-DP-1",
-        "card1-DP-1",
-        "card0-HDMI-A-1",
-        "card1-HDMI-A-1",
-    ]:
-        result = host_run(["cat", f"/sys/class/drm/{card}/modes"])
-        if result.returncode == 0 and result.stdout.strip():
-            match = re.match(r"(\d+)x(\d+)", result.stdout.strip().split("\n")[0])
-            if match:
-                return int(match.group(1)), int(match.group(2))
-    return 1920, 1080
-
-
-def _release_pending_drag():
-    """Release a drag left in progress, so no exit path leaves the button down.
-
-    `mark` presses the primary button and holds it while the user navigates to the
-    drop target. Every way out of grid mode other than `drag` — closing, clicking,
-    the new idle timeout, a tray sleep — returned without a matching release, which
-    left the primary button pressed compositor-wide and turned every subsequent
-    pointer move into a drag.
+    Returns None when the utterance is not the grid's, True when it was
+    claimed and answered. Only the selected backend is consulted: it either
+    claims the phrase or the phrase was never the grid's — the two backends
+    share one phrase surface (`_common`), so there is no second opinion to
+    ask for.
     """
-    global drag_start
-    if drag_start is None:
-        return
-    logger.debug("  → Releasing drag left in progress")
-    # After close_grid() there are no bounds to take a centre from; releasing at
-    # the press point is the least surprising fallback.
-    x, y = get_center() or drag_start
-    dbus_call("EndDrag", x, y)
-    drag_start = None
+    return _backend.handle(cmd, core)
 
 
 def cleanup():
     """Hide the grid on interpreter exit so no overlay is left on screen."""
-    _release_pending_drag()
-    dbus_call("Hide")
+    _backend.cleanup()
 
 
 atexit.register(cleanup)
-
-
-def parse_number_sequence(text):
-    """Extract ALL numbers from text as a sequence.
-
-    '3 7 5' -> [3, 7, 5].
-    """
-    # Replace word numbers with digits
-    text_lower = text.lower()
-    for word, num in WORD_TO_NUM.items():
-        text_lower = re.sub(rf"\b{word}\b", str(num), text_lower)
-
-    # Extract all single digits (grid zones are 1-9)
-    return [int(char) for char in text_lower if char.isdigit() and char != "0"]
-
-
-def parse_count(text):
-    """Extract a repeat count (for nudge/scroll).
-
-    Returns single number or 1.
-    """
-    text_lower = text.lower()
-    for word, num in WORD_TO_NUM.items():
-        text_lower = re.sub(rf"\b{word}\b", str(num), text_lower)
-
-    match = re.search(r"\b(\d+)\b", text_lower)
-    if match:
-        return min(int(match.group(1)), 20)
-    return 1
-
-
-def parse_direction(text):
-    """Return the direction (up/down/left/right) named in text, or None."""
-    for direction, words in DIRECTIONS.items():
-        for word in words:
-            if word in text:
-                return direction
-    return None
-
-
-def get_center():
-    """Return the (x, y) center of the current grid cell, or None if no grid."""
-    if not grid_bounds:
-        return None
-    x, y, w, h = grid_bounds
-    return x + w // 2, y + h // 2
-
-
-# === Grid Operations ===
-
-
-def show_grid():
-    """Show the full-screen grid overlay (no-op if it is already active)."""
-    global grid_active, grid_bounds, screen_size
-
-    if grid_active:
-        return
-
-    screen_size = get_screen_size()
-    grid_bounds = (0, 0, screen_size[0], screen_size[1])
-
-    if dbus_call("Show", screen_size[0], screen_size[1]):
-        grid_active = True
-        core.speak(_("Grid"))
-        logger.info("Grid shown (%sx%s)", screen_size[0], screen_size[1])
-    else:
-        report_grid_unavailable(core)
-
-
-def report_grid_unavailable(core):
-    """Tell the user the grid couldn't be shown, and the likely reason."""
-    if on_gnome():
-        logger.warning("Failed to show the grid. Is the EasySpeak extension enabled?")
-        core.speak(_("I couldn't show the grid. Is the EasySpeak extension enabled?"))
-    else:
-        logger.warning("The mouse grid needs GNOME and EasySpeak's Shell extension.")
-        core.speak(_("The mouse grid only works on GNOME so far."))
-
-
-def close_grid():
-    """Hide the grid overlay and clear its bounds."""
-    global grid_active, grid_bounds
-    dbus_call("Hide")
-    grid_active = False
-    grid_bounds = None
-
-
-def update_grid(zone):
-    """Zoom to a single zone.
-
-    Returns True if successful.
-    """
-    global grid_bounds
-
-    if not grid_active or not grid_bounds:
-        return False
-
-    x, y, w, h = grid_bounds
-    zone_w, zone_h = w // 3, h // 3
-
-    zone_map = {
-        1: (0, 0),
-        2: (1, 0),
-        3: (2, 0),  # top row
-        4: (0, 1),
-        5: (1, 1),
-        6: (2, 1),  # middle row
-        7: (0, 2),
-        8: (1, 2),
-        9: (2, 2),  # bottom row
-    }
-
-    if zone not in zone_map:
-        return False
-
-    col, row = zone_map[zone]
-    new_x = x + col * zone_w
-    new_y = y + row * zone_h
-
-    # Only clamp if actually going off-screen (shouldn't happen, but safety)
-    new_x = max(new_x, 0)
-    new_y = max(new_y, 0)
-    if new_x + zone_w > screen_size[0]:
-        new_x = screen_size[0] - zone_w
-    if new_y + zone_h > screen_size[1]:
-        new_y = screen_size[1] - zone_h
-
-    grid_bounds = (new_x, new_y, zone_w, zone_h)
-
-    cx, cy = get_center()
-    logger.debug("  → Zone %s: %sx%s center=(%s, %s)", zone, zone_w, zone_h, cx, cy)
-    return dbus_call("Update", new_x, new_y, zone_w, zone_h)
-
-
-def process_zones(zones):
-    """Process a sequence of zones.
-
-    'three seven five' zooms 3 times.
-    """
-    for zone in zones:
-        update_grid(zone)
-
-
-# === Click Operations ===
-
-
-def do_click(click_type="click"):
-    """Click at the current cell center and close the grid; False if no grid."""
-    global grid_bounds, grid_active, last_bounds
-
-    center = get_center()
-    if not center:
-        return False
-
-    cx, cy = center
-    last_bounds = grid_bounds
-    grid_active = False
-    grid_bounds = None
-
-    method_map = {
-        "click": "Click",
-        "double": "DoubleClick",
-        "right": "RightClick",
-        "middle": "MiddleClick",
-    }
-
-    return dbus_call(method_map.get(click_type, "Click"), cx, cy)
-
-
-def do_scroll(direction, count=1):
-    """Scroll `count` steps at the current cell center; False if no grid."""
-    global grid_bounds, grid_active, last_bounds
-
-    center = get_center()
-    if not center:
-        return False
-
-    cx, cy = center
-    last_bounds = grid_bounds
-    grid_active = False
-    grid_bounds = None
-
-    logger.debug("  → Scroll %s x%s", direction, count)
-    return dbus_call("Scroll", cx, cy, direction, count)
-
-
-def nudge_grid(direction, count=1):
-    """Shift the current cell `count` steps in a direction; False if no grid."""
-    global grid_bounds
-
-    if not grid_bounds:
-        return False
-
-    x, y, w, h = grid_bounds
-    amount = NUDGE_AMOUNT * count
-
-    if direction == "up":
-        y = max(0, y - amount)
-    elif direction == "down":
-        y = min(screen_size[1] - h, y + amount)
-    elif direction == "left":
-        x = max(0, x - amount)
-    elif direction == "right":
-        x = min(screen_size[0] - w, x + amount)
-
-    grid_bounds = (x, y, w, h)
-    cx, cy = get_center()
-    logger.debug("  → Nudge %s x%s: center=(%s, %s)", direction, count, cx, cy)
-    return dbus_call("Update", x, y, w, h)
-
-
-def start_drag():
-    """Press at the current cell center and reset the grid to full screen.
-
-    Leaves a drag in progress so a later [`end_drag`][plugins.mousegrid.end_drag]
-    releases at the new target. False if no grid is active.
-    """
-    global drag_start, grid_bounds
-    center = get_center()
-    if not center:
-        return False
-    drag_start = center
-    logger.debug("  → Drag start: %s", center)
-    dbus_call("StartDrag", center[0], center[1])
-
-    # Reset grid to full screen so user can navigate to destination
-    grid_bounds = (0, 0, screen_size[0], screen_size[1])
-    dbus_call("Update", 0, 0, screen_size[0], screen_size[1])
-    logger.debug("  → Grid reset - navigate to drop location")
-    return True
-
-
-def end_drag():
-    """Release a drag and close the grid.
-
-    Releases a drag started by [`start_drag`][plugins.mousegrid.start_drag].
-    False if no drag is in progress or no grid is active.
-    """
-    global drag_start, grid_bounds, grid_active, last_bounds
-    if not drag_start:
-        logger.debug("  → No drag in progress")
-        return False
-    center = get_center()
-    if not center:
-        return False
-    logger.debug("  → Drag end: %s", center)
-    dbus_call("EndDrag", center[0], center[1])
-    last_bounds = grid_bounds
-    grid_active = False
-    grid_bounds = None
-    drag_start = None
-    return True
-
-
-# === Main Handler ===
-
-
-def handle(cmd, core):
-    """Show or reopen the grid on a trigger word, then enter grid mode.
-
-    Returns None for commands that don't open the grid.
-    """
-    global grid_active, grid_bounds, last_bounds, screen_size
-
-    cmd_lower = cmd.lower().strip()
-    words = cmd_lower.split()
-
-    # "Again" - reopen at last position
-    if any(w in words for w in ["again", "repeat", "reopen"]) and last_bounds:
-        screen_size = get_screen_size()
-        if not dbus_call("Show", screen_size[0], screen_size[1]):
-            report_grid_unavailable(core)
-            return True
-        grid_bounds = last_bounds
-        grid_active = True
-        dbus_call("Update", *last_bounds)
-        core.speak(_("Grid"))
-        logger.info("Grid reopened at last position")
-        listen_for_grid_commands(core)
-        return True
-
-    # Show grid
-    if (
-        any(w in words for w in GRID_TRIGGERS)
-        and "close" not in words
-        and "hide" not in words
-    ):
-        show_grid()
-        listen_for_grid_commands(core)
-        return True
-
-    return None
-
-
-def listen_for_grid_commands(core):
-    """Handle grid commands until the grid closes or the mode ends.
-
-    Core owns the listening loop (see
-    [`listen_modal`][core.main.EasySpeak.listen_modal]) so the tray stays responsive
-    while the grid holds the microphone, and an
-    unattended grid times out instead of trapping the session. Any drag still in
-    progress is released on the way out, so a timeout can't leave the mouse button
-    held down.
-    """
-    global grid_active, drag_start
-
-    if not grid_active:
-        return  # the grid never opened (no extension); nothing to listen for
-
-    logger.info("Grid mode: say numbers (e.g. '3 7 5'), nudge, scroll, click, close")
-
-    try:
-        _run_grid_mode(core)
-    finally:
-        _release_pending_drag()
-        if grid_active:
-            logger.debug("  → Hiding grid left open by an ended mode")
-            close_grid()
-
-
-def _run_grid_mode(core):
-    """Dispatch one grid command per utterance until the mode ends."""
-    global grid_active, drag_start
-
-    for spoken in core.listen_modal(
-        "grid",
-        prompt=(
-            "one two three four five six seven eight nine click double "
-            "right scroll nudge up down left right close cancel mark drag"
-        ),
-        timeout=10,
-        idle_timeout=30,
-    ):
-        cmd_lower = spoken.lower()
-        logger.debug("  ← %s", cmd_lower)
-
-        # === Exit ===
-        if any(
-            w in cmd_lower
-            for w in [
-                "close",
-                "cancel",
-                "escape",
-                "exit",
-                "hide",
-                "stop",
-                "done",
-                "quit",
-            ]
-        ):
-            close_grid()
-            core.speak(_("Grid closed"))
-            logger.info("Grid closed")
-            return
-
-        # === Drag ===
-        if "mark" in cmd_lower:
-            start_drag()
-            # "Holding", not "Marked": grid mode is still listening and "mark"
-            # inside the reply would start a second drag.
-            core.speak(_("Holding"))
-            continue
-        if "drag" in cmd_lower and drag_start:
-            end_drag()
-            core.speak(_("Dropped"))
-            return
-
-        # === Scroll ===
-        if "scroll" in cmd_lower:
-            direction = parse_direction(cmd_lower)
-            if direction:
-                do_scroll(direction, parse_count(cmd_lower))
-                core.speak(_("Scrolled"))
-                return
-            continue
-
-        # === Clicks ===
-        has_click = "click" in cmd_lower
-
-        if "double" in cmd_lower:
-            do_click("double")
-            core.speak(_("Double clicked"))
-            return
-        if "middle" in cmd_lower:
-            do_click("middle")
-            core.speak(_("Middle clicked"))
-            return
-        if has_click and any(
-            w in cmd_lower for w in ["right", "write", "rite", "wright"]
-        ):
-            do_click("right")
-            core.speak(_("Right clicked"))
-            return
-        if has_click:
-            do_click("click")
-            core.speak(_("Clicked"))
-            return
-
-        # === Nudge ===
-        direction = parse_direction(cmd_lower)
-        if direction and not has_click:
-            nudge_grid(direction, parse_count(cmd_lower))
-            continue
-
-        # === Zone numbers (chained) ===
-        zones = parse_number_sequence(cmd_lower)
-        if zones:
-            logger.debug("  → Zones: %s", zones)
-            process_zones(zones)
-            continue

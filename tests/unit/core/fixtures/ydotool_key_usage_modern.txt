@@ -1,0 +1,85 @@
+# Captured from the ydotool 1.0.x client sources (upstream master), 2026-10-17
+#
+# Source: https://github.com/ReimuNotMoe/ydotool
+#   commit 708e96ff27e381a8c549418a9d34cdde12305317 (master, pushed 2025-12-22)
+#   client version: 1.0.x -- latest release tag v1.0.4 (master is v1.0.4 + fixes)
+# Packaged-manpage mirror of v1.0.4:
+#   https://manpages.debian.org/trixie-backports/ydotool/ydotool.1.en.html
+#
+# Why sources, not a live binary: this capture needed a 1.0.x client and the
+# host has none installed; the task's candidate repos (AdrianEddy/ydotool,
+# github.com/ydotoold/ydotool) return GitHub 404. ReimuNotMoe/ydotool is the
+# canonical upstream and ships both the client's own help text (what
+# `ydotool key --help` prints on 1.0.x) and the packaged manpage; both are
+# reproduced verbatim below.
+#
+# Dialect: MODERN (1.0.x). Client talks to the ydotoold(8) daemon over a
+# unix socket (override with $YDOTOOL_SOCKET; default
+# $XDG_RUNTIME_DIR/.ydotool_socket). Per-verb `--help` EXISTS here (unlike
+# 0.1.8). No `--version` verb in Client/ydotool.c either -- both dialects
+# must be probed via per-verb help, never via --version.
+#
+# ---------------------------------------------------------------------------
+# KEY VERB ARGV GRAMMAR -- MODERN (1.0.x)
+#
+#   ydotool key [-d,--key-delay <ms>] [<KEYCODE:PRESSED> ...]
+#
+#   each argv token = <keycode>:<pressed>   e.g. "28:1 28:0" = press Enter
+#     :1 = key down, :0 = key up; a combo is spelled as consecutive tokens
+#     (42:1 38:1 38:0 24:1 24:0 38:1 38:0 42:0 = "LOL")
+#   keycodes are RAW linux keycodes (KEY_* from
+#   /usr/include/linux/input-event-codes.h) -- NOT names, NOT the '+'
+#   combo syntax of the 0.1.8 legacy dialect (see
+#   ydotool_key_usage_legacy.txt).
+#   NO --delay/--repeat/--repeat-delay on key in this dialect (repeats on
+#   key are legacy-only; modern click has -r/--repeat instead).
+#   Parser notes (Client/tool_key.c @ master): the keycode is read with
+#   strtol (a token containing 'x' is parsed as hex) and the pressed state
+#   is taken from the token's LAST CHARACTER ('0' = release, anything else
+#   = press); non-interpretable tokens only cause a delay. An undocumented
+#   -f/--file long option also exists.
+# ---------------------------------------------------------------------------
+
+# --- 1. What `ydotool key --help` prints on 1.0.x --------------------------
+# Verbatim help string from Client/tool_key.c @ master 708e96f (show_help();
+# printed for `ydotool key` with no args and for `ydotool key --help`):
+Usage: key [OPTION]... [KEYCODES]...
+Emit key events.
+
+Options:
+  -d, --key-delay=N          Delay N milliseconds between key events
+  -h, --help                 Display this help and exit
+
+Since there's no way to know how many keyboard layouts are there in the world,
+we're using raw keycodes now.
+
+Syntax: <keycode>:<pressed>
+e.g. 28:1 28:0 means pressing on the Enter button on a standard US keyboard.
+     (where :1 for pressed means the key is down and then :0 means the key is released)
+     42:1 38:1 38:0 24:1 24:0 38:1 38:0 42:0 - "LOL"
+
+Non-interpretable values, such as 0, aaa, l0l, will only cause a delay.
+
+See `/usr/include/linux/input-event-codes.h' for available key codes (KEY_*).
+
+# --- 2. Packaged manpage, KEYBOARD COMMANDS section ------------------------
+# Verbatim from manpage/ydotool.1.scd @ master 708e96f (packaged as
+# ydotool(1); rendered 1.0.4 text mirrored at the Debian URL in the header):
+*key* [*-d*,*--key-delay* _<ms>_] [_<KEYCODE:PRESSED>_ ...]
+
+	Type a given keycode.
+
+	e.g. 28:1 28:0 means pressing on the Enter button on a standard US keyboard.
+	(where :1 for pressed means the key is down and then :0 means the key is released)
+
+	42:1 38:1 38:0 24:1 24:0 38:1 38:0 42:0 - "LOL"
+
+	Non-interpretable values, such as 0, aaa, l0l, will only cause a delay.
+
+	See `/usr/include/linux/input-event-codes.h' for available key codes (KEY_\*).
+
+	You can find the key name/number your keyboard is sending to libinput by running `sudo libinput record` and then selecting your keyboard from the list it will show you the libinput proper key name and number for each key you press.
+
+	Options:
+	*-d*,*--key-delay* _<ms>_
+		Delay time between keystrokes. Default 12ms.
