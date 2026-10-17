@@ -19,7 +19,9 @@ dictation (paste chord + keystroke commands), browser mode (press-key), and
 system/media-key replay. Packaging gains `ydotool` (wl-clipboard is already a
 hard dep); the AT-SPI
 focus probe falls open off GNOME; the compatibility table gains a COSMIC
-column. GNOME behavior is the regression gate: byte-for-byte unchanged.
+column. GNOME behavior is the regression gate: unchanged on every path a
+user can see, with exactly the disclosed deltas of §4.2 (bounded D-Bus
+waits; the probe-error arm) and none besides.
 
 ## 2. Background and evidence
 
@@ -161,7 +163,11 @@ New surface needed beyond the grid's verbs: keycode-level synthesis mapping
 emits `repeats` as ONE batched argv (`code:1 code:0` × repeats — one device,
 one settle), while the RemoteDesktop backend keeps its per-repeat loop so the
 GNOME path stays byte-for-byte identical; `press_key` passes `repeats`
-through unchanged (`mediakeys.py:168-176`).
+through unchanged (`mediakeys.py:168-176`). The key verb's process timeout
+**scales with the repeat count** — a fixed floor plus a per-repeat budget
+from the measured baseline — never the seam's fixed `INJECT_TIMEOUT`
+(`_ydotool.py:65`); a long legitimate batch must not time out into a false
+`unknown` after partial delivery (§11).
 The argv is the keycodes **in the order given, each as `code:1`, then in
 reverse, each as `code:0`** — identical to `tap_chord`'s documented contract
 ("keys go down in the order given and come up in reverse", `mediakeys.py:52-53`);
@@ -197,12 +203,19 @@ boundary translates that vocabulary completely into exceptions:
   missing backend in the logs, but it lands in the same spoken fallback
   (§6). Every failure mode the backend can hit (binary absent, spawn
   `OSError`, `subprocess.TimeoutExpired`, non-zero exit / stderr refusal)
-  resolves to that one exception type at the boundary. The stake is the
+  resolves to that one exception type at the boundary. On the GNOME side,
+  the newly bounded D-Bus wait (§4.2) raises jeepney's `TimeoutError` when
+  it fires — the RemoteDesktop backend translates that into
+  `InjectionUnavailableError` as well, so the paste path's ladder answers
+  with `NO_KEYSTROKES` (clipboard hint) rather than `BACKEND_ERROR`
+  ("isn't set up") at the moment `wl-copy` has already run
+  (`dictation/__init__.py:473`). The stake is the
   *right* fallback, not bare silence: dictation's paste path catches broadly
   and would speak "isn't set up" — losing the clipboard hint even though the
   text is already on the clipboard — while a foreign raise past
   `press_key`'s narrow ladder reaches the dispatcher's catch-all
-  (`core/main.py:306-308`), where nothing is spoken at all.
+  (`core/main.py:306-315`), whose generic "Sorry, something went wrong"
+  keeps neither the remedy nor the clipboard hint.
 
 ### 4.4 Consumer migration
 
@@ -350,7 +363,7 @@ swallowing, no fallback that strands the user without a way back.
 **Unit** (alongside existing core tests; gate logic pure and injected):
 
 - selection matrix: override×{remote-desktop, uinput, auto, unknown-value} ×
-  {GNOME, non-GNOME} × {Mutter owned, unowned}
+  {GNOME, non-GNOME} × {Mutter owned, not owned, probe error}
 - stickiness (second call does not re-resolve), backend log line
 - `tap_key`/`tap_chord` routing per backend; exception rename fallout; the
   subclass relation `issubclass(InjectionUnavailableError, RuntimeError)`;
@@ -391,9 +404,11 @@ Hard ordering softened into stacking: this branch sits directly on #233's
 head (`dac70d2`), so the extraction reads the landed `_ydotool` in-tree —
 no guessing. Merge order stays: #233 lands first, this follows. This PR then:
 
-1. Extract to core exactly the reusable plumbing: uinput access probe,
-   ydotool 0.1.8 daemonless and 1.0.x daemon-socket support, recovery
-   diagnostics. The grid keeps its mouse verbs and imports the shared module
+1. Extract to core exactly the reusable plumbing: the bounded run seam
+   (`_spawn` / `_run_bounded` / `run_ydotool` — the `ran`/`errored`/`unknown`
+   vocabulary §4.3 maps), the uinput access probe, ydotool 0.1.8 daemonless
+   and 1.0.x daemon-socket support, recovery diagnostics. The grid keeps its
+   mouse verbs and imports the shared module
    (the consolidation #233's review asked for; the grid's conversation loops
    are untouched). The `EASYSPEAK_GRID_DRY_RUN` silent-ran bypass
    (`_ydotool.py:353-355`) is **excluded from the shared seam**: dry-run
@@ -438,7 +453,8 @@ points at this design when the PR opens.
   keystroke failing mid-loop leaves `dictation_last_length` stale, so a later
   "scratch that" over-deletes. Batching shrinks the window — one invocation,
   one outcome — but the accounting stays repeat-level; noted, not redesigned
-  here.
+  here. The scaled timeout (§4.3) keeps a legitimate batch from ending in a
+  false `unknown`, which is what would otherwise resurrect this hazard.
 - **AT-SPI leniency pastes into nothing** off GNOME when truly nothing is
   focused: harmless (Ctrl+V lands nowhere), and strictly better than refusing
   a path that works most of the time.
