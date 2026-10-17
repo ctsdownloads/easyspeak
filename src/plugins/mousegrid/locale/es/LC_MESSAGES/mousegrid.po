@@ -36,10 +36,22 @@ msgstr "Cuadrícula cerrada"
 msgid "Holding"
 msgstr "Manteniendo"
 
+msgid "I couldn't click."
+msgstr "No he podido hacer clic."
+
+msgid "I couldn't move the pointer."
+msgstr "No he podido mover el puntero."
+
+msgid "I couldn't show the grid."
+msgstr "No pude mostrar la cuadrícula."
+
 msgid "I couldn't show the grid. Is the EasySpeak extension enabled?"
 msgstr ""
 "No he podido mostrar la cuadrícula. ¿Está activada la extensión de "
 "EasySpeak?"
+
+msgid "I tried, but I'm not sure it worked."
+msgstr "Lo intenté, pero no estoy seguro de que haya funcionado."
 
 msgid "Middle clicked"
 msgstr "Clic central"
@@ -50,8 +62,11 @@ msgstr "Clic derecho"
 msgid "Scrolled"
 msgstr "Desplazado"
 
-msgid "The mouse grid only works on GNOME so far."
-msgstr "Por ahora, la cuadrícula del ratón solo funciona en GNOME."
+msgid "That needs the GNOME extension."
+msgstr "Eso necesita la extensión de GNOME."
+
+msgid "The mouse grid needs either the GNOME extension or ydotool."
+msgstr "La cuadrícula del ratón necesita la extensión de GNOME o ydotool."
 
 msgid "again - reopen grid at last position"
 msgstr "again - reabrir la cuadrícula en la última posición"

@@ -36,10 +36,22 @@ msgstr "Griglia chiusa"
 msgid "Holding"
 msgstr "Tengo premuto"
 
+msgid "I couldn't click."
+msgstr "Non sono riuscito a fare clic."
+
+msgid "I couldn't move the pointer."
+msgstr "Non sono riuscito a spostare il puntatore."
+
+msgid "I couldn't show the grid."
+msgstr "Non sono riuscito a mostrare la griglia."
+
 msgid "I couldn't show the grid. Is the EasySpeak extension enabled?"
 msgstr ""
 "Non sono riuscito a mostrare la griglia. L'estensione di EasySpeak è "
 "attiva?"
+
+msgid "I tried, but I'm not sure it worked."
+msgstr "Ci ho provato, ma non sono sicuro che abbia funzionato."
 
 msgid "Middle clicked"
 msgstr "Clic centrale"
@@ -50,8 +62,11 @@ msgstr "Clic destro"
 msgid "Scrolled"
 msgstr "Scorso"
 
-msgid "The mouse grid only works on GNOME so far."
-msgstr "Per ora la griglia del mouse funziona solo su GNOME."
+msgid "That needs the GNOME extension."
+msgstr "Questo richiede l'estensione GNOME."
+
+msgid "The mouse grid needs either the GNOME extension or ydotool."
+msgstr "La griglia del mouse richiede l'estensione GNOME o ydotool."
 
 msgid "again - reopen grid at last position"
 msgstr "again - riapre la griglia nell'ultima posizione"

@@ -275,10 +275,18 @@ class TestEasySpeakPlugins:
         assert easy.plugins == []
         assert "Failed to load TestPlugin: no display" in readlog().out
 
-    def test_load_plugins_loads_all_shipped_plugins(self):
+    def test_load_plugins_loads_all_shipped_plugins(self, monkeypatch):
         """All shipped plugins are discovered against the real filesystem layout."""
         easy = EasySpeak()
 
+        # setup() runs for real here: forcing the grid plugin's extension
+        # backend keeps a loader test from spawning the ydotool gate's probes.
+        # The env var is the gate's own override, so it reaches the loader's
+        # module instance without any patching gymnastics — `load_plugins`
+        # imports plugins as top-level `plugins.<stem>`, whose module object is
+        # NOT the `easyspeak.plugins.<stem>` the suite imports elsewhere, and
+        # patching one never reaches the other.
+        monkeypatch.setenv("EASYSPEAK_GRID_BACKEND", "gnome")
         easy.load_plugins()
         loaded = {module.__name__.rsplit(".", 1)[-1] for module in easy.plugins}
 
@@ -295,10 +303,12 @@ class TestEasySpeakPlugins:
             "system",
         }
 
-    def test_load_plugins_routes_by_priority(self):
+    def test_load_plugins_routes_by_priority(self, monkeypatch):
         """Commands reach the modes first and the help/exit catch-all last."""
         easy = EasySpeak()
 
+        # See the roster test: setup() must not probe during a loader test.
+        monkeypatch.setenv("EASYSPEAK_GRID_BACKEND", "gnome")
         easy.load_plugins()
         names = [module.NAME for module in easy.plugins]
 
