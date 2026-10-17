@@ -98,7 +98,7 @@ def _probe_dialect():
     try:
         result = _spawn(["ydotool", "mousemove", "--help"], PROBE_TIMEOUT)
     except (OSError, subprocess.TimeoutExpired) as exc:
-        logger.info("grid: `ydotool mousemove --help` did not answer: %s", exc)
+        logger.info("ydotool: `ydotool mousemove --help` did not answer: %s", exc)
         return YDTOOL_DIALECT_LEGACY
     if YDTOOL_ABSOLUTE_FLAG in result.stdout + result.stderr:
         return YDTOOL_DIALECT_MODERN
@@ -162,7 +162,7 @@ def _socket_owned(path):
         return False
     if st.st_uid != os.getuid():
         logger.warning(
-            "grid: skipping %s (a socket owned by uid %s, not ours)",
+            "ydotool: skipping %s (a socket owned by uid %s, not ours)",
             path,
             st.st_uid,
         )
@@ -330,7 +330,7 @@ def _run_bounded(args, timeout=INJECT_TIMEOUT, dry_run=None):
         # counts, and this line states which mode was in use. 1.0.x has no such
         # mode, and says so with "failed to connect socket" instead, which is
         # an error signature.
-        logger.info("grid: per-invocation device (ydotoold unavailable)")
+        logger.info("ydotool: per-invocation device (ydotoold unavailable)")
     # The argv-shaped code is what Exec returns and what a build forwarding it
     # would report — measured both ways on the draft's own table (`type ""`
     # forwarding reports the full argc, `click 1` reports one less), so the
@@ -431,7 +431,7 @@ def _probe_tools():
     try:
         result = _spawn(["ydotool", "help"], PROBE_TIMEOUT)
     except (OSError, subprocess.TimeoutExpired) as exc:
-        logger.info("grid: `ydotool help` did not answer: %s", exc)
+        logger.info("ydotool: `ydotool help` did not answer: %s", exc)
         return None
     return parse_tool_list(result.stdout + result.stderr)
 
@@ -445,3 +445,126 @@ def noop_argv():
     if dialect() == YDTOOL_DIALECT_MODERN:
         return YDTOOL_NOOP_MODERN
     return YDTOOL_NOOP_LEGACY
+
+
+# --- the key verb -----------------------------------------------------------
+#
+# Synthesis for `key`, per dialect. The grammars are the Task 0 fixtures'
+# content, not our invention — tests/unit/core/fixtures/ydotool_key_usage_
+# legacy.txt (0.1.8, live VM capture) and ..._modern.txt (1.0.x, captured from
+# the client's own sources) are the oracle, and every argv shape below cites
+# the fixture lines it came from. The legacy fixture's crash-probe transcript
+# (`ydotool key 29:1 29:0`, its lines 73-75) documents a client abort, not a
+# grammar, and feeds nothing here.
+
+KEY_PER_REPEAT_BUDGET = 0.05  # s; PROVISIONAL — Task 7 calibrates it on the VM
+
+# evdev keycode -> 0.1.8 combo NAME, reversed from the repo's two name->code
+# tables: `core.mediakeys.KEYS` (spoken key names) and the dictation plugin's
+# `KEYCODES` (paste-chord names). This is a literal, not a programmatic
+# reverse of those tables: core cannot import the plugin (plugins import
+# core), and key injection will make mediakeys import from here, so either
+# import would close a cycle. Case is the client's problem, not ours — it
+# uppercases names before lookup (upstream v0.1.8 Key.cpp, cited by the
+# legacy fixture's corroboration section), and the fixture's own examples mix
+# cases ("CTRL+alt+f3", "ctrl+Backspace", its lines 22 and 105). We emit
+# lowercase for determinism.
+#
+# Deliberately absent: codes 104 and 109. Their repo names are the two-word
+# spoken forms "page up"/"page down", and a space is not a combo name — the
+# 0.1.8 resolver would fall through to its single-letter table and silently
+# press `P` instead (the abort the fixture documents at its lines 25-27 only
+# covers unknown single names). Upstream's full name table is unreachable
+# (the evdevPlus repo 404s), so rather than guess a spelling no grounded
+# source documents, these codes raise; Task 7's VM calibration can ground the
+# real names (`strings /usr/bin/ydotool`) and extend this table.
+KEY_LEGACY_NAMES = {
+    28: "enter",  # mediakeys.KEYS["enter"]
+    15: "tab",  # mediakeys.KEYS["tab"]
+    1: "escape",  # mediakeys.KEYS["escape"]
+    14: "backspace",  # mediakeys.KEYS["backspace"]; fixture lines 22/105
+    103: "up",  # mediakeys.KEYS["up"]
+    108: "down",  # mediakeys.KEYS["down"]
+    105: "left",  # mediakeys.KEYS["left"]
+    106: "right",  # mediakeys.KEYS["right"]
+    102: "home",  # mediakeys.KEYS["home"]
+    107: "end",  # mediakeys.KEYS["end"]
+    29: "ctrl",  # dictation.KEYCODES["ctrl"]; fixture lines 22/105
+    42: "shift",  # dictation.KEYCODES["shift"]; fixture line 106 ("Shift+#")
+    56: "alt",  # dictation.KEYCODES["alt"]; fixture lines 22/105
+    125: "super",  # dictation.KEYCODES["super"]
+    110: "insert",  # dictation.KEYCODES["insert"]
+    47: "v",  # dictation.KEYCODES["v"]; letters per the client's "alt+r", line 22
+}
+
+
+def key_timeout(repeats, floor=None, per_repeat=KEY_PER_REPEAT_BUDGET):
+    """Upper bound for one batched `key` invocation; grows with `repeats`.
+
+    A batched argv spends the client's key-delay pacing between keystrokes
+    (12ms by default in both dialects — legacy fixture line 101, modern
+    fixture line 85), so "backspace ten" cannot share the fixed
+    `INJECT_TIMEOUT` a single keystroke uses. The bound scales with the batch
+    and keeps `INJECT_TIMEOUT` as the floor.
+    """
+    return (floor if floor is not None else INJECT_TIMEOUT) + repeats * per_repeat
+
+
+def key_argv(chord, repeats=1):
+    """One batched `key` invocation pressing `chord` `repeats` times.
+
+    Chord order mirrors `mediakeys.tap_chord`: keys go down in the order
+    given and come up in reverse, per repeat. The whole batch is ONE
+    invocation — daemonless 0.1.8 pays a fresh uinput device plus its settle
+    delay per invocation, so "backspace ten" must be one call, not ten.
+
+    The dialects disagree about the grammar itself (fixtures are the oracle):
+    1.0.x takes raw `KEYCODE:PRESSED` tokens and has no repeat flag at all
+    (modern fixture lines 25-35), so repeats are consecutive down/up cycles;
+    0.1.8 takes ONE name combo joined with '+' plus a `--repeat <times>` flag
+    (legacy fixture lines 18-27), so the flag does the repeating.
+    """
+    if dialect() == YDTOOL_DIALECT_MODERN:
+        tokens = []
+        for _ in range(repeats):
+            tokens.extend(f"{code}:1" for code in chord)
+            tokens.extend(f"{code}:0" for code in reversed(chord))
+        return ("ydotool", "key", *tokens)
+    return key_legacy_argv(chord, repeats=repeats)
+
+
+def key_legacy_argv(chord, repeats=1):
+    """The 0.1.8 `key` argv for one combo: `ctrl+v`, or `--repeat N ctrl+v`.
+
+    Per the legacy fixture's usage line (its lines 18-19 and 93): options
+    first, then ONE `<key sequence>` — NAMES joined with '+' (lines 21-22),
+    each combo emitted by the client as a full press+release, up in reverse
+    (corroboration section, line 120). `--repeat <times>` (line 102) repeats
+    that sequence inside the same invocation. The other flags stay off
+    because their documented defaults already serve: `--repeat-delay` is 0ms
+    (line 103) and `--key-delay` is the client's own 12ms pacing (line 101).
+    """
+    combo = "+".join(_legacy_combo_name(code) for code in chord)
+    argv = ["ydotool", "key"]
+    if repeats > 1:
+        argv.extend(("--repeat", str(repeats)))
+    argv.append(combo)
+    return tuple(argv)
+
+
+def _legacy_combo_name(code):
+    """The 0.1.8 combo NAME for an evdev keycode, or a loud error.
+
+    The legacy fixture is explicit that an unknown NAME aborts the client
+    ("no matching keycode", its lines 25-27), and its resolver's fallback
+    would turn a wrong name into a silently wrong keypress. A code outside
+    the grounded table therefore raises here, before any process is spawned.
+    """
+    try:
+        return KEY_LEGACY_NAMES[code]
+    except (KeyError, TypeError):
+        raise ValueError(
+            f"no legacy combo name for evdev code {code!r}: the 0.1.8 key "
+            "verb takes names, not codes (ydotool_key_usage_legacy.txt "
+            "lines 21-27)"
+        ) from None

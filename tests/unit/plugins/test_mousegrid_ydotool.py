@@ -460,7 +460,6 @@ class TestOutcomeClassification:
         TestAdapterArgv)."""
         spawn = Mock()
         monkeypatch.setattr(core_ydotool, "_spawn", spawn)
-        monkeypatch.setattr(g, "_grid_dry_run", lambda: True)
         assert g._run_bounded(["ydotool", "click", "1"], dry_run=True) == "ran"
         spawn.assert_not_called()
 
