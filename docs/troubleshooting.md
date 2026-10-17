@@ -204,14 +204,15 @@ next section.
 Every injected keystroke — dictation's paste, the browser's "press enter", the
 media keys — goes through one backend, chosen at the first injection and sticky
 for the rest of the process: Mutter RemoteDesktop where the session is GNOME
-and Mutter owns its RemoteDesktop name, the ydotool/uinput stack (the same one
-the mouse grid uses) everywhere else. `EASYSPEAK_KEY_BACKEND` forces the
-choice: `remote-desktop`, `uinput`, or `auto` (the default, which probes as
-above; an unknown value warns and falls back to it). The choice is read once,
-so a change takes effect when the EasySpeak daemon restarts, not mid-session.
+and Mutter owns its RemoteDesktop name — or where the ownership probe itself
+fails — the ydotool/uinput stack (the same one the mouse grid uses) everywhere
+else. `EASYSPEAK_KEY_BACKEND` forces the choice: `remote-desktop`, `uinput`,
+or `auto` (the default, which probes as above; an unknown value warns and
+falls back to it). The choice is read once, so a change takes effect when the
+EasySpeak daemon restarts, not mid-session.
 
-When an injection fails, nothing is silent: the refusal above is spoken, and
-the log names the remedy:
+Dictation and the browser speak a refusal when their keystrokes can't be
+injected, and the log names the remedy:
 
 - **`ydotool` missing** — the prebuilt packages ship it as a dependency; on a
   source install, install it yourself (`sudo dnf install ydotool`).
@@ -223,9 +224,9 @@ the log names the remedy:
   grid section above has the package names and the user-unit recipe.
 
 If the backend resolved wrong for the session at hand — say the daemon started
-under one desktop and now runs under GNOME — restarting the EasySpeak daemon
-lets the gate probe again, or set `EASYSPEAK_KEY_BACKEND=remote-desktop` to
-pin the GNOME path for a GNOME session.
+under one desktop and now runs under GNOME — restart the daemon to let the
+gate probe again; set `EASYSPEAK_KEY_BACKEND=remote-desktop` first to pin a
+GNOME session to its native backend, then restart.
 
 ## Browser plugin: link numbers don't work
 

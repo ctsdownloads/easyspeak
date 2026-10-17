@@ -1906,7 +1906,7 @@ def test_browser_words_keep_their_own_meaning(mock_press, command, mock_core):
 
 
 @patch.object(mediakeys, "press_key", return_value=False)
-def test_browser_reports_keystrokes_need_gnome(mock_press, mock_core):
+def test_browser_reports_undeliverable_keystrokes(mock_press, mock_core):
     """A keystroke that can't be delivered is reported rather than silently dropped."""
     assert browser.handle_browser_command("press enter", mock_core) is True
     assert (

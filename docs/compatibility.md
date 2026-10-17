@@ -34,8 +34,8 @@ features still have no counterpart there.
 [^browser]: "Press enter" and the other keystrokes go through the injection
     backend (Mutter RemoteDesktop on GNOME, `ydotool` elsewhere) and land like
     real key presses.
-[^dictation]: The text is pasted automatically now, through the injection
-    backend; `wl-clipboard` is still needed for the clipboard half.
+[^dictation]: The text is pasted automatically through the injection backend;
+    `wl-clipboard` remains needed for the clipboard half.
 [^about]: Opens in Plasma's own look on KDE if the optional `kdialog` is
     installed, else as GNOME's dialog if GTK 4 and libadwaita are. Without
     either, EasySpeak says its version and shows the details in a notification.

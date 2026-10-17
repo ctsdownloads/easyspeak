@@ -31,10 +31,10 @@ easyspeak/
 │   │   ├── log.py             # Logging setup
 │   │   ├── main.py            # EasySpeak class + main loop
 │   │   ├── mediakeys.py       # Key injection: Mutter RemoteDesktop or ydotool/uinput
-│   │   ├── ydotool.py         # ydotool client seam: dialects, sockets, bounded runs
 │   │   ├── speech.py          # Persistent piper -> player pipeline
 │   │   ├── statusnotifier.py  # Tray icon outside GNOME (StatusNotifierItem)
-│   │   └── tray.py            # Panel indicator + asleep lifecycle
+│   │   ├── tray.py            # Panel indicator + asleep lifecycle
+│   │   └── ydotool.py         # ydotool client seam: dialects, sockets, bounded runs
 │   ├── data/                  # Bundled data files (easyspeak.data), shipped as package data
 │   │   ├── __init__.py        # Marks the folder as package data
 │   │   ├── easyspeak.desktop  # Desktop entry
