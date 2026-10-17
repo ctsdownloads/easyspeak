@@ -117,6 +117,27 @@ def test_override_uinput_beats_an_owned_gnome_session(monkeypatch):
     assert backend.KIND == "uinput"
 
 
+@pytest.mark.parametrize(
+    ("forced", "kind"),
+    [("remote-desktop", "remote-desktop"), ("uinput", "uinput")],
+)
+def test_forced_override_survives_a_busless_host(monkeypatch, forced, kind):
+    """The escape hatch must work where the probe cannot: no session bus at all.
+
+    Forcing a backend answers the selection without consulting Mutter — on a
+    busless host the ownership probe would raise before the forced backend is
+    ever built, defeating the override's whole purpose.
+    """
+    monkeypatch.setenv("EASYSPEAK_KEY_BACKEND", forced)
+
+    def busless(bus="SESSION"):
+        raise KeyError("DBUS_SESSION_BUS_ADDRESS not found")
+
+    monkeypatch.setattr(mk, "open_dbus_connection", busless)
+    backend = mk.select_backend()
+    assert kind == backend.KIND  # forced backend built, no probe, no exception
+
+
 def test_sticky_second_call_does_not_re_resolve(monkeypatch):
     calls = []
     monkeypatch.delenv("EASYSPEAK_KEY_BACKEND", raising=False)
@@ -246,6 +267,24 @@ def test_mutter_state_settles_on_error_after_the_retry(monkeypatch):
     assert len(opens) == 2  # bounded: two attempts, never a third
 
 
+def test_mutter_state_settles_on_error_without_a_bus(monkeypatch):
+    """No session bus to open is "no Mutter", not a crash.
+
+    Same bounded shape as the wedged bus: the open failure retries once
+    (failing fast — a KeyError is instant, unlike a timeout) and settles on
+    the probe-error arm.
+    """
+    attempts = []
+
+    def busless(bus="SESSION"):
+        attempts.append(bus)
+        raise KeyError("DBUS_SESSION_BUS_ADDRESS not found")
+
+    monkeypatch.setattr(mk, "open_dbus_connection", busless)
+    assert mk._mutter_state() == "error"
+    assert len(attempts) == 2
+
+
 # --- raise-only dispatch -----------------------------------------------------
 
 
@@ -321,6 +360,24 @@ def test_remote_desktop_translates_jeepney_timeout(monkeypatch):
         lambda: mk.RemoteDesktopBackend(conn_factory=lambda: FakeConn("timeout")),
     )
     with pytest.raises(mk.InjectionUnavailableError):
+        mk.tap_chord([29, 47])
+
+
+def test_remote_desktop_translates_a_bus_open_failure(monkeypatch):
+    """A bus that will not open is "no usable backend" — the totality promise
+    in the module docstring covers the connection open, not just the calls on
+    it (no bus address: KeyError; unsupported transport: RuntimeError; auth
+    refusal: AuthenticationError, a ValueError)."""
+
+    def busless(bus="SESSION"):
+        raise KeyError("DBUS_SESSION_BUS_ADDRESS not found")
+
+    monkeypatch.setattr(mk, "open_dbus_connection", busless)
+    backend = mk.RemoteDesktopBackend()
+    monkeypatch.setattr(mk, "select_backend", lambda: backend)
+    with pytest.raises(
+        mk.InjectionUnavailableError, match="no usable injection backend"
+    ):
         mk.tap_chord([29, 47])
 
 

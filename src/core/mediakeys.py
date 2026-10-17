@@ -3,7 +3,8 @@
 Mutter RemoteDesktop where the session provides it (GNOME, unchanged behavior —
 a RemoteDesktop session lives only as long as its creating D-Bus connection, so
 each chord runs CreateSession → Start → keycodes → Stop on ONE connection,
-closed in finally); ydotool/uinput everywhere else. Both backends are
+closed when the chord's connection scope exits); ydotool/uinput everywhere
+else. Both backends are
 raise-only: every failure becomes InjectionUnavailableError. The replay story
 (media keys for native desktop feedback) is one consumer, not the module's
 reason to exist.
@@ -65,7 +66,18 @@ class RemoteDesktopBackend:
         # The with-scope is today's `finally: conn.close()`: it closes the
         # connection on every path, success or error (jeepney's __exit__
         # closes), and test fakes bind the same context-manager contract.
-        with self._conn_factory() as conn:
+        try:
+            conn = self._conn_factory()
+        except (KeyError, RuntimeError, ValueError, TimeoutError, OSError) as exc:
+            # A bus that will not open — no session-bus address (KeyError), an
+            # unsupported transport (RuntimeError), auth refusal
+            # (AuthenticationError, a ValueError) — is "no usable backend",
+            # not a crash: the totality promise covers the open, not just the
+            # calls on it. TimeoutError/OSError are here for runner-shaped
+            # factories; the dispatch would translate them anyway.
+            message = f"no usable injection backend: {exc}"
+            raise InjectionUnavailableError(message) from exc
+        with conn:
             reply = self._call(conn, new_method_call(_REMOTE_DESKTOP, "CreateSession"))
             session = DBusAddress(
                 reply.body[0],
@@ -151,7 +163,11 @@ class UinputBackend:
 
 
 class _GateCache:
-    """One attribute of process-level state; tests swap in fresh instances."""
+    """One attribute of process-level state; tests swap in fresh instances.
+
+    Until resolve writes the instance attr, reads see the class-attr default
+    (None), which is what makes the sticky check a plain attribute read.
+    """
 
     backend = None
 
@@ -171,8 +187,9 @@ def _mutter_state():
     One bounded NameHasOwner call, retried once on a bus-level failure (spec
     4.2's bounded retry — a wedged bus is not an honest "no"). jeepney blocks
     by default, hence the explicit timeout. An error REPLY is an answer, not a
-    wedge, so it settles at once; only a call that never got through (timeout,
-    socket error) is retried.
+    wedge, so it settles at once; a call that never got through (no bus to
+    open, timeout, socket error) is retried once, then settles on "error" —
+    a busless host is "no Mutter", not a crash.
     """
     for _attempt in (1, 2):
         try:
@@ -186,7 +203,9 @@ def _mutter_state():
                     ),
                     timeout=GDBUS_TIMEOUT,
                 )
-        except (TimeoutError, OSError):
+        except (KeyError, RuntimeError, ValueError, TimeoutError, OSError):
+            # KeyError: no session-bus address; RuntimeError: unsupported
+            # transport; ValueError: auth refusal (AuthenticationError).
             continue
         if reply.header.message_type is MessageType.error:
             return "error"
@@ -216,13 +235,13 @@ def _resolve_backend(owned, probe_error, cache):
                 forced,
             )
         gnome = on_gnome()
-        # The Mutter verdict is consulted eagerly (it is a closure over the
-        # state select_backend already computed — no I/O here), so the native
-        # arm reads as one predicate: Mutter answered, or the probe itself
-        # failed, AND this is a GNOME session. Owned, or a wedged probe: stay
-        # on the native path, where a genuinely dead Mutter fails inside the
-        # well-tested CreateSession path with the spoken fallbacks — never a
-        # silent reroute of GNOME input through uinput.
+        # The Mutter verdict is consulted exactly once per resolution — the
+        # probe is the memoized callable select_backend handed in — so the
+        # native arm reads as one predicate: Mutter answered, or the probe
+        # itself failed, AND this is a GNOME session. Owned, or a wedged
+        # probe: stay on the native path, where a genuinely dead Mutter fails
+        # inside the well-tested CreateSession path with the spoken fallbacks
+        # — never a silent reroute of GNOME input through uinput.
         native = owned() or probe_error()
         backend = RemoteDesktopBackend() if gnome and native else UinputBackend()
     logger.info("key injection backend: %s", backend.KIND)
@@ -234,15 +253,24 @@ def select_backend():
     """Resolve once per process (sticky); every later injection reuses it.
 
     The cache check here is what keeps the ownership probe a first-injection
-    cost: `_resolve_backend` re-checks the cache too, but only after this
-    function has already paid for one NameHasOwner round trip.
+    cost, and the probe itself is handed to `_resolve_backend` as a lazy,
+    memoized callable — a forced override returns before the auto arm ever
+    consults it, so `EASYSPEAK_KEY_BACKEND` works on a wedged or entirely
+    absent bus, the very environment the escape hatch exists for.
     """
     if _gate.backend is not None:
         return _gate.backend
-    state = _mutter_state()
+    state = None
+
+    def from_bus():
+        nonlocal state
+        if state is None:
+            state = _mutter_state()
+        return state
+
     return _resolve_backend(
-        owned=lambda: state == "owned",
-        probe_error=lambda: state == "error",
+        owned=lambda: from_bus() == "owned",
+        probe_error=lambda: from_bus() == "error",
         cache=_gate,
     )
 
