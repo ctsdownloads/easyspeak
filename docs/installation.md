@@ -74,23 +74,52 @@ default `python3` (3.14) works out of the box.
 
 ### 1. System packages
 
-```bash
-sudo dnf install \
-  pipewire-utils \
-  wireplumber \
-  at-spi2-core \
-  python3-gobject \
-  qutebrowser \
-  glib2 \
-  ffmpeg-free \
-  pulseaudio-utils \
-  sound-theme-freedesktop \
-  wl-clipboard \
-  ydotool \
-  portaudio-devel \
-  python3-devel \
-  gcc
-```
+=== "Fedora / RHEL"
+
+    ```bash
+    sudo dnf install \
+      pipewire-utils \
+      wireplumber \
+      at-spi2-core \
+      python3-gobject \
+      qutebrowser \
+      glib2 \
+      ffmpeg-free \
+      pulseaudio-utils \
+      sound-theme-freedesktop \
+      wl-clipboard \
+      ydotool \
+      portaudio-devel \
+      python3-devel \
+      gcc
+    ```
+
+=== "Debian / Ubuntu"
+
+    ```bash
+    sudo apt install \
+      pipewire-bin \
+      wireplumber \
+      at-spi2-core \
+      gir1.2-atspi-2.0 \
+      python3-gi \
+      python3-gi-cairo \
+      qutebrowser \
+      libglib2.0-bin \
+      ffmpeg \
+      pulseaudio-utils \
+      sound-theme-freedesktop \
+      wl-clipboard \
+      ydotool \
+      portaudio19-dev \
+      python3-dev \
+      gcc
+    ```
+
+The two lists install the same things under each distro's names: `gir1.2-atspi-2.0`
+is the AT-SPI typelib the dictation helper imports, `libglib2.0-bin` provides
+`gdbus` (the focused-window lookup), and the `portaudio`/`python3` dev packages
+exist so `pyaudio` can build from source when no wheel matches your Python.
 
 `wl-clipboard` is what dictation uses to place text. It types by putting the
 text on the clipboard and sending a paste keystroke, because accessibility-level
@@ -124,6 +153,26 @@ element-level ad blocker. EasySpeak configures the browser to use it when it is
 present and falls back to host blocking when it is not, so this is worth having:
 ad overlays are numbered like any other element, so they take link hints away
 from the page underneath.
+
+### Mouse grid off GNOME (optional)
+
+On GNOME the grid rides the bundled Shell extension. Elsewhere (KDE Plasma,
+COSMIC, other Wayland compositors) the grid's ydotool backend needs the
+layer-shell stack — on Fedora and Ubuntu 26.04 it is packaged:
+
+```bash
+sudo dnf install libgtk4-layer-shell0 gir1.2-gtk4layershell-1.0
+sudo apt install libgtk4-layer-shell0 gir1.2-gtk4layershell-1.0
+```
+
+Pop!_OS 24.04's repositories do not carry those packages; there, build
+[gtk4-layer-shell](https://github.com/wmww/gtk4-layer-shell) from source and
+point `EASYSPEAK_GRID_TYPELIB` at the build tree's `src` directory (the grid
+resolves the library by soname from it automatically). Whatever the desktop,
+the ydotool side of the grid needs the same `/dev/uinput` access as dictation
+— see [Troubleshooting](troubleshooting.md#key-injection-backend). Without the
+stack nothing else breaks: saying "grid" gets a polite refusal. What works
+where is [Compatibility](compatibility.md)'s grid note.
 
 ### 2. Piper TTS
 
