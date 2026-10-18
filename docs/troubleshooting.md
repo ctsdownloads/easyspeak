@@ -77,6 +77,12 @@ needs — so grant it to the account that should be able to click. A daemon
 changes only bite a daemon (re)started after them — the same restart the grid's
 fail-closed probe needs before it reports the injector unusable.
 
+One more restart trap: distro units often ship `Restart=always`, so a killed
+daemon is back within a second — an injection fired in that window can report
+success and still land late. And after a crash loop systemd throttles starts
+("Start request repeated too quickly"), so the first restart after fixing
+permissions can itself fail; give it a few seconds and start again.
+
 `ydotool` ships in two command dialects, and the backend reads which one is
 installed from the client itself:
 

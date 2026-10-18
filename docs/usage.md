@@ -137,7 +137,10 @@ keystroke — every toolkit implements paste, whereas accessibility-level
 insertion is widely stubbed out. `EASYSPEAK_PASTE_KEYS` overrides the chord, e.g.
 `shift+insert`; by default it is Ctrl+V, or Ctrl+Shift+V when a terminal has
 focus. It accepts `ctrl`, `shift`, `alt`, `super`, `insert` and `v` joined with
-`+`.
+`+`. The terminal detection asks the focused window's class from the bundled
+GNOME extension, so on other desktops (KDE, COSMIC, …) the default is always
+Ctrl+V — terminals there ignore that chord; set `EASYSPEAK_PASTE_KEYS` when
+dictating into one.
 
 `EASYSPEAK_ATSPI_PYTHON` is normally left alone. The AT-SPI helper needs
 PyGObject and the AT-SPI typelib, which the application's own virtual environment

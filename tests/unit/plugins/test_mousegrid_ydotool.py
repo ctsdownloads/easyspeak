@@ -503,6 +503,47 @@ class TestDialect:
         monkeypatch.setattr(core_ydotool, "_spawn", boom)
         assert g._probe_dialect() == g.YDTOOL_DIALECT_LEGACY
 
+    def test_a_daemon_down_answer_logs_why_legacy_was_assumed(
+        self, monkeypatch, caplog
+    ):
+        """On 1.0.x `mousemove --help` goes through the daemon connection, so a
+        down ydotoold answers with a connect error instead of the usage line —
+        the fail-safe legacy default still applies, but the log now says why,
+        so the later "no legacy combo name" refusal is not misread as a
+        grammar limit (measured live on the kubuntu bed, 2026-10-18)."""
+        import logging
+
+        monkeypatch.setattr(
+            core_ydotool,
+            "_spawn",
+            lambda cmd, timeout: Mock(
+                returncode=2,
+                stdout="",
+                stderr=(
+                    "failed to connect socket `/run/user/1000/.ydotool_socket': "
+                    "Connection refused\nPlease check if ydotoold is running."
+                ),
+            ),
+        )
+        with caplog.at_level(logging.INFO, logger="easyspeak.core.ydotool"):
+            assert g._probe_dialect() == g.YDTOOL_DIALECT_LEGACY
+        assert "daemon is likely down" in caplog.text
+
+    def test_a_quiet_non_modern_answer_stays_silent(self, monkeypatch, caplog):
+        """A 0.1.8 help (no daemon complaint) must not borrow the daemon-down
+        explanation — the two look identical to the flag check and only the
+        stderr tells them apart."""
+        import logging
+
+        monkeypatch.setattr(
+            core_ydotool,
+            "_spawn",
+            lambda cmd, timeout: Mock(returncode=1, stdout=LEGACY_MOVE_HELP, stderr=""),
+        )
+        with caplog.at_level(logging.INFO, logger="easyspeak.core.ydotool"):
+            assert g._probe_dialect() == g.YDTOOL_DIALECT_LEGACY
+        assert "daemon is likely down" not in caplog.text
+
     def test_a_missing_binary_keeps_the_legacy_dialect(self, monkeypatch):
         monkeypatch.setattr(
             core_ydotool, "_spawn", Mock(side_effect=FileNotFoundError("ydotool"))

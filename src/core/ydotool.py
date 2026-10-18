@@ -100,8 +100,24 @@ def _probe_dialect():
     except (OSError, subprocess.TimeoutExpired) as exc:
         logger.info("ydotool: `ydotool mousemove --help` did not answer: %s", exc)
         return YDTOOL_DIALECT_LEGACY
-    if YDTOOL_ABSOLUTE_FLAG in result.stdout + result.stderr:
+    answer = result.stdout + result.stderr
+    if YDTOOL_ABSOLUTE_FLAG in answer:
         return YDTOOL_DIALECT_MODERN
+    if "ydotoold" in answer or "failed to connect" in answer:
+        # The client answered, but without the modern usage line and while
+        # complaining about the daemon. On 1.0.x `mousemove --help` goes
+        # through the daemon connection, so a down ydotoold produces exactly
+        # this answer (measured live: "failed to connect socket ...
+        # Please check if ydotoold is running."). The fail-safe legacy
+        # default below still applies — this line only keeps the log honest
+        # about WHY, so the later "no legacy combo name" refusal on a 1.0.x
+        # system is not misread as a grammar limit.
+        logger.info(
+            "ydotool: `mousemove --help` answered without '%s' and mentions "
+            "ydotoold — on 1.0.x the daemon is likely down; assuming the "
+            "legacy dialect",
+            YDTOOL_ABSOLUTE_FLAG,
+        )
     return YDTOOL_DIALECT_LEGACY
 
 
@@ -499,6 +515,11 @@ KEY_PER_REPEAT_BUDGET = 0.05  # s; PROVISIONAL — Task 7 calibrates it on the V
 # brightness). "escape" is the same trap sprung the other way: it is not in
 # the client's table — the name is "esc" — and this table's first draft
 # carried the spoken form, which would have pressed `e`.
+# Ground truth for every name here: libevdevplus's Table_ModifierKeys and
+# Table_FunctionKeys (Resource.cpp — the library 0.1.8 links). KeyStroke2Code
+# uppercases the token before lookup and FALLS BACK TO THE FIRST CHARACTER
+# for unknown names, so a guessed name like "volumeup" would silently press
+# "v" instead of failing; codes absent from those tables stay out loudly.
 KEY_LEGACY_NAMES = {
     28: "enter",  # mediakeys.KEYS; client: ENTER
     15: "tab",  # mediakeys.KEYS; client: TAB
