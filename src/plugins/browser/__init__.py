@@ -990,7 +990,12 @@ def handle_browser_command(cmd_lower, core):
     request = mediakeys.parse_key_request(cmd_lower.split(), BARE_KEYS)
     if request is not None:
         if not mediakeys.press_key(*request):
-            core.speak(_("Keystrokes need GNOME."))
+            core.speak(
+                _(
+                    "Keystrokes need a working injection backend — see the "
+                    "troubleshooting guide."
+                )
+            )
         return True
 
     # --- Bookmarks ---

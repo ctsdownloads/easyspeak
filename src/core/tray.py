@@ -30,6 +30,11 @@ import tempfile
 import time
 from pathlib import Path
 
+# The session facts live in the layer-neutral core.session; re-exported here so
+# plugin imports (`from easyspeak.core.tray import on_gnome`) and the tests that
+# patch `core.tray.on_gnome` keep their seam.
+from easyspeak.core.session import GDBUS_TIMEOUT, on_gnome
+
 from .about import (
     APPLICATION_ICON,
     APPLICATION_NAME,
@@ -73,15 +78,7 @@ SLEEP_POLL_INTERVAL = 0.2
 # if GNOME Shell or the extension reloads (which leaves it hidden by default).
 MUTED_REPUSH_INTERVAL = 5.0
 
-# Cap the gdbus call so a wedged session bus can't hang the audio loop.
-GDBUS_TIMEOUT = 5.0
-
 HELPER_STARTUP_GRACE = 1.5
-
-
-def on_gnome():
-    """Return whether the session is GNOME, where the Shell extension is the tray."""
-    return "GNOME" in os.environ.get("XDG_CURRENT_DESKTOP", "").split(":")
 
 
 def notify(summary, body):

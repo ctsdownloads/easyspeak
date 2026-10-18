@@ -50,10 +50,12 @@ overrides:
     - libportaudio2          # pyaudio runtime — microphone capture (core)
     - python3                # runs the AT-SPI dictation helper
     - python3-gi             # PyGObject for the helper + About dialog
+    - python3-gi-cairo       # the grid overlay's click-through needs cairo.Region
     - gir1.2-glib-2.0        # core GLib/Gio/DBus typelibs (Atspi typelib needs DBus-1.0)
     - gir1.2-atspi-2.0       # Atspi typelib for dictation
     - adwaita-icon-theme     # provides the launcher icon
     - wl-clipboard           # dictation places text by pasting
+    - ydotool                # key injection off GNOME (paste, media keys, browser keys)
     recommends:
     - easyspeak-lang-en      # default language data; repo installs pull it automatically
     - qutebrowser            # browser plugin
@@ -74,10 +76,12 @@ overrides:
     - portaudio
     - python3
     - python3-gobject
+    - python3-gobject-cairo  # the grid overlay's click-through needs cairo.Region
     - gobject-introspection  # DBus-1.0 typelib that the Atspi typelib depends on
     - at-spi2-core
     - adwaita-icon-theme
     - wl-clipboard           # dictation places text by pasting
+    - ydotool                # key injection off GNOME (paste, media keys, browser keys)
     recommends:
     - easyspeak-lang-en
     - qutebrowser

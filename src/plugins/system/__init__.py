@@ -1,5 +1,7 @@
 """System Plugin - Volume, brightness, do not disturb."""
 
+import os
+
 from easyspeak.core.i18n import translator
 from easyspeak.core.vocabulary import Vocabulary
 
@@ -47,14 +49,34 @@ def setup(c):
     core = c
 
 
+# Desktops whose compositors/sessions handle XF86Audio* globally (GNOME via
+# gnome-settings-daemon, KDE Plasma, COSMIC): there an injected media key
+# changes the volume and renders the native OSD, so injection is the replay.
+# Anywhere else (sway, Hyprland, wlroots-anything) the compositor only
+# delivers the key to whatever binding exists — with none configured the
+# event is dropped and nothing tells you, which used to be impossible
+# (off-GNOME the fallback always ran). So the fallback IS the replay there.
+MEDIA_KEY_DESKTOPS = ("gnome", "kde", "cosmic")
+
+
+def _desktop_binds_media_keys():
+    desktop = os.environ.get("XDG_CURRENT_DESKTOP", "").lower()
+    return any(name in desktop for name in MEDIA_KEY_DESKTOPS)
+
+
 def _media_key(core, keycode, fallback):
     """Replay a multimedia key for the desktop's native OSD (and chime for volume).
 
-    Falls back to the given command if key injection is unavailable (e.g. a non-GNOME
-    session); the setting still changes, just without the feedback.
+    On a desktop that binds media keys globally, inject the key — the native
+    OSD is the whole point — and fall back to the given command when the key
+    cannot be replayed (no injection backend, or a 0.1.x ydotool that cannot
+    spell a media key). Elsewhere the fallback IS the replay: injecting would
+    hand the key to a compositor that may drop it silently, and a successful
+    injection the user cannot hear or see is worse than the direct command.
     """
-    if not core.tap_key(keycode):
-        core.host_run(fallback)
+    if _desktop_binds_media_keys() and core.tap_key(keycode):
+        return
+    core.host_run(fallback)
 
 
 def volume_up(core):

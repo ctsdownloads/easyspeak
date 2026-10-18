@@ -43,8 +43,9 @@ MEDIA_KEYS = [
 
 
 @pytest.mark.parametrize(["func", "expected_keycode", "fallback"], MEDIA_KEYS)
-def test_replays_media_key(func, expected_keycode, fallback, mock_core):
+def test_replays_media_key(func, expected_keycode, fallback, mock_core, monkeypatch):
     """Volume and brightness controls replay the real key for GNOME's native feedback."""
+    monkeypatch.setenv("XDG_CURRENT_DESKTOP", "GNOME")
     mock_core.tap_key.return_value = True
 
     func(mock_core)
@@ -53,13 +54,38 @@ def test_replays_media_key(func, expected_keycode, fallback, mock_core):
 
 
 @pytest.mark.parametrize(["func", "expected_keycode", "fallback"], MEDIA_KEYS)
-def test_no_fallback_when_key_injected(func, expected_keycode, fallback, mock_core):
-    """When the key injection succeeds, no fallback command is issued."""
+def test_no_fallback_when_key_injected(
+    func, expected_keycode, fallback, mock_core, monkeypatch
+):
+    """On a media-key desktop, a successful injection issues no fallback."""
+    monkeypatch.setenv("XDG_CURRENT_DESKTOP", "GNOME")
     mock_core.tap_key.return_value = True
 
     func(mock_core)
 
     assert not mock_core.host_run.called
+
+
+@pytest.mark.parametrize("desktop", [None, "sway", "Hyprland", "wlroots"])
+@pytest.mark.parametrize(["func", "expected_keycode", "fallback"], MEDIA_KEYS)
+def test_fallback_is_the_replay_without_global_media_keys(
+    func, expected_keycode, fallback, mock_core, monkeypatch, desktop
+):
+    """On a desktop without global XF86Audio handling, the fallback IS the
+    replay — injecting there hands the key to a compositor that may drop it
+    silently (sway/Hyprland with no binding: no volume change, no OSD, no
+    speech). The absence of a KDE env here is the point: the family check is
+    substring-based on the XDG token, so the real desktops stay on the
+    injection arm (test_no_fallback_when_key_injected pins that side)."""
+    if desktop is None:
+        monkeypatch.delenv("XDG_CURRENT_DESKTOP", raising=False)
+    else:
+        monkeypatch.setenv("XDG_CURRENT_DESKTOP", desktop)
+    mock_core.tap_key.return_value = True  # even a working injection is not enough
+
+    func(mock_core)
+
+    assert mock_core.host_run.call_args.args[0] == fallback
 
 
 @pytest.mark.parametrize(["func", "expected_keycode", "fallback"], MEDIA_KEYS)

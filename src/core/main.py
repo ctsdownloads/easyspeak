@@ -188,18 +188,21 @@ class EasySpeak:
         self.speech.speak(text)
 
     def tap_key(self, keycode):
-        """Replay a multimedia key so the desktop renders its native feedback.
+        """Replay one key.
 
-        Returns True if the key was injected, False if unavailable (e.g. a non-GNOME
-        session) so the caller can fall back to a silent change. jeepney is imported
-        lazily so the dependency isn't needed to load.
+        False if no injection backend answered, or the installed ydotool client
+        cannot spell the key (0.1.x media keys — see core.mediakeys.tap_key);
+        the caller's own fallback runs either way (see core.mediakeys).
         """
         try:
             from . import mediakeys
 
             mediakeys.tap_key(keycode)
             return True
-        except Exception:
+        except Exception as exc:
+            logger.warning(
+                "media-key injection failed; using the direct fallback: %s", exc
+            )
             return False
 
     def deactivate(self):

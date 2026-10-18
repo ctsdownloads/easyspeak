@@ -96,7 +96,7 @@ class.
 ## Routing order
 
 A command is offered to the plugins in order of their `PRIORITY` (default 50,
-lower first, equal ones by name). The grid and head-tracking modes declare `0`
+lower first, equal ones by name). The head-tracking and grid modes declare `0`
 and `1`, so their words reach them before a look-alike elsewhere, and the base
 plugin declares `100` to act as the catch-all for help and exit. Files and
 directories whose names start with `_` are skipped.

@@ -21,7 +21,11 @@ def ctx():
 
 
 @given("a fresh EasySpeak with the system plugin")
-def fresh_easyspeak(ctx):
+def fresh_easyspeak(ctx, monkeypatch):
+    # These scenarios exercise the injection journey (native media-key
+    # replay), which the fallback gate serves only on media-key desktops —
+    # the fallback arm's matrix lives in tests/unit/plugins/test_system.py.
+    monkeypatch.setenv("XDG_CURRENT_DESKTOP", "GNOME")
     easy = EasySpeak()
     easy.tap_key = Mock(return_value=True)
     easy.host_run = Mock(return_value=Mock(returncode=0))

@@ -22,7 +22,7 @@ Linux desktop voice control is a gap. Talon exists but has a steep learning curv
 EasySpeak is **free and open source** (GPL-3.0), **fully local** (no cloud, no accounts), **Wayland-native**, **simple** ("Hey Jarvis, open downloads"), and **extensible** (drop a Python file in `plugins/`). Built for people with RSI, accessibility needs, hands-busy workflows, or anyone who wants to talk to their computer.
 
 - Wake word activation ("Hey Jarvis")
-- Mouse grid and experimental head tracking
+- Mouse grid (Shell extension on GNOME 47+, or the layer-shell + ydotool backend elsewhere (when that stack is installed)) and experimental head tracking
 - Browser control, dictation, app launcher, media and system controls
 - pyopen-wakeword + Parakeet (or Whisper) + Piper, all on-device
 
@@ -40,7 +40,8 @@ Requirements: Linux on Wayland with GNOME Shell 47+ or KDE Plasma 6 ([what works
 # 1. System packages (Fedora; see the docs for the full list)
 sudo dnf install python3 python3-devel gcc portaudio-devel \
   pipewire-utils wireplumber at-spi2-core python3-gobject qutebrowser \
-  glib2 ffmpeg-free pulseaudio-utils sound-theme-freedesktop
+  glib2 ffmpeg-free pulseaudio-utils sound-theme-freedesktop \
+  wl-clipboard ydotool
 
 # 2. Get EasySpeak and run it (uv manages the virtualenv for you)
 git clone https://github.com/ctsdownloads/easyspeak.git ~/easyspeak

@@ -30,7 +30,7 @@ who wants to talk to their computer.
 Current and in active development:
 
 - **Wake word activation** — Hands-free with "Hey Jarvis"
-- **Mouse grid** — Navigate anywhere on screen with voice ("grid", "3 7 5", "click")
+- **Mouse grid** — Navigate anywhere on screen with voice ("grid", "3 7 5", "click") — Shell extension on GNOME 47+, or the layer-shell + ydotool backend elsewhere (when that stack is installed)
 - **Head tracking** — Control cursor with head movement (experimental)
 - **Browser control** — Qutebrowser integration with link hints, tabs, scrolling
 - **Dictation** — Voice-to-text in any text field with punctuation commands

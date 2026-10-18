@@ -52,6 +52,11 @@ Chain numbers to go faster: **"3 6 3"** zooms three times at once.
 | again | Reopen at last spot |
 | close | Hide grid |
 
+On a compositor where EasySpeak's Shell extension cannot run (COSMIC, wlroots,
+KDE), the same mousegrid plugin serves the grid through its ydotool backend
+instead. It understands the navigation, click and close verbs above; `nudge`,
+`scroll` and `mark`/`drag` are not available there yet.
+
 ## Head tracking (experimental)
 
 Requires a webcam and additional dependencies — see [Installation](installation.md#head-tracking-optional).
@@ -132,9 +137,9 @@ Keystrokes need `press` in front here, apart from `enter`: `down`, `up`, `tab` a
 
 ## Dictation
 
-Dictation places text by pasting it, which needs `wl-clipboard` installed and a
-text field focused. In the browser, use `numbers` and pick the hint on the field
-first.
+Dictation places text by pasting it, which needs `wl-clipboard` installed. Off
+GNOME, a missed focus probe no longer blocks the paste. In the browser, use
+`numbers` and pick the hint on the field first.
 
 The words below are the English ones. When you dictate in another language
 (`EASYSPEAK_LANGUAGE`), the control words are that language's: "Diktat" to
@@ -241,8 +246,14 @@ Folders open in whatever file manager your desktop is configured for (via
 | brightness up/down | Adjust brightness |
 | do not disturb on/off | Toggle notifications |
 
-Volume changes are silent — GNOME's own on-screen display and chime acknowledge
-them.
+The desktop's own on-screen display and chime acknowledge the volume steps —
+the command replays a media key, which GNOME renders through Mutter and
+desktops that bind media keys globally (KDE Plasma, COSMIC) receive as an
+ordinary key press when their ydotool client is a 1.0.x one; on a 0.1.x client
+(e.g. Pop!_OS 24.04's) the media key cannot be spelled, and compositors that
+bind no media keys at all (sway, Hyprland) never replay one, so the level
+changes directly through the fallback, without the display or chime.
+"very loud" and "very silent" set the level directly and stay silent.
 
 ## Speakers playing audio
 

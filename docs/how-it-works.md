@@ -4,9 +4,13 @@
 - **Speech-to-text** — NVIDIA's Parakeet model transcribes commands locally,
   through onnx-asr; faster-whisper stands in for languages it lacks
 - **Text-to-speech** — Piper provides voice feedback
-- **Mouse control** — GNOME Shell extension with Clutter virtual input
+- **Mouse control** — a GNOME Shell extension with Clutter virtual input on
+  GNOME 47+, or a layer-shell overlay with kernel-level injection (the
+  mousegrid plugin's ydotool backend) on the compositors where no GNOME Shell
+  can run
 - **Browser scroll** — JavaScript injection via qutebrowser IPC
-- **Dictation** — clipboard and a synthetic paste keystroke, with AT-SPI used to
+- **Dictation** — clipboard and a synthetic paste keystroke via the platform's
+  injection backend (Mutter RemoteDesktop or ydotool), with AT-SPI used to
   check something is focused (and as a fallback where no clipboard tool exists)
 
 All processing happens locally. No data leaves your machine.
@@ -26,10 +30,12 @@ easyspeak/
 │   │   ├── i18n.py            # Spoken-reply translations (gettext .po)
 │   │   ├── log.py             # Logging setup
 │   │   ├── main.py            # EasySpeak class + main loop
-│   │   ├── mediakeys.py       # Replays multimedia keys via Mutter
+│   │   ├── mediakeys.py       # Key injection: Mutter RemoteDesktop or ydotool/uinput
+│   │   ├── session.py         # Session kind + bus-wait budget shared by core modules
 │   │   ├── speech.py          # Persistent piper -> player pipeline
 │   │   ├── statusnotifier.py  # Tray icon outside GNOME (StatusNotifierItem)
-│   │   └── tray.py            # Panel indicator + asleep lifecycle
+│   │   ├── tray.py            # Panel indicator + asleep lifecycle
+│   │   └── ydotool.py         # ydotool client seam: dialects, sockets, bounded runs
 │   ├── data/                  # Bundled data files (easyspeak.data), shipped as package data
 │   │   ├── __init__.py        # Marks the folder as package data
 │   │   ├── easyspeak.desktop  # Desktop entry
@@ -54,7 +60,7 @@ easyspeak/
 │       ├── files/             # Folder navigation
 │       ├── headtrack/         # Head tracking (experimental)
 │       ├── media/             # Playback controls
-│       ├── mousegrid/         # Grid overlay mouse control
+│       ├── mousegrid/         # Grid overlay mouse control (GNOME extension + ydotool backends)
 │       ├── sleep/             # Voice deactivate
 │       └── system/            # Volume, brightness, DND
 ├── tests/

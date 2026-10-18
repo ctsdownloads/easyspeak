@@ -26,6 +26,143 @@ rm -rf ~/.local/share/gnome-shell/extensions/gnome@easyspeak.dev
 
 …or click the trash icon next to *EasySpeak* in the Extensions app.
 
+## Mouse grid: the grid never appears on a non-GNOME desktop
+
+The grid needs either the Shell extension (GNOME 47+) or the mousegrid
+plugin's ydotool backend, which needs `ydotool` installed (its own tool list must offer
+`mousemove`, `click` and `type`), a compositor with layer-shell support (COSMIC,
+wlroots, KDE) and an interpreter with PyGObject, the cairo bindings
+(`python3-gi-cairo` — the click-through input region is built from a
+`cairo.Region`) and the gtk4-layer-shell typelib. `ydotool` also needs write
+access to `/dev/uinput`.
+
+On COSMIC specifically, the compositor must be one that exposes
+`zwlr_layer_shell_v1` to ordinary clients: cosmic-comp builds from before the
+2025-10-30 security rework gated layer-shell to a privileged client class and
+the grid's gate fails closed there, while Pop!_OS's current repos (cosmic-comp
+`0.1~1791491785` and later) admit any non-sandboxed client — measured on a
+Pop!_OS 24.04 VM where `apt install cosmic-comp` moved the session from
+refusing the probe to drawing the grid live.
+
+On Debian/Ubuntu the runtime pieces are:
+
+```bash
+sudo apt install ydotool libgtk4-layer-shell0 gir1.2-gtk4layershell-1.0 python3-gi python3-gi-cairo python3-cairo
+```
+
+`libgtk4-layer-shell0` with `gir1.2-gtk4layershell-1.0` is the library and its
+typelib (they first appear in 25.10 and 26.04; 24.04 has neither). Where the
+distro packages them, that is all the overlay needs: the helper resolves the
+library **by its soname** (`libgtk4-layer-shell.so.0`), so the `-dev` package
+and its unversioned `.so` symlink are not needed and `EASYSPEAK_GRID_TYPELIB` is
+unnecessary. Where no package exists, build gtk4-layer-shell and point
+`EASYSPEAK_GRID_TYPELIB` at the build tree's `src` directory: EasySpeak
+prepends it to `GI_TYPELIB_PATH` and `LD_LIBRARY_PATH` in the helper's
+environment, and probes interpreter candidates with those same paths, so both
+the check that enables the grid and the grid itself find the build tree.
+
+Granting `/dev/uinput` access is a deployment step, not a session tweak: a
+`setfacl` grant does not survive a reboot, a udev rule does. Add
+
+```udev
+# /etc/udev/rules.d/60-uinput.rules
+KERNEL=="uinput", MODE="0660", GROUP="input"
+```
+
+then `sudo udevadm control --reload-rules`, `sudo udevadm trigger`, add yourself
+to the group (`sudo usermod -aG input $USER`) and log out and back in. This is
+input-injection grade access — the same class as the `input` group hold-to-dictate
+needs — so grant it to the account that should be able to click. A daemon
+(`ydotoold`) opens `/dev/uinput` once at startup and keeps that fd: permission
+changes only bite a daemon (re)started after them — the same restart the grid's
+fail-closed probe needs before it reports the injector unusable.
+
+`ydotool` ships in two command dialects, and the backend reads which one is
+installed from the client itself:
+
+- **ydotool 0.1.8 and older** (Ubuntu 25.10): a running `ydotoold` is optional.
+  With no daemon the client builds a uinput device per invocation and says so
+  ("ydotoold backend unavailable (may have latency+delay issues)") — the
+  latency caveat its own notice names, which the plugin's log calls the
+  per-invocation mode.
+- **ydotool 1.0.x** (Ubuntu 26.04): the per-invocation fallback is gone. With no
+  daemon the client exits 2 ("failed to connect socket") and emits nothing, so a
+  running `ydotoold` is required and the backend's capability probe fails closed
+  without one — the log says why, and `mousegrid` keeps the words rather than
+  promising a grid that cannot click.
+
+Not every distro ships a `ydotoold` binary with the client (Ubuntu 24.04 and
+25.10's `ydotool` package is CLI-only and the daemon is a separate `ydotoold`
+package; 26.04 ships the daemon in the same package). If your distro has the
+daemon but no user unit,
+`systemctl --user enable --now ydotoold` answering "Unit ydotoold.service not
+found" means installing this as `~/.config/systemd/user/ydotoold.service`:
+
+```ini
+[Unit]
+Description=ydotoold - persistent uinput device for ydotool
+
+[Service]
+ExecStart=/usr/bin/ydotoold --socket-path=/tmp/.ydotool_socket --socket-perm=0600
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+```
+
+Then `systemctl --user daemon-reload` once, and `systemctl --user enable --now
+ydotoold`. The socket path and its 0600 mode are what 0.1.8's client hardcodes,
+which is also why the daemon has to run as your user rather than as root: a root
+daemon's socket is unreachable by your client. On 1.0.x the client defaults to
+`$XDG_RUNTIME_DIR/.ydotool_socket` and honours `YDOTOOL_SOCKET`; the backend
+probes that path, the login session's own `/run/user/<uid>/` path and 0.1.8's
+`/tmp/.ydotool_socket`, so a daemon on either default is found.
+
+If `ydotool` or the layer-shell stack is missing, or (on ydotool 1.0.x) no
+daemon answers, the daemon logs `grid backend inert` at startup with the reason,
+says nothing out loud, and `mousegrid` keeps the words. On 0.1.8 a missing
+`ydotoold` alone does not: the log names the per-invocation mode and the grid
+still answers.
+
+## Mouse grid: clicks land in the wrong place
+
+Injected motion passes through the desktop's pointer-acceleration curve, so a
+click lands where the grid says only when that curve is flat. With the default
+profile (adaptive), the cursor travels roughly twice the aimed distance —
+measured on Pop!_OS 24.04's COSMIC for both ydotool dialects, with and without
+`ydotoold`, at the output's default scale, and confirmed on KDE Plasma 6
+(KWin), where adaptive scales a grid click exactly 2x. Set the pointer acceleration
+profile to **Flat** in your desktop's settings and the clicks land inside the
+aimed cell. Switching the profile does not always apply on current cosmic-comp
+builds ([pop-os/cosmic-comp#2289](https://github.com/pop-os/cosmic-comp/issues/2289),
+[#2738](https://github.com/pop-os/cosmic-comp/issues/2738)); re-check after a
+session restart.
+
+From the CLI — headless machines, or any setup where the settings GUI is out
+of reach — write the profile cosmic-comp actually reads, then restart the
+session:
+
+```text
+~/.config/cosmic/com.system76.CosmicComp/v1/input_default
+(
+    state: Enabled,
+    acceleration: Some((profile: Some(Flat), speed: 0.0)),
+)
+```
+
+On KDE Plasma 6 the same fix lives in System Settings → Mouse & Touchpad →
+Mouse, and it is per device: open the **Device** dropdown, pick
+`ydotoold virtual device`, then set the acceleration profile to **Flat**.
+There is no working command-line equivalent on Plasma — profile entries
+written to `kcminputrc` with `kwriteconfig6` are ignored by KWin.
+
+Two traps, both verified on Pop!_OS 24.04: the struct field is `acceleration` —
+naming it after the type (`AccelConfig: (…)`) parses without error and silently
+applies nothing, because unknown fields are dropped, not rejected; and even a
+correct file only takes effect after a session restart. Cosmic config values
+that are options are written as explicit `Some(...)`, matching the other files
+in that directory.
+
 ## Dictation not working
 
 EasySpeak enables the GNOME accessibility bridge on first run; log out and back
@@ -57,6 +194,56 @@ wl-clipboard is not installed, so dictation is falling back to AT-SPI, ...
 
 If you hear **"No text field focused"**, click into a text field first, or use
 the browser's `numbers` command and pick the hint on the field you want.
+
+If you hear **"I can't type on this desktop yet. The text is on the clipboard,
+paste it with Control V."**, the paste keystroke couldn't be injected — see the
+next section.
+
+## Key injection backend
+
+Every injected keystroke — dictation's paste, the browser's "press enter", the
+media keys — goes through one backend, chosen at the first injection and sticky
+for the rest of the process: Mutter RemoteDesktop where the session is GNOME
+and Mutter owns its RemoteDesktop name — or where the ownership probe itself
+fails — the ydotool/uinput stack (the same one the mouse grid uses) everywhere
+else. `EASYSPEAK_KEY_BACKEND` forces the choice: `remote-desktop`, `uinput`,
+or `auto` (the default, which probes as above; an unknown value warns and
+falls back to it). The choice is read once, so a change takes effect when the
+EasySpeak daemon restarts, not mid-session.
+
+Dictation and the browser speak a refusal when their keystrokes can't be
+injected, and the log names the remedy:
+
+- **`ydotool` missing** — the prebuilt packages ship it as a dependency; on a
+  source install, install it yourself (`sudo dnf install ydotool`).
+- **No write access to `/dev/uinput`** — a udev rule or membership in the
+  `input` group, exactly the grant [the mouse grid's ydotool backend](#mouse-grid-the-grid-never-appears-on-a-non-gnome-desktop)
+  needs. Permission changes reach only processes started after them, and the
+  backend is picked at the first injection, so log out and back in first.
+- **No running `ydotoold` on ydotool 1.0.x** — the daemon the grid needs; the
+  grid section above has the package names and the user-unit recipe.
+- **A 0.1.x ydotool client and the media keys** — those clients (e.g.
+  Pop!_OS 24.04's `0.1.8-3build1`) take key NAMES, and their table cannot
+  spell a media key, so the volume/brightness replay is refused loudly and the
+  setting still changes through its direct fallback — without the desktop's
+  own on-screen display. Only a 1.0.x client (raw keycodes) renders it.
+- **A compositor without global media-key handling** — sway, Hyprland and
+  other bare compositors deliver media keys to whatever binding exists, and
+  with none configured an injected key vanishes silently. EasySpeak replays
+  volume through the direct command there (WirePlumber's `wpctl`), so the
+  level always changes; only the on-screen display is absent.
+
+If the backend resolved wrong for the session at hand — say the daemon started
+under one desktop and now runs under GNOME — restart the daemon to let the
+gate probe again; set `EASYSPEAK_KEY_BACKEND=remote-desktop` first to pin a
+GNOME session to its native backend, then restart.
+
+One ownership caveat cuts the other way: an owned RemoteDesktop name is
+treated as proof of a GNOME session, and anything that puts a second mutter
+on the session bus — `gnome-shell --nested` run from a KDE or COSMIC session,
+for instance — wins that probe. In that setup injections go to the nested
+shell, not the desktop you are focused on; `EASYSPEAK_KEY_BACKEND=uinput`
+pins the host desktop back.
 
 ## Browser plugin: link numbers don't work
 

@@ -134,6 +134,7 @@ plugins.md046.enabled = false  # code-block-style
 [tool.pytest.ini_options]
 addopts = "--ignore=tests/acceptance --ignore=tests/integration"
 
+[tool.ruff]
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [

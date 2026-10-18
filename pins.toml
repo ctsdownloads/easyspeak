@@ -13,7 +13,7 @@ bundle = "3.14"
 
 [toolchain]
 ubuntu_image = "ubuntu:24.04"
-nfpm = "2.47.0"
+nfpm = "2.48.0"
 
 # Speech models, one table group per language pack (easyspeak-lang-<code>).
 # `version` is the pack's own version, independent of the application's release

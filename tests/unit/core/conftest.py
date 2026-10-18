@@ -18,6 +18,7 @@ sys.modules["faster_whisper.tokenizer"] = MagicMock(
 
 from easyspeak.core import main as main_module  # noqa: E402
 from easyspeak.core import tray as tray_module  # noqa: E402
+from easyspeak.core import ydotool as ydotool_module  # noqa: E402
 
 # Kept before the stub below replaces it, so the tests that exercise calibration
 # itself can put the real method back.
@@ -62,6 +63,20 @@ def _gnome_session(monkeypatch):
     startup. Tests about other desktops set `XDG_CURRENT_DESKTOP` themselves.
     """
     monkeypatch.setenv("XDG_CURRENT_DESKTOP", "GNOME")
+
+
+@pytest.fixture(autouse=True)
+def _fresh_ydotool_state(monkeypatch):
+    """The ydotool seam caches its dialect decision and socket state at module
+    level; every test starts from the import-time shape, so no core test
+    inherits another's dialect decision or socket memory — and, because this
+    suite runs on real hosts, none is seeded by a ydotoold actually answering
+    on this machine (mirrors the grid suite's _fresh_client_state).
+    """
+    monkeypatch.setattr(ydotool_module, "_dialect", None)
+    monkeypatch.setattr(ydotool_module, "_socket_last_good", None)
+    monkeypatch.setattr(ydotool_module, "_socket_last_good_env", None)
+    monkeypatch.setattr(ydotool_module, "_socket_search_failed", None)
 
 
 def create_mock_plugin(name="TestPlugin", **kwargs) -> Mock:

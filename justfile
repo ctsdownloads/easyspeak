@@ -133,7 +133,7 @@ lint-docstrings:
         exit 1
     fi
 
-# Lint Markdown structure in all tracked *.md (lenient on style; config in pyproject.toml)
+# Lint Markdown structure in all tracked *.md (lenient on style; config in pyproject.toml).
 [group('docs')]
 lint-md *args:
     git ls-files '*.md' | xargs uvx --from pymarkdownlnt pymarkdown {{ args }} scan

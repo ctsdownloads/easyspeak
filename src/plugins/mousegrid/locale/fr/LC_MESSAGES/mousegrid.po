@@ -36,10 +36,22 @@ msgstr "Grille fermée"
 msgid "Holding"
 msgstr "Je maintiens"
 
+msgid "I couldn't click."
+msgstr "Je n'ai pas pu cliquer."
+
+msgid "I couldn't move the pointer."
+msgstr "Je n'ai pas pu déplacer le pointeur."
+
+msgid "I couldn't show the grid."
+msgstr "Je n'ai pas pu afficher la grille."
+
 msgid "I couldn't show the grid. Is the EasySpeak extension enabled?"
 msgstr ""
 "Je n'ai pas pu afficher la grille. L'extension EasySpeak est-elle activée"
 " ?"
+
+msgid "I tried, but I'm not sure it worked."
+msgstr "J'ai essayé, mais je ne suis pas sûr que cela ait fonctionné."
 
 msgid "Middle clicked"
 msgstr "Clic du milieu"
@@ -50,8 +62,11 @@ msgstr "Clic droit"
 msgid "Scrolled"
 msgstr "Défilé"
 
-msgid "The mouse grid only works on GNOME so far."
-msgstr "Pour l'instant, la grille de la souris ne fonctionne que sous GNOME."
+msgid "That needs the GNOME extension."
+msgstr "Cela nécessite l'extension GNOME."
+
+msgid "The mouse grid needs either the GNOME extension or ydotool."
+msgstr "La grille de souris nécessite l'extension GNOME ou ydotool."
 
 msgid "again - reopen grid at last position"
 msgstr "again - rouvrir la grille à la dernière position"
