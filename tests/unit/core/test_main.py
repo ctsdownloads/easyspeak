@@ -1,6 +1,7 @@
 """Tests for the core main module."""
 
 import subprocess
+from itertools import chain, repeat
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, call, patch
 
@@ -1596,6 +1597,96 @@ class TestEasySpeakRun:
         mock_stream.stop_stream.assert_called_once()
         mock_stream.close.assert_called_once()
         mock_audio.terminate.assert_called_once()
+
+    @staticmethod
+    def _wake_once(mock_pyaudio, mock_wakeword_model):
+        """Open a stream that hears the wake word once, then is interrupted."""
+        mock_audio = Mock()
+        mock_stream = Mock()
+        mock_stream.read.side_effect = [b"\x00\x00" * 1280, KeyboardInterrupt()]
+        mock_audio.open.return_value = mock_stream
+        mock_pyaudio.PyAudio.return_value = mock_audio
+        mock_wakeword_model.return_value.predict.return_value = 0.8
+
+    @patch("subprocess.run")
+    @patch("time.time", return_value=100.0)
+    @patch("easyspeak.core.main.pyaudio")
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch.object(EasySpeak, "load_plugins")
+    @patch.object(EasySpeak, "wait_for_speech", return_value=b"audio")
+    @patch.object(EasySpeak, "record_until_silence", return_value=b"more")
+    @patch.object(EasySpeak, "transcribe", return_value="")
+    @patch.object(EasySpeak, "_drain_feedback")
+    @patch.object(EasySpeak, "speak")
+    @patch.object(EasySpeak, "flush_stream")
+    def test_run_unclear_speech_after_wake_is_answered_once(
+        self,
+        mock_flush_stream,
+        mock_speak,
+        mock_drain,
+        mock_transcribe,
+        mock_record,
+        mock_wait,
+        mock_load_plugins,
+        mock_whisper_model,
+        mock_wakeword_model,
+        mock_pyaudio,
+        mock_time,
+        mock_subprocess_run,
+        mock_plugin,
+    ):
+        """Speech that transcribes to nothing gets one reply, not one per round."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin]
+        self._wake_once(mock_pyaudio, mock_wakeword_model)
+
+        easy.run()
+
+        assert mock_speak.call_args_list == [
+            (("Welcome! I'm ready.",),),
+            (("Sorry, I didn't catch that.",),),
+        ]
+
+    @patch("subprocess.run")
+    @patch("time.time", return_value=100.0)
+    @patch("easyspeak.core.main.pyaudio")
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch.object(EasySpeak, "load_plugins")
+    @patch.object(EasySpeak, "wait_for_speech")
+    @patch.object(EasySpeak, "record_until_silence", return_value=b"more")
+    @patch.object(EasySpeak, "transcribe", side_effect=["", "louder"])
+    @patch.object(EasySpeak, "route_command", return_value=True)
+    @patch.object(EasySpeak, "_drain_feedback")
+    @patch.object(EasySpeak, "speak")
+    @patch.object(EasySpeak, "flush_stream")
+    def test_run_unclear_speech_can_be_repeated_without_the_wake_word(
+        self,
+        mock_flush_stream,
+        mock_speak,
+        mock_drain,
+        mock_route_command,
+        mock_transcribe,
+        mock_record,
+        mock_wait,
+        mock_load_plugins,
+        mock_whisper_model,
+        mock_wakeword_model,
+        mock_pyaudio,
+        mock_time,
+        mock_subprocess_run,
+        mock_plugin,
+    ):
+        """After the reply, the mic stays open for the user to say it again."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin]
+        self._wake_once(mock_pyaudio, mock_wakeword_model)
+        mock_wait.side_effect = chain([b"audio", b"audio"], repeat(None))
+
+        easy.run()
+
+        mock_route_command.assert_called_once_with("louder")
 
     @patch("subprocess.run")
     @patch("time.time")

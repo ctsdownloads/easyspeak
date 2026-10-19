@@ -806,7 +806,8 @@ class EasySpeak:
         command. The session ends after FOLLOWUP_IDLE_ROUNDS quiet listens in a row,
         silence or noise, when a mode was left unattended (the wake word is then asked
         for, as its notice says), or when a command asks the daemon to exit, which
-        returns True. Silence right after the wake word is answered out loud.
+        returns True. Right after the wake word, silence or speech that can't be
+        made out is answered out loud.
 
         The tray is polled before every listen, as the wake-word loop and the modes
         do, so a "go to sleep" just carried out releases the mic at once instead of
@@ -835,13 +836,18 @@ class EasySpeak:
                     heard + self.record_until_silence(), language=COMMAND_LANGUAGE
                 )
             if not cmd:
-                if awake and heard is None:
-                    self.speak(_("I didn't hear anything."))
-                    return False
+                if awake:
+                    if heard is None:
+                        self.speak(_("I didn't hear anything."))
+                        return False
+                    # Once only, so background noise can't keep it apologising.
+                    self.speak(_("Sorry, I didn't catch that."))
+                    self._drain_feedback()
+                    awake = False
+                    continue
                 quiet += 1
                 if quiet >= FOLLOWUP_IDLE_ROUNDS:
                     return False
-                awake = False
                 continue
 
             logger.info("👂 %s", cmd)
