@@ -1250,6 +1250,11 @@ recording isn't stopping when you do: silence isn't being detected, so every
 utterance runs to its time cap. Check the noise floor above — if the room is
 loud enough that speech and silence look alike, move the microphone closer or set
 <code>EASYSPEAK_SILENCE_THRESHOLD</code> by hand.</p>
+<p>EasySpeak normally filters out steady noise itself and logs <code>Listening through
+the noise filter</code> at startup. If it logs <code>Noise filter unavailable</code> or <code>Noise
+filter did not start</code> instead, install <code>pw-cli</code> (<code>pipewire-utils</code> on Fedora,
+<code>pipewire-bin</code> on Debian and Ubuntu) and restart it. See
+<a href="../usage/#configuration">Configuration</a>.</p>
 <h2 id="piper-permission-denied">Piper permission denied<a class="headerlink" href="#piper-permission-denied" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>~/.local/bin/piper/piper
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>chmod<span class="w"> </span>+x<span class="w"> </span>~/.local/bin/piper/espeak-ng
