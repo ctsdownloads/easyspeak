@@ -47,12 +47,27 @@ LEGAL = [
     ("Piper voice it_IT-paola", "© Paola Persico", "CC0-1.0"),
     ("Piper voice fr_FR-siwis", "© SIWIS, University of Edinburgh", "CC-BY-4.0"),
     ("Piper voice es_ES-davefx", "© davefx (OHF voice datasets)", "CC0-1.0"),
+    # The Kokoro reply-voice stack `easyspeak --provision-kokoro` fetches into the
+    # user's environment at their request; nothing Kokoro-related ships inside an
+    # EasySpeak package, but the credits must name the stack all the same.
+    (
+        "Kokoro TTS model",
+        "© hexgrad, ONNX conversion by the onnx-community maintainers",
+        "Apache-2.0",
+    ),
+    ("kokoro-onnx runtime", "© thewh1teagle", "MIT"),
+    ("espeakng-loader", "© thewh1teagle", "MIT"),
+    ("espeak-ng phonemizer data", "© the espeak-ng contributors", "GPL-3.0"),
+    ("phonemizer", "© Mathieu Bernard and Hadrien Titeux", "GPL-3.0-or-later"),
 ]
-# Creative Commons terms have no Gtk.License member, so they are shown as a link.
+# Terms without a Gtk.License member are shown as a link instead: the Creative
+# Commons ones, and the GPL's "or later" variants, which no member distinguishes.
 LICENSE_URLS = {
     "CC-BY-4.0": "https://creativecommons.org/licenses/by/4.0/",
     "CC-BY-SA-4.0": "https://creativecommons.org/licenses/by-sa/4.0/",
     "CC0-1.0": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "GPL-3.0": "https://www.gnu.org/licenses/gpl-3.0.html",
+    "GPL-3.0-or-later": "https://www.gnu.org/licenses/gpl-3.0.html",
 }
 
 

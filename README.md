@@ -24,7 +24,7 @@ EasySpeak is **free and open source** (GPL-3.0), **fully local** (no cloud, no a
 - Wake word activation ("Hey Jarvis")
 - Mouse grid and experimental head tracking
 - Browser control, dictation, app launcher, media and system controls
-- pyopen-wakeword + Parakeet (or Whisper) + Piper, all on-device
+- pyopen-wakeword + Parakeet (or Whisper) + Piper, plus optional Kokoro voices, all on-device
 
 ## Demo
 
@@ -48,7 +48,7 @@ cd ~/easyspeak
 uv run easyspeak
 ```
 
-You also need [Piper TTS](https://easyspeak.dev/latest/installation/#3-piper-tts) installed for voice feedback.
+You also need [Piper TTS](https://easyspeak.dev/latest/installation/#2-piper-tts) installed for voice feedback, and can provision the optional [Kokoro voices](https://easyspeak.dev/latest/installation/#kokoro-optional) on top.
 See the **[Installation guide](https://easyspeak.dev/latest/installation/)** for the venv-based path, head tracking, and full details.
 
 Prefer prebuilt packages? Grab the `easyspeak` app `.deb`/`.rpm` **plus a language
@@ -77,4 +77,5 @@ Then say "Hey Jarvis" followed by a command. Say "help" to list all commands.
 - [pyopen-wakeword](https://github.com/rhasspy/pyopen-wakeword) — Wake word detection
 - [faster-whisper](https://github.com/guillaumekln/faster-whisper) — Speech recognition
 - [Piper](https://github.com/OHF-Voice/piper1-gpl) — Text-to-speech (we use the last standalone binary from the original [rhasspy/piper](https://github.com/rhasspy/piper) repo)
+- [kokoro-onnx](https://github.com/thewh1teagle/kokoro-onnx) — Optional text-to-speech engine, speaking the [Kokoro-82M](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX) model you provision with `easyspeak --provision-kokoro`
 - [Talon](https://talonvoice.com/) — Inspiration for voice control concepts

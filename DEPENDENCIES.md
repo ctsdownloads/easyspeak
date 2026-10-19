@@ -17,8 +17,12 @@ The hand-maintained lock file for everything that is *downloaded* by the
 packaging scripts and the Nix flake rather than resolved by a package manager.
 Each language pack pins an immutable Hugging Face revision — a commit for the
 Whisper model, a tag for the Piper voice — next to a `[lang.<code>.<model>.files]`
-table mapping every downloaded filename to its SHA-256. Other entries pin the
-bundled CPython, the build-container image, and nfpm. Its consumers:
+table mapping every downloaded filename to its SHA-256. The `[tts.kokoro]`
+family pins the optional Kokoro reply voice the same way: the Kokoro-82M model
+from the `onnx-community/Kokoro-82M-v1.0-ONNX` Hugging Face repo at a pinned
+revision, and the voice binaries from the `kokoro-onnx` GitHub release tagged
+`model-files-v1.1`. Other entries pin the bundled CPython, the build-container
+image, and nfpm. Its consumers:
 
 - `flake.nix` — fetches the Piper voice via `builtins.fromTOML`, each file
   checksum-verified by `fetchurl` against the `piper.files` table.
@@ -28,12 +32,22 @@ bundled CPython, the build-container image, and nfpm. Its consumers:
 - `packaging/stage-bundle.sh` — materialises the pinned standalone CPython.
 - `packaging/build-in-docker.sh` — pulls the pinned build-container image and
   nfpm release, and reads each language pack's `version` to stamp its package.
+- `src/core/provision.py` — installs the Kokoro engine on demand
+  (`easyspeak --provision-kokoro`). `pins.toml` ships in no package, so it
+  reads the generated `src/core/runtime_pins.toml` copy instead and
+  checksum-verifies the model downloads against its `[tts.kokoro.files]`
+  table.
 
 The per-file `.files` tables are generated, not hand-written — they also let an
 out-of-tree Nix package pin each file up front instead of hashing whole repos.
 `just update-pins` regenerates every `.files` table from the pinned revision on
 each run — large LFS weights read their sha256 from the Hugging Face tree
-listing, so it stays cheap — so any edit is picked up with no extra step:
+listing, and `[tts.kokoro]`'s GitHub-release voice bin reads the release
+asset's `digest` field (hash-by-download when an asset lacks it), so it stays
+cheap — and it also rewrites `src/core/runtime_pins.toml`, the packaged copy
+the Kokoro provisioner reads. `pins.toml` remains the single hand-edited
+source of truth; the copy is build output, like the `.files` tables themselves.
+Any edit is picked up with no extra step:
 
 - Add a language by writing its `[lang.<code>]` `version` and the scalar fields
   of `[lang.<code>.whisper]` (`model`/`repo`/`revision`) and
@@ -42,6 +56,13 @@ listing, so it stays cheap — so any edit is picked up with no extra step:
 - Change a voice or model in place by editing its scalar fields and running
   `just update-pins`; the `.files` table and the pack `version` both follow
   automatically.
+
+The `[tts.kokoro]` entries pin what provisioning downloads; the library itself
+is pinned like any other Python dependency. The `tts-kokoro` extra
+(`kokoro-onnx>=0.6.1,<0.7`, marked `python_version < '3.14'`) exists so
+`uv.lock` records a tested CPU resolution for source installs — and the GPU
+wheel flavor is deliberately in neither file, because the provisioner installs
+it from its own major-bounded specs that `uv.lock` never sees.
 
 Each `easyspeak-lang-*` package carries its own `[lang.<code>].version`,
 independent of the application's release version. `just update-pins` bumps its

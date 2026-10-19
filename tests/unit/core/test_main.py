@@ -949,7 +949,7 @@ class TestEasySpeakRun:
     @patch(
         "easyspeak.core.main.LANGUAGE_WARNINGS",
         [
-            "Dictation in 'ru', replies in English (no 'ru' translation, no 'ru' language pack)"
+            "Dictation in 'ru', replies in English (no 'ru' translation, no 'ru' Piper voice)"
         ],
     )
     @patch("easyspeak.core.main.ensure_extension")
@@ -985,6 +985,45 @@ class TestEasySpeakRun:
         assert "Dictation in 'ru', replies in English" in out
         assert out.index("Loading Whisper") < out.index("Dictation in 'ru'")
         assert out.index("Dictation in 'ru'") < out.index("Loading plugins")
+        mock_ensure_extension.assert_called_once()
+
+    @patch(
+        "easyspeak.core.main.TTS_WARNINGS",
+        ["Kokoro is not installed; run `easyspeak --provision-kokoro`, using Piper"],
+    )
+    @patch("easyspeak.core.main.ensure_extension")
+    @patch("subprocess.run")
+    @patch("easyspeak.core.main.pyaudio")
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch.object(EasySpeak, "load_plugins")
+    def test_run_reports_the_engine_after_loading(
+        self,
+        mock_load_plugins,
+        mock_whisper_model,
+        mock_wakeword_model,
+        mock_pyaudio,
+        mock_subprocess_run,
+        mock_ensure_extension,
+        mock_plugin,
+        _stub_speech_warmup,
+        readlog,
+    ):
+        """What the config noted about the reply engine is said once Whisper has loaded."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin]
+        mock_stream = Mock()
+        mock_stream.read.side_effect = KeyboardInterrupt()
+        mock_audio = Mock()
+        mock_audio.open.return_value = mock_stream
+        mock_pyaudio.PyAudio.return_value = mock_audio
+
+        easy.run()
+
+        out = readlog().out
+        assert "--provision-kokoro" in out
+        assert out.index("Loading Whisper") < out.index("--provision-kokoro")
+        assert out.index("--provision-kokoro") < out.index("Loading plugins")
         mock_ensure_extension.assert_called_once()
 
     @patch("subprocess.run")

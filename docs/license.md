@@ -19,6 +19,7 @@ under their own licenses. The About dialog lists them too.
 | Piper voice `it_IT-paola` | Paola Persico | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
 | Piper voice `fr_FR-siwis` | SIWIS, University of Edinburgh | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 | Piper voice `es_ES-davefx` | davefx (OHF voice datasets) | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Kokoro-82M v1.0 speech model | hexgrad, ONNX conversion by the onnx-community maintainers | [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) |
 
 ## GNU General Public License
 

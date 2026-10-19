@@ -13,6 +13,7 @@ constants; these honor an `EASYSPEAK_*` environment variable:
 - `EASYSPEAK_PIPER_MODEL`
 - `EASYSPEAK_SOUNDS_DIR`
 - `EASYSPEAK_STT`
+- `EASYSPEAK_TTS`
 - `EASYSPEAK_WHISPER_COMPUTE_TYPE`
 - `EASYSPEAK_WHISPER_CPU_THREADS`
 - `EASYSPEAK_WHISPER_MODEL`
@@ -24,6 +25,7 @@ A plugin that needs host-environment setup does it in its own `setup()` hook —
 see [Writing Plugins](../plugins.md).
 """
 
+import importlib.util
 import logging
 import os
 import sys
@@ -143,27 +145,96 @@ def _translated(language):
     )
 
 
-def _voiced(language):
+# --- Text-to-speech engine ---
+# Piper is the default reply voice. Kokoro-82M (Apache-2.0, 24 kHz) is the
+# optional second engine, installed with `easyspeak --provision-kokoro`; like
+# the recognition choice below it is language-gated, because Kokoro v1.0 has
+# no German voice.
+TTS_BACKENDS = ("piper", "kokoro")
+KOKORO_DIR = MODELS_DIR / "kokoro"
+KOKORO_MODEL = KOKORO_DIR / "kokoro-v1.0.onnx"
+KOKORO_VOICES = KOKORO_DIR / "voices-v1.0.bin"
+KOKORO_VOICES_BY_LANGUAGE = {
+    "en": "af_heart",
+    "fr": "ff_siwis",
+    "it": "im_nicola",
+    "es": "ef_dora",
+}
+# espeak's G2P language codes: it/es are plain, en/fr are two-part (§2 of the
+# Kokoro design spec).
+KOKORO_LANGUAGE_CODES = {"en": "en-us", "fr": "fr-fr", "it": "it", "es": "es"}
+# The languages a shipped Kokoro voice speaks.
+KOKORO_LANGUAGES = frozenset(KOKORO_LANGUAGE_CODES)
+
+TTS_WARNINGS: list[str] = []
+
+
+def kokoro_installed() -> bool:
+    """Whether the Kokoro engine is usable: importable and model files present.
+
+    A spec probe, not an import: importing kokoro_onnx would pull onnxruntime
+    into every daemon start, and on Python 3.14 the wheel cannot even be
+    installed (it requires <3.14).
+    """
+    if importlib.util.find_spec("kokoro_onnx") is None:
+        return False
+    return KOKORO_MODEL.is_file() and KOKORO_VOICES.is_file()
+
+
+_tts = os.environ.get("EASYSPEAK_TTS", "").strip().lower()
+TTS = _tts or "piper"
+if _tts and TTS not in TTS_BACKENDS:
+    TTS_WARNINGS.append(
+        f"Unknown text-to-speech backend {_tts!r} (EASYSPEAK_TTS), using Piper"
+    )
+    TTS = "piper"
+if TTS == "kokoro" and not kokoro_installed():
+    TTS = "piper"
+    TTS_WARNINGS.append(
+        "Kokoro is not installed; run `easyspeak --provision-kokoro`, using Piper"
+    )
+if TTS == "kokoro" and LANGUAGE not in KOKORO_LANGUAGES:
+    TTS = "piper"
+    TTS_WARNINGS.append(f"Kokoro does not cover {LANGUAGE!r}, using Piper")
+
+
+def _piper_voiced(language):
     """Whether a language pack with a Piper voice for `language` is installed."""
     return _bundled_model(language, "piper", "*.onnx", default=None) is not None
+
+
+def _spoken(language):
+    """Whether any engine can speak `language`'s replies."""
+    return _piper_voiced(language) or (
+        TTS == "kokoro" and kokoro_installed() and language in KOKORO_LANGUAGES
+    )
 
 
 # The language the spoken replies are in, which is the language the voice must
 # be for: a German voice reads an English "Done" with German phonemes, and an
 # English voice reads a German one no better. The replies are written in
-# English and spoken in the user's language where a translation and that
-# language's voice both exist (see `core.i18n`).
+# English and spoken in the user's language where a translation exists and an
+# engine can speak that language (see `core.i18n`).
 REPLY_LANGUAGE = (
     LANGUAGE
-    if LANGUAGE == "en" or (_translated(LANGUAGE) and _voiced(LANGUAGE))
+    if LANGUAGE == "en" or (_translated(LANGUAGE) and _spoken(LANGUAGE))
     else "en"
 )
 if REPLY_LANGUAGE != LANGUAGE:
+    # The engine gates above have already fallen back to Piper by the time this
+    # runs, so a missing Kokoro engine is recognizable only through `_tts`, the
+    # engine the user asked for.
     _missing = [
         f"no {LANGUAGE!r} {what}"
         for what, missing in (
             ("translation", not _translated(LANGUAGE)),
-            ("language pack", not _voiced(LANGUAGE)),
+            ("Piper voice", not _piper_voiced(LANGUAGE)),
+            (
+                "Kokoro engine",
+                _tts == "kokoro"
+                and not kokoro_installed()
+                and LANGUAGE in KOKORO_LANGUAGES,
+            ),
         )
         if missing
     ]

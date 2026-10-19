@@ -39,6 +39,7 @@ from .config import (
     SILENCE_THRESHOLD_MAX,
     STT,
     STT_WARNINGS,
+    TTS_WARNINGS,
     WAKE_COOLDOWN,
     WAKE_SOUND,
     WAKE_THRESHOLD,
@@ -885,7 +886,7 @@ class EasySpeak:
         except RuntimeError as exc:
             logger.error("Cannot start EasySpeak: %s", exc)  # noqa: TRY400
             raise SystemExit(1) from exc
-        for warning in (*STT_WARNINGS, *LANGUAGE_WARNINGS):
+        for warning in (*STT_WARNINGS, *TTS_WARNINGS, *LANGUAGE_WARNINGS):
             logger.warning(warning)
 
         ensure_extension()
@@ -899,6 +900,11 @@ class EasySpeak:
 
         # Warm up the text-to-speech pipeline now so the piper model is loaded
         # during startup, not on the first spoken response.
+        # This ensure() call is also where a Kokoro warm-up failure primes the
+        # engine fence: readiness is asynchronous (a reader thread owns it), so
+        # this handler sees only synchronous spawn failures — an engine that
+        # never sends its ready line reports through the pipeline's strike
+        # logging instead (speech.py, spec §3.3).
         logger.info("Warming up speech...")
         try:
             self.speech.ensure()

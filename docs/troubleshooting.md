@@ -173,6 +173,56 @@ chmod +x ~/.local/bin/piper/piper
 chmod +x ~/.local/bin/piper/espeak-ng
 ```
 
+## Kokoro doesn't speak — Piper answers instead
+
+EasySpeak never goes quiet: when the Kokoro engine can't start or keeps dying,
+it fences itself off, answers with Piper, and says why in the log. Run with
+`-v` and check for the engine warnings:
+
+- ``Kokoro is not installed; run `easyspeak --provision-kokoro`, using Piper``
+  — the wheels or model files are missing. Mind the version limit on the
+  prebuilt packages: they bundle Python 3.14, kokoro-onnx publishes no wheels
+  for 3.14 yet, so provisioning refuses there until it does, and Piper stays
+  the voice.
+- `Kokoro unavailable (...) after 3 strike(s); using Piper until restart` — the
+  engine kept crashing, most often a GPU driver problem. Restart EasySpeak to
+  try again; `--provision-kokoro` re-checks the install.
+- `Kokoro does not cover 'de', using Piper` — German has no Kokoro voice and
+  always stays with Piper.
+
+## Kokoro doesn't use the GPU
+
+Provisioning picks the CUDA wheels only when `nvidia-smi` is present, and ends
+by reporting which provider actually engaged — a mismatch prints a loud warning
+there. If the engine still comes up on the CPU:
+
+- An explicit `ONNX_PROVIDER` is honored verbatim:
+  `ONNX_PROVIDER=CPUExecutionProvider` pins the CPU on purpose. Unset it.
+- On an AMD (or otherwise non-NVIDIA) machine there is no GPU engine to find —
+  the CPU one is what provisioning installs, and it keeps up with short
+  replies.
+- The worker loads NVIDIA's pip-wheel libraries itself, so no `LD_LIBRARY_PATH`
+  is needed anywhere; if CUDA still won't engage with the GPU wheels installed,
+  the usual cause is a driver too old for the bundled CUDA runtime — `nvidia-smi`
+  working while CUDA initialization fails is the tell.
+
+## Kokoro's GPU is gone after an update
+
+The prebuilt packages own `onnxruntime`, so updating the app replaces the
+provisioned GPU flavor with the bundled CPU one. EasySpeak warns at startup
+("Kokoro was provisioned for the gpu flavor of onnxruntime, but the cpu flavor
+is installed") and keeps answering on the CPU meanwhile. Nothing is broken; run
+`easyspeak --provision-kokoro` once more to restore the GPU engine.
+
+## Provisioned Kokoro models not found
+
+The model lands in the models directory. If you provisioned with
+`EASYSPEAK_MODELS_DIR` pointed at a custom location, the daemon must run with
+the same variable, or it probes the default location and reports the files as
+missing despite a successful provision. Set it the same way for both — in a
+systemd user override or your shell profile, as
+[Packaging](packaging.md#language) describes for the other model variables.
+
 ## pip install fails with PyAV/Cython errors
 
 You're on an unsupported Python version. EasySpeak is tested against Python 3.10,

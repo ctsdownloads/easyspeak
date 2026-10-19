@@ -22,6 +22,14 @@ Splitting keeps the app small and lets you pick (or add) languages independently
 without re-downloading the runtime or the shared recognition model. See
 [Language](#language).
 
+One engine is deliberately provisioned instead of packaged: there is no Kokoro
+`.deb`/`.rpm`. The optional Kokoro reply voices would either tie the package to
+one GPU vendor's CUDA wheels or bloat every install with them, so
+`easyspeak --provision-kokoro` installs them on the machine that wants them —
+CPU or NVIDIA GPU wheels as detected, and the model downloaded
+checksum-verified into the models directory
+([Installation](installation.md#kokoro-optional)).
+
 > EasySpeak integrates deeply with the host (raw input devices, the AT-SPI bus,
 > session D-Bus, a GNOME Shell extension, and spawning host binaries). That is why
 > the supported formats are **unconfined distro packages** — sandboxed formats

@@ -134,9 +134,12 @@ lint-docstrings:
     fi
 
 # Lint Markdown structure in all tracked *.md (lenient on style; config in pyproject.toml)
+# docs/superpowers/ is excluded: planning artifacts are process records, not
+# built docs (see exclude_docs in mkdocs.yml) — lint only the built surface.
 [group('docs')]
 lint-md *args:
-    git ls-files '*.md' | xargs uvx --from pymarkdownlnt pymarkdown {{ args }} scan
+    git ls-files '*.md' | grep -v '^docs/superpowers/' \
+        | xargs --no-run-if-empty uvx --from pymarkdownlnt pymarkdown {{ args }} scan
 
 # Build the docs (use `serve` to serve them locally with live-reload)
 [group('docs')]

@@ -29,6 +29,7 @@ def _restore_config(monkeypatch):
         "EASYSPEAK_MODELS_DIR",
         "EASYSPEAK_OFFLINE",
         "EASYSPEAK_STT",
+        "EASYSPEAK_TTS",
     ]:
         monkeypatch.delenv(var, raising=False)
     importlib.reload(config)
@@ -449,7 +450,7 @@ class TestLanguagePacks:
         importlib.reload(config)
         assert config.REPLY_LANGUAGE == "en"
         assert config.LANGUAGE_WARNINGS == [
-            "Dictation in 'it', replies in English (no 'it' language pack)"
+            "Dictation in 'it', replies in English (no 'it' Piper voice)"
         ]
 
     def test_both_reasons_in_one_warning(self, packs, monkeypatch):
@@ -457,7 +458,7 @@ class TestLanguagePacks:
         monkeypatch.setenv("EASYSPEAK_LANGUAGE", "pt")
         importlib.reload(config)
         assert config.LANGUAGE_WARNINGS == [
-            "Dictation in 'pt', replies in English (no 'pt' translation, no 'pt' language pack)"
+            "Dictation in 'pt', replies in English (no 'pt' translation, no 'pt' Piper voice)"
         ]
 
     @pytest.mark.parametrize(
@@ -557,3 +558,144 @@ class TestLanguagePacks:
             whisper,
             Path.home() / ".local/share/piper/en_US-amy-medium.onnx",
         )
+
+
+def _kokoro_present(monkeypatch, tmp_path):
+    """Fake an installed Kokoro engine: importable spec, model files on disk."""
+    monkeypatch.setattr(
+        config.importlib.util,
+        "find_spec",
+        lambda name: object() if name == "kokoro_onnx" else None,
+    )
+    kokoro = tmp_path / "kokoro"
+    kokoro.mkdir()
+    (kokoro / "kokoro-v1.0.onnx").touch()
+    (kokoro / "voices-v1.0.bin").touch()
+    monkeypatch.setenv("EASYSPEAK_MODELS_DIR", str(tmp_path))
+
+
+def test_tts_default_piper(monkeypatch):
+    """Unset EASYSPEAK_TTS: replies are spoken with Piper, without a warning."""
+    monkeypatch.delenv("EASYSPEAK_TTS", raising=False)
+    importlib.reload(config)
+    assert config.TTS == "piper"
+    assert config.TTS_WARNINGS == []
+
+
+def test_tts_kokoro_selected(monkeypatch, tmp_path):
+    """An installed Kokoro engine is used when asked for, without a warning."""
+    _kokoro_present(monkeypatch, tmp_path)
+    monkeypatch.setenv("EASYSPEAK_TTS", "kokoro")
+    monkeypatch.setenv("EASYSPEAK_LANGUAGE", "en")
+    importlib.reload(config)
+    assert config.TTS == "kokoro"
+    assert config.TTS_WARNINGS == []
+
+
+def test_tts_kokoro_without_wheels_falls_back(monkeypatch):
+    """Without the kokoro_onnx package the choice falls back to Piper, told why."""
+    monkeypatch.setattr(config.importlib.util, "find_spec", lambda name: None)
+    monkeypatch.setenv("EASYSPEAK_TTS", "kokoro")
+    importlib.reload(config)
+    assert config.TTS == "piper"
+    assert config.TTS_WARNINGS == [
+        "Kokoro is not installed; run `easyspeak --provision-kokoro`, using Piper"
+    ]
+
+
+def test_tts_kokoro_without_model_files_falls_back(monkeypatch, tmp_path):
+    """Without the model files the engine is unusable too, and Piper is used."""
+    monkeypatch.setattr(
+        config.importlib.util,
+        "find_spec",
+        lambda name: object() if name == "kokoro_onnx" else None,
+    )
+    monkeypatch.setenv("EASYSPEAK_MODELS_DIR", str(tmp_path))  # no kokoro/ dir
+    monkeypatch.setenv("EASYSPEAK_TTS", "kokoro")
+    importlib.reload(config)
+    assert config.TTS == "piper"
+    assert config.TTS_WARNINGS == [
+        "Kokoro is not installed; run `easyspeak --provision-kokoro`, using Piper"
+    ]
+
+
+def test_tts_kokoro_german_uncovered(monkeypatch, tmp_path):
+    """Kokoro v1.0 has no German voice, so the choice falls back, told why."""
+    _kokoro_present(monkeypatch, tmp_path)
+    monkeypatch.setenv("EASYSPEAK_TTS", "kokoro")
+    monkeypatch.setenv("EASYSPEAK_LANGUAGE", "de")
+    importlib.reload(config)
+    assert config.TTS == "piper"
+    assert config.TTS_WARNINGS == ["Kokoro does not cover 'de', using Piper"]
+
+
+def test_tts_unknown_backend_warns(monkeypatch):
+    """A typo in the backend name is reported at startup, then Piper applies."""
+    monkeypatch.setenv("EASYSPEAK_TTS", "banana")
+    importlib.reload(config)
+    assert config.TTS == "piper"
+    assert config.TTS_WARNINGS == [
+        "Unknown text-to-speech backend 'banana' (EASYSPEAK_TTS), using Piper"
+    ]
+
+
+def test_tts_normalization(monkeypatch, tmp_path):
+    """`Kokoro` and `kokoro` select the same engine, without a warning."""
+    _kokoro_present(monkeypatch, tmp_path)
+    monkeypatch.setenv("EASYSPEAK_TTS", " Kokoro ")
+    importlib.reload(config)
+    assert config.TTS == "kokoro"
+    assert config.TTS_WARNINGS == []
+
+
+def test_spoken_reaches_kokoro_for_packless_language(monkeypatch, tmp_path):
+    """A language with a Kokoro voice but no Piper pack gets replies of its own.
+
+    French is translated in the core, and with the engine installed it can be
+    spoken, so `REPLY_LANGUAGE` stays French without any language pack.
+    """
+    _kokoro_present(monkeypatch, tmp_path)
+    monkeypatch.setenv("EASYSPEAK_TTS", "kokoro")
+    monkeypatch.setenv("EASYSPEAK_LANGUAGE", "fr")
+    importlib.reload(config)
+    assert config.REPLY_LANGUAGE == "fr"
+    assert config.LANGUAGE_WARNINGS == []
+
+
+def test_language_warnings_name_a_missing_kokoro_engine(monkeypatch, tmp_path):
+    """Kokoro chosen for a covered language names the engine as what is missing.
+
+    French is translated but speaks through neither engine here — no Piper pack
+    and no Kokoro engine — and the warning names both, engine included.
+    """
+    monkeypatch.setattr(config.importlib.util, "find_spec", lambda name: None)
+    monkeypatch.setenv("EASYSPEAK_MODELS_DIR", str(tmp_path))
+    monkeypatch.setenv("EASYSPEAK_TTS", "kokoro")
+    monkeypatch.setenv("EASYSPEAK_LANGUAGE", "fr")
+    importlib.reload(config)
+    assert config.REPLY_LANGUAGE == "en"
+    assert config.LANGUAGE_WARNINGS == [
+        "Dictation in 'fr', replies in English (no 'fr' Piper voice, no 'fr' Kokoro engine)"
+    ]
+
+
+def test_kokoro_engine_missing_for_german_blames_no_engine(monkeypatch, tmp_path):
+    """A language Kokoro could never speak blames no missing engine either.
+
+    The fallback points at the Piper voice as the only missing thing: the
+    engine is not installed, but it was never an option for 'de', so the
+    warning reports only the voice.
+    """
+    monkeypatch.setattr(config.importlib.util, "find_spec", lambda name: None)
+    monkeypatch.setenv("EASYSPEAK_MODELS_DIR", str(tmp_path))
+    monkeypatch.setenv("EASYSPEAK_TTS", "kokoro")
+    monkeypatch.setenv("EASYSPEAK_LANGUAGE", "de")
+    importlib.reload(config)
+    assert config.TTS == "piper"
+    assert config.TTS_WARNINGS == [
+        "Kokoro is not installed; run `easyspeak --provision-kokoro`, using Piper"
+    ]
+    assert config.REPLY_LANGUAGE == "en"
+    assert config.LANGUAGE_WARNINGS == [
+        "Dictation in 'de', replies in English (no 'de' Piper voice)"
+    ]

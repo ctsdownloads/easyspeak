@@ -42,7 +42,7 @@ class TestCredits:
 
     def test_credits_every_model_with_its_license(self):
         """Each shipped model names its owner and a license the dialog can show."""
-        assert len(about.LEGAL) == 8
+        assert len(about.LEGAL) == 13
         for title, owner, license_id in about.LEGAL:
             assert title and owner.startswith("©"), title
             assert license_id in {"MIT", "Apache-2.0", *about.LICENSE_URLS}, title

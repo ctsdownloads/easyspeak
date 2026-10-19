@@ -51,9 +51,12 @@ extra_javascript:
 
 # These assets live under docs/media/ but are not referenced by any page, so
 # keep them out of the built site (the demo video is a 23 MB LFS object).
+# superpowers/ holds the planning artifacts (intent, design, plan): process
+# records that stay in the repo, not part of the published documentation.
 exclude_docs: |
   media/demo.mp4
   media/log.txt
+  superpowers/
 
 nav:
 - Home: index.md

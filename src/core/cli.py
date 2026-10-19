@@ -5,7 +5,8 @@ flags, or — with neither — the `EASYSPEAK_LOG_LEVEL` environment variable, w
 the flags override (see [`resolve_level`][core.log.resolve_level]). `--language`
 is the command-line form of `EASYSPEAK_LANGUAGE` and overrides it. The one-shot
 `--configure` and `--preview` subcommands set up or print the desktop-integration
-files and exit. All `EASYSPEAK_*` variables are listed in [`core.config`][core.config].
+files and exit, and `--provision-kokoro` installs the Kokoro reply-voice engine
+and exits. All `EASYSPEAK_*` variables are listed in [`core.config`][core.config].
 """
 
 import argparse
@@ -48,6 +49,11 @@ def parse_args(argv=None):
         help="print the file content that would be configured and exit",
     )
     parser.add_argument(
+        "--provision-kokoro",
+        action="store_true",
+        help="install the Kokoro reply-voice engine and exit",
+    )
+    parser.add_argument(
         "--language",
         metavar="CODE",
         help=(
@@ -74,7 +80,11 @@ def run(argv=None):
 
     `EasySpeak` is imported lazily so the one-shot subcommands work without the
     audio stack (pyopen-wakeword, pyaudio, …) that `core.main` pulls in. Ctrl+C
-    ends EasySpeak quietly even while that stack or its models are still loading.
+    ends EasySpeak quietly even while that stack or its models are still
+    loading, or while a provisioning download is still running.
+    `--provision-kokoro` returns the provisioner's exit code (0 provisioned and
+    verified, 1 otherwise, a Ctrl+C abort included) instead of None; the
+    console script turns run()'s return into the process exit code.
     """
     args = parse_args(argv)
 
@@ -82,7 +92,7 @@ def run(argv=None):
         from .desktop_integration import preview
 
         preview(args.preview)
-        return
+        return None
 
     log.configure(log.resolve_level(verbose=args.verbose, quiet=args.quiet))
 
@@ -94,7 +104,24 @@ def run(argv=None):
         from .desktop_integration import configure
 
         configure(args.configure)
-        return
+        return None
+
+    if args.provision_kokoro:
+        # Deliberately after log.configure: the provisioner narrates its
+        # progress on the `easyspeak` loggers at INFO, which would fall off an
+        # unconfigured hierarchy (only WARNING+ survives logging.lastResort).
+        from .provision import provision_kokoro
+
+        try:
+            return provision_kokoro()
+        except KeyboardInterrupt:
+            # The only one-shot long enough to abort (hundreds of MB of
+            # downloads): stop quietly like the app path, but exit 1 — an
+            # interrupted provision is not a success, and scripted installs
+            # read the exit code. The provisioner's own finally blocks have
+            # already removed any partial download.
+            logger.info("\nStopped (Ctrl+C).")
+            return 1
 
     try:
         from .main import EasySpeak

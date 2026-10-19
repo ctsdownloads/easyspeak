@@ -37,7 +37,7 @@ Current and in active development:
 - **App launcher** — Open and close applications by name
 - **Media control** — Play, pause, skip via MPRIS
 - **System controls** — Volume, brightness, do not disturb
-- **Fully local** — pyopen-wakeword + Parakeet (or Whisper) + Piper, no cloud services
+- **Fully local** — pyopen-wakeword + Parakeet (or Whisper) + Piper, plus optional Kokoro voices, no cloud services
 - **Plugin architecture** — Easy to extend
 
 ## Demo
@@ -49,7 +49,7 @@ See also [the first demo](https://www.youtube.com/watch?v=dl5m2Zo1oIE) from the 
 
 ## Where to next?
 
-- [Installation](installation.md) — system packages, Python, Piper TTS
+- [Installation](installation.md) — system packages, Python, Piper TTS, optional Kokoro
 - [Usage](usage.md) — running the daemon and the wake word
 - [Commands](commands.md) — the full command reference
 - [Writing Plugins](plugins.md) — extend EasySpeak with a Python file
@@ -63,4 +63,5 @@ See also [the first demo](https://www.youtube.com/watch?v=dl5m2Zo1oIE) from the 
 - [pyopen-wakeword](https://github.com/rhasspy/pyopen-wakeword) — Wake word detection
 - [faster-whisper](https://github.com/guillaumekln/faster-whisper) — Speech recognition
 - [Piper](https://github.com/OHF-Voice/piper1-gpl) — Text-to-speech (we use the last standalone binary from the original [rhasspy/piper](https://github.com/rhasspy/piper) repo)
+- [kokoro-onnx](https://github.com/thewh1teagle/kokoro-onnx) — Optional text-to-speech engine, speaking the [Kokoro-82M](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX) model you provision with `easyspeak --provision-kokoro`
 - [Talon](https://talonvoice.com/) — Inspiration for voice control concepts

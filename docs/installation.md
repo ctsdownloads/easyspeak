@@ -193,6 +193,32 @@ pip install '.[head-tracking]'
 
 The `head-tracking` extra pulls in `sixdrepnet` and `opencv-python`.
 
+### Kokoro (optional)
+
+Piper speaks the replies; EasySpeak can also answer with
+[Kokoro](https://github.com/thewh1teagle/kokoro-onnx) — the Kokoro-82M v1.0
+model, a more natural-sounding voice with speakers for English, French, Italian
+and Spanish. German keeps its Piper voice: Kokoro ships none. Kokoro is not
+packaged; one command installs it instead — the model downloaded into the models
+directory and checksum-verified, plus the wheels that match your machine (plain
+CPU ones, or the CUDA build, about 2 GB, when an NVIDIA GPU is detected) — and
+finishes by speaking one test phrase:
+
+```bash
+uv run easyspeak --provision-kokoro
+```
+
+Two caveats. Kokoro needs a Python below 3.14 — kokoro-onnx publishes no wheels
+for 3.14 yet — so the prebuilt packages, which bundle Python 3.14, refuse to
+provision it and EasySpeak keeps answering with Piper there. And a machine
+without NVIDIA (AMD included) gets the CPU engine: slower than the GPU one, but
+replies are short. An app update replaces the installed `onnxruntime` with the
+package's own, so run the command once more after an update to get the GPU
+engine back. When you provisioned into a non-default models directory
+(`EASYSPEAK_MODELS_DIR`, see [Configuration](usage.md#configuration)), run the
+daemon with the same variable, then switch EasySpeak over with
+`EASYSPEAK_TTS=kokoro` — see [Better reply voices](usage.md#better-reply-voices-kokoro).
+
 [gh:releases]: https://github.com/ctsdownloads/easyspeak/releases
 [gh:releases:lang]: https://github.com/ctsdownloads/easyspeak/releases?q=lang
 [gh:releases:stt]: https://github.com/ctsdownloads/easyspeak/releases?q=stt

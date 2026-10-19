@@ -3,6 +3,7 @@
 import logging
 import os
 import shutil
+import sys
 from importlib import import_module
 from unittest.mock import call, patch
 
@@ -191,3 +192,73 @@ def test_run_preview_prints_item_and_skips_app(mock_preview):
 def test_parse_args_preview(argv, expected):
     """parse_args records the one --preview item, or None when absent."""
     assert cli.parse_args(argv).preview == expected
+
+
+@pytest.mark.parametrize(
+    ("argv", "expected"),
+    [
+        ([], False),  # no --provision-kokoro: run the app
+        (["--provision-kokoro"], True),  # the provisioning one-shot
+    ],
+)
+def test_parse_args_provision_kokoro(argv, expected):
+    """parse_args records --provision-kokoro, or False when absent."""
+    assert cli.parse_args(argv).provision_kokoro is expected
+
+
+def test_help_lists_provision_kokoro(capsys):
+    """--help lists the provisioning one-shot with a one-line description."""
+    with pytest.raises(SystemExit) as exc:
+        cli.parse_args(["--help"])
+
+    assert exc.value.code == 0
+    out = capsys.readouterr().out
+    assert "--provision-kokoro" in out
+    assert "reply-voice engine" in out
+
+
+@patch("easyspeak.core.provision.provision_kokoro")
+def test_run_provision_kokoro_dispatches_and_returns_its_code(
+    mock_provision, monkeypatch, capsys
+):
+    """--provision-kokoro runs the provisioner, whose int is run()'s return."""
+    # conftest imports core.main at module scope, so drop it for this test:
+    # if the dispatch ever fell through to the app, the import would re-add it.
+    monkeypatch.delitem(sys.modules, "easyspeak.core.main", raising=False)
+    mock_provision.return_value = 7
+
+    assert cli.run(["--provision-kokoro"]) == 7
+
+    mock_provision.assert_called_once_with()
+    # The one-shot works without the audio stack: core.main never loaded.
+    assert "easyspeak.core.main" not in sys.modules
+    # stdout stays pure; the machine line is the provisioner's own business.
+    assert capsys.readouterr().out == ""
+
+
+@patch("easyspeak.core.provision.provision_kokoro")
+def test_run_provision_kokoro_ends_quietly_on_ctrl_c(mock_provision, capsys):
+    """Ctrl+C mid-provision ends quietly and exits 1, per the 0/1 contract."""
+    mock_provision.side_effect = KeyboardInterrupt
+
+    assert cli.run(["--provision-kokoro"]) == 1
+
+    assert "Stopped (Ctrl+C)." in capsys.readouterr().err
+
+
+def test_run_provision_kokoro_dispatches_after_logging_is_configured(monkeypatch):
+    """The provisioner's INFO narration only survives once configure() ran."""
+    sequence = []
+    monkeypatch.setattr(
+        "easyspeak.core.log.configure", lambda level: sequence.append("configure")
+    )
+
+    def fake_provision():
+        sequence.append("provision")
+        return 0
+
+    monkeypatch.setattr("easyspeak.core.provision.provision_kokoro", fake_provision)
+
+    cli.run(["--provision-kokoro"])
+
+    assert sequence == ["configure", "provision"]

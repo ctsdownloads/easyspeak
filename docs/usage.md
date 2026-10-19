@@ -53,6 +53,7 @@ the module that reads each (linked to its API reference).
 | `EASYSPEAK_MODELS_DIR`           | `models/` beside the venv              | Where language packs are installed          |
 | `EASYSPEAK_OFFLINE`              | `strict`                               | Stay offline; `relaxed` downloads models    |
 | `EASYSPEAK_STT`                  | `parakeet`, `whisper` if not installed | Speech model: `parakeet` or `whisper`       |
+| `EASYSPEAK_TTS`                  | `piper`                                | Reply voice engine: `piper` or `kokoro`     |
 | `EASYSPEAK_PIPER_BIN`            | `piper`                                | Piper TTS binary                            |
 | `EASYSPEAK_REQUIRE_WAKE_WORD`    | unset                                  | Modes wait for the wake word each command   |
 | `EASYSPEAK_PIPER_MODEL`          | an installed language pack's voice     | Piper voice `.onnx` for speech output       |
@@ -126,3 +127,18 @@ PyGObject and the AT-SPI typelib, which the application's own virtual environmen
 usually lacks, so candidate interpreters are probed with the helper's real import
 chain and the first that works is kept. Set the variable to point straight at one
 (the Nix flake does).
+
+## Better reply voices (Kokoro)
+
+Replies are spoken by Piper. For a more natural voice, provision Kokoro — the
+Kokoro-82M v1.0 model, with speakers for English, French, Italian and Spanish
+(German keeps its Piper voice) — with the one command from
+[Installation](installation.md#kokoro-optional), then set `EASYSPEAK_TTS=kokoro`
+and restart. Kokoro is strictly optional and downloaded at your request only;
+until then, and with a warning at startup whenever the engine or a language's
+voice is missing, Piper speaks. On an NVIDIA GPU it answers fastest; everywhere
+else it runs on the CPU, which is quick enough for replies of a few words. On
+the prebuilt packages provisioning refuses for now — they bundle Python 3.14,
+which kokoro-onnx does not support yet (see
+[Installation](installation.md#kokoro-optional)) — so Piper keeps speaking
+there either way.

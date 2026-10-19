@@ -5,6 +5,22 @@ canonical, GitHub-independent record of releases. It is updated once per
 release. The format loosely follows [Keep a Changelog](https://keepachangelog.com/),
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+**A Second Reply Voice: Kokoro, Provisioned on Demand**
+
+EasySpeak can now answer with Kokoro instead of Piper: the Kokoro-82M v1.0
+model speaks more natural voices for English, French, Italian and Spanish,
+instantly on an NVIDIA GPU and fast enough for short replies on the CPU. It is the
+first pluggable reply voice, chosen with the new `EASYSPEAK_TTS` environment
+variable (`piper` remains the default), and it is never bundled: the new
+`easyspeak --provision-kokoro` flag installs it on the machine that wants it —
+CPU or CUDA wheels as detected, the model downloaded checksum-verified into
+the models directory, and one spoken phrase to prove the result. German keeps
+its Piper voice, because Kokoro ships none; where Python 3.14 rules the
+engine out (kokoro-onnx does not support it yet, and the packages bundle it),
+provisioning says so plainly and Piper keeps speaking.
+
 ## 0.13.0 · Welcome, KDE Plasma! · 2026-10-11
 
 **EasySpeak Comes to KDE Plasma, Says What Went Wrong, and Licenses Every File

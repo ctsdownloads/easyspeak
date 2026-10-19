@@ -3,7 +3,9 @@
 - **Wake word** — pyopen-wakeword detects "Hey Jarvis" instantly
 - **Speech-to-text** — NVIDIA's Parakeet model transcribes commands locally,
   through onnx-asr; faster-whisper stands in for languages it lacks
-- **Text-to-speech** — Piper provides voice feedback
+- **Text-to-speech** — Piper provides voice feedback; the reply voice is
+  pluggable, and the optional Kokoro engine takes over once you provision it
+  and select it with `EASYSPEAK_TTS=kokoro`
 - **Mouse control** — GNOME Shell extension with Clutter virtual input
 - **Browser scroll** — JavaScript injection via qutebrowser IPC
 - **Dictation** — clipboard and a synthetic paste keystroke, with AT-SPI used to
@@ -24,10 +26,12 @@ easyspeak/
 │   │   ├── config.py          # Tuning constants + Whisper model factory
 │   │   ├── gnome_extension.py # Installs/refreshes/enables the extension
 │   │   ├── i18n.py            # Spoken-reply translations (gettext .po)
+│   │   ├── kokoro_worker.py   # The optional Kokoro reply-voice engine process
 │   │   ├── log.py             # Logging setup
 │   │   ├── main.py            # EasySpeak class + main loop
 │   │   ├── mediakeys.py       # Replays multimedia keys via Mutter
-│   │   ├── speech.py          # Persistent piper -> player pipeline
+│   │   ├── provision.py       # `easyspeak --provision-kokoro` installer
+│   │   ├── speech.py          # Persistent reply-voice engine -> player pipeline
 │   │   ├── statusnotifier.py  # Tray icon outside GNOME (StatusNotifierItem)
 │   │   └── tray.py            # Panel indicator + asleep lifecycle
 │   ├── data/                  # Bundled data files (easyspeak.data), shipped as package data

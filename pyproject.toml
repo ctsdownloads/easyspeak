@@ -91,6 +91,15 @@ mypy = [
   "mypy>=1.19.1",
   "types-pyaudio>=0.2.16.20250801",
 ]
+# The optional second speech engine. `easyspeak --provision-kokoro` installs
+# the wheel (and swaps in the GPU flavor of onnxruntime where it can) at
+# runtime; this extra exists so uv.lock pins the CPU resolution it starts
+# from. Deliberately no `tts-kokoro-gpu`: it would co-install onnxruntime-gpu
+# beside the unconditional `onnxruntime` dependency — two distributions of one
+# import package.
+tts-kokoro = [
+  "kokoro-onnx>=0.6.1,<0.7 ; python_version < '3.14'",
+]
 unittest = [
   "coverage[toml]>=7.14",
   "lxml>=6",
@@ -133,6 +142,12 @@ plugins.md046.enabled = false  # code-block-style
 
 [tool.pytest.ini_options]
 addopts = "--ignore=tests/acceptance --ignore=tests/integration"
+
+[tool.ruff]
+# docs/superpowers/ is excluded: planning artifacts are process records, not
+# built docs (see exclude_docs in mkdocs.yml) — lint/format only the built
+# surface instead of reformatting the Python snippets embedded in their prose.
+extend-exclude = ["docs/superpowers"]
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -204,7 +219,7 @@ packages = [
 
 [tool.setuptools.package-data]
 "*" = ["locale/*/LC_MESSAGES/*.po", "locale/*/vocabulary.toml"]
-"easyspeak.core" = ["*.xml"]
+"easyspeak.core" = ["*.xml", "runtime_pins.toml"]
 "easyspeak.data" = ["*"]
 "easyspeak.gnome" = [
   "extension.js",

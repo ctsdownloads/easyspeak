@@ -24,7 +24,7 @@ no-op rather than a failure.
 ## Layout
 
 ```sh
-test_speech_pipeline.py        # piper synthesis + player playback for real
+test_speech_pipeline.py        # piper + Kokoro synthesis, player playback for real
 test_gnome_extension_unit.py   # install_refresh_unit enabled by real systemd
 conftest.py                    # stubs heavy deps; skip fixtures for audio/systemd
 ```
