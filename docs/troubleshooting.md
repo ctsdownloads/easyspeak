@@ -166,6 +166,12 @@ utterance runs to its time cap. Check the noise floor above — if the room is
 loud enough that speech and silence look alike, move the microphone closer or set
 `EASYSPEAK_SILENCE_THRESHOLD` by hand.
 
+EasySpeak normally filters out steady noise itself and logs `Listening through
+the noise filter` at startup. If it logs `Noise filter unavailable` or `Noise
+filter did not start` instead, install `pw-cli` (`pipewire-utils` on Fedora,
+`pipewire-bin` on Debian and Ubuntu) and restart it. See
+[Configuration](usage.md#configuration).
+
 ## Piper permission denied
 
 ```bash

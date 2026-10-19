@@ -8,6 +8,7 @@ constants; these honor an `EASYSPEAK_*` environment variable:
 - `EASYSPEAK_HOTKEY`
 - `EASYSPEAK_LANGUAGE`
 - `EASYSPEAK_MODELS_DIR`
+- `EASYSPEAK_NOISE_FILTER`
 - `EASYSPEAK_OFFLINE`
 - `EASYSPEAK_PIPER_BIN`
 - `EASYSPEAK_PIPER_MODEL`
@@ -55,6 +56,10 @@ WAKE_COOLDOWN = 3.0  # Seconds to ignore wake word after trigger
 # first, which keeps a speaker playing video from being transcribed as commands.
 _require_wake = os.environ.get("EASYSPEAK_REQUIRE_WAKE_WORD", "").strip().lower()
 REQUIRE_WAKE_WORD = _require_wake in {"1", "true", "yes", "on"}
+
+# Listen through a noise-suppressed copy of the microphone (see core.noisefilter).
+_noise_filter = os.environ.get("EASYSPEAK_NOISE_FILTER", "").strip().lower()
+NOISE_FILTER = _noise_filter not in {"0", "false", "no", "off"}
 
 # --- Audio thresholds ---
 SILENCE_THRESHOLD = 300

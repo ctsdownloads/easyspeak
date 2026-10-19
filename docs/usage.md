@@ -51,6 +51,7 @@ the module that reads each (linked to its API reference).
 | `EASYSPEAK_HOTKEY`               | `ctrl+shift`                           | Keys held to dictate without the wake word  |
 | `EASYSPEAK_LANGUAGE`             | `en`                                   | Language you dictate in and are answered in |
 | `EASYSPEAK_MODELS_DIR`           | `models/` beside the venv              | Where language packs are installed          |
+| `EASYSPEAK_NOISE_FILTER`         | on                                     | `0` listens to the microphone unfiltered    |
 | `EASYSPEAK_OFFLINE`              | `strict`                               | Stay offline; `relaxed` downloads models    |
 | `EASYSPEAK_STT`                  | `parakeet`, `whisper` if not installed | Speech model: `parakeet` or `whisper`       |
 | `EASYSPEAK_PIPER_BIN`            | `piper`                                | Piper TTS binary                            |
@@ -95,6 +96,15 @@ Room noise floor 412; silence threshold 1030
 
 Set the variable to skip the measurement, e.g. if you happen to be talking during
 the first second after launch.
+
+EasySpeak listens through a noise-suppressed copy of the microphone that it makes
+for itself with PipeWire, so a fan or an air filter doesn't keep every recording
+running to its time cap. Other applications keep the plain microphone, and the
+filter goes away when EasySpeak sleeps or quits. It needs `pw-cli` (in
+`pipewire-utils` on Fedora, `pipewire-bin` on Debian and Ubuntu); without it, or
+where PipeWire lacks the filter, EasySpeak logs a warning and uses the plain
+microphone. Set `EASYSPEAK_NOISE_FILTER=0` to always use the plain one. The
+filter removes steady noise, not voices, so a TV still gets heard.
 
 `EASYSPEAK_HOTKEY` takes the `ctrl`/`shift`/`alt`/`super` aliases or raw evdev
 key names joined with `+` (e.g. `ctrl+space`); set it to empty, `off`, or `none`
