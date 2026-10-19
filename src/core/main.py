@@ -28,6 +28,7 @@ from .config import (
     LANGUAGE_WARNINGS,
     MAX_RECORD_SECONDS,
     MISUNDERSTAND_GRACE,
+    NOISE_FILTER,
     NUMBER_WORDS,
     PARAKEET_MODEL,
     PARAKEET_QUANTIZATION,
@@ -52,6 +53,7 @@ from .config import (
 from .gnome_extension import ensure_extension
 from .hotkey import HotkeyListener
 from .i18n import _
+from .noisefilter import NoiseFilter
 from .speech import SpeechPipeline, suppressed_c_stderr
 from .tray import Tray, TrayAction
 from .wakeword import WakeWordModel
@@ -150,6 +152,7 @@ class EasySpeak:
         self._sound_player = None
         # Raised to suit the room by calibrate_silence() once the mic is open.
         self.silence_threshold = SILENCE_THRESHOLD
+        self.noise_filter = NoiseFilter()
 
     # --- Utilities for plugins ---
 
@@ -375,9 +378,14 @@ class EasySpeak:
         microphone bridged in. The user hears it too, before the exit: they may have
         woken EasySpeak from the tray after unplugging the microphone, with no terminal
         in sight.
+
+        With `NOISE_FILTER` on, the stream reads a noise-suppressed copy of the
+        microphone (see `core.noisefilter`) when one can be had.
         """
+        if NOISE_FILTER:
+            self.noise_filter.start()
         try:
-            with suppressed_c_stderr():
+            with suppressed_c_stderr(), self.noise_filter.selected():
                 self.stream = self.audio.open(
                     format=pyaudio.paInt16,
                     channels=1,
@@ -399,15 +407,16 @@ class EasySpeak:
     def _close_stream(self):
         """Release the microphone so other apps see it as free.
 
-        Also clears GNOME's privacy mic indicator. The PyAudio instance is kept for
+        Also clears GNOME's privacy mic indicator. The noise filter holds the
+        microphone as well, so it goes too. The PyAudio instance is kept for
         reopening.
         """
-        if self.stream is None:
-            return
-        for release in (self.stream.stop_stream, self.stream.close):
-            with contextlib.suppress(OSError):
-                release()
-        self.stream = None
+        if self.stream is not None:
+            for release in (self.stream.stop_stream, self.stream.close):
+                with contextlib.suppress(OSError):
+                    release()
+            self.stream = None
+        self.noise_filter.stop()
 
     def flush_stream(self):
         """Flush any remaining audio data from the stream buffer."""
@@ -997,5 +1006,6 @@ class EasySpeak:
             if self.stream is not None:
                 self.stream.stop_stream()
                 self.stream.close()
+            self.noise_filter.stop()
             if self.audio is not None:
                 self.audio.terminate()

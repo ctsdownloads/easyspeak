@@ -2106,6 +2106,38 @@ class TestOpenStream:
         )
         easy.speech.drain.assert_called_once()
 
+    @patch("easyspeak.core.main.NOISE_FILTER", new=True)
+    def test_open_stream_goes_through_the_noise_filter(self):
+        """With the filter on, it starts first and the stream opens through it."""
+        easy = EasySpeak()
+        easy.audio = Mock()
+        easy.noise_filter = MagicMock()
+
+        easy._open_stream()
+
+        easy.noise_filter.start.assert_called_once_with()
+        easy.noise_filter.selected.assert_called_once_with()
+
+    def test_open_stream_without_the_noise_filter(self):
+        """With the filter off, nothing is started."""
+        easy = EasySpeak()
+        easy.audio = Mock()
+        easy.noise_filter = MagicMock()
+
+        easy._open_stream()
+
+        easy.noise_filter.start.assert_not_called()
+
+    def test_close_stream_stops_the_noise_filter(self):
+        """Releasing the mic stops the filter too, since it holds the mic as well."""
+        easy = EasySpeak()
+        easy.stream = Mock()
+        easy.noise_filter = Mock()
+
+        easy._close_stream()
+
+        easy.noise_filter.stop.assert_called_once_with()
+
 
 class TestWaitForWake:
     """The single wake-word listen a wake-gated mode runs before each command."""

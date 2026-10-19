@@ -36,6 +36,15 @@ def _skip_silence_calibration(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def _no_noise_filter(monkeypatch):
+    """Open the microphone directly, without starting a real `pw-cli` filter.
+
+    The filter's own behaviour is covered in test_noisefilter.
+    """
+    monkeypatch.setattr(main_module, "NOISE_FILTER", False)
+
+
+@pytest.fixture(autouse=True)
 def _silence_desktop_sounds(monkeypatch, tmp_path_factory):
     """Keep the suite from chiming through the speakers.
 
