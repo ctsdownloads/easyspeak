@@ -12,6 +12,8 @@ rather than audio leaving a speaker.
 import sys
 from unittest.mock import MagicMock
 
+import pytest
+
 # easyspeak.core imports pyaudio/pyopen_wakeword/faster_whisper at load time; stub
 # them so importing EasySpeak doesn't require the ML/audio stack.
 sys.modules["pyaudio"] = MagicMock()
@@ -20,3 +22,11 @@ sys.modules["faster_whisper"] = MagicMock()
 sys.modules["faster_whisper.tokenizer"] = MagicMock(
     _LANGUAGE_CODES=("en", "de", "it", "fr", "es", "pt", "nl")
 )
+
+from easyspeak.core import main  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _no_noise_filter(monkeypatch):
+    """Open the microphone directly: these scenarios stub the processes it starts."""
+    monkeypatch.setattr(main, "NOISE_FILTER", False)
