@@ -1,0 +1,9 @@
+# Qué decir, en español. Las frases se comparan como palabras enteras con la
+# transcripción en minúsculas de Whisper; las confusiones frecuentes también van aquí.
+
+[commands]
+wifi = ["wi-fi", "wifi"]
+airplane = ["modo avión"]
+bluetooth = ["bluetooth"]
+on = ["activa", "activar", "enciende"]
+off = ["desactiva", "desactivar", "apaga"]
