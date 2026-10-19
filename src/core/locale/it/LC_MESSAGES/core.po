@@ -39,6 +39,9 @@ msgstr "Esco da {label}. Di' {wake_word_spoken} per continuare."
 msgid "Sorry, I couldn't open the documentation page."
 msgstr "Mi dispiace, non sono riuscito ad aprire la documentazione."
 
+msgid "Sorry, I didn't catch that."
+msgstr "Mi dispiace, non ho capito bene."
+
 msgid "Sorry, I didn't understand."
 msgstr "Mi dispiace, non ho capito."
 

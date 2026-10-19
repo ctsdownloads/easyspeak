@@ -37,6 +37,9 @@ msgstr "Je quitte {label}. Dites {wake_word_spoken} pour continuer."
 msgid "Sorry, I couldn't open the documentation page."
 msgstr "Désolé, je n'ai pas pu ouvrir la documentation."
 
+msgid "Sorry, I didn't catch that."
+msgstr "Désolé, ça m'a échappé."
+
 msgid "Sorry, I didn't understand."
 msgstr "Désolé, je n'ai pas compris."
 
