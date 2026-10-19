@@ -490,7 +490,7 @@ def parse_tab_number(cmd_lower):
 def parse_spoken_url(spoken):
     """Convert spoken URL to actual URL.
 
-    'claude dot ai' -> 'https://claude.ai'.
+    'example dot io' -> 'https://example.io'.
     """
     url = spoken.lower().strip()
 
