@@ -1,0 +1,46 @@
+# French translations for EasySpeak.
+# Copyright (C) 2026 EasySpeak contributors
+# This file is distributed under the same license as the EasySpeak project.
+msgid ""
+msgstr ""
+"Project-Id-Version: EasySpeak\n"
+"Report-Msgid-Bugs-To: https://github.com/ctsdownloads/easyspeak/issues\n"
+"POT-Creation-Date: 2026-09-12 19:14+0200\n"
+"PO-Revision-Date: 2026-09-12 19:14+0200\n"
+"Last-Translator: EasySpeak contributors\n"
+"Language: fr\n"
+"Language-Team: French\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Airplane mode off."
+msgstr "Mode avion désactivé."
+
+msgid "Airplane mode on."
+msgstr "Mode avion activé."
+
+msgid "Bluetooth off."
+msgstr "Bluetooth désactivé."
+
+msgid "Bluetooth on."
+msgstr "Bluetooth activé."
+
+msgid "Sorry, I couldn't change that."
+msgstr "Désolé, impossible de le changer."
+
+msgid "Wi-Fi off."
+msgstr "Wi-Fi désactivé."
+
+msgid "Wi-Fi on."
+msgstr "Wi-Fi activé."
+
+msgid "turn Bluetooth on or off"
+msgstr "activer/désactiver le Bluetooth"
+
+msgid "turn Wi-Fi on or off"
+msgstr "activer/désactiver le Wi-Fi"
+
+msgid "turn airplane mode on or off"
+msgstr "activer/désactiver le mode avion"

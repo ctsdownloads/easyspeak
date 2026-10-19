@@ -5,11 +5,12 @@ time to print the full list to the terminal.
 
 This page lists the English commands, which work in every language. With
 `EASYSPEAK_LANGUAGE` set to German, Italian, French or Spanish, the general,
-app, folder, media, sleep and system commands also take that language's words
-("öffne den Rechner", "lauter", "geh schlafen"), and the terminal help lists
-them in those words, described in that language; each plugin's words are its
-`locale/<language>/vocabulary.toml`. The grid, browser and head-tracking modes
-still take English words only, and the help shows them so.
+app, folder, media, sleep, system and connectivity commands also take that
+language's words ("öffne den Rechner", "lauter", "geh schlafen"), and the
+terminal help lists them in those words, described in that language; each
+plugin's words are its `locale/<language>/vocabulary.toml`. The grid, browser
+and head-tracking modes still take English words only, and the help shows them
+so.
 
 ## Mouse grid
 
@@ -243,6 +244,17 @@ Folders open in whatever file manager your desktop is configured for (via
 
 Volume changes are silent — GNOME's own on-screen display and chime acknowledge
 them.
+
+## Wi-Fi, Bluetooth and airplane mode
+
+| Command | Action |
+|---------|--------|
+| wifi on/off (or wireless on/off) | Turn Wi-Fi on or off |
+| airplane mode on/off (or flight mode) | Turn airplane mode on or off |
+| bluetooth on/off | Turn Bluetooth on or off |
+
+EasySpeak says what it changed, or that it couldn't change it. Airplane mode and
+Bluetooth use GNOME's own switches, so on KDE Plasma only Wi-Fi works.
 
 ## Speakers playing audio
 

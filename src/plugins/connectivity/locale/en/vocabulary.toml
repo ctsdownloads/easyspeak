@@ -1,0 +1,9 @@
+# What to say, in English. Phrases are matched as whole words against
+# Whisper's lowercased transcript, so common mishearings belong here too.
+
+[commands]
+wifi = ["wi-fi", "wifi", "wi fi", "wireless"]
+airplane = ["airplane mode", "aeroplane mode", "flight mode"]
+bluetooth = ["bluetooth", "blue tooth"]
+on = ["on", "enable"]
+off = ["off", "disable"]

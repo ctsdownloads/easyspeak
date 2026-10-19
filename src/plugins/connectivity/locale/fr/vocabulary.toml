@@ -1,0 +1,9 @@
+# Ce que l'on dit, en français. Les mots sont comparés en mots entiers à la
+# transcription en minuscules de Whisper ; les confusions fréquentes en font partie.
+
+[commands]
+wifi = ["wi-fi", "wifi"]
+airplane = ["mode avion"]
+bluetooth = ["bluetooth"]
+on = ["active", "activer", "allume"]
+off = ["désactive", "désactiver", "éteins", "coupe"]

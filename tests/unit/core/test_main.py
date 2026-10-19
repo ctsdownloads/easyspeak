@@ -287,6 +287,7 @@ class TestEasySpeakPlugins:
             "apps",
             "base",
             "browser",
+            "connectivity",
             "dictation",
             "files",
             "headtrack",

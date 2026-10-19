@@ -1,0 +1,9 @@
+# Was man sagt, auf Deutsch. Die Wörter werden als ganze Wörter mit Whispers
+# kleingeschriebener Abschrift verglichen; häufige Verhörer gehören also dazu.
+
+[commands]
+wifi = ["wlan", "wi-fi", "wifi"]
+airplane = ["flugmodus", "flugzeugmodus"]
+bluetooth = ["bluetooth"]
+on = ["an", "ein", "einschalten", "aktivieren"]
+off = ["aus", "ausschalten", "deaktivieren"]
