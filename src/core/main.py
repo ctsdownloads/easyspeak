@@ -96,6 +96,12 @@ def strip_wake_words(cmd):
     return cmd.strip(".,!? ")
 
 
+def _mean_level(samples):
+    """Mean absolute amplitude of a chunk of int16 samples."""
+    # Widened first: abs(-32768) does not fit in int16 and comes back negative.
+    return np.abs(samples.astype(np.int32)).mean()
+
+
 # =============================================================================
 # CORE CLASS
 # =============================================================================
@@ -438,7 +444,7 @@ class EasySpeak:
         for _tick in range(int(SILENCE_CALIBRATION_SECONDS * 16000 / 1600)):
             with contextlib.suppress(Exception):
                 pcm = self.stream.read(1600, exception_on_overflow=False)
-                chunks.append(np.abs(np.frombuffer(pcm, dtype=np.int16)).mean())
+                chunks.append(_mean_level(np.frombuffer(pcm, dtype=np.int16)))
 
         if not chunks:
             return  # no audio to measure; the floor stands
@@ -458,7 +464,7 @@ class EasySpeak:
 
     def is_silence(self, audio_chunk):
         """Return True if the audio chunk's mean amplitude is below the threshold."""
-        return np.abs(audio_chunk).mean() < self.silence_threshold
+        return _mean_level(audio_chunk) < self.silence_threshold
 
     def record_until_silence(
         self, should_continue=None, max_seconds=None, silence_duration=None

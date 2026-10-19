@@ -143,7 +143,7 @@ def test_parse_hint_number_no_numbers():
 @pytest.mark.parametrize(
     ["spoken_url", "expected"],
     [
-        ("claude dot ai", "https://claude.ai"),
+        ("example dot io", "https://example.io"),
         ("github dot com", "https://github.com"),
         ("example dot com slash page", "https://example.com/page"),
         ("test dash site dot com", "https://test-site.com"),
@@ -162,7 +162,7 @@ def test_parse_spoken_url(spoken_url, expected):
 @pytest.mark.parametrize(
     ["spoken_url", "expected"],
     [
-        ("CLAUDE DOT AI", "https://claude.ai"),
+        ("EXAMPLE DOT IO", "https://example.io"),
         ("GitHub Dot Com", "https://github.com"),
     ],
 )
@@ -479,7 +479,7 @@ def test_handle_browser_command_bookmarks(mock_qb_open, command, site, url, mock
 @pytest.mark.parametrize(
     ["command", "expected_url"],
     [
-        ["go to claude dot ai", "https://claude.ai"],
+        ["go to example dot io", "https://example.io"],
         ["go to example dot com", "https://example.com"],
         ["open test dot org", "https://test.org"],
     ],

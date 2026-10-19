@@ -687,6 +687,22 @@ class TestSilenceCalibration:
 
         assert easy.is_silence(room) is np.True_
 
+    def test_full_scale_negative_samples_read_as_loud(self, easy, monkeypatch):
+        """abs() of an int16 -32768 stays negative unless widened."""
+        monkeypatch.delenv("EASYSPEAK_SILENCE_THRESHOLD", raising=False)
+        easy.stream.read = Mock(return_value=self._room(-32768))
+
+        easy.calibrate_silence()
+
+        assert easy.silence_threshold == main.SILENCE_THRESHOLD_MAX
+
+    def test_a_clipped_chunk_is_not_silence(self, easy):
+        """Clipped speech must not end a recording as if the room went quiet."""
+        easy.silence_threshold = 1000
+        clipped = np.full(1600, -32768, dtype=np.int16)
+
+        assert easy.is_silence(clipped) is np.False_
+
 
 class TestSilentExits:
     """No way out of a mode should leave the user guessing."""
