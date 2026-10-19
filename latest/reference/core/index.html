@@ -5669,269 +5669,269 @@ the microphone and draining speech on the way out.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/core/main.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-864">864</a></span>
-<span class="normal"><a href="#__codelineno-0-865">865</a></span>
-<span class="normal"><a href="#__codelineno-0-866">866</a></span>
-<span class="normal"><a href="#__codelineno-0-867">867</a></span>
-<span class="normal"><a href="#__codelineno-0-868">868</a></span>
-<span class="normal"><a href="#__codelineno-0-869">869</a></span>
-<span class="normal"><a href="#__codelineno-0-870">870</a></span>
-<span class="normal"><a href="#__codelineno-0-871">871</a></span>
-<span class="normal"><a href="#__codelineno-0-872">872</a></span>
-<span class="normal"><a href="#__codelineno-0-873">873</a></span>
-<span class="normal"><a href="#__codelineno-0-874">874</a></span>
-<span class="normal"><a href="#__codelineno-0-875">875</a></span>
-<span class="normal"><a href="#__codelineno-0-876">876</a></span>
-<span class="normal"><a href="#__codelineno-0-877">877</a></span>
-<span class="normal"><a href="#__codelineno-0-878">878</a></span>
-<span class="normal"><a href="#__codelineno-0-879">879</a></span>
-<span class="normal"><a href="#__codelineno-0-880">880</a></span>
-<span class="normal"><a href="#__codelineno-0-881">881</a></span>
-<span class="normal"><a href="#__codelineno-0-882">882</a></span>
-<span class="normal"><a href="#__codelineno-0-883">883</a></span>
-<span class="normal"><a href="#__codelineno-0-884">884</a></span>
-<span class="normal"><a href="#__codelineno-0-885">885</a></span>
-<span class="normal"><a href="#__codelineno-0-886">886</a></span>
-<span class="normal"><a href="#__codelineno-0-887">887</a></span>
-<span class="normal"><a href="#__codelineno-0-888">888</a></span>
-<span class="normal"><a href="#__codelineno-0-889">889</a></span>
-<span class="normal"><a href="#__codelineno-0-890">890</a></span>
-<span class="normal"><a href="#__codelineno-0-891">891</a></span>
-<span class="normal"><a href="#__codelineno-0-892">892</a></span>
-<span class="normal"><a href="#__codelineno-0-893">893</a></span>
-<span class="normal"><a href="#__codelineno-0-894">894</a></span>
-<span class="normal"><a href="#__codelineno-0-895">895</a></span>
-<span class="normal"><a href="#__codelineno-0-896">896</a></span>
-<span class="normal"><a href="#__codelineno-0-897">897</a></span>
-<span class="normal"><a href="#__codelineno-0-898">898</a></span>
-<span class="normal"><a href="#__codelineno-0-899">899</a></span>
-<span class="normal"><a href="#__codelineno-0-900">900</a></span>
-<span class="normal"><a href="#__codelineno-0-901">901</a></span>
-<span class="normal"><a href="#__codelineno-0-902">902</a></span>
-<span class="normal"><a href="#__codelineno-0-903">903</a></span>
-<span class="normal"><a href="#__codelineno-0-904">904</a></span>
-<span class="normal"><a href="#__codelineno-0-905">905</a></span>
-<span class="normal"><a href="#__codelineno-0-906">906</a></span>
-<span class="normal"><a href="#__codelineno-0-907">907</a></span>
-<span class="normal"><a href="#__codelineno-0-908">908</a></span>
-<span class="normal"><a href="#__codelineno-0-909">909</a></span>
-<span class="normal"><a href="#__codelineno-0-910">910</a></span>
-<span class="normal"><a href="#__codelineno-0-911">911</a></span>
-<span class="normal"><a href="#__codelineno-0-912">912</a></span>
-<span class="normal"><a href="#__codelineno-0-913">913</a></span>
-<span class="normal"><a href="#__codelineno-0-914">914</a></span>
-<span class="normal"><a href="#__codelineno-0-915">915</a></span>
-<span class="normal"><a href="#__codelineno-0-916">916</a></span>
-<span class="normal"><a href="#__codelineno-0-917">917</a></span>
-<span class="normal"><a href="#__codelineno-0-918">918</a></span>
-<span class="normal"><a href="#__codelineno-0-919">919</a></span>
-<span class="normal"><a href="#__codelineno-0-920">920</a></span>
-<span class="normal"><a href="#__codelineno-0-921">921</a></span>
-<span class="normal"><a href="#__codelineno-0-922">922</a></span>
-<span class="normal"><a href="#__codelineno-0-923">923</a></span>
-<span class="normal"><a href="#__codelineno-0-924">924</a></span>
-<span class="normal"><a href="#__codelineno-0-925">925</a></span>
-<span class="normal"><a href="#__codelineno-0-926">926</a></span>
-<span class="normal"><a href="#__codelineno-0-927">927</a></span>
-<span class="normal"><a href="#__codelineno-0-928">928</a></span>
-<span class="normal"><a href="#__codelineno-0-929">929</a></span>
-<span class="normal"><a href="#__codelineno-0-930">930</a></span>
-<span class="normal"><a href="#__codelineno-0-931">931</a></span>
-<span class="normal"><a href="#__codelineno-0-932">932</a></span>
-<span class="normal"><a href="#__codelineno-0-933">933</a></span>
-<span class="normal"><a href="#__codelineno-0-934">934</a></span>
-<span class="normal"><a href="#__codelineno-0-935">935</a></span>
-<span class="normal"><a href="#__codelineno-0-936">936</a></span>
-<span class="normal"><a href="#__codelineno-0-937">937</a></span>
-<span class="normal"><a href="#__codelineno-0-938">938</a></span>
-<span class="normal"><a href="#__codelineno-0-939">939</a></span>
-<span class="normal"><a href="#__codelineno-0-940">940</a></span>
-<span class="normal"><a href="#__codelineno-0-941">941</a></span>
-<span class="normal"><a href="#__codelineno-0-942">942</a></span>
-<span class="normal"><a href="#__codelineno-0-943">943</a></span>
-<span class="normal"><a href="#__codelineno-0-944">944</a></span>
-<span class="normal"><a href="#__codelineno-0-945">945</a></span>
-<span class="normal"><a href="#__codelineno-0-946">946</a></span>
-<span class="normal"><a href="#__codelineno-0-947">947</a></span>
-<span class="normal"><a href="#__codelineno-0-948">948</a></span>
-<span class="normal"><a href="#__codelineno-0-949">949</a></span>
-<span class="normal"><a href="#__codelineno-0-950">950</a></span>
-<span class="normal"><a href="#__codelineno-0-951">951</a></span>
-<span class="normal"><a href="#__codelineno-0-952">952</a></span>
-<span class="normal"><a href="#__codelineno-0-953">953</a></span>
-<span class="normal"><a href="#__codelineno-0-954">954</a></span>
-<span class="normal"><a href="#__codelineno-0-955">955</a></span>
-<span class="normal"><a href="#__codelineno-0-956">956</a></span>
-<span class="normal"><a href="#__codelineno-0-957">957</a></span>
-<span class="normal"><a href="#__codelineno-0-958">958</a></span>
-<span class="normal"><a href="#__codelineno-0-959">959</a></span>
-<span class="normal"><a href="#__codelineno-0-960">960</a></span>
-<span class="normal"><a href="#__codelineno-0-961">961</a></span>
-<span class="normal"><a href="#__codelineno-0-962">962</a></span>
-<span class="normal"><a href="#__codelineno-0-963">963</a></span>
-<span class="normal"><a href="#__codelineno-0-964">964</a></span>
-<span class="normal"><a href="#__codelineno-0-965">965</a></span>
-<span class="normal"><a href="#__codelineno-0-966">966</a></span>
-<span class="normal"><a href="#__codelineno-0-967">967</a></span>
-<span class="normal"><a href="#__codelineno-0-968">968</a></span>
-<span class="normal"><a href="#__codelineno-0-969">969</a></span>
-<span class="normal"><a href="#__codelineno-0-970">970</a></span>
-<span class="normal"><a href="#__codelineno-0-971">971</a></span>
-<span class="normal"><a href="#__codelineno-0-972">972</a></span>
-<span class="normal"><a href="#__codelineno-0-973">973</a></span>
-<span class="normal"><a href="#__codelineno-0-974">974</a></span>
-<span class="normal"><a href="#__codelineno-0-975">975</a></span>
-<span class="normal"><a href="#__codelineno-0-976">976</a></span>
-<span class="normal"><a href="#__codelineno-0-977">977</a></span>
-<span class="normal"><a href="#__codelineno-0-978">978</a></span>
-<span class="normal"><a href="#__codelineno-0-979">979</a></span>
-<span class="normal"><a href="#__codelineno-0-980">980</a></span>
-<span class="normal"><a href="#__codelineno-0-981">981</a></span>
-<span class="normal"><a href="#__codelineno-0-982">982</a></span>
-<span class="normal"><a href="#__codelineno-0-983">983</a></span>
-<span class="normal"><a href="#__codelineno-0-984">984</a></span>
-<span class="normal"><a href="#__codelineno-0-985">985</a></span>
-<span class="normal"><a href="#__codelineno-0-986">986</a></span>
-<span class="normal"><a href="#__codelineno-0-987">987</a></span>
-<span class="normal"><a href="#__codelineno-0-988">988</a></span>
-<span class="normal"><a href="#__codelineno-0-989">989</a></span>
-<span class="normal"><a href="#__codelineno-0-990">990</a></span>
-<span class="normal"><a href="#__codelineno-0-991">991</a></span>
-<span class="normal"><a href="#__codelineno-0-992">992</a></span>
-<span class="normal"><a href="#__codelineno-0-993">993</a></span>
-<span class="normal"><a href="#__codelineno-0-994">994</a></span>
-<span class="normal"><a href="#__codelineno-0-995">995</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-864" name="__codelineno-0-864"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-865" name="__codelineno-0-865"></a><span class="w">        </span><span class="sd">"""Load models and plugins, then run the wake-word listen loop forever.</span>
-<a id="__codelineno-0-866" name="__codelineno-0-866"></a>
-<a id="__codelineno-0-867" name="__codelineno-0-867"></a><span class="sd">        Blocks until the user quits (voice command, tray, or Ctrl-C), always releasing</span>
-<a id="__codelineno-0-868" name="__codelineno-0-868"></a><span class="sd">        the microphone and draining speech on the way out.</span>
-<a id="__codelineno-0-869" name="__codelineno-0-869"></a><span class="sd">        """</span>
-<a id="__codelineno-0-870" name="__codelineno-0-870"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Loading OpenWakeWord..."</span><span class="p">)</span>
-<a id="__codelineno-0-871" name="__codelineno-0-871"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">wakeword</span> <span class="o">=</span> <span class="n">WakeWordModel</span><span class="p">()</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-870"> 870</a></span>
+<span class="normal"><a href="#__codelineno-0-871"> 871</a></span>
+<span class="normal"><a href="#__codelineno-0-872"> 872</a></span>
+<span class="normal"><a href="#__codelineno-0-873"> 873</a></span>
+<span class="normal"><a href="#__codelineno-0-874"> 874</a></span>
+<span class="normal"><a href="#__codelineno-0-875"> 875</a></span>
+<span class="normal"><a href="#__codelineno-0-876"> 876</a></span>
+<span class="normal"><a href="#__codelineno-0-877"> 877</a></span>
+<span class="normal"><a href="#__codelineno-0-878"> 878</a></span>
+<span class="normal"><a href="#__codelineno-0-879"> 879</a></span>
+<span class="normal"><a href="#__codelineno-0-880"> 880</a></span>
+<span class="normal"><a href="#__codelineno-0-881"> 881</a></span>
+<span class="normal"><a href="#__codelineno-0-882"> 882</a></span>
+<span class="normal"><a href="#__codelineno-0-883"> 883</a></span>
+<span class="normal"><a href="#__codelineno-0-884"> 884</a></span>
+<span class="normal"><a href="#__codelineno-0-885"> 885</a></span>
+<span class="normal"><a href="#__codelineno-0-886"> 886</a></span>
+<span class="normal"><a href="#__codelineno-0-887"> 887</a></span>
+<span class="normal"><a href="#__codelineno-0-888"> 888</a></span>
+<span class="normal"><a href="#__codelineno-0-889"> 889</a></span>
+<span class="normal"><a href="#__codelineno-0-890"> 890</a></span>
+<span class="normal"><a href="#__codelineno-0-891"> 891</a></span>
+<span class="normal"><a href="#__codelineno-0-892"> 892</a></span>
+<span class="normal"><a href="#__codelineno-0-893"> 893</a></span>
+<span class="normal"><a href="#__codelineno-0-894"> 894</a></span>
+<span class="normal"><a href="#__codelineno-0-895"> 895</a></span>
+<span class="normal"><a href="#__codelineno-0-896"> 896</a></span>
+<span class="normal"><a href="#__codelineno-0-897"> 897</a></span>
+<span class="normal"><a href="#__codelineno-0-898"> 898</a></span>
+<span class="normal"><a href="#__codelineno-0-899"> 899</a></span>
+<span class="normal"><a href="#__codelineno-0-900"> 900</a></span>
+<span class="normal"><a href="#__codelineno-0-901"> 901</a></span>
+<span class="normal"><a href="#__codelineno-0-902"> 902</a></span>
+<span class="normal"><a href="#__codelineno-0-903"> 903</a></span>
+<span class="normal"><a href="#__codelineno-0-904"> 904</a></span>
+<span class="normal"><a href="#__codelineno-0-905"> 905</a></span>
+<span class="normal"><a href="#__codelineno-0-906"> 906</a></span>
+<span class="normal"><a href="#__codelineno-0-907"> 907</a></span>
+<span class="normal"><a href="#__codelineno-0-908"> 908</a></span>
+<span class="normal"><a href="#__codelineno-0-909"> 909</a></span>
+<span class="normal"><a href="#__codelineno-0-910"> 910</a></span>
+<span class="normal"><a href="#__codelineno-0-911"> 911</a></span>
+<span class="normal"><a href="#__codelineno-0-912"> 912</a></span>
+<span class="normal"><a href="#__codelineno-0-913"> 913</a></span>
+<span class="normal"><a href="#__codelineno-0-914"> 914</a></span>
+<span class="normal"><a href="#__codelineno-0-915"> 915</a></span>
+<span class="normal"><a href="#__codelineno-0-916"> 916</a></span>
+<span class="normal"><a href="#__codelineno-0-917"> 917</a></span>
+<span class="normal"><a href="#__codelineno-0-918"> 918</a></span>
+<span class="normal"><a href="#__codelineno-0-919"> 919</a></span>
+<span class="normal"><a href="#__codelineno-0-920"> 920</a></span>
+<span class="normal"><a href="#__codelineno-0-921"> 921</a></span>
+<span class="normal"><a href="#__codelineno-0-922"> 922</a></span>
+<span class="normal"><a href="#__codelineno-0-923"> 923</a></span>
+<span class="normal"><a href="#__codelineno-0-924"> 924</a></span>
+<span class="normal"><a href="#__codelineno-0-925"> 925</a></span>
+<span class="normal"><a href="#__codelineno-0-926"> 926</a></span>
+<span class="normal"><a href="#__codelineno-0-927"> 927</a></span>
+<span class="normal"><a href="#__codelineno-0-928"> 928</a></span>
+<span class="normal"><a href="#__codelineno-0-929"> 929</a></span>
+<span class="normal"><a href="#__codelineno-0-930"> 930</a></span>
+<span class="normal"><a href="#__codelineno-0-931"> 931</a></span>
+<span class="normal"><a href="#__codelineno-0-932"> 932</a></span>
+<span class="normal"><a href="#__codelineno-0-933"> 933</a></span>
+<span class="normal"><a href="#__codelineno-0-934"> 934</a></span>
+<span class="normal"><a href="#__codelineno-0-935"> 935</a></span>
+<span class="normal"><a href="#__codelineno-0-936"> 936</a></span>
+<span class="normal"><a href="#__codelineno-0-937"> 937</a></span>
+<span class="normal"><a href="#__codelineno-0-938"> 938</a></span>
+<span class="normal"><a href="#__codelineno-0-939"> 939</a></span>
+<span class="normal"><a href="#__codelineno-0-940"> 940</a></span>
+<span class="normal"><a href="#__codelineno-0-941"> 941</a></span>
+<span class="normal"><a href="#__codelineno-0-942"> 942</a></span>
+<span class="normal"><a href="#__codelineno-0-943"> 943</a></span>
+<span class="normal"><a href="#__codelineno-0-944"> 944</a></span>
+<span class="normal"><a href="#__codelineno-0-945"> 945</a></span>
+<span class="normal"><a href="#__codelineno-0-946"> 946</a></span>
+<span class="normal"><a href="#__codelineno-0-947"> 947</a></span>
+<span class="normal"><a href="#__codelineno-0-948"> 948</a></span>
+<span class="normal"><a href="#__codelineno-0-949"> 949</a></span>
+<span class="normal"><a href="#__codelineno-0-950"> 950</a></span>
+<span class="normal"><a href="#__codelineno-0-951"> 951</a></span>
+<span class="normal"><a href="#__codelineno-0-952"> 952</a></span>
+<span class="normal"><a href="#__codelineno-0-953"> 953</a></span>
+<span class="normal"><a href="#__codelineno-0-954"> 954</a></span>
+<span class="normal"><a href="#__codelineno-0-955"> 955</a></span>
+<span class="normal"><a href="#__codelineno-0-956"> 956</a></span>
+<span class="normal"><a href="#__codelineno-0-957"> 957</a></span>
+<span class="normal"><a href="#__codelineno-0-958"> 958</a></span>
+<span class="normal"><a href="#__codelineno-0-959"> 959</a></span>
+<span class="normal"><a href="#__codelineno-0-960"> 960</a></span>
+<span class="normal"><a href="#__codelineno-0-961"> 961</a></span>
+<span class="normal"><a href="#__codelineno-0-962"> 962</a></span>
+<span class="normal"><a href="#__codelineno-0-963"> 963</a></span>
+<span class="normal"><a href="#__codelineno-0-964"> 964</a></span>
+<span class="normal"><a href="#__codelineno-0-965"> 965</a></span>
+<span class="normal"><a href="#__codelineno-0-966"> 966</a></span>
+<span class="normal"><a href="#__codelineno-0-967"> 967</a></span>
+<span class="normal"><a href="#__codelineno-0-968"> 968</a></span>
+<span class="normal"><a href="#__codelineno-0-969"> 969</a></span>
+<span class="normal"><a href="#__codelineno-0-970"> 970</a></span>
+<span class="normal"><a href="#__codelineno-0-971"> 971</a></span>
+<span class="normal"><a href="#__codelineno-0-972"> 972</a></span>
+<span class="normal"><a href="#__codelineno-0-973"> 973</a></span>
+<span class="normal"><a href="#__codelineno-0-974"> 974</a></span>
+<span class="normal"><a href="#__codelineno-0-975"> 975</a></span>
+<span class="normal"><a href="#__codelineno-0-976"> 976</a></span>
+<span class="normal"><a href="#__codelineno-0-977"> 977</a></span>
+<span class="normal"><a href="#__codelineno-0-978"> 978</a></span>
+<span class="normal"><a href="#__codelineno-0-979"> 979</a></span>
+<span class="normal"><a href="#__codelineno-0-980"> 980</a></span>
+<span class="normal"><a href="#__codelineno-0-981"> 981</a></span>
+<span class="normal"><a href="#__codelineno-0-982"> 982</a></span>
+<span class="normal"><a href="#__codelineno-0-983"> 983</a></span>
+<span class="normal"><a href="#__codelineno-0-984"> 984</a></span>
+<span class="normal"><a href="#__codelineno-0-985"> 985</a></span>
+<span class="normal"><a href="#__codelineno-0-986"> 986</a></span>
+<span class="normal"><a href="#__codelineno-0-987"> 987</a></span>
+<span class="normal"><a href="#__codelineno-0-988"> 988</a></span>
+<span class="normal"><a href="#__codelineno-0-989"> 989</a></span>
+<span class="normal"><a href="#__codelineno-0-990"> 990</a></span>
+<span class="normal"><a href="#__codelineno-0-991"> 991</a></span>
+<span class="normal"><a href="#__codelineno-0-992"> 992</a></span>
+<span class="normal"><a href="#__codelineno-0-993"> 993</a></span>
+<span class="normal"><a href="#__codelineno-0-994"> 994</a></span>
+<span class="normal"><a href="#__codelineno-0-995"> 995</a></span>
+<span class="normal"><a href="#__codelineno-0-996"> 996</a></span>
+<span class="normal"><a href="#__codelineno-0-997"> 997</a></span>
+<span class="normal"><a href="#__codelineno-0-998"> 998</a></span>
+<span class="normal"><a href="#__codelineno-0-999"> 999</a></span>
+<span class="normal"><a href="#__codelineno-0-1000">1000</a></span>
+<span class="normal"><a href="#__codelineno-0-1001">1001</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-870" name="__codelineno-0-870"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-0-871" name="__codelineno-0-871"></a><span class="w">        </span><span class="sd">"""Load models and plugins, then run the wake-word listen loop forever.</span>
 <a id="__codelineno-0-872" name="__codelineno-0-872"></a>
-<a id="__codelineno-0-873" name="__codelineno-0-873"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-874" name="__codelineno-0-874"></a>            <span class="k">if</span> <span class="n">STT</span> <span class="o">==</span> <span class="s2">"parakeet"</span><span class="p">:</span>
-<a id="__codelineno-0-875" name="__codelineno-0-875"></a>                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-<a id="__codelineno-0-876" name="__codelineno-0-876"></a>                    <span class="s2">"Loading Parakeet (</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">, language=</span><span class="si">%s</span><span class="s2">)..."</span><span class="p">,</span>
-<a id="__codelineno-0-877" name="__codelineno-0-877"></a>                    <span class="n">PARAKEET_MODEL</span><span class="p">,</span>
-<a id="__codelineno-0-878" name="__codelineno-0-878"></a>                    <span class="n">PARAKEET_QUANTIZATION</span><span class="p">,</span>
-<a id="__codelineno-0-879" name="__codelineno-0-879"></a>                    <span class="n">LANGUAGE</span><span class="p">,</span>
-<a id="__codelineno-0-880" name="__codelineno-0-880"></a>                <span class="p">)</span>
-<a id="__codelineno-0-881" name="__codelineno-0-881"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">parakeet</span> <span class="o">=</span> <span class="n">load_parakeet_model</span><span class="p">()</span>
-<a id="__codelineno-0-882" name="__codelineno-0-882"></a>            <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-883" name="__codelineno-0-883"></a>                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-<a id="__codelineno-0-884" name="__codelineno-0-884"></a>                    <span class="s2">"Loading Whisper (</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">, language=</span><span class="si">%s</span><span class="s2">, cpu_threads=</span><span class="si">%s</span><span class="s2">)..."</span><span class="p">,</span>
-<a id="__codelineno-0-885" name="__codelineno-0-885"></a>                    <span class="n">WHISPER_MODEL</span><span class="p">,</span>
-<a id="__codelineno-0-886" name="__codelineno-0-886"></a>                    <span class="n">WHISPER_COMPUTE_TYPE</span><span class="p">,</span>
-<a id="__codelineno-0-887" name="__codelineno-0-887"></a>                    <span class="n">LANGUAGE</span><span class="p">,</span>
-<a id="__codelineno-0-888" name="__codelineno-0-888"></a>                    <span class="n">WHISPER_CPU_THREADS</span> <span class="ow">or</span> <span class="s2">"auto"</span><span class="p">,</span>
-<a id="__codelineno-0-889" name="__codelineno-0-889"></a>                <span class="p">)</span>
-<a id="__codelineno-0-890" name="__codelineno-0-890"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">whisper</span> <span class="o">=</span> <span class="n">load_whisper_model</span><span class="p">()</span>
-<a id="__codelineno-0-891" name="__codelineno-0-891"></a>        <span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-<a id="__codelineno-0-892" name="__codelineno-0-892"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Cannot start EasySpeak: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>  <span class="c1"># noqa: TRY400</span>
-<a id="__codelineno-0-893" name="__codelineno-0-893"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
-<a id="__codelineno-0-894" name="__codelineno-0-894"></a>        <span class="k">for</span> <span class="n">warning</span> <span class="ow">in</span> <span class="p">(</span><span class="o">*</span><span class="n">STT_WARNINGS</span><span class="p">,</span> <span class="o">*</span><span class="n">LANGUAGE_WARNINGS</span><span class="p">):</span>
-<a id="__codelineno-0-895" name="__codelineno-0-895"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">warning</span><span class="p">)</span>
-<a id="__codelineno-0-896" name="__codelineno-0-896"></a>
-<a id="__codelineno-0-897" name="__codelineno-0-897"></a>        <span class="n">ensure_extension</span><span class="p">()</span>
-<a id="__codelineno-0-898" name="__codelineno-0-898"></a>
-<a id="__codelineno-0-899" name="__codelineno-0-899"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Loading plugins..."</span><span class="p">)</span>
-<a id="__codelineno-0-900" name="__codelineno-0-900"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">load_plugins</span><span class="p">()</span>
-<a id="__codelineno-0-901" name="__codelineno-0-901"></a>
-<a id="__codelineno-0-902" name="__codelineno-0-902"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugins</span><span class="p">:</span>
-<a id="__codelineno-0-903" name="__codelineno-0-903"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"No plugins loaded. Exiting."</span><span class="p">)</span>
-<a id="__codelineno-0-904" name="__codelineno-0-904"></a>            <span class="k">return</span>
-<a id="__codelineno-0-905" name="__codelineno-0-905"></a>
-<a id="__codelineno-0-906" name="__codelineno-0-906"></a>        <span class="c1"># Warm up the text-to-speech pipeline now so the piper model is loaded</span>
-<a id="__codelineno-0-907" name="__codelineno-0-907"></a>        <span class="c1"># during startup, not on the first spoken response.</span>
-<a id="__codelineno-0-908" name="__codelineno-0-908"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Warming up speech..."</span><span class="p">)</span>
-<a id="__codelineno-0-909" name="__codelineno-0-909"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-910" name="__codelineno-0-910"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">speech</span><span class="o">.</span><span class="n">ensure</span><span class="p">()</span>
-<a id="__codelineno-0-911" name="__codelineno-0-911"></a>        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-<a id="__codelineno-0-912" name="__codelineno-0-912"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"Speech unavailable; continuing without it."</span><span class="p">)</span>
-<a id="__codelineno-0-913" name="__codelineno-0-913"></a>
-<a id="__codelineno-0-914" name="__codelineno-0-914"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"""</span>
-<a id="__codelineno-0-915" name="__codelineno-0-915"></a><span class="s2">╔══════════════════════════════════════════╗</span>
-<a id="__codelineno-0-916" name="__codelineno-0-916"></a><span class="s2">║            EasySpeak                     ║</span>
-<a id="__codelineno-0-917" name="__codelineno-0-917"></a><span class="s2">╠══════════════════════════════════════════╣</span>
-<a id="__codelineno-0-918" name="__codelineno-0-918"></a><span class="s2">║  Wake word: "Hey Jarvis"                 ║</span>
-<a id="__codelineno-0-919" name="__codelineno-0-919"></a><span class="s2">║  Say "help" for available commands       ║</span>
-<a id="__codelineno-0-920" name="__codelineno-0-920"></a><span class="s2">╚══════════════════════════════════════════╝</span>
-<a id="__codelineno-0-921" name="__codelineno-0-921"></a><span class="s2">"""</span><span class="p">)</span>
-<a id="__codelineno-0-922" name="__codelineno-0-922"></a>
-<a id="__codelineno-0-923" name="__codelineno-0-923"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-924" name="__codelineno-0-924"></a>            <span class="k">with</span> <span class="n">suppressed_c_stderr</span><span class="p">():</span>
-<a id="__codelineno-0-925" name="__codelineno-0-925"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">audio</span> <span class="o">=</span> <span class="n">pyaudio</span><span class="o">.</span><span class="n">PyAudio</span><span class="p">()</span>
-<a id="__codelineno-0-926" name="__codelineno-0-926"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_open_stream</span><span class="p">()</span>
-<a id="__codelineno-0-927" name="__codelineno-0-927"></a>
-<a id="__codelineno-0-928" name="__codelineno-0-928"></a>            <span class="c1"># Measure the room before listening, so silence detection matches it.</span>
-<a id="__codelineno-0-929" name="__codelineno-0-929"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">calibrate_silence</span><span class="p">()</span>
-<a id="__codelineno-0-930" name="__codelineno-0-930"></a>
-<a id="__codelineno-0-931" name="__codelineno-0-931"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">tray</span><span class="o">.</span><span class="n">started</span><span class="p">()</span>
-<a id="__codelineno-0-932" name="__codelineno-0-932"></a>            <span class="c1"># Start keyboard (silent) activation; no-op if disabled or no</span>
-<a id="__codelineno-0-933" name="__codelineno-0-933"></a>            <span class="c1"># /dev/input access. Plugins have registered their handlers by now.</span>
-<a id="__codelineno-0-934" name="__codelineno-0-934"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">hotkey</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-<a id="__codelineno-0-935" name="__codelineno-0-935"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Listening for wake word..."</span><span class="p">)</span>
-<a id="__codelineno-0-936" name="__codelineno-0-936"></a>            <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-937" name="__codelineno-0-937"></a>
-<a id="__codelineno-0-938" name="__codelineno-0-938"></a>            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-<a id="__codelineno-0-939" name="__codelineno-0-939"></a>                <span class="c1"># The tray controller owns sleep/quit; it releases and reopens</span>
-<a id="__codelineno-0-940" name="__codelineno-0-940"></a>                <span class="c1"># the mic via these callbacks so this loop stays about audio.</span>
-<a id="__codelineno-0-941" name="__codelineno-0-941"></a>                <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tray</span><span class="o">.</span><span class="n">poll</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_close_stream</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_stream</span><span class="p">)</span>
-<a id="__codelineno-0-942" name="__codelineno-0-942"></a>                <span class="k">if</span> <span class="n">action</span> <span class="ow">is</span> <span class="n">TrayAction</span><span class="o">.</span><span class="n">QUIT</span><span class="p">:</span>
-<a id="__codelineno-0-943" name="__codelineno-0-943"></a>                    <span class="k">break</span>
-<a id="__codelineno-0-944" name="__codelineno-0-944"></a>                <span class="k">if</span> <span class="n">action</span> <span class="ow">is</span> <span class="n">TrayAction</span><span class="o">.</span><span class="n">RESUME</span><span class="p">:</span>
-<a id="__codelineno-0-945" name="__codelineno-0-945"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_reset_detector</span><span class="p">()</span>
-<a id="__codelineno-0-946" name="__codelineno-0-946"></a>                    <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-947" name="__codelineno-0-947"></a>                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Listening for wake word..."</span><span class="p">)</span>
-<a id="__codelineno-0-948" name="__codelineno-0-948"></a>                    <span class="k">continue</span>
-<a id="__codelineno-0-949" name="__codelineno-0-949"></a>
-<a id="__codelineno-0-950" name="__codelineno-0-950"></a>                <span class="c1"># Keyboard activation bypasses the wake word: dictate while held.</span>
-<a id="__codelineno-0-951" name="__codelineno-0-951"></a>                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hotkey</span><span class="o">.</span><span class="n">take_activation</span><span class="p">():</span>
-<a id="__codelineno-0-952" name="__codelineno-0-952"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_run_push_to_talk</span><span class="p">()</span>
-<a id="__codelineno-0-953" name="__codelineno-0-953"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_reset_detector</span><span class="p">()</span>
-<a id="__codelineno-0-954" name="__codelineno-0-954"></a>                    <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-955" name="__codelineno-0-955"></a>                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Listening for wake word..."</span><span class="p">)</span>
-<a id="__codelineno-0-956" name="__codelineno-0-956"></a>                    <span class="k">continue</span>
-<a id="__codelineno-0-957" name="__codelineno-0-957"></a>
-<a id="__codelineno-0-958" name="__codelineno-0-958"></a>                <span class="n">pcm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1280</span><span class="p">,</span> <span class="n">exception_on_overflow</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<a id="__codelineno-0-959" name="__codelineno-0-959"></a>
-<a id="__codelineno-0-960" name="__codelineno-0-960"></a>                <span class="n">audio_buffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pcm</span><span class="p">)</span>
-<a id="__codelineno-0-961" name="__codelineno-0-961"></a>                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">audio_buffer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">:</span>
-<a id="__codelineno-0-962" name="__codelineno-0-962"></a>                    <span class="n">audio_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-0-873" name="__codelineno-0-873"></a><span class="sd">        Blocks until the user quits (voice command, tray, or Ctrl-C), always releasing</span>
+<a id="__codelineno-0-874" name="__codelineno-0-874"></a><span class="sd">        the microphone and draining speech on the way out.</span>
+<a id="__codelineno-0-875" name="__codelineno-0-875"></a><span class="sd">        """</span>
+<a id="__codelineno-0-876" name="__codelineno-0-876"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Loading OpenWakeWord..."</span><span class="p">)</span>
+<a id="__codelineno-0-877" name="__codelineno-0-877"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">wakeword</span> <span class="o">=</span> <span class="n">WakeWordModel</span><span class="p">()</span>
+<a id="__codelineno-0-878" name="__codelineno-0-878"></a>
+<a id="__codelineno-0-879" name="__codelineno-0-879"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-880" name="__codelineno-0-880"></a>            <span class="k">if</span> <span class="n">STT</span> <span class="o">==</span> <span class="s2">"parakeet"</span><span class="p">:</span>
+<a id="__codelineno-0-881" name="__codelineno-0-881"></a>                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-0-882" name="__codelineno-0-882"></a>                    <span class="s2">"Loading Parakeet (</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">, language=</span><span class="si">%s</span><span class="s2">)..."</span><span class="p">,</span>
+<a id="__codelineno-0-883" name="__codelineno-0-883"></a>                    <span class="n">PARAKEET_MODEL</span><span class="p">,</span>
+<a id="__codelineno-0-884" name="__codelineno-0-884"></a>                    <span class="n">PARAKEET_QUANTIZATION</span><span class="p">,</span>
+<a id="__codelineno-0-885" name="__codelineno-0-885"></a>                    <span class="n">LANGUAGE</span><span class="p">,</span>
+<a id="__codelineno-0-886" name="__codelineno-0-886"></a>                <span class="p">)</span>
+<a id="__codelineno-0-887" name="__codelineno-0-887"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">parakeet</span> <span class="o">=</span> <span class="n">load_parakeet_model</span><span class="p">()</span>
+<a id="__codelineno-0-888" name="__codelineno-0-888"></a>            <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-889" name="__codelineno-0-889"></a>                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-0-890" name="__codelineno-0-890"></a>                    <span class="s2">"Loading Whisper (</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">, language=</span><span class="si">%s</span><span class="s2">, cpu_threads=</span><span class="si">%s</span><span class="s2">)..."</span><span class="p">,</span>
+<a id="__codelineno-0-891" name="__codelineno-0-891"></a>                    <span class="n">WHISPER_MODEL</span><span class="p">,</span>
+<a id="__codelineno-0-892" name="__codelineno-0-892"></a>                    <span class="n">WHISPER_COMPUTE_TYPE</span><span class="p">,</span>
+<a id="__codelineno-0-893" name="__codelineno-0-893"></a>                    <span class="n">LANGUAGE</span><span class="p">,</span>
+<a id="__codelineno-0-894" name="__codelineno-0-894"></a>                    <span class="n">WHISPER_CPU_THREADS</span> <span class="ow">or</span> <span class="s2">"auto"</span><span class="p">,</span>
+<a id="__codelineno-0-895" name="__codelineno-0-895"></a>                <span class="p">)</span>
+<a id="__codelineno-0-896" name="__codelineno-0-896"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">whisper</span> <span class="o">=</span> <span class="n">load_whisper_model</span><span class="p">()</span>
+<a id="__codelineno-0-897" name="__codelineno-0-897"></a>        <span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+<a id="__codelineno-0-898" name="__codelineno-0-898"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Cannot start EasySpeak: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>  <span class="c1"># noqa: TRY400</span>
+<a id="__codelineno-0-899" name="__codelineno-0-899"></a>            <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+<a id="__codelineno-0-900" name="__codelineno-0-900"></a>        <span class="k">for</span> <span class="n">warning</span> <span class="ow">in</span> <span class="p">(</span><span class="o">*</span><span class="n">STT_WARNINGS</span><span class="p">,</span> <span class="o">*</span><span class="n">LANGUAGE_WARNINGS</span><span class="p">):</span>
+<a id="__codelineno-0-901" name="__codelineno-0-901"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">warning</span><span class="p">)</span>
+<a id="__codelineno-0-902" name="__codelineno-0-902"></a>
+<a id="__codelineno-0-903" name="__codelineno-0-903"></a>        <span class="n">ensure_extension</span><span class="p">()</span>
+<a id="__codelineno-0-904" name="__codelineno-0-904"></a>
+<a id="__codelineno-0-905" name="__codelineno-0-905"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Loading plugins..."</span><span class="p">)</span>
+<a id="__codelineno-0-906" name="__codelineno-0-906"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">load_plugins</span><span class="p">()</span>
+<a id="__codelineno-0-907" name="__codelineno-0-907"></a>
+<a id="__codelineno-0-908" name="__codelineno-0-908"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugins</span><span class="p">:</span>
+<a id="__codelineno-0-909" name="__codelineno-0-909"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"No plugins loaded. Exiting."</span><span class="p">)</span>
+<a id="__codelineno-0-910" name="__codelineno-0-910"></a>            <span class="k">return</span>
+<a id="__codelineno-0-911" name="__codelineno-0-911"></a>
+<a id="__codelineno-0-912" name="__codelineno-0-912"></a>        <span class="c1"># Warm up the text-to-speech pipeline now so the piper model is loaded</span>
+<a id="__codelineno-0-913" name="__codelineno-0-913"></a>        <span class="c1"># during startup, not on the first spoken response.</span>
+<a id="__codelineno-0-914" name="__codelineno-0-914"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Warming up speech..."</span><span class="p">)</span>
+<a id="__codelineno-0-915" name="__codelineno-0-915"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-916" name="__codelineno-0-916"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">speech</span><span class="o">.</span><span class="n">ensure</span><span class="p">()</span>
+<a id="__codelineno-0-917" name="__codelineno-0-917"></a>        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+<a id="__codelineno-0-918" name="__codelineno-0-918"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"Speech unavailable; continuing without it."</span><span class="p">)</span>
+<a id="__codelineno-0-919" name="__codelineno-0-919"></a>
+<a id="__codelineno-0-920" name="__codelineno-0-920"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"""</span>
+<a id="__codelineno-0-921" name="__codelineno-0-921"></a><span class="s2">╔══════════════════════════════════════════╗</span>
+<a id="__codelineno-0-922" name="__codelineno-0-922"></a><span class="s2">║            EasySpeak                     ║</span>
+<a id="__codelineno-0-923" name="__codelineno-0-923"></a><span class="s2">╠══════════════════════════════════════════╣</span>
+<a id="__codelineno-0-924" name="__codelineno-0-924"></a><span class="s2">║  Wake word: "Hey Jarvis"                 ║</span>
+<a id="__codelineno-0-925" name="__codelineno-0-925"></a><span class="s2">║  Say "help" for available commands       ║</span>
+<a id="__codelineno-0-926" name="__codelineno-0-926"></a><span class="s2">╚══════════════════════════════════════════╝</span>
+<a id="__codelineno-0-927" name="__codelineno-0-927"></a><span class="s2">"""</span><span class="p">)</span>
+<a id="__codelineno-0-928" name="__codelineno-0-928"></a>
+<a id="__codelineno-0-929" name="__codelineno-0-929"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-930" name="__codelineno-0-930"></a>            <span class="k">with</span> <span class="n">suppressed_c_stderr</span><span class="p">():</span>
+<a id="__codelineno-0-931" name="__codelineno-0-931"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">audio</span> <span class="o">=</span> <span class="n">pyaudio</span><span class="o">.</span><span class="n">PyAudio</span><span class="p">()</span>
+<a id="__codelineno-0-932" name="__codelineno-0-932"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_open_stream</span><span class="p">()</span>
+<a id="__codelineno-0-933" name="__codelineno-0-933"></a>
+<a id="__codelineno-0-934" name="__codelineno-0-934"></a>            <span class="c1"># Measure the room before listening, so silence detection matches it.</span>
+<a id="__codelineno-0-935" name="__codelineno-0-935"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">calibrate_silence</span><span class="p">()</span>
+<a id="__codelineno-0-936" name="__codelineno-0-936"></a>
+<a id="__codelineno-0-937" name="__codelineno-0-937"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">tray</span><span class="o">.</span><span class="n">started</span><span class="p">()</span>
+<a id="__codelineno-0-938" name="__codelineno-0-938"></a>            <span class="c1"># Start keyboard (silent) activation; no-op if disabled or no</span>
+<a id="__codelineno-0-939" name="__codelineno-0-939"></a>            <span class="c1"># /dev/input access. Plugins have registered their handlers by now.</span>
+<a id="__codelineno-0-940" name="__codelineno-0-940"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">hotkey</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<a id="__codelineno-0-941" name="__codelineno-0-941"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Listening for wake word..."</span><span class="p">)</span>
+<a id="__codelineno-0-942" name="__codelineno-0-942"></a>            <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-943" name="__codelineno-0-943"></a>
+<a id="__codelineno-0-944" name="__codelineno-0-944"></a>            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+<a id="__codelineno-0-945" name="__codelineno-0-945"></a>                <span class="c1"># The tray controller owns sleep/quit; it releases and reopens</span>
+<a id="__codelineno-0-946" name="__codelineno-0-946"></a>                <span class="c1"># the mic via these callbacks so this loop stays about audio.</span>
+<a id="__codelineno-0-947" name="__codelineno-0-947"></a>                <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tray</span><span class="o">.</span><span class="n">poll</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_close_stream</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_stream</span><span class="p">)</span>
+<a id="__codelineno-0-948" name="__codelineno-0-948"></a>                <span class="k">if</span> <span class="n">action</span> <span class="ow">is</span> <span class="n">TrayAction</span><span class="o">.</span><span class="n">QUIT</span><span class="p">:</span>
+<a id="__codelineno-0-949" name="__codelineno-0-949"></a>                    <span class="k">break</span>
+<a id="__codelineno-0-950" name="__codelineno-0-950"></a>                <span class="k">if</span> <span class="n">action</span> <span class="ow">is</span> <span class="n">TrayAction</span><span class="o">.</span><span class="n">RESUME</span><span class="p">:</span>
+<a id="__codelineno-0-951" name="__codelineno-0-951"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_reset_detector</span><span class="p">()</span>
+<a id="__codelineno-0-952" name="__codelineno-0-952"></a>                    <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-953" name="__codelineno-0-953"></a>                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Listening for wake word..."</span><span class="p">)</span>
+<a id="__codelineno-0-954" name="__codelineno-0-954"></a>                    <span class="k">continue</span>
+<a id="__codelineno-0-955" name="__codelineno-0-955"></a>
+<a id="__codelineno-0-956" name="__codelineno-0-956"></a>                <span class="c1"># Keyboard activation bypasses the wake word: dictate while held.</span>
+<a id="__codelineno-0-957" name="__codelineno-0-957"></a>                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hotkey</span><span class="o">.</span><span class="n">take_activation</span><span class="p">():</span>
+<a id="__codelineno-0-958" name="__codelineno-0-958"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_run_push_to_talk</span><span class="p">()</span>
+<a id="__codelineno-0-959" name="__codelineno-0-959"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_reset_detector</span><span class="p">()</span>
+<a id="__codelineno-0-960" name="__codelineno-0-960"></a>                    <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-961" name="__codelineno-0-961"></a>                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Listening for wake word..."</span><span class="p">)</span>
+<a id="__codelineno-0-962" name="__codelineno-0-962"></a>                    <span class="k">continue</span>
 <a id="__codelineno-0-963" name="__codelineno-0-963"></a>
-<a id="__codelineno-0-964" name="__codelineno-0-964"></a>                <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wakeword</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">pcm</span><span class="p">)</span>
+<a id="__codelineno-0-964" name="__codelineno-0-964"></a>                <span class="n">pcm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1280</span><span class="p">,</span> <span class="n">exception_on_overflow</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <a id="__codelineno-0-965" name="__codelineno-0-965"></a>
-<a id="__codelineno-0-966" name="__codelineno-0-966"></a>                <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="n">WAKE_THRESHOLD</span><span class="p">:</span>
-<a id="__codelineno-0-967" name="__codelineno-0-967"></a>                    <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<a id="__codelineno-0-968" name="__codelineno-0-968"></a>                    <span class="k">if</span> <span class="n">now</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_wake_time</span> <span class="o">&lt;</span> <span class="n">WAKE_COOLDOWN</span><span class="p">:</span>
-<a id="__codelineno-0-969" name="__codelineno-0-969"></a>                        <span class="k">continue</span>
-<a id="__codelineno-0-970" name="__codelineno-0-970"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">last_wake_time</span> <span class="o">=</span> <span class="n">now</span>
+<a id="__codelineno-0-966" name="__codelineno-0-966"></a>                <span class="n">audio_buffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pcm</span><span class="p">)</span>
+<a id="__codelineno-0-967" name="__codelineno-0-967"></a>                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">audio_buffer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">:</span>
+<a id="__codelineno-0-968" name="__codelineno-0-968"></a>                    <span class="n">audio_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-0-969" name="__codelineno-0-969"></a>
+<a id="__codelineno-0-970" name="__codelineno-0-970"></a>                <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wakeword</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">pcm</span><span class="p">)</span>
 <a id="__codelineno-0-971" name="__codelineno-0-971"></a>
-<a id="__codelineno-0-972" name="__codelineno-0-972"></a>                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"🎤 Wake! (confidence: </span><span class="si">%.2f</span><span class="s2">)"</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
-<a id="__codelineno-0-973" name="__codelineno-0-973"></a>
-<a id="__codelineno-0-974" name="__codelineno-0-974"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_reset_detector</span><span class="p">()</span>
-<a id="__codelineno-0-975" name="__codelineno-0-975"></a>                    <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-976" name="__codelineno-0-976"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_play_wake_chime</span><span class="p">()</span>
+<a id="__codelineno-0-972" name="__codelineno-0-972"></a>                <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="n">WAKE_THRESHOLD</span><span class="p">:</span>
+<a id="__codelineno-0-973" name="__codelineno-0-973"></a>                    <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<a id="__codelineno-0-974" name="__codelineno-0-974"></a>                    <span class="k">if</span> <span class="n">now</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_wake_time</span> <span class="o">&lt;</span> <span class="n">WAKE_COOLDOWN</span><span class="p">:</span>
+<a id="__codelineno-0-975" name="__codelineno-0-975"></a>                        <span class="k">continue</span>
+<a id="__codelineno-0-976" name="__codelineno-0-976"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">last_wake_time</span> <span class="o">=</span> <span class="n">now</span>
 <a id="__codelineno-0-977" name="__codelineno-0-977"></a>
-<a id="__codelineno-0-978" name="__codelineno-0-978"></a>                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_capture_command_session</span><span class="p">():</span>
-<a id="__codelineno-0-979" name="__codelineno-0-979"></a>                        <span class="k">break</span>
-<a id="__codelineno-0-980" name="__codelineno-0-980"></a>
+<a id="__codelineno-0-978" name="__codelineno-0-978"></a>                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"🎤 Wake! (confidence: </span><span class="si">%.2f</span><span class="s2">)"</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
+<a id="__codelineno-0-979" name="__codelineno-0-979"></a>
+<a id="__codelineno-0-980" name="__codelineno-0-980"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_reset_detector</span><span class="p">()</span>
 <a id="__codelineno-0-981" name="__codelineno-0-981"></a>                    <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-982" name="__codelineno-0-982"></a>                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Listening for wake word..."</span><span class="p">)</span>
+<a id="__codelineno-0-982" name="__codelineno-0-982"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_play_wake_chime</span><span class="p">()</span>
 <a id="__codelineno-0-983" name="__codelineno-0-983"></a>
-<a id="__codelineno-0-984" name="__codelineno-0-984"></a>        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-<a id="__codelineno-0-985" name="__codelineno-0-985"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Stopped (Ctrl+C)."</span><span class="p">)</span>
-<a id="__codelineno-0-986" name="__codelineno-0-986"></a>        <span class="k">finally</span><span class="p">:</span>
-<a id="__codelineno-0-987" name="__codelineno-0-987"></a>            <span class="c1"># Hide the indicator so the daemon's exit doesn't leave a stale icon.</span>
-<a id="__codelineno-0-988" name="__codelineno-0-988"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">tray</span><span class="o">.</span><span class="n">stopped</span><span class="p">()</span>
-<a id="__codelineno-0-989" name="__codelineno-0-989"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">hotkey</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
-<a id="__codelineno-0-990" name="__codelineno-0-990"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">speech</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
-<a id="__codelineno-0-991" name="__codelineno-0-991"></a>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-992" name="__codelineno-0-992"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">stop_stream</span><span class="p">()</span>
-<a id="__codelineno-0-993" name="__codelineno-0-993"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-<a id="__codelineno-0-994" name="__codelineno-0-994"></a>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">audio</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-995" name="__codelineno-0-995"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">audio</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+<a id="__codelineno-0-984" name="__codelineno-0-984"></a>                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_capture_command_session</span><span class="p">():</span>
+<a id="__codelineno-0-985" name="__codelineno-0-985"></a>                        <span class="k">break</span>
+<a id="__codelineno-0-986" name="__codelineno-0-986"></a>
+<a id="__codelineno-0-987" name="__codelineno-0-987"></a>                    <span class="n">audio_buffer</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-988" name="__codelineno-0-988"></a>                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Listening for wake word..."</span><span class="p">)</span>
+<a id="__codelineno-0-989" name="__codelineno-0-989"></a>
+<a id="__codelineno-0-990" name="__codelineno-0-990"></a>        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+<a id="__codelineno-0-991" name="__codelineno-0-991"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Stopped (Ctrl+C)."</span><span class="p">)</span>
+<a id="__codelineno-0-992" name="__codelineno-0-992"></a>        <span class="k">finally</span><span class="p">:</span>
+<a id="__codelineno-0-993" name="__codelineno-0-993"></a>            <span class="c1"># Hide the indicator so the daemon's exit doesn't leave a stale icon.</span>
+<a id="__codelineno-0-994" name="__codelineno-0-994"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">tray</span><span class="o">.</span><span class="n">stopped</span><span class="p">()</span>
+<a id="__codelineno-0-995" name="__codelineno-0-995"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">hotkey</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+<a id="__codelineno-0-996" name="__codelineno-0-996"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">speech</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
+<a id="__codelineno-0-997" name="__codelineno-0-997"></a>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-998" name="__codelineno-0-998"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">stop_stream</span><span class="p">()</span>
+<a id="__codelineno-0-999" name="__codelineno-0-999"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<a id="__codelineno-0-1000" name="__codelineno-0-1000"></a>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">audio</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-1001" name="__codelineno-0-1001"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">audio</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
