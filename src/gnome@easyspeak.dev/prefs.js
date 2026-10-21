@@ -1,8 +1,8 @@
 // EasySpeak GNOME Shell extension preferences (gjs / GTK4 / libadwaita).
 //
 // Backs the "Settings" button the GNOME Extensions app shows for any extension
-// that ships a prefs.js. It toggles whether EasySpeak starts at login — by
-// writing the per-user autostart entry — and opens an About dialog. The pure
+// that ships a prefs.js. It toggles whether EasySpeak starts at login, by
+// writing the per-user autostart entry, and opens an About dialog. The pure
 // autostart text handling lives in extension-helpers.js so it can be unit-tested;
 // this file is the Gio/Adw glue, which only runs inside the prefs process.
 
@@ -21,8 +21,8 @@ import {
 // ~/.config/autostart/easyspeak.desktop, matching core.desktop_integration.
 const AUTOSTART_SUBPATH = ['autostart', 'easyspeak.desktop'];
 
-// Last-resort content, used only when no autostart entry is installed anywhere
-// — e.g. a pip install that never ran `easyspeak --configure autostart` and
+// Last-resort content, used only when no autostart entry is installed anywhere,
+// e.g. a pip install that never ran `easyspeak --configure autostart` and
 // isn't a deb/rpm with the /etc/xdg copy. The enabled flag is added by
 // setAutostartEnabledInText; the canonical richer entry lives in
 // data/easyspeak-autostart.desktop, which this never duplicates.
@@ -123,8 +123,8 @@ export default class EasySpeakPreferences extends ExtensionPreferences {
     }
 
     // The content the per-user override is built from: the user's own entry, the
-    // packaged system entries, or a minimal last resort — pickAutostartSource
-    // decides; here we only read the candidate files.
+    // packaged system entries, or a minimal last resort. pickAutostartSource
+    // decides; this only reads the candidate files.
     _autostartSourceText() {
         const userText = this._readText(this._autostartFile());
         const systemTexts = GLib.get_system_config_dirs().map((dir) =>

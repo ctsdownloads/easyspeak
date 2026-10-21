@@ -82,7 +82,7 @@ def volume_max(core):
 
 
 def volume_min(core):
-    """Drop low (15%, still audible — not a mute), set directly like volume_max."""
+    """Drop low (15%, still audible, not a mute), set directly like volume_max."""
     core.host_run(["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "15%"])
 
 
@@ -127,7 +127,7 @@ def handle(cmd, core):
     """
     says = lambda key: vocab.says(cmd, key)  # noqa: E731
 
-    # Volume -- "louder"/"quieter" etc. work on their own, without "volume"/"sound".
+    # Volume: "louder"/"quieter" etc. work on their own, without "volume"/"sound".
     if says("very"):
         if says("loud"):
             volume_max(core)

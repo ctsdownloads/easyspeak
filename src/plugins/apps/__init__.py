@@ -32,7 +32,6 @@ COMMANDS = [
     ),
 ]
 
-# Flatpak apps
 FLATPAK_APPS = {
     "firefox": "org.mozilla.firefox",
     "steam": "com.valvesoftware.Steam",
@@ -41,7 +40,6 @@ FLATPAK_APPS = {
     "settings": "org.gnome.Settings",
 }
 
-# Local binary apps
 LOCAL_APPS = {
     "alarm": "gnome-clocks",
     "browser": "qutebrowser",

@@ -5,7 +5,7 @@ ships a bundled TensorFlow Lite and depends only on numpy). pyopen-wakeword
 splits detection into a feature extractor and a per-word model and streams
 probabilities; this thin wrapper just feeds one through the other and reports
 the strongest score for the chunk. It is glue for that two-stage streaming API,
-not a compatibility shim — there is no extra copy or conversion on the hot path.
+not a compatibility shim: there is no extra copy or conversion on the hot path.
 """
 
 from pyopen_wakeword import Model, OpenWakeWord, OpenWakeWordFeatures

@@ -188,7 +188,7 @@ def adblock_method():
     Ad overlays and newsletter interstitials are numbered like anything else, so
     they take hint numbers away from the page underneath and a spoken hint lands
     on a popup instead of the link the user meant. "both" adds Brave's ABP engine,
-    which is what catches those overlays -- but it needs the `adblock` module, and
+    which is what catches those overlays, but it needs the `adblock` module, and
     without it qutebrowser complains on every single page load, which is worse
     than the ads. Host blocking is built in and needs nothing.
 
@@ -200,7 +200,7 @@ def adblock_method():
     `adblock: <version>` when present and `adblock: no` when not, so a leading
     digit means "both"; installing the module later is still picked up on the
     next start. That call imports Qt and so is slow rather than instant, so the
-    15-second timeout is a ceiling for a wedged process, not an expected wait --
+    15-second timeout is a ceiling for a wedged process, not an expected wait;
     past it, host blocking (which always works) is assumed.
     """
     try:
@@ -228,8 +228,8 @@ def required_qutebrowser_lines():
 def _setting_name(line):
     """The `c.…` setting a config line assigns, or None if it isn't an assignment.
 
-    Matched with a pattern rather than a literal `" = "` so a user's own spacing --
-    `c.foo='bar'` or `c.foo  =  'bar'` -- is still recognised. Missing it would
+    Matched with a pattern rather than a literal `" = "` so a user's own spacing,
+    `c.foo='bar'` or `c.foo  =  'bar'`, is still recognised. Missing it would
     append a second assignment for the same setting on every start.
     """
     match = re.match(r"^\s*(c\.[^=\s]+)\s*=\s*\S", line)
@@ -378,20 +378,16 @@ def parse_hint_numbers(cmd):
 def looks_like_hint(cmd):
     """Check if command looks like a hint number (short, mostly digits/number words)."""
     clean = re.sub(r"[.,!?\-\s]", "", cmd.lower())
-    # Must be short
     if len(clean) > 6:
         return False
-    # Direct digits like "02", "92"
     if clean.replace("o", "0").isdigit():
         return True
-    # Check if all words are number words
     words = cmd.lower().split()
     return len(words) <= 3 and all(w.strip(".,!?") in HINT_NUMBERS for w in words)
 
 
 def parse_hint_number(cmd):
     """Parse spoken numbers into a hint string ('zero two' -> '02')."""
-    # Number word mappings
     NUM_WORDS = {
         "zero": "0",
         "oh": "0",
@@ -427,7 +423,6 @@ def parse_hint_number(cmd):
         "nein": "9",
         "ninth": "9",
         "mine": "9",
-        # Tens
         "ten": "10",
         "eleven": "11",
         "twelve": "12",
@@ -452,10 +447,8 @@ def parse_hint_number(cmd):
     words = re.sub(r"[.,!?\-]", " ", cmd.lower()).split()
 
     for word in words:
-        # Direct digit
         if word.isdigit():
             result.append(word)
-        # Word to digit
         elif word in NUM_WORDS:
             result.append(NUM_WORDS[word])
 
@@ -463,7 +456,7 @@ def parse_hint_number(cmd):
 
 
 # Ways of naming a tab by number, spoken. Anchored so "go to tab 2" is a tab
-# switch rather than a bookmark called "tab 2", which is what it used to do.
+# switch rather than a bookmark called "tab 2".
 TAB_PREFIXES = (
     "close tab",
     "switch to tab",
@@ -494,7 +487,6 @@ def parse_spoken_url(spoken):
     """
     url = spoken.lower().strip()
 
-    # Replace spoken elements
     url = url.replace(" dot ", ".")
     url = url.replace(" slash ", "/")
     url = url.replace(" colon ", ":")
@@ -502,10 +494,8 @@ def parse_spoken_url(spoken):
     url = url.replace(" hyphen ", "-")
     url = url.replace(" underscore ", "_")
 
-    # Remove remaining spaces
     url = url.replace(" ", "")
 
-    # Add https:// if no protocol
     if not url.startswith("http://") and not url.startswith("https://"):
         url = "https://" + url
 
@@ -516,7 +506,7 @@ def parse_spoken_url(spoken):
 # arriving while hints are already showing, instead of tearing the mode down.
 HINT_TRIGGERS = ("numbers", "number", "links", "link", "hints", "hint")
 
-# fails the same way.
+# How long to wait before showing hints again when none appeared.
 HINT_RETRY_DELAY = 0.6
 
 
@@ -559,13 +549,11 @@ def listen_for_hint(core, retries_left=3):
     logger.info("  🔢 Say hint number (e.g. 'zero two'), 'exit links' to cancel")
     core.speak(_("Ready"))
 
-    # Small delay to let hints render
     time.sleep(0.3)
 
     core.speech.drain()
     core.flush_stream()
 
-    # Wait for speech
     first = core.wait_for_speech(timeout=10)
     if not first:
         if retries_left > 0:
@@ -615,7 +603,6 @@ def listen_for_hint(core, retries_left=3):
         listen_for_hint(core, retries_left - 1)
         return
 
-    # Cancel
     if cmd_lower in [
         "exit links",
         "exit link",
@@ -631,7 +618,6 @@ def listen_for_hint(core, retries_left=3):
         logger.debug("  [listen_for_hint returning - cancelled]")
         return
 
-    # Parse hint number
     hint = parse_hint_number(cmd_lower)
 
     if hint:
@@ -641,7 +627,6 @@ def listen_for_hint(core, retries_left=3):
         time.sleep(1.0)
         qb("fake-key <Escape>")
     else:
-        # Try phonetic fallback
         hint = parse_hint_numbers(cmd_lower)
         if hint:
             logger.debug("  🔤 Phonetic: '%s' → '%s'", cmd_lower, hint)
@@ -687,8 +672,8 @@ def _qutebrowser_running(core):
 
     Used by [`handle`][plugins.browser.handle] to gate ambiguous navigation commands: we
     only act on them when there is actually a browser to receive them. `pgrep -f`
-    (rather than `-x`) matches however the binary is wrapped — e.g. a Nix
-    `.qutebrowser-wrapped` launcher — so an open browser isn't missed.
+    (rather than `-x`) matches however the binary is wrapped, such as a Nix
+    `.qutebrowser-wrapped` launcher, so an open browser isn't missed.
     """
     result = core.host_run(["pgrep", "-f", "qutebrowser"])
     return getattr(result, "returncode", 1) == 0
@@ -710,7 +695,7 @@ def handle(cmd, core):
         return None
 
     # Closing the application works from anywhere, and must not then step into
-    # browser mode -- there would be no browser left to drive.
+    # browser mode, since there would be no browser left to drive.
     if cmd_lower in CLOSE_BROWSER:
         if not _qutebrowser_running(core):
             core.speak(_("The browser isn't running."))
@@ -720,7 +705,7 @@ def handle(cmd, core):
         return True
 
     # Already outside browser mode: acknowledge rather than fall through to the
-    # "I didn't understand" path, which is what saying it twice used to get.
+    # "I didn't understand" path.
     if cmd_lower in LEAVE_BROWSER_MODE:
         return True
 
@@ -994,7 +979,6 @@ def handle_browser_command(cmd_lower, core):
         return True
 
     # --- Bookmarks ---
-    # Save current page as quickmark
     if (
         "bookmark this" in cmd_lower or "save this" in cmd_lower
     ) and " as " in cmd_lower:
@@ -1004,18 +988,15 @@ def handle_browser_command(cmd_lower, core):
             qb(f"quickmark-save {name}")
             return True
 
-    # Load quickmark (user-saved)
     if cmd_lower.startswith(("go to ", "open ")):
         target = cmd_lower.replace("go to ", "").replace("open ", "").strip()
 
-        # Check predefined bookmarks first
         for site, url in BOOKMARKS.items():
             if site == target:
                 core.speak(_("Opening {site}.").format(site=site))
                 qb_open(url)
                 return True
 
-        # Try as spoken URL (contains "dot")
         if "dot" in target or "." in target:
             url = parse_spoken_url(target)
             core.speak(_("Opening {url}.").format(url=url))
@@ -1040,7 +1021,6 @@ def handle_browser_command(cmd_lower, core):
             return True
 
     # --- Phonetic hint selection (LAST - only if nothing else matched) ---
-    # Only try hint parsing if it actually looks like a hint
     if looks_like_hint(cmd_lower):
         # Direct digit input (e.g., "02", "92", "0-2")
         stripped = re.sub(r"[^0-9a-z]", "", cmd_lower)
@@ -1050,7 +1030,6 @@ def handle_browser_command(cmd_lower, core):
             qb(f"hint-follow {hint}")
             return True
 
-        # Try phonetic parsing
         hint = parse_hint_numbers(cmd_lower)
         if hint and hint.isdigit():
             logger.debug("  🔤 Phonetic parsed: '%s' → '%s'", cmd_lower, hint)

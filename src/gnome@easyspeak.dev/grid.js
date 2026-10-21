@@ -16,8 +16,8 @@ import {
 
 // A drag is a journey, not a jump. GTK begins one only after the pointer travels
 // past its threshold with the button held, and picks a drop target from where the
-// pointer comes to rest -- so the press, single teleport and immediate release
-// this used to inject read as a plain click and dropped nothing. The travel is
+// pointer comes to rest, so a press, a single teleport and an immediate release
+// read as a plain click and drop nothing. The travel is
 // spread over real time via timeouts, because the application on the other side
 // has to run its own main loop to process each motion.
 const DRAG_STEPS = 24;
@@ -220,17 +220,14 @@ export class GridOverlay {
         this.container.destroy_all_children();
         const [bx, by, bw, bh] = this.bounds;
 
-        // Semi-transparent background
         this.container.add_child(new St.Widget({
             style: 'background-color: rgba(0,0,0,0.15);',
             x: bx, y: by, width: bw, height: bh
         }));
 
-        // Grid lines and labels
         const { cellW, cellH, fontSize, cells, center, crossSize } =
             gridGeometry(bx, by, bw, bh);
 
-        // Vertical lines
         for (let i = 1; i < 3; i++) {
             this.container.add_child(new St.Widget({
                 style: 'background-color: rgba(255,255,255,0.8);',
@@ -238,7 +235,6 @@ export class GridOverlay {
             }));
         }
 
-        // Horizontal lines
         for (let i = 1; i < 3; i++) {
             this.container.add_child(new St.Widget({
                 style: 'background-color: rgba(255,255,255,0.8);',
@@ -246,7 +242,6 @@ export class GridOverlay {
             }));
         }
 
-        // Number labels 1-9
         for (const cell of cells) {
             const label = new St.Label({
                 text: String(cell.num),
@@ -258,12 +253,10 @@ export class GridOverlay {
             this.container.add_child(label);
         }
 
-        // Crosshair at center
         const centerX = center.x;
         const centerY = center.y;
         const crossThick = 4;
 
-        // White outline
         this.container.add_child(new St.Widget({
             style: 'background-color: #ffffff;',
             x: centerX - crossSize / 2 - 2, y: centerY - crossThick / 2 - 2,
@@ -275,7 +268,6 @@ export class GridOverlay {
             width: crossThick + 4, height: crossSize + 4
         }));
 
-        // Red cross
         this.container.add_child(new St.Widget({
             style: 'background-color: #ff0000;',
             x: centerX - crossSize / 2, y: centerY - crossThick / 2,

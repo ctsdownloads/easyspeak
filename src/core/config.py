@@ -21,8 +21,8 @@ constants; these honor an `EASYSPEAK_*` environment variable:
 See the [Configuration guide](../usage.md#configuration) for what each does, its
 default, and EasySpeak's other `EASYSPEAK_*` variables.
 
-A plugin that needs host-environment setup does it in its own `setup()` hook —
-see [Writing Plugins](../plugins.md).
+A plugin that needs host-environment setup does it in its own `setup()` hook; see
+[Writing Plugins](../plugins.md).
 """
 
 import logging
@@ -284,8 +284,8 @@ def load_whisper_model(
 ) -> WhisperModel:
     """Build a faster-whisper model from the configured (or given) settings.
 
-    A model already on disk — bundled in a language pack or cached from an earlier
-    run — loads without any network access. When it is missing, EasySpeak stays
+    A model already on disk, bundled in a language pack or cached from an earlier
+    run, loads without any network access. When it is missing, EasySpeak stays
     offline by default and raises an actionable message; setting
     `EASYSPEAK_OFFLINE=relaxed` (see `NETWORK_ALLOWED`) lets it fetch a bare name
     like `base.en` from Hugging Face instead.

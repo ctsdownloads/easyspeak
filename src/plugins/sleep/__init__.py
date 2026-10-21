@@ -2,8 +2,8 @@
 
 "Go to sleep" (or "stop listening", "deactivate yourself") releases the
 microphone and stops wake-word detection until the user reactivates EasySpeak from
-the GNOME tray indicator or the Quick Settings toggle — whichever the extension is
-showing, the one way back since voice control is off until reactivated.
+the GNOME tray indicator or the Quick Settings toggle, whichever the extension is
+showing. That is the one way back, since voice control is off until reactivated.
 """
 
 from easyspeak.core.i18n import translator

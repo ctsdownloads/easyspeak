@@ -22,7 +22,6 @@ export class ScreenshotManager {
     }
 
     takeScreenshotSync() {
-        // Delete old file first
         try {
             Gio.File.new_for_path(this._path).delete(null);
         } catch {}
@@ -39,7 +38,6 @@ export class ScreenshotManager {
         try {
             const screenshot = new Shell.Screenshot();
 
-            // Get primary monitor dimensions
             const monitor = Main.layoutManager.primaryMonitor;
             const x = monitor.x;
             const y = monitor.y;
@@ -48,7 +46,6 @@ export class ScreenshotManager {
 
             log('EasySpeak: capturing area ' + x + ',' + y + ' ' + width + 'x' + height);
 
-            // Create output file stream
             const file = Gio.File.new_for_path(this._path);
             const stream = file.replace(null, false, Gio.FileCreateFlags.NONE, null);
 

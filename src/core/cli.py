@@ -1,7 +1,7 @@
 """Command-line entry point: parse arguments, set up logging, run the app.
 
 Verbosity comes from the mutually exclusive `-v`/`--verbose` and `-q`/`--quiet`
-flags, or — with neither — the `EASYSPEAK_LOG_LEVEL` environment variable, which
+flags, or, with neither, the `EASYSPEAK_LOG_LEVEL` environment variable, which
 the flags override (see [`resolve_level`][core.log.resolve_level]). `--language`
 is the command-line form of `EASYSPEAK_LANGUAGE` and overrides it. The one-shot
 `--configure` and `--preview` subcommands set up or print the desktop-integration

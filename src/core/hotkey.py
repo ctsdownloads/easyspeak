@@ -1,7 +1,7 @@
 """Hold-to-dictate keyboard activation via evdev (the silent-activation path).
 
 On Wayland an ordinary process can't grab global keys, and only raw evdev events from
-`/dev/input` expose key *release* — which "hold the keys to dictate, release to stop"
+`/dev/input` expose key *release*, which "hold the keys to dictate, release to stop"
 needs. This listener reads every keyboard device in a background thread and tracks
 whether a configured modifier combo (default Ctrl+Shift) is fully held, so the audio
 loop can start dictation on press and end it the moment the keys come up.
@@ -132,7 +132,7 @@ class HotkeyListener:
         """Return True once per press of the combo, clearing the edge.
 
         The audio loop polls this each iteration; a True means "the user just pressed
-        the combo — start dictation now".
+        the combo, start dictation now".
         """
         with self._lock:
             fired = self._activation
@@ -163,7 +163,7 @@ class HotkeyListener:
         """Stop the reader thread, then release the keyboard devices.
 
         Joins the thread first so it leaves its `select()` loop before the fds close
-        under it — closing a fd mid-select can raise in the thread. The loop wakes
+        under it, since closing a fd mid-select can raise in the thread. The loop wakes
         within one POLL_TIMEOUT, so the join returns promptly.
         """
         self._stop.set()

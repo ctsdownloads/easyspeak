@@ -1,7 +1,7 @@
 """Text-to-speech playback pipeline and audio-device noise suppression.
 
-Extracted from core.main so the orchestration loop isn't tangled up with the subprocess
-plumbing that keeps a piper voice model warm. `SpeechPipeline` owns a persistent `piper
+Keeps the subprocess plumbing that holds a piper voice model warm out of the
+orchestration loop in core.main. `SpeechPipeline` owns a persistent `piper
 -> player` pair; `suppressed_c_stderr` hides the unrelated ALSA/JACK probe spew
 PortAudio emits when the input side (PyAudio) starts up.
 """
@@ -30,7 +30,7 @@ def suppressed_c_stderr():
     Initializing PyAudio makes PortAudio enumerate every ALSA PCM named in the
     system alsa.conf (surround*, hdmi, iec958, ...) and ping JACK. Devices the
     machine doesn't have each print a harmless error, and libasound/libjack
-    write them straight to file descriptor 2 from C — Python's sys.stderr never
+    write them straight to file descriptor 2 from C, so Python's sys.stderr never
     sees them, so only redirecting the fd itself can hide them.
 
     Suppression is best-effort: if stderr has no real fd (e.g. captured in
