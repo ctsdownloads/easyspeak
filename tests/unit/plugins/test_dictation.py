@@ -147,6 +147,11 @@ def test_ensure_gnome_accessibility_oserror(mock_which, mock_run, readlog):
         ("hello newline world", "Hello\nworld"),
         ("hello you line world", "Hello\nworld"),
         ("hello line break world", "Hello\nworld"),
+        # Line breaks alone and at either end
+        ("new line", "\n"),
+        ("new paragraph", "\n\n"),
+        ("hello new line", "Hello\n"),
+        ("new line hello", "\nHello"),
         ("hello enter world", "Hello enter world"),
         # Backspace is a keystroke command, not text: it must survive as words
         ("hello backspace world", "Hello backspace world"),
