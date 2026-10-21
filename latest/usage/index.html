@@ -520,6 +520,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#pluginsheadtrack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plugins.headtrack
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -946,6 +957,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#pluginsheadtrack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plugins.headtrack
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1205,6 +1227,30 @@ PyGObject and the AT-SPI typelib, which the application's own virtual environmen
 usually lacks, so candidate interpreters are probed with the helper's real import
 chain and the first that works is kept. Set the variable to point straight at one
 (the Nix flake does).</p>
+<h3 id="pluginsheadtrack"><a class="autorefs autorefs-internal" title="            plugins.headtrack" href="../reference/plugins/#plugins.headtrack"><code>plugins.headtrack</code></a><a class="headerlink" href="#pluginsheadtrack" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>EASYSPEAK_CAMERA</code></td>
+<td>first found</td>
+<td>Camera head tracking looks through</td>
+</tr>
+</tbody>
+</table>
+<p>One camera owns several <code>/dev/video*</code> nodes, only one of which streams video, so
+head tracking asks the kernel which node that is and takes the lowest-numbered
+camera it finds. A machine with a single webcam needs nothing set.</p>
+<p>Where there is more than one, head tracking logs each camera with its number and
+name at startup. Set <code>EASYSPEAK_CAMERA</code> to the number of the one you want, e.g.
+<code>EASYSPEAK_CAMERA=4</code>. A capture card or a virtual camera is indistinguishable
+from a webcam to the kernel, so this is how you choose between them.</p>
 
 
 
