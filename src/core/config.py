@@ -11,9 +11,10 @@ constants; these honor an `EASYSPEAK_*` environment variable:
 - `EASYSPEAK_NOISE_FILTER`
 - `EASYSPEAK_OFFLINE`
 - `EASYSPEAK_PIPER_BIN`
-- `EASYSPEAK_PIPER_MODEL`
+- `EASYSPEAK_PIPER_MODEL` (deprecated)
 - `EASYSPEAK_SOUNDS_DIR`
 - `EASYSPEAK_STT`
+- `EASYSPEAK_TTS`
 - `EASYSPEAK_WHISPER_COMPUTE_TYPE`
 - `EASYSPEAK_WHISPER_CPU_THREADS`
 - `EASYSPEAK_WHISPER_MODEL`
@@ -177,7 +178,8 @@ if REPLY_LANGUAGE != LANGUAGE:
     )
 
 
-PIPER_MODEL = os.environ.get("EASYSPEAK_PIPER_MODEL") or _bundled_model(
+_piper_model_env = os.environ.get("EASYSPEAK_PIPER_MODEL")
+PIPER_MODEL = _piper_model_env or _bundled_model(
     REPLY_LANGUAGE,
     "piper",
     "*.onnx",
@@ -267,6 +269,22 @@ if not STT:
             f"Parakeet model not installed in {PARAKEET_MODEL_DIR}, using Whisper; "
             "set EASYSPEAK_OFFLINE=relaxed to download it"
         )
+
+
+# --- Text-to-speech engine ---
+# Piper is the reply voice and the only engine yet; EASYSPEAK_TTS exists so a
+# further engine can arrive without a second variable.
+TTS_BACKENDS = ("piper",)
+TTS_WARNINGS: list[str] = []
+
+TTS = os.environ.get("EASYSPEAK_TTS", "").strip().lower() or "piper"
+if TTS not in TTS_BACKENDS:
+    TTS_WARNINGS.append(
+        f"Unknown text-to-speech backend {TTS!r} (EASYSPEAK_TTS), using Piper"
+    )
+    TTS = "piper"
+if _piper_model_env:
+    TTS_WARNINGS.append("EASYSPEAK_PIPER_MODEL is deprecated and will be removed")
 
 
 # --- Desktop sounds ---
