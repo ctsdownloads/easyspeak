@@ -5,9 +5,11 @@ Uses a 6D rotation representation for smooth head pose estimation.
 
 import logging
 import math
+import os
 import subprocess
 import threading
 import time
+from pathlib import Path
 
 from easyspeak.core.i18n import translator
 
@@ -42,6 +44,50 @@ cursor_x = 960
 cursor_y = 540
 frozen = False
 NUDGE_AMOUNT = 15
+
+VIDEO_DEVICES = Path("/sys/class/video4linux")
+
+
+def cameras():
+    """Every camera's streaming node, as `(index, name)` pairs, lowest first.
+
+    One camera owns several `/dev/video*` nodes; the kernel numbers them within
+    the device and only node 0 streams video, so the rest are skipped.
+    """
+    found = []
+    for device in VIDEO_DEVICES.glob("video*"):
+        try:
+            if int((device / "index").read_text().strip()) != 0:
+                continue
+            name = (device / "name").read_text().strip()
+            index = int(device.name.removeprefix("video"))
+        except (OSError, ValueError):
+            continue
+        found.append((index, name))
+    return sorted(found)
+
+
+def camera_index():
+    """The camera to open: `EASYSPEAK_CAMERA` when set, else the first found."""
+    override = os.environ.get("EASYSPEAK_CAMERA", "").strip()
+    if override:
+        try:
+            return int(override)
+        except ValueError:
+            logger.warning("EASYSPEAK_CAMERA is not a camera number: %s", override)
+    found = cameras()
+    if not found:
+        return 0
+    index, name = found[0]
+    if len(found) > 1:
+        others = ", ".join(f"{other} ({label})" for other, label in found[1:])
+        logger.info(
+            "Using camera %s (%s). Set EASYSPEAK_CAMERA to use another: %s",
+            index,
+            name,
+            others,
+        )
+    return index
 
 
 class OneEuroFilter:
@@ -183,7 +229,7 @@ def run_tracking():
     SCREEN_W, SCREEN_H = get_screen_size()
     logger.debug("Screen: %sx%s", SCREEN_W, SCREEN_H)
 
-    cap = cv2.VideoCapture(1)  # Integrated webcam
+    cap = cv2.VideoCapture(camera_index())
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
     cap.set(cv2.CAP_PROP_FPS, 30)

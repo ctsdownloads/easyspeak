@@ -136,3 +136,18 @@ PyGObject and the AT-SPI typelib, which the application's own virtual environmen
 usually lacks, so candidate interpreters are probed with the helper's real import
 chain and the first that works is kept. Set the variable to point straight at one
 (the Nix flake does).
+
+### [`plugins.headtrack`][plugins.headtrack]
+
+| Variable           | Default     | Effect                             |
+| ------------------ | ----------- | ---------------------------------- |
+| `EASYSPEAK_CAMERA` | first found | Camera head tracking looks through |
+
+One camera owns several `/dev/video*` nodes, only one of which streams video, so
+head tracking asks the kernel which node that is and takes the lowest-numbered
+camera it finds. A machine with a single webcam needs nothing set.
+
+Where there is more than one, head tracking logs each camera with its number and
+name at startup. Set `EASYSPEAK_CAMERA` to the number of the one you want, e.g.
+`EASYSPEAK_CAMERA=4`. A capture card or a virtual camera is indistinguishable
+from a webcam to the kernel, so this is how you choose between them.
