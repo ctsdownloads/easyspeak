@@ -631,15 +631,14 @@ def format_text(text, vocabulary=None):
 
     text = re.sub(r"([.!?]\s+)([a-z])", capitalize_after, text)
 
-    if text:
-        text = text[0].upper() + text[1:]
+    text = re.sub(r"^(\s*)(\w)", capitalize_after, text)
 
     text = re.sub(r" +", " ", text)
     text = re.sub(r" ([.,!?:;])", r"\1", text)
 
     text = re.sub(r"\.+", ".", text)
 
-    return text.strip()
+    return text.strip(" \t")
 
 
 # Bare "up" or "right" is ordinary speech, so the arrows need "press" in front.
