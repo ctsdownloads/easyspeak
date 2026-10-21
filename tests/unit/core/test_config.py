@@ -29,6 +29,7 @@ def _restore_config(monkeypatch):
         "EASYSPEAK_MODELS_DIR",
         "EASYSPEAK_OFFLINE",
         "EASYSPEAK_STT",
+        "EASYSPEAK_TTS",
     ]:
         monkeypatch.delenv(var, raising=False)
     importlib.reload(config)
@@ -321,11 +322,40 @@ def test_offline_unknown_value_stays_strict(monkeypatch):
     assert config.NETWORK_ALLOWED is False
 
 
-def test_piper_model_env_override(monkeypatch):
-    """EASYSPEAK_PIPER_MODEL overrides the default path."""
+def test_tts_defaults_to_piper(monkeypatch):
+    """Unset EASYSPEAK_TTS means Piper, no warning."""
+    monkeypatch.delenv("EASYSPEAK_TTS", raising=False)
+    importlib.reload(config)
+    assert config.TTS == "piper"
+    assert config.TTS_WARNINGS == []
+
+
+def test_tts_piper_chosen_case_insensitively(monkeypatch):
+    """`Piper` and `piper` select the same engine, without a warning."""
+    monkeypatch.setenv("EASYSPEAK_TTS", " Piper ")
+    importlib.reload(config)
+    assert config.TTS == "piper"
+    assert config.TTS_WARNINGS == []
+
+
+def test_tts_unknown_engine_falls_back_to_piper(monkeypatch):
+    """An unknown engine is ignored with a warning, and Piper speaks."""
+    monkeypatch.setenv("EASYSPEAK_TTS", "kokoro")
+    importlib.reload(config)
+    assert config.TTS == "piper"
+    assert config.TTS_WARNINGS == [
+        "Unknown text-to-speech backend 'kokoro' (EASYSPEAK_TTS), using Piper"
+    ]
+
+
+def test_deprecated_piper_model_env_still_honored(monkeypatch):
+    """EASYSPEAK_PIPER_MODEL keeps choosing the voice, deprecated, with a warning."""
     monkeypatch.setenv("EASYSPEAK_PIPER_MODEL", "/opt/voices/voice.onnx")
     importlib.reload(config)
     assert config.PIPER_MODEL == "/opt/voices/voice.onnx"
+    assert config.TTS_WARNINGS == [
+        "EASYSPEAK_PIPER_MODEL is deprecated and will be removed"
+    ]
 
 
 def test_whisper_model_env_override(monkeypatch):

@@ -98,19 +98,23 @@ take that language's words too; the English ones work everywhere.
 
 `EASYSPEAK_LANGUAGE` (default `en`) is the language you dictate in, and it picks
 the pack installed under `/opt/easyspeak/models/<language>`. To use a language we
-ship no package for, install/drop its models and point these environment variables
-at them (an explicit value always wins; set them in a systemd user override or your
-shell profile):
+ship no package for, install/drop its models in a pack directory of your own —
+`EASYSPEAK_MODELS_DIR/<language>`, holding a `whisper/` and a `piper/` side by
+side:
 
 - `EASYSPEAK_WHISPER_MODEL` — a multilingual faster-whisper model name (e.g. `base`,
   `small`) or a local model directory. The English-only `*.en` models can't
   transcribe other languages.
-- `EASYSPEAK_PIPER_MODEL` — path to a Piper voice `.onnx` (with its `.onnx.json`
-  next to it).
+- the Piper voice — a `.onnx` (with its `.onnx.json` next to it) in the pack's
+  `piper/` directory; of several, the first by name is used. The older
+  `EASYSPEAK_PIPER_MODEL` path variable still works but is deprecated and will
+  be removed.
 
 So adding a language needs no root and no package from us: download any
-faster-whisper model and Piper voice, then set the two variables. A different wake
-word, however, needs a custom-trained model that pyopen-wakeword can load.
+faster-whisper model and Piper voice, and put them in place (an explicit
+`EASYSPEAK_WHISPER_MODEL` always wins; set it in a systemd user override or your
+shell profile). A different wake word, however, needs a custom-trained model that
+pyopen-wakeword can load.
 
 ## Build the packages yourself
 
