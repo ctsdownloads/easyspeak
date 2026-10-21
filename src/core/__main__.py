@@ -1,9 +1,4 @@
-"""Application entry point when executed as a module, e.g.
-
-.. code:: console
-
-    python -m easyspeak.core
-"""
+"""Application entry point when executed as a module: `python -m easyspeak.core`."""
 
 from .cli import run
 

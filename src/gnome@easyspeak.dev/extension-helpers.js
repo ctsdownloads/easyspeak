@@ -26,8 +26,8 @@ export function dragPath(sx, sy, tx, ty, steps) {
     return path;
 }
 
-// Clamp a rectangle so it stays inside the work area. Mirrors the inverse-of-
-// nothing identity when there is no work area (e.g. before the grid is shown).
+// Clamp a rectangle so it stays inside the work area. Returns the rectangle
+// unchanged when there is no work area (e.g. before the grid is shown).
 export function clampToWorkArea(x, y, w, h, workArea) {
     if (!workArea) return [x, y, w, h];
     const wa = workArea;
@@ -83,7 +83,7 @@ export function indicatorVisibleForState(state) {
 
 // Whether the Quick Settings toggle should read as "on" for a given daemon
 // state: on while EasySpeak is listening, off while it's asleep ("muted") or in
-// any other non-listening state. The inverse of the tray's visibility rule — the
+// any other non-listening state. The inverse of the tray's visibility rule: the
 // tray surfaces the asleep state, the toggle surfaces the listening one.
 export function quickSettingsCheckedForState(state) {
     return state === 'listening';
@@ -94,7 +94,7 @@ export function quickSettingsCheckedForState(state) {
 // per-user ~/.config/autostart/easyspeak.desktop is derived this way from the
 // canonical entry (data/easyspeak-autostart.desktop, installed to the user dir
 // or /etc/xdg/autostart), so the content lives in one place; written with the
-// flag false it overrides a packaged entry — the way gnome-tweaks disables one.
+// flag false it overrides a packaged entry, the way gnome-tweaks disables one.
 export function setAutostartEnabledInText(text, enabled) {
     const line = `X-GNOME-Autostart-enabled=${enabled ? 'true' : 'false'}`;
     const flag = /^X-GNOME-Autostart-enabled\s*=.*$/m;

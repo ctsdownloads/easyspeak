@@ -12,7 +12,7 @@ one-directional channels:
   (the same path the mouse-grid plugin uses to drive the extension).
 * icon -> daemon: the extension's menu writes a single command to a control
   file; the controller consumes it. The audio loop already wakes every ~80ms on
-  a read, so a cheap file probe per iteration is enough — no GLib loop needed.
+  a read, so a cheap file probe per iteration is enough, with no GLib loop needed.
 
 The indicator is shown only while the assistant is asleep (deactivated); while
 running it stays hidden because GNOME's own microphone privacy icon already
@@ -125,7 +125,7 @@ class Tray:
     """Owns the EasySpeak panel indicator and the asleep (deactivated) lifecycle.
 
     The audio loop calls [`poll`][core.tray.Tray.poll] once per iteration; the
-    controller pushes display state, consumes menu commands, and — when deactivated —
+    controller pushes display state, consumes menu commands, and, when deactivated,
     runs the idle loop itself, using caller-supplied callbacks to release and reacquire
     the microphone. It never touches audio directly.
 
@@ -159,11 +159,11 @@ class Tray:
         Also drop any command left in the control file from before startup. It's a
         one-shot channel for *live* menu clicks, so a stale 'about'/'help'/ 'quit'
         written during a previous session (or before the daemon was running to consume
-        it) must not fire the moment we begin polling — which otherwise pops the About
+        it) must not fire the moment polling begins, which otherwise pops the About
         window open on launch.
 
         Greets the user once startup reaches a listening state, the spoken
-        counterpart of the wake chime — and the same greeting reactivation gives.
+        counterpart of the wake chime, and the same greeting reactivation gives.
 
         Outside GNOME it starts the tray helper first.
         """
@@ -215,8 +215,7 @@ class Tray:
         Returns True if it was one of those side-effect actions so callers can carry on
         without touching the sleep/quit lifecycle. The indicator menu is only shown
         while asleep, so in practice these fire from the idle loop in `sleep`; `poll`
-        handles them too so the path isn't lifecycle- dependent.
-
+        handles them too so the path isn't lifecycle-dependent.
         """
         if command == COMMAND_HELP:
             if not self._spawn(["xdg-open", DOCS_URL], "documentation page"):
@@ -299,8 +298,8 @@ class Tray:
 
         Fire-and-forget for the success case: a helper whose window opens keeps running
         and is left detached (never waited on or reaped). But a helper that *can't*
-        start — a bad interpreter, missing GTK/libadwaita, no display, no `xdg-open`
-        handler — exits within [`HELPER_STARTUP_GRACE`][core.tray.HELPER_STARTUP_GRACE];
+        start (a bad interpreter, missing GTK/libadwaita, no display, no `xdg-open`
+        handler) exits within [`HELPER_STARTUP_GRACE`][core.tray.HELPER_STARTUP_GRACE];
         that's caught here so the caller can tell the user, and the menu click isn't
         silently lost.
 

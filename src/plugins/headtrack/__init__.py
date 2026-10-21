@@ -70,18 +70,14 @@ class OneEuroFilter:
             self.x_prev = x
             return x
 
-        # Derivative
         dx = (x - self.x_prev) * self.freq
 
-        # Smooth derivative
         a_d = self._alpha(self.d_cutoff)
         dx_smooth = a_d * dx + (1 - a_d) * self.dx_prev
         self.dx_prev = dx_smooth
 
-        # Adaptive cutoff based on speed
         cutoff = self.min_cutoff + self.beta * abs(dx_smooth)
 
-        # Smooth value
         a = self._alpha(cutoff)
         x_smooth = a * x + (1 - a) * self.x_prev
         self.x_prev = x_smooth
@@ -258,18 +254,15 @@ def run_tracking():
                 logger.info("Calibrated: center=(%.1f, %.1f)", center_yaw, center_pitch)
             continue
 
-        # Apply one-euro filter to raw values
         smooth_yaw = filter_yaw(raw_yaw)
         smooth_pitch = filter_pitch(raw_pitch)
 
-        # Add to rolling average buffers
         yaw_buffer.append(smooth_yaw)
         pitch_buffer.append(smooth_pitch)
         if len(yaw_buffer) > BUFFER_SIZE:
             yaw_buffer.pop(0)  # pragma: no cover
             pitch_buffer.pop(0)  # pragma: no cover
 
-        # Use averaged values
         avg_yaw = sum(yaw_buffer) / len(yaw_buffer)
         avg_pitch = sum(pitch_buffer) / len(pitch_buffer)
 
@@ -278,7 +271,6 @@ def run_tracking():
             vel_yaw = abs(avg_yaw - prev_yaw)
             vel_pitch = abs(avg_pitch - prev_pitch)
 
-            # If head is basically still, skip this frame
             if vel_yaw < VELOCITY_THRESHOLD and vel_pitch < VELOCITY_THRESHOLD:
                 prev_yaw = avg_yaw
                 prev_pitch = avg_pitch
@@ -288,11 +280,9 @@ def run_tracking():
         prev_yaw = avg_yaw
         prev_pitch = avg_pitch
 
-        # Offset from center
         offset_yaw = avg_yaw - center_yaw
         offset_pitch = avg_pitch - center_pitch
 
-        # Dead zone
         if abs(offset_yaw) < DEAD_ZONE:
             offset_yaw = 0
         else:
@@ -323,7 +313,7 @@ def run_tracking():
         target_x = SCREEN_W // 2 + (offset_yaw * SENSITIVITY_X / 3)
         target_y = SCREEN_H // 2 + (offset_pitch * SENSITIVITY_Y / 3)
 
-        # Clamp target to screen FIRST
+        # Clamped before dampening, which reads the distance to each edge.
         target_x = max(0, min(SCREEN_W - 1, target_x))
         target_y = max(0, min(SCREEN_H - 1, target_y))
 
@@ -331,17 +321,14 @@ def run_tracking():
         EDGE_MARGIN = 150  # Pixels from edge where dampening kicks in
         MIN_DAMP = 0.3  # Minimum speed at very edge (0.3 = 30% speed)
 
-        # Calculate distance from edges
         dist_left = target_x
         dist_right = SCREEN_W - 1 - target_x
         dist_top = target_y
         dist_bottom = SCREEN_H - 1 - target_y
 
-        # Find closest edge distance
         closest_x = min(dist_left, dist_right)
         closest_y = min(dist_top, dist_bottom)
 
-        # Dampening: 1.0 when far from edge, MIN_DAMP at edge
         damp_x = (
             1.0
             if closest_x > EDGE_MARGIN
@@ -353,26 +340,20 @@ def run_tracking():
             else MIN_DAMP + (1.0 - MIN_DAMP) * (closest_y / EDGE_MARGIN)
         )
 
-        # Apply dampening (blend toward target more slowly near edges)
         damp = min(damp_x, damp_y)  # Use tightest dampening for corners
 
-        # Apply cursor position update (only if not frozen)
         if not frozen:
-            # Apply edge dampening to movement
             target_x_damped = cursor_x + (target_x - cursor_x) * damp
             target_y_damped = cursor_y + (target_y - cursor_y) * damp
 
             cursor_x = target_x_damped
             cursor_y = target_y_damped
 
-            # Strictly clamp to screen bounds
             cursor_x = max(5, min(SCREEN_W - 5, cursor_x))
             cursor_y = max(5, min(SCREEN_H - 5, cursor_y))
 
-            # Move cursor via GNOME Shell extension
             dbus_call("MoveTo", int(cursor_x), int(cursor_y))
 
-        # Throttle to reduce jitter
         time.sleep(0.033)  # ~30fps
 
     cap.release()
@@ -488,9 +469,9 @@ def listen_for_tracking_commands(core):
 
     Core owns the listening loop (see
     [`listen_modal`][core.main.EasySpeak.listen_modal]) so the tray keeps working while
-    tracking holds the microphone. The mode also ends
-    as soon as the tracking thread is gone — a webcam that failed to open used to
-    leave the user in a mode with nothing driving the cursor.
+    tracking holds the microphone. The mode also ends as soon as the tracking
+    thread is gone, so a webcam that failed to open does not leave the user in a
+    mode with nothing driving the cursor.
     """
     global tracking_active, cursor_x, cursor_y, frozen
 

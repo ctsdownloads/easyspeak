@@ -1,10 +1,9 @@
 """Standalone AT-SPI caret-insertion helper.
 
 The dictation plugin runs this as a script (see `dictation.atspi_python`) in
-an interpreter that has PyGObject and the AT-SPI typelib — which the app's own
+an interpreter that has PyGObject and the AT-SPI typelib, which the app's own
 venv usually lacks. It is a real module rather than an embedded `python3 -c`
-string so Ruff lints it and the unit tests can import and exercise it; an
-unlinted string is exactly how the earlier `contextlib` NameError slipped in.
+string so Ruff lints it and the unit tests can import and exercise it.
 
 It communicates with the parent purely through stdout tokens:
 `OK` (text inserted), `NO_FOCUS` (no editable field), `NO_BACKEND`
@@ -61,8 +60,7 @@ def find_focused_editable(atspi, obj, depth=0):
 def _insertion_point(target):
     """Where to start inserting: the caret, else end-of-text, else None.
 
-    Falling back to the end keeps multi-character insertion in order; the old code
-    advanced from a bogus `-1`, scattering later characters to the start. None means
+    Falling back to the end keeps multi-character insertion in order. None means
     neither the caret nor the character count was readable.
     """
     with contextlib.suppress(Exception):
@@ -78,7 +76,7 @@ def insert_into(target, text):
     """Type `text` into `target` at the caret, honouring backspaces.
 
     Returns True once the text is inserted, or False if no usable insertion point could
-    be found — so the caller reports "no focus" rather than scattering characters across
+    be found, so the caller reports "no focus" rather than scattering characters across
     the field.
     """
     pos = _insertion_point(target)

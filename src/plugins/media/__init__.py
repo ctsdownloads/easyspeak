@@ -98,10 +98,9 @@ def _action_for(cmd):
 
     Filler words and media nouns, which may be phrases ("per favore"), are
     stripped first, and what is left has to be exactly one playback verb from the
-    vocabulary table. Substring matching used to make this plugin answer for
-    anything containing a verb -- "make the display brighter" was caught by the
-    "play" inside "display" and swallowed with a cheery "Playing." -- and
-    requiring a lone verb also keeps "next tab" with the browser. A verb listed
+    vocabulary table. Requiring a lone verb keeps a command that merely contains
+    one with its own plugin: "make the display brighter" is not media even though
+    "display" holds "play", and "next tab" stays with the browser. A verb listed
     under `needs_noun` ("stop", "back") only counts with a media noun beside it.
     """
     text = " ".join(word.strip(".,!?") for word in cmd.lower().split())
@@ -123,9 +122,8 @@ def _action_for(cmd):
 def handle(cmd, core):
     """Map a playback command to an MPRIS action; return None if not media.
 
-    The reply now follows the action rather than preceding it: this used to
-    announce "Playing." and return handled even when no player was running, so a
-    command that did nothing at all sounded like it had worked.
+    The reply follows the action rather than preceding it, so a command no player
+    picked up is never announced as though it had worked.
     """
     action = _action_for(cmd)
     if action is None:

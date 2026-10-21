@@ -78,8 +78,8 @@ def strip_wake_words(cmd):
     """Remove a leading spoken wake word and surrounding punctuation.
 
     Only a prefix is removed. Replacing every occurrence anywhere in the utterance
-    -- which is what this did -- eats the word out of the middle of a command, so
-    "search jarvis" became "search" and a URL containing it lost part of itself.
+    would eat the word out of the middle of a command, so "search jarvis" would
+    become "search" and a URL containing it would lose part of itself.
     Longest prefix first, so "hey jarvis," is matched before "jarvis". The case
     of what remains is kept: dictation inserts it as spoken, and every other
     consumer lowercases for itself.
@@ -102,11 +102,6 @@ def _mean_level(samples):
     """Mean absolute amplitude of a chunk of int16 samples."""
     # Widened first: abs(-32768) does not fit in int16 and comes back negative.
     return np.abs(samples.astype(np.int32)).mean()
-
-
-# =============================================================================
-# CORE CLASS
-# =============================================================================
 
 
 class EasySpeak:
@@ -335,7 +330,7 @@ class EasySpeak:
         real retry lands after the feedback plays out, past the window. The
         first real miss apologises, the next escalates to the command list
         (shown once per streak), and further misses keep the mic open without
-        repeating it. The feedback never says "help" — the open mic would
+        repeating it. The feedback never says "help", because the open mic would
         transcribe it and fire the help command in a loop.
         """
         now = time.time()
@@ -431,10 +426,9 @@ class EasySpeak:
         """Measure the room's noise floor and set the silence threshold above it.
 
         A fixed threshold assumes a quiet room. Where the ambient level sits above
-        it -- a fan, a desktop, an air conditioner -- `is_silence` never returns
-        True, so nothing ever stops recording early: a three-word command took the
-        whole five-second cap and a dictated sentence took twenty, which is most of
-        the wait between speaking and seeing text.
+        it, from a fan, a desktop or an air conditioner, `is_silence` never returns
+        True, so nothing stops recording early and every utterance runs to its
+        time cap.
 
         Uses the median chunk level so a cough or a passing car doesn't skew the
         measurement, and clamps the result: never below the configured floor, and
@@ -485,8 +479,8 @@ class EasySpeak:
         window.
 
         Both limits are adjustable because a command and a dictated sentence need
-        very different ones: the command defaults stopped recording during the pause
-        in the middle of a sentence, and truncated anything past five seconds.
+        very different ones: the command defaults stop recording during a
+        mid-sentence pause, and cap a sentence at five seconds.
         """
         max_seconds = MAX_RECORD_SECONDS if max_seconds is None else max_seconds
         if silence_duration is None:
@@ -603,13 +597,12 @@ class EasySpeak:
         """Yield transcribed commands for a plugin's modal mode. Plugin-facing.
 
         Plugins that take over the microphone (grid, browser, dictation, head
-        tracking) each ran their own `while` loop, which starved everything the main
-        loop owns: the tray was never polled, so its Quit and Mute entries and the
-        Quick Settings toggle did nothing; and with no idle limit a mode never ended
-        on its own, so an unattended session stayed in it indefinitely with the wake
-        word unreachable. Driving the loop from here keeps those alive — the tray is
-        polled between utterances, and the mode ends `idle_timeout` seconds after the
-        last command it understood.
+        tracking) drive their listening from here rather than from a `while` loop
+        of their own, so everything the main loop owns stays alive: the tray is
+        polled between utterances, which keeps its Quit and Mute entries and the
+        Quick Settings toggle working, and the mode ends `idle_timeout` seconds
+        after the last command it understood rather than running unattended with
+        the wake word unreachable.
 
         The deadline is wall-clock and only a recognised command pushes it back.
         Counting silent *rounds* instead doesn't work in a real room: any sound over
@@ -742,11 +735,10 @@ class EasySpeak:
         """Play a short desktop sound, best-effort. Plugin-facing.
 
         The daemon is voice-first, so an audible cue is often the only signal a
-        user gets -- especially with no Piper voice installed, where every spoken
-        reply is dropped. Failures are never fatal: this used to be a bare
-        `paplay` call, so a machine without pulseaudio-utils took the whole daemon
-        down on the first wake word. The working player is remembered after the
-        first success, so a mode change costs one process, not three.
+        user gets, especially with no Piper voice installed, where every spoken
+        reply is dropped. Failures are never fatal, so a machine with no working
+        player still runs. The working player is remembered after the first
+        success, so a mode change costs one process, not three.
         """
         if not Path(sound).exists():
             logger.debug("sound file not found: %s", sound)
@@ -789,8 +781,8 @@ class EasySpeak:
         """Run a hotkey-triggered dictation session for as long as the keys are held.
 
         Triggered from the main loop when the silent-activation combo fires.
-        Acknowledges with the wake chime — but speaks no prompt, this being the *silent*
-        path — then hands off to the registered dictation handler, gating it on the
+        Acknowledges with the wake chime but speaks no prompt, this being the *silent*
+        path, then hands off to the registered dictation handler, gating it on the
         still-held key state so releasing the keys ends it. Without a registered handler
         (e.g. the dictation plugin didn't load) the error sound and a short reply say
         so, as a silent key press would look like it did nothing.

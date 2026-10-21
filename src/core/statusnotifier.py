@@ -82,7 +82,7 @@ def icon(state):
 
 def tooltip(state):
     """Return the tooltip's subtitle for a daemon state."""
-    return "Asleep — click to reactivate" if is_muted(state) else "Listening"
+    return "Asleep, click to reactivate" if is_muted(state) else "Listening"
 
 
 def toggle_command(state):

@@ -9,7 +9,7 @@ libadwaita.
 
 Everything GUI is imported lazily inside [`main`][core.about.main] so this module stays
 importable (for its metadata constants and version lookup) without PyGObject or a
-display present — which is how the unit suite exercises it.
+display present, which is how the unit suite exercises it.
 """
 
 import html

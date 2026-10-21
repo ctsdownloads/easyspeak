@@ -1,7 +1,7 @@
 // Thin entrypoint: the Extension subclass, enable()/disable(), and the D-Bus
 // interface + handler wiring. Every feature primitive lives in its own module
 // (grid, windows, screenshot, indicator); this file only owns their lifecycle
-// and routes D-Bus calls to them. Keep it generic — see issue #75.
+// and routes D-Bus calls to them. Keep it generic, see issue #75.
 
 import Gio from 'gi://Gio';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';

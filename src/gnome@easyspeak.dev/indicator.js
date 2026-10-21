@@ -33,7 +33,7 @@ function writeControlCommand(command) {
 
 // The indicator is shown ONLY while EasySpeak is deactivated. While it's running
 // it listens continuously, so GNOME's own red microphone privacy icon already
-// signals the open mic and the assistant is driven by voice — a second icon would
+// signals the open mic and the assistant is driven by voice, so a second icon would
 // just be noise. When deactivated the mic is released (GNOME's dot disappears) and
 // voice is off, so this dimmed, struck-through mic becomes the one affordance to
 // wake the assistant back up.

@@ -2,8 +2,8 @@
 
 Core owns the extension's lifecycle because both the mousegrid plugin and `core.tray`
 drive it over D-Bus; [`ensure_extension`][core.gnome_extension.ensure_extension] runs
-once at startup. The extension ships as package data — `extension.js`, the
-`extension-helpers.js` it imports, and `metadata.json` — copied into the user's
+once at startup. The extension ships as package data (`extension.js`, the
+`extension-helpers.js` it imports, and `metadata.json`), copied into the user's
 extensions dir as a set. On Wayland GNOME only loads extension code at login, so the
 startup copy is always one login behind; [a `oneshot` systemd user unit][systemd]
 ordered before the shell re-copies it at the start of every login to close that gap. The
@@ -169,7 +169,7 @@ def _stable_interpreter():
     `sys.executable` is fine for packaged installs but can point into a uv
     ephemeral build env under `uv run` / `nix run`. When it does, fall back to
     the base interpreter that env was built from (`sys._base_executable`, else
-    the symlink target) — it persists, and the refresh entry point imports only
+    the symlink target), which persists, and the refresh entry point imports only
     the stdlib so a bare base interpreter runs it. Resolving deterministically
     keeps the rendered unit byte-stable, so re-running converges instead of
     flapping (and a unit left pointing at a vanished interpreter self-heals on
@@ -192,8 +192,8 @@ def unit_text():
 
     Two non-obvious choices in the rendered unit: it's ordered before
     `gnome-session-pre.target` and the `org.gnome.Shell@*` services (missing ones
-    are ignored) so a changed extension takes effect on this login, not the next
-    — on Wayland the shell only loads extensions at login. And both ExecStart
+    are ignored) so a changed extension takes effect on this login, not the next,
+    because on Wayland the shell only loads extensions at login. And both ExecStart
     arguments are quoted, since systemd splits ExecStart on whitespace.
     """
     return data_text(
@@ -293,12 +293,12 @@ def install_refresh_unit():
 def migrate_legacy_extensions():
     """Remove any pre-rename extension install so it can't double-load.
 
-    The extension's UUID changed over time — `easyspeak-grid@local` (when it was
+    The extension's UUID changed over time: `easyspeak-grid@local` (when it was
     just a mouse grid), then `easyspeak@local`, now `gnome@easyspeak.dev`. A
     leftover copy under an old UUID would stay enabled and add a second panel
     indicator and grid that the daemon no longer drives, so clean each up:
     disable it (so GNOME drops it from the enabled set) then delete its
-    directory. Best-effort throughout — returns True if any legacy install was
+    directory. Best-effort throughout, returning True if any legacy install was
     found and removed.
 
     One-off migration shim: once users have had a release or two to upgrade past
@@ -319,7 +319,7 @@ def migrate_legacy_extensions():
             )
         shutil.rmtree(legacy_dir, ignore_errors=True)
         logger.info(
-            "removed the legacy %s extension (renamed to %s) — log out and back "
+            "removed the legacy %s extension (renamed to %s); log out and back "
             "in to load the new one",
             uuid,
             EXTENSION_UUID,
@@ -387,7 +387,7 @@ def activate_extension():
         result = refresh_extension_files(root, dest_dir)
         if result is RefreshResult.REFRESHED:
             logger.info(
-                "updated GNOME extension %s to the bundled version — "
+                "updated GNOME extension %s to the bundled version; "
                 "log out and back in to load it",
                 EXTENSION_UUID,
             )
@@ -403,7 +403,7 @@ def activate_extension():
     if not installed:
         if not all((root / name).is_file() for name in EXTENSION_ASSETS):
             logger.warning(
-                "could not auto-install GNOME extension — source files not "
+                "could not auto-install GNOME extension: source files not "
                 "found at %s. The panel indicator and grid commands will not "
                 "work until the extension is installed manually.",
                 root,
@@ -418,7 +418,7 @@ def activate_extension():
             return
 
     # On Wayland GNOME only rescans at login, so enable fails with "Unknown
-    # extension" until then — treated as "installed, log back in to use".
+    # extension" until then, which counts as "installed, log back in to use".
     try:
         enabled = subprocess.run(
             ["gnome-extensions", "enable", EXTENSION_UUID],
@@ -454,7 +454,7 @@ def activate_extension():
         )
     else:
         logger.info(
-            "installed GNOME extension to %s — "
+            "installed GNOME extension to %s; "
             "log out and back in to finish enabling it.",
             dest_dir,
         )

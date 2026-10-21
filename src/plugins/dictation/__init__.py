@@ -1,4 +1,8 @@
-"""Dictation Plugin - Voice to text via AT-SPI."""
+"""Dictation Plugin - Voice to text, pasted into the focused field.
+
+Text reaches an application through the clipboard and a paste keystroke. AT-SPI
+caret insertion is the fallback where no clipboard tool is installed.
+"""
 
 import ast
 import json
@@ -81,7 +85,6 @@ ENTER_PHRASES = frozenset(VOCABULARY["enter"]["say"]) | frozenset(
     ENGLISH["enter"]["say"]
 )
 EXIT_VERBS = tuple(VOCABULARY["exit"]["verbs"])
-EXIT_NOUNS = tuple(VOCABULARY["exit"]["nouns"])
 EXIT_PHRASES = exit_phrases(VOCABULARY)
 UNDO_PHRASES = frozenset(VOCABULARY["undo"]["phrases"])
 KEY_PREFIXES = tuple(VOCABULARY["keystrokes"]["prefix"])
@@ -131,7 +134,7 @@ def ensure_gnome_accessibility():
             check=False,
         )
         if current.returncode != 0:
-            return  # schema missing — not really on GNOME
+            return  # schema missing, not really on GNOME
         if current.stdout.strip() == "true":
             return
         result = subprocess.run(
@@ -142,7 +145,7 @@ def ensure_gnome_accessibility():
         )
         if result.returncode == 0:
             logger.info(
-                "enabled GNOME toolkit-accessibility — "
+                "enabled GNOME toolkit-accessibility; "
                 "log out and back in for dictation to work"
             )
         else:
@@ -187,7 +190,6 @@ def is_exit_phrase(text, phrases=None):
 
 
 # --- Insertion ---------------------------------------------------------------
-#
 
 # evdev keycodes for the paste chord (stable Linux input ABI).
 KEYCODES = {
@@ -202,7 +204,6 @@ KEYCODES = {
 DEFAULT_PASTE_CHORD = "ctrl+v"
 
 # Terminals paste with Ctrl+Shift+V, since Ctrl+V is a control character there.
-# A short, stable list -- unlike the toolkit table this design replaced.
 TERMINAL_PASTE_CHORD = "ctrl+shift+v"
 TERMINAL_WM_CLASSES = frozenset(
     {
@@ -329,9 +330,8 @@ def read_clipboard(paste_cmd):
     """Return the current clipboard text, or None if there isn't any.
 
     Read as bytes and decoded here rather than by `subprocess`, because the
-    clipboard often isn't text at all -- a copied image arrives as PNG bytes, and
-    decoding those as UTF-8 raised straight out of the middle of an insertion and
-    killed dictation mid-sentence.
+    clipboard often isn't text at all: a copied image arrives as PNG bytes, and
+    decoding those as UTF-8 would raise in the middle of an insertion.
 
     Non-text content simply isn't preserved: the dictated text still gets pasted,
     but whatever was on the clipboard is gone afterwards. Restoring arbitrary
@@ -358,9 +358,8 @@ def write_clipboard(copy_cmd, text):
 
     Output goes to /dev/null rather than a pipe. `wl-copy` forks a daemon to hold
     the selection for as long as it owns it, and that daemon inherits whatever
-    pipes we hand the parent -- so capturing output makes `subprocess.run` wait on
-    a process that never exits (CPython bpo-37424). Every copy timed out, and
-    dictation reported that it couldn't reach the clipboard.
+    pipes the parent is given, so capturing output makes `subprocess.run` wait on
+    a process that never exits (CPython bpo-37424).
     """
     try:
         result = subprocess.run(
@@ -421,8 +420,8 @@ def leave_browser_insert_mode():
     """Hand qutebrowser back in normal mode once dictation is over.
 
     Insert mode is entered so a paste reaches the page, but leaving the browser in
-    it means every later keystroke is treated as text: hinting and scrolling both
-    misbehave, which looked like dictation breaking the browser on its way out.
+    it means every later keystroke is treated as text, which breaks hinting and
+    scrolling.
     """
     global _left_browser_in_insert_mode
     if not _left_browser_in_insert_mode:
@@ -441,7 +440,7 @@ def has_focused_text_field():
     there was one.
 
     Any failure answers yes. A probe that can't run is no reason to refuse to
-    paste -- the old behaviour, blind but willing, is the better fallback.
+    paste, so pasting blind is the fallback.
     """
     return insert_via_atspi("") != NO_FOCUS
 
@@ -524,7 +523,7 @@ def _restore_clipboard_later(copy_cmd, saved, generation):
 ATSPI_CANDIDATES = ("python3", "/usr/bin/python3", "/usr/bin/python")
 
 # Exactly what the helper does on startup, so a candidate is only accepted if the
-# real import chain works -- PyGObject alone isn't enough without the typelib.
+# real import chain works: PyGObject alone isn't enough without the typelib.
 ATSPI_PROBE = (
     "import gi; gi.require_version('Atspi', '2.0'); from gi.repository import Atspi"
 )
@@ -541,10 +540,9 @@ def atspi_python():
     interpreter that has them (the Nix flake sets it). Otherwise each candidate is
     probed with the helper's own import chain and the first that works is kept.
 
-    Falling back to a bare `python3` used to be enough, but only until the daemon
-    was run from an activated virtualenv: `python3` then resolves to the venv's
-    interpreter, which has no PyGObject, and dictation transcribed perfectly and
-    inserted nothing.
+    A bare `python3` is not enough on its own: under an activated virtualenv it
+    resolves to the venv's interpreter, which has no PyGObject, leaving dictation
+    able to transcribe but not to insert.
     """
     global _atspi_python
     if _atspi_python is None:
@@ -628,21 +626,17 @@ def format_text(text, vocabulary=None):
     # A comma right before a period is Whisper's, not the speaker's.
     text = re.sub(r",\s*\.", ",", text)
 
-    # Capitalize after sentence endings
     def capitalize_after(match):
         return match.group(1) + match.group(2).upper()
 
     text = re.sub(r"([.!?]\s+)([a-z])", capitalize_after, text)
 
-    # Capitalize first letter
     if text:
         text = text[0].upper() + text[1:]
 
-    # Clean up extra spaces
     text = re.sub(r" +", " ", text)
     text = re.sub(r" ([.,!?:;])", r"\1", text)
 
-    # Fix double periods
     text = re.sub(r"\.+", ".", text)
 
     return text.strip()
@@ -727,13 +721,13 @@ PTT_LISTEN_TIMEOUT = 2
 def run_push_to_talk(core, should_continue):
     """Dictate while the activation keys are held (the silent-activation path).
 
-    Mirrors the voice `notes` loop but is gated on `should_continue` — a predicate that
-    is True while the keys remain held — instead of a spoken "stop notes": each
+    Mirrors the voice `notes` loop but is gated on `should_continue`, a predicate that
+    is True while the keys remain held, instead of a spoken "stop notes": each
     utterance captured from `core` is formatted and inserted until the keys are
     released. The capture waits re-check `should_continue` so releasing stops dictation
     promptly.
     """
-    logger.info("🎙️ Push-to-talk dictation — release to end")
+    logger.info("🎙️ Push-to-talk dictation, release to end")
     while should_continue():
         core.flush_stream()
         first = core.wait_for_speech(
@@ -756,7 +750,7 @@ def handle(cmd, core):
     "noted" do not trigger it, and a command that also names leaving ("stop
     dictation") is not an entry. While in dictation mode core drives the listening
     (see [`listen_modal`][core.main.EasySpeak.listen_modal]), transcribing speech
-    and inserting it into the focused field until the exit phrase is heard — or
+    and inserting it into the focused field until the exit phrase is heard, or
     until the mode ends on its own, so an open microphone can't be left dictating
     unattended.
     """
@@ -769,8 +763,8 @@ def handle(cmd, core):
         try:
             return _dictation_session(core)
         finally:
-            # However the session ended -- "stop notes", an idle timeout, the
-            # tray -- the browser must not be left in insert mode.
+            # However the session ended, by "stop notes", an idle timeout or the
+            # tray, the browser must not be left in insert mode.
             leave_browser_insert_mode()
 
     return None
@@ -779,8 +773,8 @@ def handle(cmd, core):
 def _dictation_session(core):
     """Transcribe and insert until the user stops; see handle().
 
-    Sentence-length recording, not command-length: the command defaults cut the
-    recording off during a mid-sentence pause and truncated anyone who kept going.
+    Sentence-length recording, not command-length: the command defaults would cut
+    the recording off during a mid-sentence pause.
     """
     for text in core.listen_modal(
         "dictation",

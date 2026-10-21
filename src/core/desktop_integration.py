@@ -4,8 +4,8 @@ Debian/RPM packages ship the launcher, autostart entry, and refresh service as
 system files, so users there need do nothing. A pip or `uv` install has no such
 hooks, so `easyspeak --configure` writes the per-user equivalents under `$HOME`.
 
-The GNOME extension and its refresh service are always set up — they're what
-makes the panel/tray icon work — while the launcher and autostart entries are
+The GNOME extension and its refresh service are always set up, because they are
+what makes the panel/tray icon work. The launcher and autostart entries stay
 opt-in, since not everyone wants EasySpeak in their menu or starting at login.
 """
 
