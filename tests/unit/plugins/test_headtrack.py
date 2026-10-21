@@ -917,3 +917,102 @@ def test_tracking_replies_cannot_re_trigger_themselves(
     freeze_words = ("freeze", "free", "rees", "frees")
     assert not any(word in phrase for phrase in spoken for word in freeze_words)
     assert "following" not in ("go", "go go", "unfreeze", "resume", "track")
+
+
+def write_video_devices(root, nodes):
+    """Build a sysfs tree of `video<N>: (node index, name)` entries."""
+    for device, (node, name) in nodes.items():
+        (root / device).mkdir()
+        (root / device / "index").write_text(f"{node}\n")
+        (root / device / "name").write_text(f"{name}\n")
+    return root
+
+
+def test_cameras_keeps_one_node_per_device(tmp_path, monkeypatch):
+    """A camera owns several nodes and only node 0 streams video."""
+    monkeypatch.setattr(
+        headtrack,
+        "VIDEO_DEVICES",
+        write_video_devices(
+            tmp_path,
+            {
+                "video0": (0, "Logitech BRIO"),
+                "video1": (1, "Logitech BRIO"),
+                "video2": (2, "Logitech BRIO"),
+                "video3": (3, "Logitech BRIO"),
+                "video4": (0, "UGREEN 15389"),
+                "video5": (1, "UGREEN 15389"),
+            },
+        ),
+    )
+
+    assert headtrack.cameras() == [(0, "Logitech BRIO"), (4, "UGREEN 15389")]
+
+
+def test_cameras_skips_unreadable_devices(tmp_path, monkeypatch):
+    """A node without the kernel's files is not a camera to offer."""
+    (tmp_path / "video9").mkdir()
+    monkeypatch.setattr(headtrack, "VIDEO_DEVICES", tmp_path)
+
+    assert headtrack.cameras() == []
+
+
+def test_camera_index_takes_the_first_camera(tmp_path, monkeypatch):
+    """The laptop case: one camera, nothing to choose between."""
+    monkeypatch.delenv("EASYSPEAK_CAMERA", raising=False)
+    monkeypatch.setattr(
+        headtrack,
+        "VIDEO_DEVICES",
+        write_video_devices(tmp_path, {"video0": (0, "Integrated Camera")}),
+    )
+
+    assert headtrack.camera_index() == 0
+
+
+def test_camera_index_without_any_camera(tmp_path, monkeypatch):
+    monkeypatch.delenv("EASYSPEAK_CAMERA", raising=False)
+    monkeypatch.setattr(headtrack, "VIDEO_DEVICES", tmp_path)
+
+    assert headtrack.camera_index() == 0
+
+
+def test_camera_index_honours_the_override(tmp_path, monkeypatch):
+    monkeypatch.setenv("EASYSPEAK_CAMERA", "4")
+    monkeypatch.setattr(
+        headtrack,
+        "VIDEO_DEVICES",
+        write_video_devices(tmp_path, {"video0": (0, "Logitech BRIO")}),
+    )
+
+    assert headtrack.camera_index() == 4
+
+
+def test_camera_index_ignores_an_unusable_override(tmp_path, monkeypatch, readlog):
+    """A typo in the variable falls back rather than refusing to start."""
+    monkeypatch.setenv("EASYSPEAK_CAMERA", "banana")
+    monkeypatch.setattr(
+        headtrack,
+        "VIDEO_DEVICES",
+        write_video_devices(tmp_path, {"video0": (0, "Logitech BRIO")}),
+    )
+
+    assert headtrack.camera_index() == 0
+    assert "banana" in readlog().out
+
+
+def test_camera_index_names_the_others_when_there_is_a_choice(
+    tmp_path, monkeypatch, readlog
+):
+    """Two real cameras: say which was taken and how to take the other."""
+    monkeypatch.delenv("EASYSPEAK_CAMERA", raising=False)
+    monkeypatch.setattr(
+        headtrack,
+        "VIDEO_DEVICES",
+        write_video_devices(
+            tmp_path,
+            {"video0": (0, "Logitech BRIO"), "video4": (0, "UGREEN 15389")},
+        ),
+    )
+
+    assert headtrack.camera_index() == 0
+    assert "UGREEN 15389" in readlog().out
