@@ -40,7 +40,11 @@ export class GridOverlay {
 
     _getPointer() {
         if (!this._pointer) {
-            const seat = Clutter.get_default_backend().get_default_seat();
+            // Clutter.get_default_backend() was removed in GNOME Shell 51.
+            const backend = Clutter.get_default_backend
+                ? Clutter.get_default_backend()
+                : global.stage.context.get_backend();
+            const seat = backend.get_default_seat();
             this._pointer = seat.create_virtual_device(Clutter.InputDeviceType.POINTER_DEVICE);
         }
         return this._pointer;
