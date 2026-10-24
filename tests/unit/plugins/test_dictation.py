@@ -587,6 +587,8 @@ def test_run_push_to_talk_inserts_until_released(mock_format, mock_insert):
     # The capture is gated on the held state so a release can cut it short.
     assert core.wait_for_speech.call_args.kwargs["should_continue"] is not None
     assert core.record_until_silence.call_args.kwargs["should_continue"] is not None
+    assert core.record_until_silence.call_args.kwargs["max_seconds"] == 20.0
+    assert core.record_until_silence.call_args.kwargs["silence_duration"] == 0.7
 
 
 @patch("easyspeak.plugins.dictation.insert_text", return_value=dictation.INSERTED)
@@ -676,6 +678,39 @@ def test_run_push_to_talk_without_keystrokes_points_to_the_clipboard(
         "I can't type on this desktop yet. "
         "The text is on the clipboard, paste it with Control V."
     )
+
+
+def test_push_to_talk_speech_longer_than_five_seconds_with_pause():
+    """Simulated push-to-talk speech longer than 5s with a mid-speech pause records in full (#117)."""
+    from easyspeak.core.main import EasySpeak
+
+    easy = EasySpeak()
+    easy.silence_threshold = 300
+
+    speech_chunk = b"\x00\x05" * 800  # amplitude > 300
+    silent_chunk = b"\x00\x00" * 800  # silence (amplitude 0)
+
+    # 70 chunks total (7.0 seconds of audio at 100ms per 1600-byte chunk):
+    # - 30 chunks speech (3.0s)
+    # - 5 chunks pause (0.5s pause: would abort under default 0.3s silence, but tolerated by 0.7s)
+    # - 35 chunks speech (3.5s: total 7.0s > 5.0s default max cap)
+    stream_chunks = [speech_chunk] * 30 + [silent_chunk] * 5 + [speech_chunk] * 35
+    chunk_iter = iter(stream_chunks)
+
+    easy.stream = Mock()
+    easy.stream.read.side_effect = lambda size, exception_on_overflow=False: next(
+        chunk_iter, silent_chunk
+    )
+
+    recorded = easy.record_until_silence(
+        max_seconds=dictation.MAX_RECORD_SECONDS,
+        silence_duration=dictation.SILENCE_DURATION,
+        should_continue=lambda: True,
+    )
+
+    # 70 chunks of speech/pause + 7 chunks (0.7s) of trailing silence = 77 chunks (123,200 bytes)
+    # Under default command caps (5.0s max, 0.3s pause), this would have cut off at 33 chunks (0.3s pause).
+    assert len(recorded) == (70 + 7) * 1600
 
 
 @patch("easyspeak.plugins.dictation.insert_text")
