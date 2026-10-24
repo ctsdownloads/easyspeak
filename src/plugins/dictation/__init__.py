@@ -734,7 +734,11 @@ def run_push_to_talk(core, should_continue):
         )
         if not first:
             continue
-        audio = first + core.record_until_silence(should_continue=should_continue)
+        audio = first + core.record_until_silence(
+            max_seconds=MAX_RECORD_SECONDS,
+            silence_duration=SILENCE_DURATION,
+            should_continue=should_continue,
+        )
         text = core.transcribe(audio, prompt=DICTATION_PROMPT, language=LANGUAGE)
         if not text:
             continue
