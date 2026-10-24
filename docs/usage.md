@@ -54,9 +54,10 @@ the module that reads each (linked to its API reference).
 | `EASYSPEAK_NOISE_FILTER`         | on                                     | `0` listens to the microphone unfiltered    |
 | `EASYSPEAK_OFFLINE`              | `strict`                               | Stay offline; `relaxed` downloads models    |
 | `EASYSPEAK_STT`                  | `parakeet`, `whisper` if not installed | Speech model: `parakeet` or `whisper`       |
+| `EASYSPEAK_TTS`                  | `piper`                                | Reply voice engine: `piper`                 |
 | `EASYSPEAK_PIPER_BIN`            | `piper`                                | Piper TTS binary                            |
 | `EASYSPEAK_REQUIRE_WAKE_WORD`    | unset                                  | Modes wait for the wake word each command   |
-| `EASYSPEAK_PIPER_MODEL`          | an installed language pack's voice     | Piper voice `.onnx` for speech output       |
+| `EASYSPEAK_PIPER_MODEL`          | an installed language pack's voice     | Deprecated Piper voice `.onnx`; honored     |
 | `EASYSPEAK_SOUNDS_DIR`           | `/usr/share/sounds/freedesktop/stereo` | Directory of the wake chime and error bell  |
 | `EASYSPEAK_WHISPER_COMPUTE_TYPE` | `int8`                                 | CTranslate2 compute type                    |
 | `EASYSPEAK_WHISPER_CPU_THREADS`  | `0`                                    | CPU threads for transcription (`0` = auto)  |
@@ -71,6 +72,9 @@ also what happens, with a warning, when the Parakeet model is neither installed
 nor allowed to download, or when `EASYSPEAK_LANGUAGE` is one Parakeet does not
 cover.
 
+`EASYSPEAK_TTS` names the reply-voice engine; Piper is the only engine yet.
+An unknown name warns at startup, and Piper speaks.
+
 `EASYSPEAK_LANGUAGE` is the language you dictate in, and the language of the
 spoken replies where they are translated (German, Italian, French and Spanish
 are) and that language's pack is installed. Commands take that language's words
@@ -80,8 +84,6 @@ knows, a warning at startup says so. It picks which installed
 [language pack](packaging.md#language) `EASYSPEAK_WHISPER_MODEL` defaults to;
 without one it falls back to `base.en` for English and to the multilingual
 `small` for any other language (a download, see `EASYSPEAK_OFFLINE`).
-`EASYSPEAK_PIPER_MODEL` defaults to the voice of the pack the replies are spoken
-in, else `~/.local/share/piper/en_US-amy-medium.onnx`.
 
 `EASYSPEAK_SILENCE_THRESHOLD` is normally left alone. On startup EasySpeak
 listens to the room for a second and sets the threshold above whatever it

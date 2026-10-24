@@ -40,6 +40,7 @@ from .config import (
     SILENCE_THRESHOLD_MAX,
     STT,
     STT_WARNINGS,
+    TTS_WARNINGS,
     WAKE_COOLDOWN,
     WAKE_SOUND,
     WAKE_THRESHOLD,
@@ -898,7 +899,9 @@ class EasySpeak:
         except RuntimeError as exc:
             logger.error("Cannot start EasySpeak: %s", exc)  # noqa: TRY400
             raise SystemExit(1) from exc
-        for warning in (*STT_WARNINGS, *LANGUAGE_WARNINGS):
+        # The order is not arbitrary: LANGUAGE_WARNINGS pair with the
+        # "Loading Parakeet"/"Loading Whisper" line above.
+        for warning in (*STT_WARNINGS, *LANGUAGE_WARNINGS, *TTS_WARNINGS):
             logger.warning(warning)
 
         ensure_extension()
