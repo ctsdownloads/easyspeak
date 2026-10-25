@@ -4,6 +4,63 @@
 // can be unit-tested with `node --test` outside a running shell (the rest of
 // extension.js can only run inside gnome-shell). Keep this file dependency-free.
 
+// Convert monitor-local coordinates (relative to the monitor's top-left) to
+// Clutter stage coordinates (global across all connected monitors).
+export function localToStageCoordinates(localX, localY, monitor) {
+    if (!monitor) return { stageX: localX, stageY: localY };
+    return {
+        stageX: Math.round((monitor.x ?? 0) + localX),
+        stageY: Math.round((monitor.y ?? 0) + localY),
+    };
+}
+
+// Cycle monitor index to the next display using modular arithmetic.
+export function cycleMonitorIndex(currentIndex, totalMonitors) {
+    if (!totalMonitors || totalMonitors <= 0) return 0;
+    const current = Math.max(0, currentIndex ?? 0);
+    return (current + 1) % totalMonitors;
+}
+
+// Resolve a target specifier ('laptop', 'external', 'primary', or index)
+// to a valid monitor index in the monitors list.
+export function resolveMonitorTarget(monitors, primaryIndex, target) {
+    if (!monitors || monitors.length === 0) return 0;
+    if (typeof target === 'number') {
+        return Math.max(0, Math.min(target, monitors.length - 1));
+    }
+    const defaultIndex = primaryIndex >= 0 && primaryIndex < monitors.length ? primaryIndex : 0;
+    const str = String(target ?? '').trim().toLowerCase();
+    if (!str || str === 'primary' || str === 'default') {
+        return defaultIndex;
+    }
+    if (str === 'secondary' || str === 'external' || str === 'other') {
+        const extIdx = monitors.findIndex((m, idx) => idx !== defaultIndex);
+        return extIdx !== -1 ? extIdx : defaultIndex;
+    }
+    if (str === 'laptop' || str === 'builtin' || str === 'internal') {
+        const builtinIdx = monitors.findIndex((m) => m && m.is_builtin);
+        if (builtinIdx !== -1) return builtinIdx;
+        const nonPrimary = monitors.findIndex((m, idx) => idx !== defaultIndex);
+        return nonPrimary !== -1 ? nonPrimary : defaultIndex;
+    }
+    const parsed = parseInt(str, 10);
+    if (!isNaN(parsed) && parsed >= 0 && parsed < monitors.length) {
+        return parsed;
+    }
+    // Match connector name (exact match first, then substring)
+    const exactConnector = monitors.findIndex((m) =>
+        m && m.connector && m.connector.toLowerCase() === str
+    );
+    if (exactConnector !== -1) return exactConnector;
+
+    const byConnector = monitors.findIndex((m) =>
+        m && m.connector && m.connector.toLowerCase().includes(str)
+    );
+    if (byConnector !== -1) return byConnector;
+
+    return defaultIndex;
+}
+
 // Interpolate the pointer path for a drag, from the press point to the drop
 // point, as `steps` positions ending exactly on the target.
 //

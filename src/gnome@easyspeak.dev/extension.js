@@ -27,6 +27,17 @@ const DBUS_INTERFACE = `
       <arg type="i" direction="in" name="width"/>
       <arg type="i" direction="in" name="height"/>
     </method>
+    <method name="GetMonitors">
+      <arg type="s" direction="out" name="monitors_json"/>
+    </method>
+    <method name="ShowOnMonitor">
+      <arg type="s" direction="in" name="target"/>
+      <arg type="i" direction="out" name="width"/>
+      <arg type="i" direction="out" name="height"/>
+    </method>
+    <method name="SwitchMonitor">
+      <arg type="b" direction="out" name="success"/>
+    </method>
 
     <!-- Mouse control -->
     <method name="Click">
@@ -166,6 +177,9 @@ export default class EasySpeakGridExtension extends Extension {
             Show: () => this._grid.show(),
             Hide: () => this._grid.hide(),
             Update: (x, y, width, height) => this._grid.update(x, y, width, height),
+            GetMonitors: () => JSON.stringify(this._grid.getAllMonitors()),
+            ShowOnMonitor: (target) => this._grid.showOnMonitor(target),
+            SwitchMonitor: () => this._grid.switchMonitor(),
 
             // Mouse
             Click: (x, y) => this._grid.click(x, y),
@@ -245,11 +259,7 @@ export default class EasySpeakGridExtension extends Extension {
 
     disable() {
         if (this._grid) {
-            // Button up first: hide() only tears down the overlay, and a drag
-            // still in progress would otherwise stay pressed with nothing left
-            // to release it.
-            this._grid.abortDrag();
-            this._grid.hide();
+            this._grid.destroy();
             this._grid = null;
         }
         if (this._dbus) {

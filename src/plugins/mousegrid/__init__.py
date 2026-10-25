@@ -25,6 +25,8 @@ PRIORITY = 1
 
 COMMANDS = [
     _("grid/mouse/pointer - show mouse grid"),
+    _("grid on laptop/external - show grid on specific monitor"),
+    _("switch monitor / next monitor - cycle grid between displays"),
     _("1-9 or chains like '3 7 5' - zoom to zone(s)"),
     _("up/down/left/right [N] - nudge position"),
     _("click - left click"),
@@ -294,6 +296,70 @@ def report_grid_unavailable(core):
         core.speak(_("The mouse grid only works on GNOME so far."))
 
 
+def switch_monitor():
+    """Cycle the grid overlay to the next connected monitor."""
+    global grid_active, grid_bounds, screen_size
+    result = host_run(
+        [
+            "gdbus",
+            "call",
+            "--session",
+            "--dest",
+            "org.gnome.Shell",
+            "--object-path",
+            "/org/easyspeak/Desktop",
+            "--method",
+            "org.easyspeak.Desktop.SwitchMonitor",
+        ]
+    )
+    if result.returncode != 0 or "(true,)" not in result.stdout.lower():
+        return False
+    grid_active = True
+    screen_size = get_screen_size()
+    grid_bounds = (0, 0, screen_size[0], screen_size[1])
+    core.speak(_("Switched monitor"))
+    logger.info("Grid switched to next monitor (%sx%s)", screen_size[0], screen_size[1])
+    return True
+
+
+def show_grid_on_monitor(target):
+    """Show the grid on a specific target display ('laptop', 'external', or index)."""
+    global grid_active, grid_bounds, screen_size
+
+    if grid_active:
+        close_grid()
+
+    result = host_run(
+        [
+            "gdbus",
+            "call",
+            "--session",
+            "--dest",
+            "org.gnome.Shell",
+            "--object-path",
+            "/org/easyspeak/Desktop",
+            "--method",
+            "org.easyspeak.Desktop.ShowOnMonitor",
+            str(target),
+        ]
+    )
+
+    if result.returncode == 0:
+        grid_active = True
+        match = re.search(r"\((\d+),\s*(\d+)\)", result.stdout)
+        if match:
+            screen_size = (int(match.group(1)), int(match.group(2)))
+        else:
+            screen_size = get_screen_size()
+        grid_bounds = (0, 0, screen_size[0], screen_size[1])
+        core.speak(_("Grid"))
+        logger.info("Grid shown on %s (%sx%s)", target, screen_size[0], screen_size[1])
+        return True
+
+    report_grid_unavailable(core)
+    return False
+
+
 def close_grid():
     """Hide the grid overlay and clear its bounds."""
     global grid_active, grid_bounds
@@ -502,7 +568,35 @@ def handle(cmd, core):
         and "close" not in words
         and "hide" not in words
     ):
+        # Target specific monitor if requested
+        if any(
+            t in cmd_lower
+            for t in ["laptop", "external", "secondary", "primary", "builtin"]
+        ):
+            target = "primary"
+            if "laptop" in cmd_lower or "builtin" in cmd_lower:
+                target = "laptop"
+            elif "external" in cmd_lower or "secondary" in cmd_lower:
+                target = "external"
+            elif "primary" in cmd_lower:
+                target = "primary"
+
+            if show_grid_on_monitor(target):
+                listen_for_grid_commands(core)
+                return True
+
         show_grid()
+        listen_for_grid_commands(core)
+        return True
+
+    # Switch monitor directly from speech
+    if (
+        any(
+            phrase in cmd_lower
+            for phrase in ["switch monitor", "next monitor", "swap monitor"]
+        )
+        and switch_monitor()
+    ):
         listen_for_grid_commands(core)
         return True
 
@@ -543,7 +637,8 @@ def _run_grid_mode(core):
         "grid",
         prompt=(
             "one two three four five six seven eight nine click double "
-            "right scroll nudge up down left right close cancel mark drag"
+            "right scroll nudge up down left right close cancel mark drag "
+            "switch monitor next screen"
         ),
         timeout=10,
         idle_timeout=30,
@@ -569,6 +664,21 @@ def _run_grid_mode(core):
             core.speak(_("Grid closed"))
             logger.info("Grid closed")
             return
+
+        # === Switch Monitor ===
+        if any(
+            phrase in cmd_lower
+            for phrase in [
+                "switch monitor",
+                "next monitor",
+                "swap monitor",
+                "other monitor",
+                "other screen",
+                "next screen",
+            ]
+        ):
+            switch_monitor()
+            continue
 
         # === Drag ===
         if "mark" in cmd_lower:
