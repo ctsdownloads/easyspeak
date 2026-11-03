@@ -15,6 +15,8 @@ Say "Hey Jarvis" and control your desktop with your voice.
 
 > ⚠️ **Early development.** This project works but is not polished. Expect bugs, incomplete docs, and changes without notice.
 
+See the [roadmap](https://github.com/users/ctsdownloads/projects/3) for what's fixed, what's next, and what's planned.
+
 ## Why EasySpeak?
 
 Linux desktop voice control is a gap. Talon exists but has a steep learning curve and costs money for the full version. Most other tools are X11-only, abandoned, or cloud-dependent.
@@ -48,13 +50,14 @@ cd ~/easyspeak
 uv run easyspeak
 ```
 
-You also need [Piper TTS](https://easyspeak.dev/latest/installation/#3-piper-tts) installed for voice feedback.
+You also need [Piper TTS](https://easyspeak.dev/latest/installation/#2-piper-tts) installed for voice feedback.
 See the **[Installation guide](https://easyspeak.dev/latest/installation/)** for the venv-based path, head tracking, and full details.
 
-Prefer prebuilt packages? Grab the `easyspeak` app `.deb`/`.rpm` **plus a language
+Prefer prebuilt packages? Grab the `easyspeak` app `.deb`/`.rpm`, the **Parakeet
+pack** (`easyspeak-stt-parakeet`, the speech recognition model) **and a language
 pack** (`easyspeak-lang-en`; German, Italian, French and Spanish packs exist too) from the
 [Releases page](https://github.com/ctsdownloads/easyspeak/releases) and install them
-together — a self-contained, offline install (Python runtime, `piper`, GNOME
+together for a self-contained, offline install (Python runtime, `piper`, GNOME
 extension, and speech models). See the
 **[Packaging guide](https://easyspeak.dev/latest/packaging/)**.
 
