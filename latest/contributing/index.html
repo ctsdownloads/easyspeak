@@ -1055,6 +1055,9 @@ application directly:</p>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="go">nix run</span>
 </code></pre></div>
+<p>In the development shell EasySpeak logs in detail, as with <code>-v</code>, so you see early
+what it does and where it fails; set <code>EASYSPEAK_LOG_LEVEL=INFO</code> for the normal
+output.</p>
 <p>The shell carries the English language pack. The others in <code>pins.toml</code> are
 fetched on demand, one command per language, and stay cached in the Nix store:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="go">easyspeak-lang de it</span>
