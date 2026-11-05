@@ -5,13 +5,18 @@ import logging
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
 from unittest.mock import Mock, call, patch
 
+import pytest
+from easyspeak.core import log
 from easyspeak.core.about import DOCS_URL
 from easyspeak.core.tray import (
     ABOUT_HELPER,
     COMMAND_ABOUT,
     COMMAND_HELP,
+    COMMAND_PRESENT,
+    COMMAND_PRESENT_VERBOSE,
     COMMAND_QUIT,
     STATE_LISTENING,
     STATE_MUTED,
@@ -72,7 +77,25 @@ class TestTakeCommand:
         tray = Tray(control_file=control)
 
         assert tray.take_command() == COMMAND_QUIT
-        assert not control.exists()
+        assert list(tmp_path.iterdir()) == []
+
+    def test_keeps_a_command_written_while_reading(self, tmp_path):
+        """A command that arrives between reading the file and deleting it, such
+        as a second launch's request, is kept for the next poll, not deleted."""
+        control = tmp_path / "control"
+        control.write_text("about")
+        tray = Tray(control_file=control)
+        real_read = Path.read_text
+
+        def read_then_a_request_arrives(path, *args, **kwargs):
+            text = real_read(path, *args, **kwargs)
+            control.write_text(COMMAND_PRESENT)
+            return text
+
+        with patch.object(Path, "read_text", read_then_a_request_arrives):
+            assert tray.take_command() == COMMAND_ABOUT
+
+        assert tray.take_command() == COMMAND_PRESENT
 
     def test_returns_none_when_absent(self, tmp_path):
         """No control file (the common idle case) yields None and no error."""
@@ -438,7 +461,7 @@ class TestMenuActions:
         assert mock_notify.call_args.args[0] == "EasySpeak 1.2.3"
         assert "GPL-3.0" in mock_notify.call_args.args[1]
         tray._speak.assert_called_once_with(
-            "This is EasySpeak 1.2.3. The details are in a notification."
+            "This is EasySpeak 1.2.3. The details are in the desktop notification."
         )
         mock_run.assert_not_called()  # no error chime: the user got what they asked
 
@@ -549,6 +572,23 @@ class TestLifecycleHooks:
 
         tray._speak.assert_called_once_with("Welcome! I'm ready.")
 
+    @pytest.mark.parametrize(
+        ("pending", "details"),
+        [(COMMAND_PRESENT_VERBOSE, True), (COMMAND_PRESENT, False), (None, False)],
+    )
+    @patch("easyspeak.core.tray.subprocess.run")
+    def test_started_keeps_a_request_for_details(self, mock_run, pending, details):
+        """A second launch with `-v` while the first copy still loads is answered
+        by the startup greeting, details included."""
+        mock_run.return_value = Mock(returncode=0)
+        tray = Tray(speak=Mock())
+        tray.take_command = Mock(return_value=pending)
+        tray.greet = Mock()
+
+        tray.started()
+
+        tray.greet.assert_called_once_with(details=details)
+
     @patch("easyspeak.core.tray.subprocess.run")
     def test_started_discards_a_stale_command(self, mock_run):
         """A command left in the control file before startup is dropped, so it
@@ -649,3 +689,141 @@ class TestOtherDesktops:
         tray.stopped()
 
         tray._speak.assert_called_once_with("Welcome! I'm ready.")
+
+
+class TestGreeting:
+    """The ready greeting is spoken and shown, with details when verbose."""
+
+    @pytest.fixture(autouse=True)
+    def _session(self, monkeypatch):
+        monkeypatch.delenv("EASYSPEAK_LOG_LEVEL", raising=False)
+        monkeypatch.setenv("XDG_CURRENT_DESKTOP", "X-Cinnamon")
+        monkeypatch.setenv("XDG_SESSION_TYPE", "x11")
+        monkeypatch.setattr("easyspeak.core.tray.app_version", lambda: "1.2.3")
+        monkeypatch.setattr("easyspeak.core.tray.LANGUAGE", "en")
+
+    @patch("easyspeak.core.tray.notify", return_value=True)
+    def test_greet_shows_the_greeting(self, mock_notify):
+        """Not verbose, the notification just repeats the greeting, problems or not."""
+        log.problems.append("Speech unavailable")
+        tray = Tray(speak=Mock())
+
+        tray.greet()
+
+        mock_notify.assert_called_once_with("EasySpeak", "Welcome! I'm ready.")
+        tray._speak.assert_called_once_with("Welcome! I'm ready.")
+
+    @patch("easyspeak.core.tray.notify", return_value=True)
+    def test_greet_verbose_shows_the_details(self, mock_notify, monkeypatch):
+        """Verbose, the notification tells the version, desktop, language and the
+        problems, escaped for the notification's markup, and says there are some."""
+        monkeypatch.setenv("EASYSPEAK_LOG_LEVEL", "DEBUG")
+        log.problems.extend(["Speech unavailable (no <voice> & no player)", "Oops"])
+        tray = Tray(speak=Mock())
+
+        tray.greet()
+
+        mock_notify.assert_called_once_with(
+            "EasySpeak",
+            "Welcome! I'm ready.\n\n"
+            "EasySpeak 1.2.3 on X-Cinnamon (x11), language en\n"
+            "Speech unavailable (no &lt;voice&gt; &amp; no player)\n"
+            "Oops",
+        )
+        assert tray._speak.call_args_list == [
+            call("Welcome! I'm ready."),
+            call("I ran into problems. The details are in the desktop notification."),
+        ]
+
+    @patch("easyspeak.core.tray.notify", return_value=True)
+    def test_greet_details_without_problems(self, mock_notify, monkeypatch):
+        """Asked for details, an unknown desktop is named so, and without problems
+        nothing more is said."""
+        monkeypatch.delenv("XDG_CURRENT_DESKTOP")
+        monkeypatch.delenv("XDG_SESSION_TYPE")
+        tray = Tray(speak=Mock())
+
+        tray.greet(details=True)
+
+        assert mock_notify.call_args.args[1] == (
+            "Welcome! I'm ready.\n\n"
+            "EasySpeak 1.2.3 on unknown desktop (unknown session), language en"
+        )
+        tray._speak.assert_called_once_with("Welcome! I'm ready.")
+
+    @patch("easyspeak.core.tray.notify", return_value=False)
+    def test_greet_without_notifications_doesnt_point_to_one(self, mock_notify):
+        """Without a notification service, the greeting doesn't mention one."""
+        log.problems.append("Speech unavailable")
+        tray = Tray(speak=Mock())
+
+        tray.greet(details=True)
+
+        tray._speak.assert_called_once_with("Welcome! I'm ready.")
+
+    @pytest.mark.parametrize(
+        ("command", "details"),
+        [(COMMAND_PRESENT, False), (COMMAND_PRESENT_VERBOSE, True)],
+    )
+    def test_poll_presents_for_a_second_launch(self, command, details):
+        """A second launch makes the running copy greet, while it keeps listening,
+        and tells the audio loop it spoke, so it doesn't record the greeting."""
+        tray = Tray(speak=Mock())
+        tray.take_command = Mock(return_value=command)
+        tray.present = Mock()
+        release, acquire = Mock(), Mock()
+
+        assert tray.poll(release, acquire) is TrayAction.SPOKE
+        tray.present.assert_called_once_with(details=details)
+        release.assert_not_called()
+
+    def test_second_launch_overrides_a_pending_sleep(self):
+        """A second launch right after "go to sleep" keeps EasySpeak listening,
+        as the later request wins."""
+        tray = Tray(speak=Mock())
+        tray.take_command = Mock(side_effect=[COMMAND_PRESENT, None, COMMAND_QUIT])
+        tray.set_state = Mock(return_value=True)
+        tray.present = Mock()
+        tray.request_sleep()
+        release, acquire = Mock(), Mock()
+
+        assert tray.poll(release, acquire) is TrayAction.SPOKE
+        assert tray.poll(release, acquire) is TrayAction.CONTINUE
+        release.assert_not_called()
+
+    def test_second_launch_wakes_a_sleeping_copy(self):
+        """Asleep, a second launch reopens the mic and greets, as starting
+        EasySpeak means wanting it to listen."""
+        tray = Tray(speak=Mock())
+        tray.take_command = Mock(side_effect=["mute", COMMAND_PRESENT_VERBOSE])
+        tray.set_state = Mock(return_value=True)
+        tray.present = Mock()
+        release, acquire = Mock(), Mock()
+
+        assert tray.poll(release, acquire) is TrayAction.RESUME
+        acquire.assert_called_once_with()
+        tray.set_state.assert_called_with(STATE_LISTENING)
+        tray.present.assert_called_once_with(details=True)
+
+    @patch("easyspeak.core.tray.notify", return_value=True)
+    def test_present_brings_the_about_dialog_forward(self, mock_notify):
+        """An open About dialog is opened again, which brings it to the front."""
+        tray = Tray(speak=Mock())
+        tray.about_open = Mock(return_value=True)
+        tray.open_about = Mock()
+
+        tray.present()
+
+        tray.open_about.assert_called_once_with()
+        tray._speak.assert_called_once_with("Welcome! I'm ready.")
+
+    @patch("easyspeak.core.tray.notify", return_value=True)
+    def test_present_without_a_window_only_greets(self, mock_notify):
+        """With no About dialog showing, none is opened."""
+        tray = Tray(speak=Mock())
+        tray.open_about = Mock()
+
+        tray.present()
+
+        tray.open_about.assert_not_called()
+        mock_notify.assert_called_once()

@@ -837,6 +837,36 @@ class TestEasySpeakRun:
         _stub_hotkey.start.assert_called_once_with()
         _stub_hotkey.stop.assert_called_once_with()
 
+    @patch("subprocess.run")
+    @patch("easyspeak.core.main.pyaudio")
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch.object(EasySpeak, "load_plugins")
+    def test_run_starts_the_hotkey_before_the_greeting(
+        self,
+        mock_load_plugins,
+        mock_whisper_model,
+        mock_wakeword_model,
+        mock_pyaudio,
+        mock_subprocess_run,
+        mock_plugin,
+        _stub_hotkey,
+    ):
+        """The hotkey starts before the greeting, so a warning it logs, such as
+        no readable keyboard, is among those the greeting's notification lists."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin]
+        order = Mock()
+        order.attach_mock(_stub_hotkey.start, "hotkey_start")
+        easy.tray = Mock()
+        order.attach_mock(easy.tray.started, "greeting")
+        easy.tray.poll.side_effect = KeyboardInterrupt()
+        mock_pyaudio.PyAudio.return_value = Mock()
+
+        easy.run()
+
+        assert order.mock_calls[:2] == [call.hotkey_start(), call.greeting()]
+
     @patch("easyspeak.core.main.WakeWordModel")
     @patch("easyspeak.core.main.load_whisper_model")
     @patch.object(EasySpeak, "load_plugins")
@@ -1460,11 +1490,13 @@ class TestEasySpeakRun:
         # No second listen: the sleep phrase was the session's last command.
         mock_wait.assert_called_once()
         easy.tray.set_state.assert_any_call(STATE_MUTED)
-        # Drained, then released for the sleep; drained and released on exit.
+        # Drained, then released for the sleep; the wake greeting drained before
+        # the mic is read again; drained and released on exit.
         lifecycle = [
             c for c in boundary.mock_calls if c[0] in ("speech.drain", "stream.close")
         ]
-        assert lifecycle == [call.speech.drain(), call.stream.close()] * 2
+        drain, close = call.speech.drain(), call.stream.close()
+        assert lifecycle == [drain, close, drain, drain, close]
         assert mock_audio.open.call_count == 2  # reopened on reactivation
 
     @patch("subprocess.run")
@@ -1924,9 +1956,9 @@ class TestEasySpeakRun:
         mock_flush_stream,
         mock_plugin,
     ):
-        """A RESUME (woke from sleep) resets the detector and flushes the mic so
-        it starts fresh, skips the audio read, and loops again; the next
-        CONTINUE proceeds to read."""
+        """A RESUME (woke from sleep) lets the wake greeting play out, resets the
+        detector and flushes the mic so it starts fresh, skips the audio read,
+        and loops again; the next CONTINUE proceeds to read."""
         easy = EasySpeak()
         easy.plugins = [mock_plugin]
         easy.tray = Mock()
@@ -1942,11 +1974,52 @@ class TestEasySpeakRun:
 
         easy.run()
 
-        # Resume behaves like a fresh start: detector reset and mic flushed,
-        # without consuming the main-loop read (only CONTINUE reaches the mic).
+        # Resume behaves like a fresh start: greeting drained, detector reset and
+        # mic flushed after each, without consuming the main-loop read (only
+        # CONTINUE reaches the mic).
         mock_wakeword_instance.reset.assert_called_once()
-        mock_flush_stream.assert_called_once()
+        assert mock_flush_stream.call_count == 2
         mock_stream.read.assert_called_once()
+
+    @patch.object(EasySpeak, "flush_stream")
+    @patch.object(EasySpeak, "_drain_feedback")
+    @patch("easyspeak.core.main.pyaudio")
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch.object(EasySpeak, "load_plugins")
+    def test_run_lets_the_trays_speech_finish_before_listening(
+        self,
+        mock_load_plugins,
+        mock_whisper_model,
+        mock_wakeword_model,
+        mock_pyaudio,
+        mock_drain,
+        mock_flush_stream,
+        mock_plugin,
+    ):
+        """When the tray spoke, e.g. greeting a second launch, the greeting plays
+        out and the detector starts fresh before the mic is read again, so a wake
+        word said over it can't record the greeting's tail as a command."""
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin]
+        easy.tray = Mock()
+        easy.tray.poll.side_effect = [TrayAction.SPOKE, TrayAction.CONTINUE]
+        order = Mock()
+        order.attach_mock(mock_drain, "drain")
+        mock_stream = Mock()
+        mock_stream.read.side_effect = KeyboardInterrupt()
+        order.attach_mock(mock_stream.read, "read")
+        mock_audio = Mock()
+        mock_audio.open.return_value = mock_stream
+        mock_pyaudio.PyAudio.return_value = mock_audio
+        mock_wakeword_instance = Mock()
+        mock_wakeword_model.return_value = mock_wakeword_instance
+
+        easy.run()
+
+        assert [c[0] for c in order.mock_calls] == ["drain", "read"]
+        assert order.read.call_args.args == (1280,)
+        mock_wakeword_instance.reset.assert_called_once()
 
     @patch("easyspeak.core.main.pyaudio")
     @patch("easyspeak.core.main.WakeWordModel")

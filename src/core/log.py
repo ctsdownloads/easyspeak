@@ -3,15 +3,37 @@
 Output is message-only (no level or timestamp prefixes) so the CLI reads nicely for
 humans; the level only gates which lines appear. Only the `easyspeak` and `plugins`
 logger hierarchies are configured, so importing the package as a library leaves the root
-logger untouched.
+logger untouched. The latest warnings and errors are also kept in
+[`problems`][core.log.problems], for users who don't look at a terminal.
 """
 
+import collections
 import logging
 import os
 
 logger = logging.getLogger(__name__)
 
 _PACKAGE_LOGGERS = ("easyspeak", "plugins")
+
+problems: collections.deque[str] = collections.deque(maxlen=10)
+"""The latest warnings and errors logged, oldest first."""
+
+
+class ProblemCollector(logging.Handler):
+    """Keep each warning and error in [`problems`][core.log.problems]."""
+
+    def __init__(self):
+        """Collect records from WARNING up."""
+        super().__init__(logging.WARNING)
+
+    def emit(self, record):
+        """Remember the record's message."""
+        problems.append(record.getMessage().strip())
+
+
+def verbose():
+    """Whether EasySpeak runs verbose: with `-v`, or `EASYSPEAK_LOG_LEVEL=DEBUG`."""
+    return resolve_level() <= logging.DEBUG
 
 
 def resolve_level(*, verbose=False, quiet=False):
@@ -26,7 +48,7 @@ def resolve_level(*, verbose=False, quiet=False):
 
 
 def configure(level):
-    """Attach a message-only stderr handler to the package loggers.
+    """Attach a message-only stderr handler and the problem collector.
 
     The level is also passed on to the processes EasySpeak starts, such as the tray
     helper, through `EASYSPEAK_LOG_LEVEL`, so they log like the daemon, even when
@@ -38,10 +60,12 @@ def configure(level):
     fmt = "%(levelname)s %(message)s" if level <= logging.DEBUG else "%(message)s"
     handler = logging.StreamHandler()
     handler.setFormatter(logging.Formatter(fmt))
+    collector = ProblemCollector()
     for name in _PACKAGE_LOGGERS:
         log = logging.getLogger(name)
         log.handlers.clear()
         log.addHandler(handler)
+        log.addHandler(collector)
         log.setLevel(level)
         log.propagate = False
     logger.debug(

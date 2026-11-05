@@ -10,7 +10,7 @@ prompt.
 
 from contextlib import contextmanager
 from itertools import chain, count, repeat
-from unittest.mock import Mock, patch
+from unittest.mock import ANY, Mock, call, patch
 
 import conftest
 import numpy as np
@@ -177,6 +177,46 @@ class TestTrayStaysLive:
 
         assert list(easy.listen_modal("grid")) == []
         assert easy.exit_requested is False
+
+    def test_lets_the_trays_speech_finish_before_listening(self, easy):
+        """A greeting for a second launch isn't recorded as dictation."""
+        easy.tray.poll = Mock(
+            side_effect=chain([TrayAction.SPOKE], repeat(TrayAction.CONTINUE))
+        )
+        drive(easy, [b"a"], ["click"])
+        order = Mock()
+        easy._drain_feedback = order.drain
+        easy.wait_for_speech = order.listen
+        order.listen.side_effect = chain([b"a"], repeat(None))
+
+        with clock():
+            list(easy.listen_modal("grid", wake_gated=False))
+
+        assert order.mock_calls[:2] == [call.drain(), call.listen(timeout=ANY)]
+
+    def test_command_session_lets_the_trays_speech_finish(self, easy):
+        """Right after a wake, a greeting for a second launch plays out before
+        the next command is recorded."""
+        easy.tray.poll = Mock(return_value=TrayAction.SPOKE)
+        order = Mock()
+        easy._drain_feedback = order.drain
+        easy.wait_for_speech = order.listen
+        order.listen.return_value = None
+
+        easy._capture_command_session()
+
+        assert order.mock_calls[:2] == [call.drain(), call.listen(timeout=5)]
+
+    def test_command_session_lets_the_wake_greeting_finish(self, easy):
+        """Woken from sleep, the session ends once the greeting has played out,
+        so the wake-word loop doesn't record it."""
+        easy.tray.poll = Mock(return_value=TrayAction.RESUME)
+        order = Mock()
+        easy._drain_feedback = order.drain
+        easy._reset_detector = order.reset
+
+        assert easy._capture_command_session() is False
+        assert order.mock_calls == [call.drain(), call.reset()]
 
     def test_flushes_the_microphone_each_round(self, easy):
         """Buffered audio from the previous command can't leak into the next."""

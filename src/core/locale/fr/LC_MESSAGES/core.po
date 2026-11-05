@@ -30,6 +30,11 @@ msgstr "Je n'ai rien entendu."
 msgid "I didn't understand."
 msgstr "Je n'ai pas compris."
 
+msgid "I ran into problems. The details are in the desktop notification."
+msgstr ""
+"J'ai rencontré des problèmes. Les détails sont dans la notification du "
+"bureau."
+
 #, python-brace-format
 msgid "Leaving {label}. Say {wake_word_spoken} to continue."
 msgstr "Je quitte {label}. Dites {wake_word_spoken} pour continuer."
@@ -51,8 +56,8 @@ msgid "This is {name}."
 msgstr "Ici {name}."
 
 #, python-brace-format
-msgid "This is {name}. The details are in a notification."
-msgstr "Ici {name}. Les détails sont dans une notification."
+msgid "This is {name}. The details are in the desktop notification."
+msgstr "Ici {name}. Les détails sont dans la notification du bureau."
 
 msgid "Voice control turned off."
 msgstr "Commande vocale désactivée."

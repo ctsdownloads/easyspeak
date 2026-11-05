@@ -29,14 +29,49 @@ def test_resolve_level(kwargs, env, expected, monkeypatch):
 
 
 def test_configure_isolates_package_loggers():
-    """configure attaches one stderr handler and isolates the package loggers."""
+    """configure attaches a stderr handler and the problem collector, and
+    isolates the package loggers."""
     log.configure(logging.INFO)
 
     pkg = logging.getLogger("easyspeak")
     assert pkg.level == logging.INFO
     assert pkg.propagate is False
-    assert len(pkg.handlers) == 1
+    assert len(pkg.handlers) == 2
     assert pkg.handlers[0].stream is sys.stderr
+    assert isinstance(pkg.handlers[1], log.ProblemCollector)
+
+
+def test_configure_collects_warnings_and_errors(capsys):
+    """Warnings and errors are kept, stripped of the blank lines around them,
+    and plain information isn't."""
+    log.configure(logging.INFO)
+
+    logging.getLogger("easyspeak.core").info("Loading plugins...")
+    logging.getLogger("plugins.media").warning("\nNo player %s", "found")
+    logging.getLogger("easyspeak.core").error("Cannot start")
+
+    assert list(log.problems) == ["No player found", "Cannot start"]
+
+
+def test_problems_keeps_only_the_latest():
+    """A long-running daemon keeps the latest ten problems, not every one."""
+    log.configure(logging.INFO)
+
+    for n in range(12):
+        logging.getLogger("easyspeak").warning("problem %d", n)
+
+    assert list(log.problems) == [f"problem {n}" for n in range(2, 12)]
+
+
+@pytest.mark.parametrize(
+    ("level", "expected"),
+    [(logging.DEBUG, True), (logging.INFO, False), (logging.WARNING, False)],
+)
+def test_verbose(level, expected):
+    """Verbose means the debug level, from `-v` or `EASYSPEAK_LOG_LEVEL`."""
+    log.configure(level)
+
+    assert log.verbose() is expected
 
 
 def _format_info_record():

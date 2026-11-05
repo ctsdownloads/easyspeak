@@ -11,7 +11,7 @@ rather than audio leaving a speaker.
 
 import os
 import sys
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 import pytest
 
@@ -24,13 +24,19 @@ sys.modules["faster_whisper.tokenizer"] = MagicMock(
     _LANGUAGE_CODES=("en", "de", "it", "fr", "es", "pt", "nl")
 )
 
-from easyspeak.core import main, speech  # noqa: E402
+from easyspeak.core import main, speech, tray  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
 def _no_noise_filter(monkeypatch):
     """Open the microphone directly: these scenarios stub the processes it starts."""
     monkeypatch.setattr(main, "NOISE_FILTER", False)
+
+
+@pytest.fixture(autouse=True)
+def _no_desktop_notifications(monkeypatch):
+    """Keep the startup greeting from popping up notifications on the desktop."""
+    monkeypatch.setattr(tray, "notify", Mock(return_value=False))
 
 
 @pytest.fixture(autouse=True)
