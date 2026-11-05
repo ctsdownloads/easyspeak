@@ -269,6 +269,8 @@
             unset PYTHONPATH PYTHONHOME
 
             ${commonEnv}
+            # Debug logging, as with `-v`, for early feedback while developing.
+            export EASYSPEAK_LOG_LEVEL="''${EASYSPEAK_LOG_LEVEL:-DEBUG}"
             echo "EasySpeak dev shell — Python $(python --version 2>&1 | awk '{print $2}'), uv $(uv --version | awk '{print $2}')"
             echo "Run:  uv run [--extra head-tracking] easyspeak"
             echo "      easyspeak-lang de && uv run easyspeak --language de"
