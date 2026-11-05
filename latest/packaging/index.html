@@ -1173,12 +1173,13 @@ shell profile):</p>
 <li><code>EASYSPEAK_WHISPER_MODEL</code> — a multilingual faster-whisper model name (e.g. <code>base</code>,
   <code>small</code>) or a local model directory. The English-only <code>*.en</code> models can't
   transcribe other languages.</li>
-<li><code>EASYSPEAK_PIPER_MODEL</code> — path to a Piper voice <code>.onnx</code> (with its <code>.onnx.json</code>
-  next to it).</li>
+<li><code>EASYSPEAK_TTS_VOICE</code> — path to a Piper voice <code>.onnx</code> (with its <code>.onnx.json</code>
+  next to it). Its older name, <code>EASYSPEAK_PIPER_MODEL</code>, still works but is
+  deprecated.</li>
 </ul>
 <p>So adding a language needs no root and no package from us: download any
-faster-whisper model and Piper voice, then set the two variables. A different wake
-word, however, needs a custom-trained model that pyopen-wakeword can load.</p>
+faster-whisper model and Piper voice, then set the two variables. A different wake word, however, needs a custom-trained model that
+pyopen-wakeword can load.</p>
 <h2 id="build-the-packages-yourself">Build the packages yourself<a class="headerlink" href="#build-the-packages-yourself" title="Permanent link">&para;</a></h2>
 <p>The packages are built in a clean Ubuntu container, so the result is identical
 whether produced locally or in CI — handy on NixOS, where the bundle's standalone

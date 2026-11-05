@@ -1044,14 +1044,19 @@ wakes it up if it was asleep.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>-v</code>, <code>--verbose</code></td>
-<td></td>
-<td>Show debug output</td>
-</tr>
-<tr>
 <td><code>-q</code>, <code>--quiet</code></td>
 <td></td>
-<td>Show only warnings and errors</td>
+<td>Show only warnings and errors in the terminal</td>
+</tr>
+<tr>
+<td><code>-v</code>, <code>--verbose</code></td>
+<td></td>
+<td>Announce warnings and errors on the desktop and by voice</td>
+</tr>
+<tr>
+<td><code>-d</code>, <code>--debug</code></td>
+<td></td>
+<td>Show all logging output in the terminal</td>
 </tr>
 <tr>
 <td><code>--configure [ITEM ...]</code></td>
@@ -1070,11 +1075,16 @@ wakes it up if it was asleep.</p>
 </tr>
 </tbody>
 </table>
+<p>With <code>-v</code>, each warning and error gets a desktop notification, titled with the
+feature it comes from, and EasySpeak says which feature it is, e.g.
+"Hold-to-dictate: there was a warning.", followed once by where the details are.
+A notification with the version, desktop and language comes at startup. <code>-v</code>
+goes with either <code>-d</code> or <code>-q</code>, which only change what the terminal shows.</p>
 <p><code>--language</code> is the command-line form of <code>EASYSPEAK_LANGUAGE</code> (see below) and
 overrides it. For <code>--configure</code>/<code>--preview</code>, each <code>ITEM</code> is one of <code>extension</code>, <code>service</code>,
-<code>autostart</code>, or <code>desktop</code>. Verbosity can also be set with the
+<code>autostart</code>, or <code>desktop</code>. The terminal's verbosity can also be set with the
 <code>EASYSPEAK_LOG_LEVEL</code> environment variable (e.g. <code>DEBUG</code>, <code>INFO</code>, <code>WARNING</code>),
-but the command-line flags take precedence.</p>
+but <code>-d</code> and <code>-q</code> take precedence.</p>
 <p>See <a class="autorefs autorefs-internal" title="            core.cli" href="../reference/core/#core.cli"><code>core.cli</code></a> and <a class="autorefs autorefs-internal" title="            core.log" href="../reference/core/#core.log"><code>core.log</code></a> for
 the underlying argument parsing and logging setup.</p>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
@@ -1121,6 +1131,16 @@ the module that reads each (linked to its API reference).</p>
 <td>Speech model: <code>parakeet</code> or <code>whisper</code></td>
 </tr>
 <tr>
+<td><code>EASYSPEAK_TTS</code></td>
+<td><code>piper</code></td>
+<td>Reply voice engine: <code>piper</code></td>
+</tr>
+<tr>
+<td><code>EASYSPEAK_TTS_VOICE</code></td>
+<td>an installed language pack's voice</td>
+<td>Reply voice; for Piper a voice <code>.onnx</code></td>
+</tr>
+<tr>
 <td><code>EASYSPEAK_PIPER_BIN</code></td>
 <td><code>piper</code></td>
 <td>Piper TTS binary</td>
@@ -1132,8 +1152,8 @@ the module that reads each (linked to its API reference).</p>
 </tr>
 <tr>
 <td><code>EASYSPEAK_PIPER_MODEL</code></td>
-<td>an installed language pack's voice</td>
-<td>Piper voice <code>.onnx</code> for speech output</td>
+<td></td>
+<td>Deprecated name of <code>EASYSPEAK_TTS_VOICE</code></td>
 </tr>
 <tr>
 <td><code>EASYSPEAK_SOUNDS_DIR</code></td>
@@ -1169,6 +1189,13 @@ punctuation and capitalization of its own. It picks the language itself.
 also what happens, with a warning, when the Parakeet model is neither installed
 nor allowed to download, or when <code>EASYSPEAK_LANGUAGE</code> is one Parakeet does not
 cover.</p>
+<p><code>EASYSPEAK_TTS</code> names the reply-voice engine; Piper is the only engine yet.
+An unknown name warns at startup, and Piper speaks. <code>EASYSPEAK_TTS_VOICE</code> names
+that engine's voice, for Piper the path to a voice <code>.onnx</code> with its <code>.onnx.json</code>
+next to it. It defaults to the voice of the pack the replies are spoken in, else
+<code>~/.local/share/piper/en_US-amy-medium.onnx</code>. Its older name,
+<code>EASYSPEAK_PIPER_MODEL</code>, still works, with a warning; <code>EASYSPEAK_TTS_VOICE</code> wins
+if both are set.</p>
 <p><code>EASYSPEAK_LANGUAGE</code> is the language you dictate in, and the language of the
 spoken replies where they are translated (German, Italian, French and Spanish
 are) and that language's pack is installed. Commands take that language's words
@@ -1177,9 +1204,7 @@ work. Where the replies fall back to English, or the code is not one Whisper
 knows, a warning at startup says so. It picks which installed
 <a href="../packaging/#language">language pack</a> <code>EASYSPEAK_WHISPER_MODEL</code> defaults to;
 without one it falls back to <code>base.en</code> for English and to the multilingual
-<code>small</code> for any other language (a download, see <code>EASYSPEAK_OFFLINE</code>).
-<code>EASYSPEAK_PIPER_MODEL</code> defaults to the voice of the pack the replies are spoken
-in, else <code>~/.local/share/piper/en_US-amy-medium.onnx</code>.</p>
+<code>small</code> for any other language (a download, see <code>EASYSPEAK_OFFLINE</code>).</p>
 <p><code>EASYSPEAK_SILENCE_THRESHOLD</code> is normally left alone. On startup EasySpeak
 listens to the room for a second and sets the threshold above whatever it
 measures — a fixed value assumes a quiet room, and where the ambient level sits
@@ -1215,7 +1240,7 @@ to turn it off, and an unrecognized key disables it too. See
 <tr>
 <td><code>EASYSPEAK_LOG_LEVEL</code></td>
 <td><code>INFO</code></td>
-<td>Logging level when no <code>-v</code>/<code>-q</code> flag is given</td>
+<td>Logging level when no <code>-d</code>/<code>-q</code> flag is given</td>
 </tr>
 </tbody>
 </table>

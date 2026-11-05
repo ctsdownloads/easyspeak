@@ -1186,11 +1186,12 @@ terminal. To make it show more of what it does and where it fails, add <code>-v<
 its starter: copy <code>/usr/share/applications/easyspeak.desktop</code> to
 <code>~/.local/share/applications/</code> and change <code>Exec=easyspeak</code> to
 <code>Exec=easyspeak -v</code> there. Starting EasySpeak from the menu then shows its
-version, your desktop and its language in a notification, followed by the
-latest warnings and errors, and says when there were any. The pop-up shows only
-the start of it; the desktop's notification list has the full text, on GNOME
-behind the clock in the top bar. To see everything it logs, say "Hey Jarvis,
-exit" to quit the running EasySpeak, then run <code>easyspeak -v</code> in a terminal.</p>
+version, your desktop and its language in a notification, and each warning or
+error in one of its own, and says which feature it came from. A pop-up shows
+only the start of a notification; the desktop's notification list has the full
+text, on GNOME behind the clock in the top bar. To see everything it logs, say
+"Hey Jarvis, exit" to quit the running EasySpeak, then run <code>easyspeak --debug</code> in
+a terminal.</p>
 <h2 id="mouse-grid-failed-to-show-grid-is-extension-enabled">Mouse grid: "Failed to show grid — is extension enabled?"<a class="headerlink" href="#mouse-grid-failed-to-show-grid-is-extension-enabled" title="Permanent link">&para;</a></h2>
 <p>You don't install the extension yourself — EasySpeak does it automatically on
 startup, copying it to
@@ -1297,7 +1298,7 @@ and <strong>"block ads"</strong> to turn it back on.</p>
   <code>EASYSPEAK_SILENCE_THRESHOLD</code> — see <a href="../usage/#configuration">Configuration</a></li>
 </ul>
 <h2 id="everything-takes-several-seconds">Everything takes several seconds<a class="headerlink" href="#everything-takes-several-seconds" title="Permanent link">&para;</a></h2>
-<p>Run with <code>-v</code> and compare the two numbers on this line:</p>
+<p>Run with <code>--debug</code> and compare the two numbers on this line:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>transcribed 4.2s of audio in 0.45s
 </code></pre></div>
 <p>The second number is the transcription. If it's small and the first is large,
