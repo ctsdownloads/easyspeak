@@ -19,6 +19,7 @@ running it stays hidden because GNOME's own microphone privacy icon already
 signals the open mic.
 """
 
+import collections
 import contextlib
 import enum
 import functools
@@ -43,7 +44,7 @@ from .about import (
     about_html,
     app_version,
 )
-from .config import ERROR_SOUND, LANGUAGE
+from .config import ERROR_SOUND
 from .control import (
     COMMAND_ABOUT,
     COMMAND_HELP,
@@ -111,8 +112,11 @@ def drop_session_bus():
     session_bus.cache_clear()
 
 
-def notify(summary, body):
-    """Show a desktop notification; False if no notification service took it.
+def notify(summary, body, replaces=0):
+    """Show a desktop notification: its id, or 0 if no notification service took it.
+
+    With the id of an earlier notification as `replaces`, the new one takes its
+    place, so a message that comes again updates it instead of adding another.
 
     Speaks the freedesktop Notifications protocol over D-Bus, which every desktop's
     notification service implements. jeepney is imported lazily so the dependency
@@ -149,7 +153,7 @@ def notify(summary, body):
                 "susssasa{sv}i",
                 (
                     APPLICATION_NAME,
-                    0,
+                    replaces,
                     APPLICATION_ICON,
                     summary,
                     text,
@@ -159,11 +163,13 @@ def notify(summary, body):
                 ),
             )
             reply = conn.send_and_get_reply(message, timeout=GDBUS_TIMEOUT)
-            return reply.header.message_type is MessageType.method_return
+            if reply.header.message_type is not MessageType.method_return:
+                return 0
+            return reply.body[0]
         except Exception as exc:
             drop_session_bus()
             logger.debug("No desktop notification: %s", exc)
-    return False
+    return 0
 
 
 LINE_BREAK = "\u2028"
@@ -172,6 +178,31 @@ LINE_BREAK = "\u2028"
 GNOME Shell turns each newline in a body into a space, but this character passes
 and its text layout breaks the line there, as other desktops' do.
 """
+
+
+# What to call a core module's messages when reporting them: the feature it serves.
+# A plugin names itself in its LABEL; anything else is EasySpeak itself.
+CORE_SOURCES = {
+    "easyspeak.core.about": _("About dialog"),
+    "easyspeak.core.autostart": _("Start at login"),
+    "easyspeak.core.config": _("Speech recognition"),
+    "easyspeak.core.gnome_extension": _("GNOME extension"),
+    "easyspeak.core.hotkey": _("Hold-to-dictate"),
+    "easyspeak.core.mediakeys": _("Media keys"),
+    "easyspeak.core.noisefilter": _("Noise filter"),
+    "easyspeak.core.speech": _("Speech"),
+    "easyspeak.core.statusnotifier": _("Tray icon"),
+    "easyspeak.core.tray": _("Tray icon"),
+    "easyspeak.core.wakeword": _("Wake word"),
+}
+
+
+def source_label(logger_name):
+    """Name the feature behind a logger, as said and shown to the user."""
+    if logger_name.startswith("plugins."):
+        plugin = sys.modules.get(".".join(logger_name.split(".")[:2]))
+        return getattr(plugin, "LABEL", APPLICATION_NAME)
+    return CORE_SOURCES.get(logger_name, APPLICATION_NAME)
 
 
 def escape(text):
@@ -217,6 +248,9 @@ class Tray:
         self._about = None
         self._sleep_requested = False
         self._speak = speak or (lambda _text: None)
+        self._verbose = log.verbose()
+        self._notified = {}  # message -> id of the notification showing it
+        self._reported = set()  # warnings and errors already spoken of
 
     # --- lifecycle hooks called by the daemon ---
 
@@ -228,63 +262,98 @@ class Tray:
         written during a previous session (or before the daemon was running to consume
         it) must not fire the moment polling begins, which otherwise pops the About
         window open on launch. Only a second launch's request for details is kept, as
-        the startup greeting fulfils it.
+        it turns on what `-v` does (see [`present`][core.tray.Tray.present]).
 
         Greets the user once startup reaches a listening state, the spoken
         counterpart of the wake chime, and the same greeting reactivation gives,
-        also in a notification (see [`greet`][core.tray.Tray.greet]).
+        also in a notification, then reports the messages logged during startup
+        (see [`report`][core.tray.Tray.report]).
 
         Outside GNOME it starts the tray helper first.
         """
-        details = self.take_command() == COMMAND_PRESENT_VERBOSE
+        if self.take_command() == COMMAND_PRESENT_VERBOSE:
+            self.go_verbose()
         if self._service == TRAY_SERVICE:
             self._start_helper()
         self.set_state(STATE_LISTENING)
-        self.greet(details=details)
+        self.greet()
+        self.report()
 
-    def greet(self, details=False):
-        """Say that EasySpeak is ready, aloud and in a desktop notification.
-
-        Verbose, or with `details` (a second launch with `-v` asks for them), the
-        notification also tells the version, desktop and language, then the latest
-        warnings and errors, one per line with a bold label. The greeting stays its
-        first line, as the desktop's pop-up shows little more. If there are any,
-        the greeting says so, too, so they're noticed without looking at a terminal;
-        it speaks of problems only for errors.
-        """
+    def greet(self):
+        """Say that EasySpeak is ready, aloud and in a desktop notification."""
         greeting = _("Welcome! I'm ready.")
         self._speak(greeting)
-        details = details or log.verbose()
-        lines = [escape(greeting)]
-        if details:
-            desktop = os.environ.get("XDG_CURRENT_DESKTOP") or "unknown"
-            if session := os.environ.get("XDG_SESSION_TYPE"):
-                desktop = f"{desktop} ({session})"
-            lines.append(
-                f"<b>Version</b> {escape(app_version())}, "
-                f"<b>desktop</b> {escape(desktop)}, <b>language</b> {LANGUAGE}."
-            )
-            lines += [
-                f"<b>{logging.getLevelName(level).capitalize()}:</b> {escape(message)}"
-                for level, message in log.problems
-            ]
-        shown = notify(APPLICATION_NAME, LINE_BREAK.join(lines))
-        if details and log.problems and shown:
-            if any(level >= logging.ERROR for level, _message in log.problems):
-                summary = _(
-                    "I ran into problems. The details are in the desktop notification."
-                )
-            else:
-                summary = _(
-                    "There were warnings. The details are in the desktop notification."
-                )
-            self._speak(summary)
+        notify(APPLICATION_NAME, escape(greeting))
 
     def present(self, details=False):
-        """Come forward for a second launch: raise the About dialog, then greet."""
+        """Come forward for a second launch: raise the About dialog, then greet.
+
+        A second launch with `-v` asks for `details`: from then on, this copy
+        reports its messages as if it had been started with `-v`, starting with
+        the latest ones.
+        """
         if self.about_open():
             self.open_about()
-        self.greet(details=details)
+        if details:
+            self.go_verbose()
+        self.greet()
+        self.report()
+
+    def go_verbose(self):
+        """Report messages from now on, the latest ones logged so far first."""
+        if self._verbose:
+            return
+        self._verbose = True
+        log.pending.clear()
+        log.pending.extend(log.recent)
+
+    def report(self):
+        """Show and speak the messages logged since the last report; True if it spoke.
+
+        Only with `-v`; otherwise they're dropped, though the latest are kept for
+        a later `-v` (see [`go_verbose`][core.tray.Tray.go_verbose]). Each message
+        gets a desktop notification, titled with its source, the same message
+        logged several times one with a count; a message logged again later
+        updates its notification. For each source with a new warning or error,
+        EasySpeak says so, then once where the details are, so someone who can't
+        read the screen knows which feature is affected.
+        """
+        messages = collections.Counter()
+        while log.pending:
+            messages[log.pending.popleft()] += 1
+        if not self._verbose or not messages:
+            return False
+        problems = {}
+        shown = False
+        for message, count in messages.items():
+            source = source_label(message.source)
+            text = escape(message.text) + (f" ({count}×)" if count > 1 else "")  # noqa: RUF001
+            if message.level >= logging.WARNING:
+                level = logging.getLevelName(message.level).capitalize()
+                text = f"<b>{level}:</b> {text}"
+                if message not in self._reported:
+                    self._reported.add(message)
+                    problems[source] = problems.get(source, False) or (
+                        message.level >= logging.ERROR
+                    )
+            notified = notify(source, text, replaces=self._notified.get(message, 0))
+            if notified:
+                self._notified[message] = notified
+                shown = True
+        sentences = [
+            (
+                _("{source}: something went wrong.")
+                if error
+                else _("{source}: there was a warning.")
+            ).format(source=source)
+            for source, error in problems.items()
+        ]
+        if not sentences:
+            return False
+        if shown:
+            sentences.append(_("The details are in the desktop notification."))
+        self._speak(" ".join(sentences))
+        return True
 
     def stopped(self):
         """Daemon is exiting; hide the indicator so no stale icon is left."""
@@ -302,13 +371,15 @@ class Tray:
         self._sleep_requested = True
 
     def poll(self, release_mic, acquire_mic):
-        """Act on any pending menu command or queued sleep request.
+        """Report new messages, then act on any pending menu command or queued sleep.
 
         `release_mic` / `acquire_mic` are zero-arg callbacks that close and reopen the
         input stream; the controller calls them around the asleep idle loop so this
         module stays out of the audio internals. Returns a
-        [`TrayAction`][core.tray.TrayAction] for the audio loop to dispatch on.
+        [`TrayAction`][core.tray.TrayAction] for the audio loop to dispatch on,
+        `SPOKE` where a report said something and the loop would carry on.
         """
+        spoke = self.report()
         command = self.take_command()
         if command == COMMAND_QUIT:
             return TrayAction.QUIT
@@ -316,13 +387,13 @@ class Tray:
             self._sleep_requested = False  # the later launch wants it listening
             self.present(details=command == COMMAND_PRESENT_VERBOSE)
             return TrayAction.SPOKE
-        if self._run_menu_action(command):
-            return TrayAction.CONTINUE
-        if command == COMMAND_MUTE or self._sleep_requested:
+        if not self._run_menu_action(command) and (
+            command == COMMAND_MUTE or self._sleep_requested
+        ):
             announce = command == COMMAND_MUTE
             self._sleep_requested = False
             return self.sleep(release_mic, acquire_mic, announce=announce)
-        return TrayAction.CONTINUE
+        return TrayAction.SPOKE if spoke else TrayAction.CONTINUE
 
     # --- internals ---
 
@@ -522,6 +593,7 @@ class Tray:
                 self.present(details=command == COMMAND_PRESENT_VERBOSE)
                 return TrayAction.RESUME
             self._run_menu_action(command)
+            self.report()
             if time.monotonic() >= next_repush:
                 self.set_state(STATE_MUTED)
                 next_repush = time.monotonic() + MUTED_REPUSH_INTERVAL

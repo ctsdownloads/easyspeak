@@ -30,6 +30,9 @@ msgstr "Bluetooth attivato."
 msgid "Sorry, I couldn't change that."
 msgstr "Mi dispiace, non sono riuscito a cambiarlo."
 
+msgid "Wi-Fi and Bluetooth"
+msgstr "Wi-Fi e Bluetooth"
+
 msgid "Wi-Fi off."
 msgstr "Wi-Fi disattivato."
 

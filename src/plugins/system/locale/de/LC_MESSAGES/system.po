@@ -27,6 +27,9 @@ msgstr "Nicht stören aus."
 msgid "Do not disturb on."
 msgstr "Nicht stören an."
 
+msgid "System controls"
+msgstr "Systemsteuerung"
+
 msgid "adjust screen brightness"
 msgstr "Bildschirmhelligkeit anpassen"
 

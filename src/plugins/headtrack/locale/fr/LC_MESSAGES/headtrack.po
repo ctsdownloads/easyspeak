@@ -24,6 +24,9 @@ msgstr "Je suis le mouvement"
 msgid "Frozen"
 msgstr "Figé"
 
+msgid "Head tracking"
+msgstr "Suivi de la tête"
+
 msgid "Head tracking is still busy. Try again in a moment."
 msgstr "Le suivi de la tête est encore occupé. Réessayez dans un instant."
 

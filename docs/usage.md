@@ -28,17 +28,24 @@ wakes it up if it was asleep.
 
 | Flag                     | Default             | Effect                                                          |
 | ------------------------ | ------------------- | --------------------------------------------------------------- |
-| `-v`, `--verbose`        |                     | Show debug output                                               |
-| `-q`, `--quiet`          |                     | Show only warnings and errors                                   |
+| `-q`, `--quiet`          |                     | Show only warnings and errors in the terminal                   |
+| `-v`, `--verbose`        |                     | Announce warnings and errors on the desktop and by voice        |
+| `-d`, `--debug`          |                     | Show all logging output in the terminal                         |
 | `--configure [ITEM ...]` | `extension service` | Set up the listed integrations and exit                         |
 | `--preview ITEM`         |                     | Print the file content that would be configured and exit        |
 | `--language CODE`        |                     | Language to dictate and be answered in; or `EASYSPEAK_LANGUAGE` |
 
+With `-v`, each warning and error gets a desktop notification, titled with the
+feature it comes from, and EasySpeak says which feature it is, e.g.
+"Hold-to-dictate: there was a warning.", followed once by where the details are.
+A notification with the version, desktop and language comes at startup. `-v`
+goes with either `-d` or `-q`, which only change what the terminal shows.
+
 `--language` is the command-line form of `EASYSPEAK_LANGUAGE` (see below) and
 overrides it. For `--configure`/`--preview`, each `ITEM` is one of `extension`, `service`,
-`autostart`, or `desktop`. Verbosity can also be set with the
+`autostart`, or `desktop`. The terminal's verbosity can also be set with the
 `EASYSPEAK_LOG_LEVEL` environment variable (e.g. `DEBUG`, `INFO`, `WARNING`),
-but the command-line flags take precedence.
+but `-d` and `-q` take precedence.
 
 See [`core.cli`][core.cli] and [`core.log`][core.log] for
 the underlying argument parsing and logging setup.
@@ -119,7 +126,7 @@ to turn it off, and an unrecognized key disables it too. See
 
 | Variable              | Default | Effect                                        |
 | --------------------- | ------- | --------------------------------------------- |
-| `EASYSPEAK_LOG_LEVEL` | `INFO`  | Logging level when no `-v`/`-q` flag is given |
+| `EASYSPEAK_LOG_LEVEL` | `INFO`  | Logging level when no `-d`/`-q` flag is given |
 
 ### [`core.desktop_integration`][core.desktop_integration]
 

@@ -1,5 +1,6 @@
 """Tests for the core main module."""
 
+import logging
 import subprocess
 from itertools import chain, repeat
 from pathlib import Path
@@ -7,6 +8,7 @@ from unittest.mock import MagicMock, Mock, call, patch
 
 import numpy as np
 import pytest
+from easyspeak.core import log
 from easyspeak.core.config import MISUNDERSTAND_GRACE
 from easyspeak.core.main import EasySpeak
 from easyspeak.core.tray import STATE_MUTED, TrayAction
@@ -836,6 +838,72 @@ class TestEasySpeakRun:
         mock_ptt.assert_called_once_with()
         _stub_hotkey.start.assert_called_once_with()
         _stub_hotkey.stop.assert_called_once_with()
+
+    @patch("subprocess.run")
+    @patch("easyspeak.core.main.pyaudio")
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch.object(EasySpeak, "load_plugins")
+    def test_run_reports_its_version_and_platform(
+        self,
+        mock_load_plugins,
+        mock_whisper_model,
+        mock_wakeword_model,
+        mock_pyaudio,
+        mock_subprocess_run,
+        mock_plugin,
+        monkeypatch,
+    ):
+        """Startup logs the version, desktop and language as a message for the
+        desktop, which `-v` shows as a notification."""
+        monkeypatch.setenv("XDG_CURRENT_DESKTOP", "X-Cinnamon")
+        monkeypatch.setenv("XDG_SESSION_TYPE", "x11")
+        monkeypatch.setattr("easyspeak.core.main.app_version", lambda: "1.2.3")
+        monkeypatch.setattr("easyspeak.core.main.LANGUAGE", "en")
+        log.configure(logging.INFO)
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin]
+        easy.tray = Mock()
+        easy.tray.poll.side_effect = KeyboardInterrupt()
+
+        easy.run()
+
+        assert (
+            log.Message(
+                logging.INFO,
+                "easyspeak.core.main",
+                "EasySpeak 1.2.3 on X-Cinnamon (x11), language en",
+            )
+            in log.recent
+        )
+
+    @patch("subprocess.run")
+    @patch("easyspeak.core.main.pyaudio")
+    @patch("easyspeak.core.main.WakeWordModel")
+    @patch("easyspeak.core.main.load_whisper_model")
+    @patch.object(EasySpeak, "load_plugins")
+    def test_run_names_an_unknown_desktop(
+        self,
+        mock_load_plugins,
+        mock_whisper_model,
+        mock_wakeword_model,
+        mock_pyaudio,
+        mock_subprocess_run,
+        mock_plugin,
+        monkeypatch,
+    ):
+        """Without desktop or session in the environment, the line says so."""
+        monkeypatch.delenv("XDG_CURRENT_DESKTOP", raising=False)
+        monkeypatch.delenv("XDG_SESSION_TYPE", raising=False)
+        log.configure(logging.INFO)
+        easy = EasySpeak()
+        easy.plugins = [mock_plugin]
+        easy.tray = Mock()
+        easy.tray.poll.side_effect = KeyboardInterrupt()
+
+        easy.run()
+
+        assert any(" on unknown desktop, " in m.text for m in log.recent)
 
     @patch("subprocess.run")
     @patch("easyspeak.core.main.pyaudio")

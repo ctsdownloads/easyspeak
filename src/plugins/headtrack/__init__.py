@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 _ = translator(__file__)
 
 NAME = "headtrack"
+LABEL = _("Head tracking")
 DESCRIPTION = "Head tracking for cursor control"
 PRIORITY = 0
 

@@ -46,8 +46,8 @@ def _restore_easyspeak_loggers():
     ``log.configure`` mutates the ``easyspeak`` and ``plugins`` loggers
     (handlers, level, ``propagate``) and passes the level on through
     ``EASYSPEAK_LOG_LEVEL``; restoring both keeps a test that calls it from
-    leaking that state into later tests. The problems it collects are cleared
-    for the same reason.
+    leaking that state into later tests. The messages it collects for the
+    desktop, and whether it delivers them, are reset for the same reason.
     """
     from easyspeak.core import log as core_log
 
@@ -63,7 +63,9 @@ def _restore_easyspeak_loggers():
     ]
     saved_level = os.environ.get("EASYSPEAK_LOG_LEVEL")
     yield
-    core_log.problems.clear()
+    core_log.recent.clear()
+    core_log.pending.clear()
+    core_log._settings["verbose"] = False
     if saved_level is None:
         os.environ.pop("EASYSPEAK_LOG_LEVEL", None)
     else:

@@ -12,6 +12,7 @@ vocab = Vocabulary(__file__)
 logger = logging.getLogger(__name__)
 
 NAME = "apps"
+LABEL = _("Apps")
 DESCRIPTION = "Launch and close applications"
 
 COMMANDS = [

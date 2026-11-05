@@ -13,6 +13,7 @@ _ = translator(__file__)
 vocab = Vocabulary(__file__)
 
 NAME = "sleep"
+LABEL = _("Sleep")
 DESCRIPTION = "Deactivate (sleep) until reactivated from the tray or Quick Settings"
 
 COMMANDS = [

@@ -7,6 +7,7 @@ _ = translator(__file__)
 vocab = Vocabulary(__file__)
 
 NAME = "system"
+LABEL = _("System controls")
 DESCRIPTION = "System controls"
 
 UP_DOWN = f"{vocab.say('up', limit=1)}/{vocab.say('down', limit=1)}"

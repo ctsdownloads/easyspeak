@@ -27,6 +27,9 @@ msgstr "Je ferme la boîte de dialogue À propos."
 msgid "Goodbye."
 msgstr "Au revoir."
 
+msgid "Help"
+msgstr "Aide"
+
 msgid "Modes now take commands on their own."
 msgstr "Les modes acceptent maintenant les commandes directement."
 

@@ -9,6 +9,7 @@ _ = translator(__file__)
 vocab = Vocabulary(__file__)
 
 NAME = "media"
+LABEL = _("Media")
 DESCRIPTION = "Media playback controls"
 
 COMMANDS = [

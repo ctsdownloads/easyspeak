@@ -24,6 +24,9 @@ msgstr "Siguiendo"
 msgid "Frozen"
 msgstr "Congelado"
 
+msgid "Head tracking"
+msgstr "Seguimiento de la cabeza"
+
 msgid "Head tracking is still busy. Try again in a moment."
 msgstr ""
 "El seguimiento de la cabeza todavía está ocupado. Inténtalo de nuevo en "

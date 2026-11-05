@@ -15,8 +15,17 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "About dialog"
+msgstr "Diálogo Acerca de"
+
 msgid "Dictation isn't available."
 msgstr "El dictado no está disponible."
+
+msgid "GNOME extension"
+msgstr "Extensión de GNOME"
+
+msgid "Hold-to-dictate"
+msgstr "Dictado con tecla"
 
 msgid "I can't find a microphone, so I have to stop."
 msgstr "No encuentro ningún micrófono, así que tengo que detenerme."
@@ -30,12 +39,15 @@ msgstr "No he oído nada."
 msgid "I didn't understand."
 msgstr "No he entendido."
 
-msgid "I ran into problems. The details are in the desktop notification."
-msgstr "Hubo problemas. Los detalles están en la notificación del escritorio."
-
 #, python-brace-format
 msgid "Leaving {label}. Say {wake_word_spoken} to continue."
 msgstr "Salgo de {label}. Di {wake_word_spoken} para continuar."
+
+msgid "Media keys"
+msgstr "Teclas multimedia"
+
+msgid "Noise filter"
+msgstr "Filtro de ruido"
 
 msgid "Sorry, I couldn't open the documentation page."
 msgstr "Lo siento, no he podido abrir la documentación."
@@ -49,8 +61,17 @@ msgstr "Lo siento, no he entendido."
 msgid "Sorry, something went wrong with that command."
 msgstr "Lo siento, algo ha salido mal con ese comando."
 
-msgid "There were warnings. The details are in the desktop notification."
-msgstr "Hubo advertencias. Los detalles están en la notificación del escritorio."
+msgid "Speech"
+msgstr "Voz"
+
+msgid "Speech recognition"
+msgstr "Reconocimiento de voz"
+
+msgid "Start at login"
+msgstr "Iniciar al iniciar sesión"
+
+msgid "The details are in the desktop notification."
+msgstr "Los detalles están en la notificación del escritorio."
 
 #, python-brace-format
 msgid "This is {name}."
@@ -60,8 +81,22 @@ msgstr "Soy {name}."
 msgid "This is {name}. The details are in the desktop notification."
 msgstr "Soy {name}. Los detalles están en la notificación del escritorio."
 
+msgid "Tray icon"
+msgstr "Icono de la bandeja"
+
 msgid "Voice control turned off."
 msgstr "Control por voz desactivado."
 
+msgid "Wake word"
+msgstr "Palabra de activación"
+
 msgid "Welcome! I'm ready."
 msgstr "¡Bienvenido! Estoy listo."
+
+#, python-brace-format
+msgid "{source}: something went wrong."
+msgstr "{source}: algo ha fallado."
+
+#, python-brace-format
+msgid "{source}: there was a warning."
+msgstr "{source}: hubo una advertencia."

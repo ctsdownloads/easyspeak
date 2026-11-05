@@ -27,6 +27,9 @@ msgstr "Der Info-Dialog wird geschlossen."
 msgid "Goodbye."
 msgstr "Auf Wiedersehen."
 
+msgid "Help"
+msgstr "Hilfe"
+
 msgid "Modes now take commands on their own."
 msgstr "Modi nehmen Befehle jetzt direkt entgegen."
 

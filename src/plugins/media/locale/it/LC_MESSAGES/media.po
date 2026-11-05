@@ -15,6 +15,9 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "Media"
+msgstr "Multimedia"
+
 msgid "Next."
 msgstr "Successivo."
 
