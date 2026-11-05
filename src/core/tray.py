@@ -24,6 +24,7 @@ import enum
 import html
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -92,6 +93,11 @@ def notify(summary, body):
     Speaks the freedesktop Notifications protocol over D-Bus, which every desktop's
     notification service implements. jeepney is imported lazily so the dependency
     isn't needed to load this module.
+
+    `body` is markup, so escape its text: `<b>`, `<i>` and `<u>` show where the
+    service takes markup, as GNOME's, KDE's and most others do, and are taken out
+    where it doesn't. Separate its lines with
+    [`LINE_BREAK`][core.tray.LINE_BREAK], not a newline.
     """
     from jeepney import DBusAddress, MessageType, new_method_call
     from jeepney.io.blocking import open_dbus_connection
@@ -100,19 +106,37 @@ def notify(summary, body):
     address = DBusAddress(
         "/org/freedesktop/Notifications", bus_name=service, interface=service
     )
-    message = new_method_call(
-        address,
-        "Notify",
-        "susssasa{sv}i",
-        (APPLICATION_NAME, 0, APPLICATION_ICON, summary, body, [], {}, -1),
-    )
     try:
         with open_dbus_connection(bus="SESSION") as conn:
+            capabilities = conn.send_and_get_reply(
+                new_method_call(address, "GetCapabilities"), timeout=GDBUS_TIMEOUT
+            ).body
+            if not capabilities or "body-markup" not in capabilities[0]:
+                body = html.unescape(re.sub(r"</?[biu]>", "", body))
+            message = new_method_call(
+                address,
+                "Notify",
+                "susssasa{sv}i",
+                (APPLICATION_NAME, 0, APPLICATION_ICON, summary, body, [], {}, -1),
+            )
             reply = conn.send_and_get_reply(message, timeout=GDBUS_TIMEOUT)
     except Exception as exc:
         logger.debug("No desktop notification: %s", exc)
         return False
     return reply.header.message_type is MessageType.method_return
+
+
+LINE_BREAK = "\u2028"
+"""Unicode's line separator, for line breaks in a notification body.
+
+GNOME Shell turns each newline in a body into a space, but this character passes
+and its text layout breaks the line there, as other desktops' do.
+"""
+
+
+def escape(text):
+    """Escape `text` for a notification's markup body."""
+    return html.escape(text, quote=False)
 
 
 class TrayAction(enum.Enum):
@@ -182,24 +206,39 @@ class Tray:
         """Say that EasySpeak is ready, aloud and in a desktop notification.
 
         Verbose, or with `details` (a second launch with `-v` asks for them), the
-        notification also tells the version, desktop and language, and the latest
-        warnings and errors. If there are any, the greeting says so, too, so they're
-        noticed without looking at a terminal.
+        notification also tells the version, desktop and language, then the latest
+        warnings and errors, one per line with a bold label. The greeting stays its
+        first line, as the desktop's pop-up shows little more. If there are any,
+        the greeting says so, too, so they're noticed without looking at a terminal;
+        it speaks of problems only for errors.
         """
         greeting = _("Welcome! I'm ready.")
         self._speak(greeting)
         details = details or log.verbose()
-        body = greeting
+        lines = [escape(greeting)]
         if details:
-            desktop = os.environ.get("XDG_CURRENT_DESKTOP") or "unknown desktop"
-            session = os.environ.get("XDG_SESSION_TYPE") or "unknown session"
-            facts = f"{APPLICATION_NAME} {app_version()} on {desktop} ({session})"
-            body += "\n\n" + "\n".join((f"{facts}, language {LANGUAGE}", *log.problems))
-        shown = notify(APPLICATION_NAME, html.escape(body, quote=False))
-        if details and log.problems and shown:
-            self._speak(
-                _("I ran into problems. The details are in the desktop notification.")
+            desktop = os.environ.get("XDG_CURRENT_DESKTOP") or "unknown"
+            if session := os.environ.get("XDG_SESSION_TYPE"):
+                desktop = f"{desktop} ({session})"
+            lines.append(
+                f"<b>Version</b> {escape(app_version())}, "
+                f"<b>desktop</b> {escape(desktop)}, <b>language</b> {LANGUAGE}."
             )
+            lines += [
+                f"<b>{logging.getLevelName(level).capitalize()}:</b> {escape(message)}"
+                for level, message in log.problems
+            ]
+        shown = notify(APPLICATION_NAME, LINE_BREAK.join(lines))
+        if details and log.problems and shown:
+            if any(level >= logging.ERROR for level, _message in log.problems):
+                summary = _(
+                    "I ran into problems. The details are in the desktop notification."
+                )
+            else:
+                summary = _(
+                    "There were warnings. The details are in the desktop notification."
+                )
+            self._speak(summary)
 
     def present(self, details=False):
         """Come forward for a second launch: raise the About dialog, then greet."""
@@ -307,7 +346,8 @@ class Tray:
     def _tell_about(self):
         """Present EasySpeak without the About dialog: spoken, plus a notification."""
         name = f"{APPLICATION_NAME} {app_version()}".strip()
-        if notify(name, f"{COMMENTS}\n{COPYRIGHT}\nGPL-3.0 · {DOCS_URL}"):
+        about = (COMMENTS, COPYRIGHT, f"GPL-3.0 · {DOCS_URL}")
+        if notify(name, LINE_BREAK.join(map(escape, about))):
             self._speak(
                 _(
                     "This is {name}. The details are in the desktop notification."

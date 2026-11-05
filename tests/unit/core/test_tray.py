@@ -525,18 +525,37 @@ class TestMenuActions:
 class TestNotify:
     """Desktop notifications over the freedesktop Notifications D-Bus API."""
 
+    @staticmethod
+    def _service(mock_open, capabilities):
+        """A notification service with `capabilities` that accepts the call."""
+        conn = mock_open.return_value.__enter__.return_value
+        accepted = Mock(body=())
+        accepted.header.message_type = MessageType.method_return
+        conn.send_and_get_reply.side_effect = [Mock(body=(capabilities,)), accepted]
+        return conn
+
     @patch("jeepney.io.blocking.open_dbus_connection")
     def test_shows_a_notification(self, mock_open):
-        """The notification service accepting the call means it was shown."""
-        conn = mock_open.return_value.__enter__.return_value
-        conn.send_and_get_reply.return_value.header.message_type = (
-            MessageType.method_return
-        )
+        """The notification service accepting the call means it was shown, with
+        the markup kept where the service takes it."""
+        conn = self._service(mock_open, ["body", "body-markup"])
 
-        assert notify("EasySpeak 1.2.3", "Voice control") is True
+        assert notify("EasySpeak 1.2.3", "<b>Voice</b> control &amp; more") is True
         message = conn.send_and_get_reply.call_args.args[0]
         assert message.header.fields[HeaderFields.member] == "Notify"
-        assert message.body[3:5] == ("EasySpeak 1.2.3", "Voice control")
+        assert message.body[3:5] == (
+            "EasySpeak 1.2.3",
+            "<b>Voice</b> control &amp; more",
+        )
+
+    @patch("jeepney.io.blocking.open_dbus_connection")
+    def test_takes_markup_out_where_the_service_shows_plain_text(self, mock_open):
+        """A service without markup gets plain text, not tags and entities."""
+        conn = self._service(mock_open, ["body"])
+
+        assert notify("EasySpeak", "<b>Voice</b> control &amp; more") is True
+        message = conn.send_and_get_reply.call_args.args[0]
+        assert message.body[4] == "Voice control & more"
 
     @patch("jeepney.io.blocking.open_dbus_connection", side_effect=KeyError("bus"))
     def test_without_a_session_bus(self, mock_open):
@@ -547,7 +566,9 @@ class TestNotify:
     def test_refused_by_the_service(self, mock_open):
         """An error reply, e.g. no notification service running, means not shown."""
         conn = mock_open.return_value.__enter__.return_value
-        conn.send_and_get_reply.return_value.header.message_type = MessageType.error
+        refused = Mock(body=())
+        refused.header.message_type = MessageType.error
+        conn.send_and_get_reply.side_effect = [refused, refused]
 
         assert notify("EasySpeak", "Voice control") is False
 
@@ -705,7 +726,7 @@ class TestGreeting:
     @patch("easyspeak.core.tray.notify", return_value=True)
     def test_greet_shows_the_greeting(self, mock_notify):
         """Not verbose, the notification just repeats the greeting, problems or not."""
-        log.problems.append("Speech unavailable")
+        log.problems.append((logging.ERROR, "Speech unavailable"))
         tray = Tray(speak=Mock())
 
         tray.greet()
@@ -715,24 +736,46 @@ class TestGreeting:
 
     @patch("easyspeak.core.tray.notify", return_value=True)
     def test_greet_verbose_shows_the_details(self, mock_notify, monkeypatch):
-        """Verbose, the notification tells the version, desktop, language and the
-        problems, escaped for the notification's markup, and says there are some."""
+        """Verbose, the greeting stays the first line, as the pop-up shows little
+        more; the version, desktop and language follow, then the problems one per
+        line, labelled in bold and escaped for the notification's markup. The lines
+        are split by Unicode's line separator, as GNOME turns newlines into spaces.
+        An error is a problem."""
         monkeypatch.setenv("EASYSPEAK_LOG_LEVEL", "DEBUG")
-        log.problems.extend(["Speech unavailable (no <voice> & no player)", "Oops"])
+        log.problems.extend(
+            [
+                (logging.WARNING, "No readable keyboard"),
+                (logging.ERROR, "Speech unavailable (no <voice> & no player)"),
+            ]
+        )
         tray = Tray(speak=Mock())
 
         tray.greet()
 
         mock_notify.assert_called_once_with(
             "EasySpeak",
-            "Welcome! I'm ready.\n\n"
-            "EasySpeak 1.2.3 on X-Cinnamon (x11), language en\n"
-            "Speech unavailable (no &lt;voice&gt; &amp; no player)\n"
-            "Oops",
+            "Welcome! I'm ready.\u2028"
+            "<b>Version</b> 1.2.3, <b>desktop</b> X-Cinnamon (x11), <b>language</b> en.\u2028"
+            "<b>Warning:</b> No readable keyboard\u2028"
+            "<b>Error:</b> Speech unavailable (no &lt;voice&gt; &amp; no player)",
         )
         assert tray._speak.call_args_list == [
             call("Welcome! I'm ready."),
             call("I ran into problems. The details are in the desktop notification."),
+        ]
+
+    @patch("easyspeak.core.tray.notify", return_value=True)
+    def test_greet_with_only_warnings_says_so(self, mock_notify):
+        """Warnings alone, such as no keyboard for the hotkey, aren't announced as
+        problems."""
+        log.problems.append((logging.WARNING, "No readable keyboard"))
+        tray = Tray(speak=Mock())
+
+        tray.greet(details=True)
+
+        assert tray._speak.call_args_list == [
+            call("Welcome! I'm ready."),
+            call("There were warnings. The details are in the desktop notification."),
         ]
 
     @patch("easyspeak.core.tray.notify", return_value=True)
@@ -746,15 +789,15 @@ class TestGreeting:
         tray.greet(details=True)
 
         assert mock_notify.call_args.args[1] == (
-            "Welcome! I'm ready.\n\n"
-            "EasySpeak 1.2.3 on unknown desktop (unknown session), language en"
+            "Welcome! I'm ready.\u2028"
+            "<b>Version</b> 1.2.3, <b>desktop</b> unknown, <b>language</b> en."
         )
         tray._speak.assert_called_once_with("Welcome! I'm ready.")
 
     @patch("easyspeak.core.tray.notify", return_value=False)
     def test_greet_without_notifications_doesnt_point_to_one(self, mock_notify):
         """Without a notification service, the greeting doesn't mention one."""
-        log.problems.append("Speech unavailable")
+        log.problems.append((logging.ERROR, "Speech unavailable"))
         tray = Tray(speak=Mock())
 
         tray.greet(details=True)

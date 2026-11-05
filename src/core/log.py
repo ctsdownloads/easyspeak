@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 
 _PACKAGE_LOGGERS = ("easyspeak", "plugins")
 
-problems: collections.deque[str] = collections.deque(maxlen=10)
-"""The latest warnings and errors logged, oldest first."""
+problems: collections.deque[tuple[int, str]] = collections.deque(maxlen=10)
+"""The latest warnings and errors logged, as `(level, message)`, oldest first."""
 
 
 class ProblemCollector(logging.Handler):
@@ -27,8 +27,8 @@ class ProblemCollector(logging.Handler):
         super().__init__(logging.WARNING)
 
     def emit(self, record):
-        """Remember the record's message."""
-        problems.append(record.getMessage().strip())
+        """Remember the record's level and message."""
+        problems.append((record.levelno, record.getMessage().strip()))
 
 
 def verbose():
