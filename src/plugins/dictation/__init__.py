@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 _ = translator(__file__)
 
 NAME = "dictation"
+LABEL = _("Dictation")
 DESCRIPTION = "Voice dictation into any text field"
 
 MAX_RECORD_SECONDS = 20.0

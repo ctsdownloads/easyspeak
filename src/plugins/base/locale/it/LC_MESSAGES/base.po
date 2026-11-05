@@ -27,6 +27,9 @@ msgstr "Chiudo la finestra Informazioni."
 msgid "Goodbye."
 msgstr "Arrivederci."
 
+msgid "Help"
+msgstr "Aiuto"
+
 msgid "Modes now take commands on their own."
 msgstr "Le modalità ora accettano i comandi direttamente."
 

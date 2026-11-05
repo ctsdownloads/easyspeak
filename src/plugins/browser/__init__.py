@@ -18,6 +18,7 @@ BARE_KEYS = frozenset({"enter"})
 _ = translator(__file__)
 
 NAME = "browser"
+LABEL = _("Browser")
 DESCRIPTION = "Qutebrowser voice control"
 
 COMMANDS = [

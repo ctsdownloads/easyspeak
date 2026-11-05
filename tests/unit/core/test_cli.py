@@ -9,7 +9,7 @@ from importlib import import_module
 from unittest.mock import call, patch
 
 import pytest
-from easyspeak.core import cli, instance
+from easyspeak.core import cli, instance, log
 
 
 def test_dunder_main_module():
@@ -49,16 +49,15 @@ def test_run_while_running_greets_from_the_running_copy(
 
 
 @patch("easyspeak.core.main.EasySpeak")
-def test_run_while_running_passes_on_a_verbose_environment(mock_easyspeak, monkeypatch):
-    """Verbose by `EASYSPEAK_LOG_LEVEL`, as an alternative to `-v`, asks for the
-    details, too."""
-    monkeypatch.setenv("EASYSPEAK_LOG_LEVEL", "DEBUG")
+def test_run_while_running_keeps_a_debug_terminal_to_itself(mock_easyspeak):
+    """Debug output in the second launch's terminal doesn't ask the running copy
+    for notifications; only `-v` does."""
     running = instance.acquire()
 
-    cli.run([])
+    cli.run(["-d"])
 
     running.close()
-    assert instance.CONTROL_FILE.read_text() == "present verbose"
+    assert instance.CONTROL_FILE.read_text() == "present"
 
 
 def test_second_launch_path_leaves_the_speech_stack_unloaded():
@@ -127,27 +126,33 @@ def test_run_without_language_leaves_the_environment_alone(mock_easyspeak, monke
 
 
 @pytest.mark.parametrize(
-    ("argv", "verbose", "quiet"),
+    ("argv", "verbose", "debug", "quiet"),
     [
-        ([], False, False),
-        (["-v"], True, False),
-        (["--verbose"], True, False),
-        (["-q"], False, True),
-        (["--quiet"], False, True),
+        ([], False, False, False),
+        (["-v"], True, False, False),
+        (["--verbose"], True, False, False),
+        (["-d"], False, True, False),
+        (["--debug"], False, True, False),
+        (["-q"], False, False, True),
+        (["--quiet"], False, False, True),
+        (["-v", "-d"], True, True, False),
+        (["-v", "-q"], True, False, True),
     ],
 )
-def test_parse_args_flags(argv, verbose, quiet):
-    """-v/--verbose and -q/--quiet set their flags; default is neither."""
+def test_parse_args_flags(argv, verbose, debug, quiet):
+    """-v/--verbose goes with either terminal level, -d/--debug or -q/--quiet;
+    default is none."""
     args = cli.parse_args(argv)
 
     assert args.verbose is verbose
+    assert args.debug is debug
     assert args.quiet is quiet
 
 
-def test_parse_args_verbose_and_quiet_are_mutually_exclusive():
-    """Passing both -v and -q is rejected by argparse."""
+def test_parse_args_debug_and_quiet_are_mutually_exclusive():
+    """Passing both -d and -q is rejected by argparse."""
     with pytest.raises(SystemExit):
-        cli.parse_args(["-v", "-q"])
+        cli.parse_args(["-d", "-q"])
 
 
 @patch("easyspeak.core.cli.app_version", return_value="1.2.3")
@@ -180,10 +185,19 @@ def test_run_default_prints_info_without_prefix(mock_easyspeak, capsys):
 
 
 @patch("easyspeak.core.main.EasySpeak")
-def test_run_verbose_enables_debug_with_level_prefix(mock_easyspeak, capsys):
-    """-v: DEBUG is shown and every line is prefixed with its level name."""
-    assert _run_then_log(["-v"], capsys, logging.INFO, "hello") == "INFO hello\n"
-    assert _run_then_log(["-v"], capsys, logging.DEBUG, "x") == "DEBUG x\n"
+def test_run_debug_enables_debug_with_level_prefix(mock_easyspeak, capsys):
+    """-d: DEBUG is shown and every line is prefixed with its level name."""
+    assert _run_then_log(["-d"], capsys, logging.INFO, "hello") == "INFO hello\n"
+    assert _run_then_log(["-d"], capsys, logging.DEBUG, "x") == "DEBUG x\n"
+
+
+@patch("easyspeak.core.main.EasySpeak")
+def test_run_verbose_leaves_the_terminal_as_it_is(mock_easyspeak, capsys):
+    """-v: the terminal shows what it would without, and the desktop gets the
+    messages."""
+    assert _run_then_log(["-v"], capsys, logging.INFO, "hello") == "hello\n"
+    assert _run_then_log(["-v"], capsys, logging.DEBUG, "noise") == ""
+    assert log.verbose() is True
 
 
 @patch("easyspeak.core.main.EasySpeak")

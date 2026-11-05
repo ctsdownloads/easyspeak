@@ -44,6 +44,9 @@ msgstr ""
 msgid "Middle clicked"
 msgstr "Clic centrale"
 
+msgid "Mouse grid"
+msgstr "Griglia del mouse"
+
 msgid "Right clicked"
 msgstr "Clic destro"
 

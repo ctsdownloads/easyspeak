@@ -11,6 +11,7 @@ _ = translator(__file__)
 vocab = Vocabulary(__file__)
 
 NAME = "connectivity"
+LABEL = _("Wi-Fi and Bluetooth")
 DESCRIPTION = "Wi-Fi, airplane mode and Bluetooth"
 
 ON_OFF = f"{vocab.say('on', limit=1)}/{vocab.say('off', limit=1)}"

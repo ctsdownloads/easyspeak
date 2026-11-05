@@ -27,6 +27,9 @@ msgstr "No molestar desactivado."
 msgid "Do not disturb on."
 msgstr "No molestar activado."
 
+msgid "System controls"
+msgstr "Controles del sistema"
+
 msgid "adjust screen brightness"
 msgstr "ajustar el brillo de la pantalla"
 

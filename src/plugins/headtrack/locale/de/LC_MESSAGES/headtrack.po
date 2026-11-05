@@ -24,6 +24,9 @@ msgstr "Folge"
 msgid "Frozen"
 msgstr "Eingefroren"
 
+msgid "Head tracking"
+msgstr "Kopfsteuerung"
+
 msgid "Head tracking is still busy. Try again in a moment."
 msgstr ""
 "Die Kopfbewegungsverfolgung ist noch beschäftigt. Versuch es gleich noch "

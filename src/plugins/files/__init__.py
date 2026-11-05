@@ -10,6 +10,7 @@ _ = translator(__file__)
 vocab = Vocabulary(__file__)
 
 NAME = "files"
+LABEL = _("Files")
 DESCRIPTION = "Folder navigation"
 
 COMMANDS = [

@@ -7,6 +7,7 @@ speaks in the user's language is a package instead: a directory with an
 
 ```python
 NAME = "myplugin"
+LABEL = "My plugin"
 DESCRIPTION = "What it does"
 
 COMMANDS = [
@@ -39,6 +40,7 @@ classDiagram
     class PluginContract {
         <<protocol>>
         +str NAME
+        +str LABEL
         +str DESCRIPTION
         +int PRIORITY
         +list COMMANDS
@@ -63,6 +65,10 @@ The dashed boxes are examples of bundled plugins that implement the contract;
 yours joins them the same way.
 
 - `NAME` — short identifier shown in the help screen (required)
+- `LABEL` — optional; the plugin's name for people, e.g. "Mouse grid". Started
+  with `-v`, EasySpeak titles the notification of each warning or error the
+  plugin logs with it and says it aloud, so the user knows which feature is
+  affected; without it, the plugin's messages carry EasySpeak's own name
 - `DESCRIPTION` — one-line summary for the help screen
 - `COMMANDS` — list of `"phrase - description"` strings for the help screen
 - `_` — optional; a localized package's translator, `translator(__file__)`,
@@ -124,6 +130,8 @@ from easyspeak.core.i18n import translator
 
 _ = translator(__file__)
 
+LABEL = _("My plugin")
+
 
 def handle(cmd, core):
     if "say hello" in cmd:
@@ -132,7 +140,8 @@ def handle(cmd, core):
     return None
 ```
 
-Text with a value in it stays a template until it is looked up:
+The `LABEL` is translated the same way, as EasySpeak says it, too. Text with a
+value in it stays a template until it is looked up:
 `core.speak(_("Opening {app}.").format(app=app))`.
 
 What the plugin listens for goes the same way, through its `vocabulary.toml`:

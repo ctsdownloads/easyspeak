@@ -7,6 +7,7 @@ _ = translator(__file__)
 vocab = Vocabulary(__file__)
 
 NAME = "base"
+LABEL = _("Help")
 PRIORITY = 100  # the catch-all for help and exit routes last
 DESCRIPTION = "Help, About and exit commands"
 

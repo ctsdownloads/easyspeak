@@ -1,8 +1,10 @@
 """Command-line entry point: parse arguments, set up logging, run the app.
 
-Verbosity comes from the mutually exclusive `-v`/`--verbose` and `-q`/`--quiet`
-flags, or, with neither, the `EASYSPEAK_LOG_LEVEL` environment variable, which
-the flags override (see [`resolve_level`][core.log.resolve_level]). `--language`
+The terminal's verbosity comes from the mutually exclusive `-d`/`--debug` and
+`-q`/`--quiet` flags, or, with neither, the `EASYSPEAK_LOG_LEVEL` environment
+variable, which the flags override (see [`resolve_level`][core.log.resolve_level]).
+`-v`/`--verbose` goes with either: it has EasySpeak show its warnings and errors
+as desktop notifications and say where they came from. `--language`
 is the command-line form of `EASYSPEAK_LANGUAGE` and overrides it. The one-shot
 `--configure` and `--preview` subcommands set up or print the desktop-integration
 files and exit. All `EASYSPEAK_*` variables are listed in [`core.config`][core.config].
@@ -19,19 +21,34 @@ logger = logging.getLogger(__name__)
 
 
 def parse_args(argv=None):
-    """Parse EasySpeak's command-line arguments."""
+    """Parse EasySpeak's command-line arguments.
+
+    The help lists `-q`, `-v` and `-d` by how much they say, quietest first.
+    """
     config_items = {"extension", "service", "autostart", "desktop"}
     config_defaults = {"extension", "service"}
 
     parser = argparse.ArgumentParser(
         prog="easyspeak", description="Voice control for Linux desktops."
     )
-    verbosity = parser.add_mutually_exclusive_group()
-    verbosity.add_argument(
-        "-q", "--quiet", action="store_true", help="show only warnings and errors"
+    terminal = parser.add_mutually_exclusive_group()
+    terminal.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="show only warnings and errors in the terminal",
     )
-    verbosity.add_argument(
-        "-v", "--verbose", action="store_true", help="show debug output"
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="announce warnings and errors on the desktop and by voice",
+    )
+    terminal.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="show all logging output in the terminal",
     )
     parser.add_argument(
         "--configure",
@@ -86,7 +103,9 @@ def run(argv=None):
         preview(args.preview)
         return
 
-    log.configure(log.resolve_level(verbose=args.verbose, quiet=args.quiet))
+    log.configure(
+        log.resolve_level(debug=args.debug, quiet=args.quiet), verbose=args.verbose
+    )
 
     if args.language:
         # The config reads the variable when it is imported, below.
@@ -103,7 +122,7 @@ def run(argv=None):
 
         lock = instance.acquire()
         if lock is None:
-            instance.present(verbose=log.verbose())
+            instance.present(verbose=args.verbose)
             logger.info("EasySpeak is running already; it greets you instead.")
             return
 

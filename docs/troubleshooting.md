@@ -7,11 +7,12 @@ terminal. To make it show more of what it does and where it fails, add `-v` to
 its starter: copy `/usr/share/applications/easyspeak.desktop` to
 `~/.local/share/applications/` and change `Exec=easyspeak` to
 `Exec=easyspeak -v` there. Starting EasySpeak from the menu then shows its
-version, your desktop and its language in a notification, followed by the
-latest warnings and errors, and says when there were any. The pop-up shows only
-the start of it; the desktop's notification list has the full text, on GNOME
-behind the clock in the top bar. To see everything it logs, say "Hey Jarvis,
-exit" to quit the running EasySpeak, then run `easyspeak -v` in a terminal.
+version, your desktop and its language in a notification, and each warning or
+error in one of its own, and says which feature it came from. A pop-up shows
+only the start of a notification; the desktop's notification list has the full
+text, on GNOME behind the clock in the top bar. To see everything it logs, say
+"Hey Jarvis, exit" to quit the running EasySpeak, then run `easyspeak --debug` in
+a terminal.
 
 ## Mouse grid: "Failed to show grid — is extension enabled?"
 
@@ -167,7 +168,7 @@ alsamixer
 
 ## Everything takes several seconds
 
-Run with `-v` and compare the two numbers on this line:
+Run with `--debug` and compare the two numbers on this line:
 
 ```
 transcribed 4.2s of audio in 0.45s

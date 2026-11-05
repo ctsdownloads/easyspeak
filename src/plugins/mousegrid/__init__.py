@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 _ = translator(__file__)
 
 NAME = "mousegrid"
+LABEL = _("Mouse grid")
 DESCRIPTION = "Voice-controlled mouse grid"
 PRIORITY = 1
 

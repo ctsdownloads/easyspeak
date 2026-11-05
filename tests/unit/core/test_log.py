@@ -11,7 +11,7 @@ from easyspeak.core import log
 @pytest.mark.parametrize(
     ("kwargs", "env", "expected"),
     [
-        ({"verbose": True}, None, logging.DEBUG),
+        ({"debug": True}, None, logging.DEBUG),
         ({"quiet": True}, None, logging.WARNING),
         ({}, "WARNING", logging.WARNING),
         ({}, None, logging.INFO),
@@ -29,7 +29,7 @@ def test_resolve_level(kwargs, env, expected, monkeypatch):
 
 
 def test_configure_isolates_package_loggers():
-    """configure attaches a stderr handler and the problem collector, and
+    """configure attaches a stderr handler and the message collector, and
     isolates the package loggers."""
     log.configure(logging.INFO)
 
@@ -38,45 +38,54 @@ def test_configure_isolates_package_loggers():
     assert pkg.propagate is False
     assert len(pkg.handlers) == 2
     assert pkg.handlers[0].stream is sys.stderr
-    assert isinstance(pkg.handlers[1], log.ProblemCollector)
+    assert isinstance(pkg.handlers[1], log.MessageCollector)
 
 
-def test_configure_collects_warnings_and_errors(capsys):
-    """Warnings and errors are kept, stripped of the blank lines around them,
-    and plain information isn't."""
+def test_configure_collects_messages_for_the_desktop():
+    """Warnings, errors and messages marked for the desktop are kept with their
+    source, stripped of the blank lines around them, and other information isn't."""
     log.configure(logging.INFO)
 
     logging.getLogger("easyspeak.core").info("Loading plugins...")
     logging.getLogger("plugins.media").warning("\nNo player %s", "found")
     logging.getLogger("easyspeak.core").error("Cannot start")
+    logging.getLogger("easyspeak.core.main").info("EasySpeak 1.2.3", extra=log.NOTIFY)
 
-    assert list(log.problems) == [
-        (logging.WARNING, "No player found"),
-        (logging.ERROR, "Cannot start"),
+    expected = [
+        log.Message(logging.WARNING, "plugins.media", "No player found"),
+        log.Message(logging.ERROR, "easyspeak.core", "Cannot start"),
+        log.Message(logging.INFO, "easyspeak.core.main", "EasySpeak 1.2.3"),
     ]
+    assert list(log.recent) == expected
+    assert list(log.pending) == expected
 
 
-def test_problems_keeps_only_the_latest():
-    """A long-running daemon keeps the latest ten problems, not every one."""
+def test_configure_collects_marked_messages_below_a_quiet_terminal(capsys):
+    """A quiet terminal doesn't hide a message meant for the desktop."""
+    log.configure(logging.WARNING)
+
+    logging.getLogger("easyspeak.core.main").info("EasySpeak 1.2.3", extra=log.NOTIFY)
+
+    assert [m.text for m in log.pending] == ["EasySpeak 1.2.3"]
+    assert capsys.readouterr().err == ""
+
+
+def test_recent_keeps_only_the_latest():
+    """A long-running daemon keeps the latest ten messages, not every one."""
     log.configure(logging.INFO)
 
     for n in range(12):
         logging.getLogger("easyspeak").warning("problem %d", n)
 
-    assert list(log.problems) == [
-        (logging.WARNING, f"problem {n}") for n in range(2, 12)
-    ]
+    assert [m.text for m in log.recent] == [f"problem {n}" for n in range(2, 12)]
 
 
-@pytest.mark.parametrize(
-    ("level", "expected"),
-    [(logging.DEBUG, True), (logging.INFO, False), (logging.WARNING, False)],
-)
-def test_verbose(level, expected):
-    """Verbose means the debug level, from `-v` or `EASYSPEAK_LOG_LEVEL`."""
-    log.configure(level)
+@pytest.mark.parametrize("verbose", [True, False])
+def test_verbose(verbose):
+    """`-v` is separate from the terminal's level."""
+    log.configure(logging.WARNING, verbose=verbose)
 
-    assert log.verbose() is expected
+    assert log.verbose() is verbose
 
 
 def _format_info_record():

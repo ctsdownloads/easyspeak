@@ -17,6 +17,7 @@ from pathlib import Path
 import numpy as np
 import pyaudio
 
+from .about import app_version
 from .config import (
     COMMAND_LANGUAGE,
     COMMAND_PROMPT,
@@ -53,6 +54,7 @@ from .config import (
 from .gnome_extension import ensure_extension
 from .hotkey import HotkeyListener
 from .i18n import _
+from .log import NOTIFY
 from .noisefilter import NoiseFilter
 from .speech import SpeechPipeline, suppressed_c_stderr
 from .tray import Tray, TrayAction
@@ -925,6 +927,17 @@ class EasySpeak:
             self.speech.ensure()
         except OSError as exc:
             logger.warning("Speech unavailable (%s); continuing without it.", exc)
+
+        desktop = os.environ.get("XDG_CURRENT_DESKTOP") or "unknown desktop"
+        if session := os.environ.get("XDG_SESSION_TYPE"):
+            desktop = f"{desktop} ({session})"
+        logger.info(
+            "EasySpeak %s on %s, language %s",
+            app_version(),
+            desktop,
+            LANGUAGE,
+            extra=NOTIFY,
+        )
 
         logger.info("""
 ╔══════════════════════════════════════════╗

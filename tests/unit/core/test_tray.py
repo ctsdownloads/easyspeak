@@ -527,20 +527,20 @@ class TestNotify:
 
     @staticmethod
     def _service(mock_open, capabilities):
-        """A notification service with `capabilities` that accepts the call."""
+        """A notification service with `capabilities` that shows it as number 7."""
         conn = mock_open.return_value
-        accepted = Mock(body=())
+        accepted = Mock(body=(7,))
         accepted.header.message_type = MessageType.method_return
         conn.send_and_get_reply.side_effect = [Mock(body=(capabilities,)), accepted]
         return conn
 
     @patch("jeepney.io.blocking.open_dbus_connection")
     def test_shows_a_notification(self, mock_open):
-        """The notification service accepting the call means it was shown, with
-        the markup kept where the service takes it."""
+        """The notification service accepting the call means it was shown, as the
+        number it returns, with the markup kept where the service takes it."""
         conn = self._service(mock_open, ["body", "body-markup"])
 
-        assert notify("EasySpeak 1.2.3", "<b>Voice</b> control &amp; more") is True
+        assert notify("EasySpeak 1.2.3", "<b>Voice</b> control &amp; more") == 7
         message = conn.send_and_get_reply.call_args.args[0]
         assert message.header.fields[HeaderFields.member] == "Notify"
         assert message.body[3:5] == (
@@ -553,7 +553,7 @@ class TestNotify:
         """A service without markup gets plain text, not tags and entities."""
         conn = self._service(mock_open, ["body"])
 
-        assert notify("EasySpeak", "<b>Voice</b> control &amp; more") is True
+        assert notify("EasySpeak", "<b>Voice</b> control &amp; more") == 7
         message = conn.send_and_get_reply.call_args.args[0]
         assert message.body[4] == "Voice control & more"
 
@@ -567,6 +567,15 @@ class TestNotify:
 
         hints = conn.send_and_get_reply.call_args.args[0].body[6]
         assert hints == {"desktop-entry": ("s", "easyspeak")}
+
+    @patch("jeepney.io.blocking.open_dbus_connection")
+    def test_takes_the_place_of_an_earlier_one(self, mock_open):
+        """Given an earlier notification's number, the service updates that one."""
+        conn = self._service(mock_open, ["body"])
+
+        notify("Dictation", "Warning: no keyboard", replaces=5)
+
+        assert conn.send_and_get_reply.call_args.args[0].body[1] == 5
 
     @patch("jeepney.io.blocking.open_dbus_connection")
     def test_a_click_only_dismisses_it(self, mock_open):
@@ -584,12 +593,13 @@ class TestNotify:
         """All notifications go through one connection, which stays open, as the
         desktop removes an app's notifications once their connection is gone."""
         conn = mock_open.return_value
-        accepted = Mock(body=(["body"],))
+        capabilities = Mock(body=(["body"],))
+        accepted = Mock(body=(7,))
         accepted.header.message_type = MessageType.method_return
-        conn.send_and_get_reply.return_value = accepted
+        conn.send_and_get_reply.side_effect = [capabilities, accepted] * 2
 
-        assert notify("EasySpeak", "one") is True
-        assert notify("EasySpeak", "two") is True
+        assert notify("EasySpeak", "one") == 7
+        assert notify("EasySpeak", "two") == 7
 
         mock_open.assert_called_once_with(bus="SESSION")
         conn.close.assert_not_called()
@@ -600,18 +610,18 @@ class TestNotify:
         and replaced, so the notification still shows."""
         broken, fresh = Mock(), Mock()
         broken.send_and_get_reply.side_effect = ConnectionResetError("bus gone")
-        accepted = Mock(body=(["body"],))
+        accepted = Mock(body=(7,))
         accepted.header.message_type = MessageType.method_return
-        fresh.send_and_get_reply.return_value = accepted
+        fresh.send_and_get_reply.side_effect = [Mock(body=(["body"],)), accepted]
         mock_open.side_effect = [broken, fresh]
 
-        assert notify("EasySpeak", "Voice control") is True
+        assert notify("EasySpeak", "Voice control") == 7
         broken.close.assert_called_once_with()
 
     @patch("jeepney.io.blocking.open_dbus_connection", side_effect=KeyError("bus"))
     def test_without_a_session_bus(self, mock_open):
         """No session bus to talk to means no notification, not a crash."""
-        assert notify("EasySpeak", "Voice control") is False
+        assert notify("EasySpeak", "Voice control") == 0
 
     @patch("jeepney.io.blocking.open_dbus_connection")
     def test_refused_by_the_service(self, mock_open):
@@ -621,7 +631,7 @@ class TestNotify:
         refused.header.message_type = MessageType.error
         conn.send_and_get_reply.side_effect = [refused, refused]
 
-        assert notify("EasySpeak", "Voice control") is False
+        assert notify("EasySpeak", "Voice control") == 0
 
 
 class TestLifecycleHooks:
@@ -645,21 +655,24 @@ class TestLifecycleHooks:
         tray._speak.assert_called_once_with("Welcome! I'm ready.")
 
     @pytest.mark.parametrize(
-        ("pending", "details"),
+        ("pending", "verbose"),
         [(COMMAND_PRESENT_VERBOSE, True), (COMMAND_PRESENT, False), (None, False)],
     )
     @patch("easyspeak.core.tray.subprocess.run")
-    def test_started_keeps_a_request_for_details(self, mock_run, pending, details):
-        """A second launch with `-v` while the first copy still loads is answered
-        by the startup greeting, details included."""
+    def test_started_keeps_a_request_for_details(self, mock_run, pending, verbose):
+        """A second launch with `-v` while the first copy still loads turns on what
+        `-v` does, before the greeting and the startup messages are reported."""
         mock_run.return_value = Mock(returncode=0)
         tray = Tray(speak=Mock())
         tray.take_command = Mock(return_value=pending)
         tray.greet = Mock()
+        tray.report = Mock()
 
         tray.started()
 
-        tray.greet.assert_called_once_with(details=details)
+        assert tray._verbose is verbose
+        tray.greet.assert_called_once_with()
+        tray.report.assert_called_once_with()
 
     @patch("easyspeak.core.tray.subprocess.run")
     def test_started_discards_a_stale_command(self, mock_run):
@@ -764,95 +777,16 @@ class TestOtherDesktops:
 
 
 class TestGreeting:
-    """The ready greeting is spoken and shown, with details when verbose."""
+    """The ready greeting is spoken and shown; a second launch is greeted, too."""
 
-    @pytest.fixture(autouse=True)
-    def _session(self, monkeypatch):
-        monkeypatch.delenv("EASYSPEAK_LOG_LEVEL", raising=False)
-        monkeypatch.setenv("XDG_CURRENT_DESKTOP", "X-Cinnamon")
-        monkeypatch.setenv("XDG_SESSION_TYPE", "x11")
-        monkeypatch.setattr("easyspeak.core.tray.app_version", lambda: "1.2.3")
-        monkeypatch.setattr("easyspeak.core.tray.LANGUAGE", "en")
-
-    @patch("easyspeak.core.tray.notify", return_value=True)
-    def test_greet_shows_the_greeting(self, mock_notify):
-        """Not verbose, the notification just repeats the greeting, problems or not."""
-        log.problems.append((logging.ERROR, "Speech unavailable"))
+    @patch("easyspeak.core.tray.notify", return_value=7)
+    def test_greet_says_and_shows_it(self, mock_notify):
+        """The greeting is spoken and shown, nothing more."""
         tray = Tray(speak=Mock())
 
         tray.greet()
 
         mock_notify.assert_called_once_with("EasySpeak", "Welcome! I'm ready.")
-        tray._speak.assert_called_once_with("Welcome! I'm ready.")
-
-    @patch("easyspeak.core.tray.notify", return_value=True)
-    def test_greet_verbose_shows_the_details(self, mock_notify, monkeypatch):
-        """Verbose, the greeting stays the first line, as the pop-up shows little
-        more; the version, desktop and language follow, then the problems one per
-        line, labelled in bold and escaped for the notification's markup. The lines
-        are split by Unicode's line separator, as GNOME turns newlines into spaces.
-        An error is a problem."""
-        monkeypatch.setenv("EASYSPEAK_LOG_LEVEL", "DEBUG")
-        log.problems.extend(
-            [
-                (logging.WARNING, "No readable keyboard"),
-                (logging.ERROR, "Speech unavailable (no <voice> & no player)"),
-            ]
-        )
-        tray = Tray(speak=Mock())
-
-        tray.greet()
-
-        mock_notify.assert_called_once_with(
-            "EasySpeak",
-            "Welcome! I'm ready.\u2028"
-            "<b>Version</b> 1.2.3, <b>desktop</b> X-Cinnamon (x11), <b>language</b> en.\u2028"
-            "<b>Warning:</b> No readable keyboard\u2028"
-            "<b>Error:</b> Speech unavailable (no &lt;voice&gt; &amp; no player)",
-        )
-        assert tray._speak.call_args_list == [
-            call("Welcome! I'm ready."),
-            call("I ran into problems. The details are in the desktop notification."),
-        ]
-
-    @patch("easyspeak.core.tray.notify", return_value=True)
-    def test_greet_with_only_warnings_says_so(self, mock_notify):
-        """Warnings alone, such as no keyboard for the hotkey, aren't announced as
-        problems."""
-        log.problems.append((logging.WARNING, "No readable keyboard"))
-        tray = Tray(speak=Mock())
-
-        tray.greet(details=True)
-
-        assert tray._speak.call_args_list == [
-            call("Welcome! I'm ready."),
-            call("There were warnings. The details are in the desktop notification."),
-        ]
-
-    @patch("easyspeak.core.tray.notify", return_value=True)
-    def test_greet_details_without_problems(self, mock_notify, monkeypatch):
-        """Asked for details, an unknown desktop is named so, and without problems
-        nothing more is said."""
-        monkeypatch.delenv("XDG_CURRENT_DESKTOP")
-        monkeypatch.delenv("XDG_SESSION_TYPE")
-        tray = Tray(speak=Mock())
-
-        tray.greet(details=True)
-
-        assert mock_notify.call_args.args[1] == (
-            "Welcome! I'm ready.\u2028"
-            "<b>Version</b> 1.2.3, <b>desktop</b> unknown, <b>language</b> en."
-        )
-        tray._speak.assert_called_once_with("Welcome! I'm ready.")
-
-    @patch("easyspeak.core.tray.notify", return_value=False)
-    def test_greet_without_notifications_doesnt_point_to_one(self, mock_notify):
-        """Without a notification service, the greeting doesn't mention one."""
-        log.problems.append((logging.ERROR, "Speech unavailable"))
-        tray = Tray(speak=Mock())
-
-        tray.greet(details=True)
-
         tray._speak.assert_called_once_with("Welcome! I'm ready.")
 
     @pytest.mark.parametrize(
@@ -921,3 +855,162 @@ class TestGreeting:
 
         tray.open_about.assert_not_called()
         mock_notify.assert_called_once()
+
+
+class TestReport:
+    """With `-v`, each message logged becomes a notification, and its source is
+    said."""
+
+    @pytest.fixture(autouse=True)
+    def _verbose(self):
+        log.configure(logging.WARNING, verbose=True)
+
+    @pytest.fixture
+    def mock_notify(self):
+        with patch("easyspeak.core.tray.notify", side_effect=itertools.count(1)) as m:
+            yield m
+
+    def test_shows_each_message_and_says_where_it_came_from(
+        self, mock_notify, monkeypatch
+    ):
+        """Each message gets a notification titled with its source, a plugin
+        named by its label; each source of a warning or error is said, then where
+        the details are, once."""
+        monkeypatch.setitem(sys.modules, "plugins.grid", Mock(LABEL="Mouse grid"))
+        logging.getLogger("easyspeak.core.hotkey").warning("No readable keyboard")
+        logging.getLogger("plugins.grid").error("Grid failed")
+        tray = Tray(speak=Mock())
+
+        assert tray.report() is True
+
+        assert mock_notify.call_args_list == [
+            call("Hold-to-dictate", "<b>Warning:</b> No readable keyboard", replaces=0),
+            call("Mouse grid", "<b>Error:</b> Grid failed", replaces=0),
+        ]
+        tray._speak.assert_called_once_with(
+            "Hold-to-dictate: there was a warning. Mouse grid: something went "
+            "wrong. The details are in the desktop notification."
+        )
+
+    def test_shows_a_marked_message_without_saying_it(self, mock_notify):
+        """Information meant for the desktop, such as the version line, is shown
+        as it is, under EasySpeak's name, and not spoken."""
+        logging.getLogger("easyspeak.core.main").info(
+            "EasySpeak 1.2.3 on <GNOME>", extra=log.NOTIFY
+        )
+        tray = Tray(speak=Mock())
+
+        assert tray.report() is False
+
+        mock_notify.assert_called_once_with(
+            "EasySpeak", "EasySpeak 1.2.3 on &lt;GNOME&gt;", replaces=0
+        )
+        tray._speak.assert_not_called()
+
+    def test_counts_a_message_logged_several_times(self, mock_notify):
+        """The same message in one go is one notification with a count, and one
+        sentence."""
+        for _ in range(3):
+            logging.getLogger("easyspeak.core.noisefilter").warning("Filter stopped")
+        tray = Tray(speak=Mock())
+
+        tray.report()
+
+        mock_notify.assert_called_once_with(
+            "Noise filter",
+            "<b>Warning:</b> Filter stopped (3×)",  # noqa: RUF001
+            replaces=0,
+        )
+        tray._speak.assert_called_once_with(
+            "Noise filter: there was a warning. "
+            "The details are in the desktop notification."
+        )
+
+    def test_updates_the_notification_of_a_message_that_comes_again(self, mock_notify):
+        """A message logged again later updates its notification, and isn't said
+        once more."""
+        noise = logging.getLogger("easyspeak.core.noisefilter")
+        tray = Tray(speak=Mock())
+        noise.warning("Filter stopped")
+        tray.report()
+        tray._speak.reset_mock()
+
+        noise.warning("Filter stopped")
+
+        assert tray.report() is False
+        assert mock_notify.call_args == call(
+            "Noise filter", "<b>Warning:</b> Filter stopped", replaces=1
+        )
+        tray._speak.assert_not_called()
+
+    def test_without_notifications_still_says_where(self, monkeypatch):
+        """Without a notification service, the source is still said, but not
+        that the details are in a notification."""
+        monkeypatch.setattr("easyspeak.core.tray.notify", Mock(return_value=0))
+        logging.getLogger("easyspeak.core.speech").warning("No voice")
+        tray = Tray(speak=Mock())
+
+        tray.report()
+
+        tray._speak.assert_called_once_with("Speech: there was a warning.")
+
+    def test_names_an_unknown_source_easyspeak(self, mock_notify, monkeypatch):
+        """A core module without a feature name, or a plugin without a label,
+        reports as EasySpeak."""
+        monkeypatch.setitem(sys.modules, "plugins.bare", Mock(spec=[]))
+        logging.getLogger("easyspeak.core.main").warning("Odd")
+        logging.getLogger("plugins.bare").warning("Odder")
+
+        Tray(speak=Mock()).report()
+
+        assert [c.args[0] for c in mock_notify.call_args_list] == [
+            "EasySpeak",
+            "EasySpeak",
+        ]
+
+    def test_without_verbose_drops_the_messages(self, mock_notify):
+        """Without `-v`, nothing is shown or said, and nothing piles up."""
+        log.configure(logging.WARNING)
+        logging.getLogger("easyspeak.core.hotkey").warning("No readable keyboard")
+        tray = Tray(speak=Mock())
+
+        assert tray.report() is False
+
+        mock_notify.assert_not_called()
+        assert not log.pending
+
+    def test_a_second_launch_with_v_shows_the_latest_messages(self, mock_notify):
+        """A copy started without `-v` shows the latest messages once a second
+        launch asks with `-v`, and reports from then on."""
+        log.configure(logging.WARNING)
+        tray = Tray(speak=Mock())
+        logging.getLogger("easyspeak.core.hotkey").warning("No readable keyboard")
+        tray.report()
+
+        tray.present(details=True)
+
+        assert mock_notify.call_args_list[-1] == call(
+            "Hold-to-dictate", "<b>Warning:</b> No readable keyboard", replaces=0
+        )
+        logging.getLogger("easyspeak.core.speech").warning("No voice")
+        assert tray.report() is True
+
+    def test_poll_tells_the_loop_when_it_spoke(self, mock_notify):
+        """A report that spoke makes the audio loop wait for it."""
+        tray = Tray(speak=Mock())
+        tray.take_command = Mock(return_value=None)
+        logging.getLogger("easyspeak.core.hotkey").warning("No readable keyboard")
+
+        assert tray.poll(Mock(), Mock()) is TrayAction.SPOKE
+        assert tray.poll(Mock(), Mock()) is TrayAction.CONTINUE
+
+    def test_a_second_launch_with_v_shows_nothing_twice(self, mock_notify):
+        """A copy already reporting doesn't show its earlier messages again."""
+        tray = Tray(speak=Mock())
+        logging.getLogger("easyspeak.core.hotkey").warning("No readable keyboard")
+        tray.report()
+        mock_notify.reset_mock()
+
+        tray.present(details=True)
+
+        mock_notify.assert_called_once_with("EasySpeak", "Welcome! I'm ready.")

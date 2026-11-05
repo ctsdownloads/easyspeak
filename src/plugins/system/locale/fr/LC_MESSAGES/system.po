@@ -27,6 +27,9 @@ msgstr "Ne pas déranger désactivé."
 msgid "Do not disturb on."
 msgstr "Ne pas déranger activé."
 
+msgid "System controls"
+msgstr "Commandes du système"
+
 msgid "adjust screen brightness"
 msgstr "régler la luminosité"
 

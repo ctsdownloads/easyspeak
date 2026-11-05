@@ -18,6 +18,9 @@ msgstr ""
 msgid "Closing the file manager."
 msgstr "Cierro el gestor de archivos."
 
+msgid "Files"
+msgstr "Archivos"
+
 #, python-brace-format
 msgid "Folders: {names}"
 msgstr "Carpetas: {names}"
