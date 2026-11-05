@@ -30,6 +30,16 @@ def _no_custom_config_home(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def _no_preset_log_level(monkeypatch):
+    """Keep tests from following a log level the developer's environment sets.
+
+    The Nix dev shell exports `EASYSPEAK_LOG_LEVEL=DEBUG`; tests that need a
+    level set it themselves.
+    """
+    monkeypatch.delenv("EASYSPEAK_LOG_LEVEL", raising=False)
+
+
+@pytest.fixture(autouse=True)
 def _restore_easyspeak_loggers():
     """Snapshot and restore the package loggers around each test.
 
