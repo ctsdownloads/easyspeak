@@ -33,8 +33,8 @@ def _no_custom_config_home(monkeypatch):
 def _no_preset_log_level(monkeypatch):
     """Keep tests from following a log level the developer's environment sets.
 
-    The Nix dev shell exports `EASYSPEAK_LOG_LEVEL=DEBUG`; tests that need a
-    level set it themselves.
+    A developer may export `EASYSPEAK_LOG_LEVEL`, e.g. `DEBUG`; tests that need
+    a level set it themselves.
     """
     monkeypatch.delenv("EASYSPEAK_LOG_LEVEL", raising=False)
 
