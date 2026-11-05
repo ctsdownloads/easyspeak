@@ -687,10 +687,11 @@ def test_push_to_talk_speech_longer_than_five_seconds_with_pause():
     easy = EasySpeak()
     easy.silence_threshold = 300
 
-    speech_chunk = b"\x00\x05" * 800  # amplitude > 300
-    silent_chunk = b"\x00\x00" * 800  # silence (amplitude 0)
+    # One read of the mono 16 kHz stream: 1600 int16 samples (3200 bytes, 100ms).
+    speech_chunk = b"\x00\x05" * 1600  # amplitude > 300
+    silent_chunk = b"\x00\x00" * 1600  # silence (amplitude 0)
 
-    # 70 chunks total (7.0 seconds of audio at 100ms per 1600-byte chunk):
+    # 70 chunks total (7.0 seconds of audio at 100ms per chunk):
     # - 30 chunks speech (3.0s)
     # - 5 chunks pause (0.5s pause: would abort under default 0.3s silence, but tolerated by 0.7s)
     # - 35 chunks speech (3.5s: total 7.0s > 5.0s default max cap)
@@ -708,9 +709,9 @@ def test_push_to_talk_speech_longer_than_five_seconds_with_pause():
         should_continue=lambda: True,
     )
 
-    # 70 chunks of speech/pause + 7 chunks (0.7s) of trailing silence = 77 chunks (123,200 bytes)
+    # 70 chunks of speech/pause + 7 chunks (0.7s) of trailing silence = 77 chunks (246,400 bytes)
     # Under default command caps (5.0s max, 0.3s pause), this would have cut off at 33 chunks (0.3s pause).
-    assert len(recorded) == (70 + 7) * 1600
+    assert len(recorded) == (70 + 7) * 3200
 
 
 @patch("easyspeak.plugins.dictation.insert_text")
