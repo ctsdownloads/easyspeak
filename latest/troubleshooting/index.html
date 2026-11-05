@@ -573,6 +573,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#see-what-easyspeak-is-doing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See what EasySpeak is doing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#mouse-grid-failed-to-show-grid-is-extension-enabled" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -984,6 +995,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#see-what-easyspeak-is-doing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See what EasySpeak is doing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#mouse-grid-failed-to-show-grid-is-extension-enabled" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1158,6 +1180,16 @@
 
 
 <h1 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h1>
+<h2 id="see-what-easyspeak-is-doing">See what EasySpeak is doing<a class="headerlink" href="#see-what-easyspeak-is-doing" title="Permanent link">&para;</a></h2>
+<p>Started from the application menu or at login, EasySpeak runs without a
+terminal. To make it show more of what it does and where it fails, add <code>-v</code> to
+its starter: copy <code>/usr/share/applications/easyspeak.desktop</code> to
+<code>~/.local/share/applications/</code> and change <code>Exec=easyspeak</code> to
+<code>Exec=easyspeak -v</code> there. Starting EasySpeak from the menu then shows its
+version, your desktop and its language in a notification, along with the latest
+warnings and errors, and says when there were problems. To see everything it
+logs, say "Hey Jarvis, exit" to quit the running EasySpeak, then run
+<code>easyspeak -v</code> in a terminal.</p>
 <h2 id="mouse-grid-failed-to-show-grid-is-extension-enabled">Mouse grid: "Failed to show grid — is extension enabled?"<a class="headerlink" href="#mouse-grid-failed-to-show-grid-is-extension-enabled" title="Permanent link">&para;</a></h2>
 <p>You don't install the extension yourself — EasySpeak does it automatically on
 startup, copying it to
