@@ -74,6 +74,10 @@ nix develop
 nix run
 ```
 
+In the development shell EasySpeak logs in detail, as with `-v`, so you see early
+what it does and where it fails; set `EASYSPEAK_LOG_LEVEL=INFO` for the normal
+output.
+
 The shell carries the English language pack. The others in `pins.toml` are
 fetched on demand, one command per language, and stay cached in the Nix store:
 
