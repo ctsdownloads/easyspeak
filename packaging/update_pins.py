@@ -31,10 +31,10 @@ import json
 import os
 import re
 import subprocess
+import tomllib
 import urllib.request
 from pathlib import Path
 
-import tomllib
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
@@ -85,7 +85,7 @@ def latest_python(requires_python):
 def supported_ubuntu_image(current):
     """Advance the LTS base image only once the pinned one has gone EOL."""
     pinned = current.removeprefix("ubuntu:")
-    today = dt.datetime.now(tz=dt.timezone.utc).date()
+    today = dt.datetime.now(tz=dt.UTC).date()
     supported = [
         c["cycle"]
         for c in fetch_json("https://endoflife.date/api/ubuntu.json")

@@ -36,7 +36,7 @@ Matt Hartley walks through [the current state of EasySpeak](https://www.youtube.
 
 ## Quickstart
 
-Requirements: Linux on Wayland with GNOME Shell 47+ or KDE Plasma 6 ([what works where](https://easyspeak.dev/latest/compatibility/)), Python 3.10–3.14 (tested against 3.10, 3.11, 3.12, 3.13, and 3.14), a microphone, and ~2 GB disk for models. Tested on Fedora 43.
+Requirements: Linux on Wayland with GNOME Shell 47+ or KDE Plasma 6 ([what works where](https://easyspeak.dev/latest/compatibility/)), Python 3.11–3.14 (tested against 3.11, 3.12, 3.13, and 3.14), a microphone, and ~2 GB disk for models. Tested on Fedora 43.
 
 ```bash
 # 1. System packages (Fedora; see the docs for the full list)

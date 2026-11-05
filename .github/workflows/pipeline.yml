@@ -22,6 +22,7 @@ jobs:
         - package
         - check-desktop-integration
         - check-translations
+        - check-system-python
       fail-fast: false
     steps:
     - uses: actions/checkout@v6
@@ -57,7 +58,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-        - '3.10'
         - '3.11'
         - '3.12'
         - '3.13'

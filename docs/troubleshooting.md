@@ -181,6 +181,6 @@ chmod +x ~/.local/bin/piper/espeak-ng
 
 ## pip install fails with PyAV/Cython errors
 
-You're on an unsupported Python version. EasySpeak is tested against Python 3.10,
-3.11, 3.12, 3.13, and 3.14 — use one of those. The simplest fix is `uv run
+You're on an unsupported Python version. EasySpeak is tested against Python 3.11,
+3.12, 3.13, and 3.14 — use one of those. The simplest fix is `uv run
 easyspeak`, which picks a compatible interpreter for you.

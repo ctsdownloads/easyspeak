@@ -6,10 +6,35 @@
   [Compatibility](compatibility.md) for what works where
 - Working microphone
 - ~2 GB disk space for models
-- Python 3.10–3.14 — **source install only**; the prebuilt packages bundle their
+- Python 3.11–3.14 — **source install only**; the prebuilt packages bundle their
   own runtime
 
 Tested on Fedora and NixOS.
+
+### Distribution releases
+
+Which install path suits a release depends on the Python it ships. The prebuilt
+packages bring their own and only use the system's `python3`, 3.10 or newer,
+for the About dialog and for typing dictated text. A source install needs a
+`python3` from 3.11 to 3.14, or [uv](https://docs.astral.sh/uv/), which fetches
+one. The table is guidance from each release's Python, not a list of tested
+installs; the desktop must still suit EasySpeak, see
+[Compatibility](compatibility.md).
+
+| Distribution | Release       | `python3` | Prebuilt packages | From source |
+| ------------ | ------------- | :-------: | :---------------: | :---------: |
+| Debian       | 12 "bookworm" |   3.11    |        ✅         |     ✅      |
+| Debian       | 13 "trixie"   |   3.13    |        ✅         |     ✅      |
+| Ubuntu       | 22.04 LTS     |   3.10    |        ✅         |   with uv   |
+| Ubuntu       | 24.04 LTS     |   3.12    |        ✅         |     ✅      |
+| Ubuntu       | 25.10         |   3.13    |        ✅         |     ✅      |
+| Ubuntu       | 26.04 LTS     |   3.14    |        ✅         |     ✅      |
+| Linux Mint   | 21.x          |   3.10    |        ✅         |   with uv   |
+| Linux Mint   | 22.x          |   3.12    |        ✅         |     ✅      |
+| LMDE         | 6             |   3.11    |        ✅         |     ✅      |
+| LMDE         | 7             |   3.13    |        ✅         |     ✅      |
+| Fedora       | 43, 44        |   3.14    |        ✅         |     ✅      |
+| Fedora       | 45            |   3.15    |        ✅         |   with uv   |
 
 ## Quick install (prebuilt packages)
 
@@ -69,7 +94,7 @@ This path needs system build dependencies and a supported Python.
 
 ### Python
 
-EasySpeak is tested against Python 3.10, 3.11, 3.12, 3.13, and 3.14. Fedora 43's
+EasySpeak is tested against Python 3.11, 3.12, 3.13, and 3.14. Fedora 43's
 default `python3` (3.14) works out of the box.
 
 ### 1. System packages

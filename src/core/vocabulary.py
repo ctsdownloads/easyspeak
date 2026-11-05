@@ -12,13 +12,8 @@ so the English phrases keep working whatever the language.
 """
 
 import re
-import sys
+import tomllib
 from pathlib import Path
-
-if sys.version_info < (3, 11):
-    import tomli as tomllib
-else:
-    import tomllib
 
 
 def load_table(locale_dir, language):
