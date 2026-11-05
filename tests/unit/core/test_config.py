@@ -30,6 +30,7 @@ def _restore_config(monkeypatch):
         "EASYSPEAK_OFFLINE",
         "EASYSPEAK_STT",
         "EASYSPEAK_TTS",
+        "EASYSPEAK_TTS_VOICE",
     ]:
         monkeypatch.delenv(var, raising=False)
     importlib.reload(config)
@@ -348,14 +349,34 @@ def test_tts_unknown_engine_falls_back_to_piper(monkeypatch):
     ]
 
 
+def test_tts_voice_chooses_the_voice(monkeypatch):
+    """EASYSPEAK_TTS_VOICE overrides the pack's voice, without a warning."""
+    monkeypatch.setenv("EASYSPEAK_TTS_VOICE", "/opt/voices/voice.onnx")
+    importlib.reload(config)
+    assert config.PIPER_MODEL == "/opt/voices/voice.onnx"
+    assert config.TTS_WARNINGS == []
+
+
 def test_deprecated_piper_model_env_still_honored(monkeypatch):
-    """EASYSPEAK_PIPER_MODEL keeps choosing the voice, deprecated, with a warning."""
+    """EASYSPEAK_PIPER_MODEL keeps choosing the voice, with a warning that names
+    its replacement."""
     monkeypatch.setenv("EASYSPEAK_PIPER_MODEL", "/opt/voices/voice.onnx")
     importlib.reload(config)
     assert config.PIPER_MODEL == "/opt/voices/voice.onnx"
     assert config.TTS_WARNINGS == [
-        "EASYSPEAK_PIPER_MODEL is deprecated and will be removed"
+        (
+            "EASYSPEAK_PIPER_MODEL is deprecated and will be removed, "
+            "use EASYSPEAK_TTS_VOICE instead"
+        )
     ]
+
+
+def test_tts_voice_wins_over_the_deprecated_name(monkeypatch):
+    """With both set, EASYSPEAK_TTS_VOICE chooses the voice."""
+    monkeypatch.setenv("EASYSPEAK_TTS_VOICE", "/opt/voices/new.onnx")
+    monkeypatch.setenv("EASYSPEAK_PIPER_MODEL", "/opt/voices/old.onnx")
+    importlib.reload(config)
+    assert config.PIPER_MODEL == "/opt/voices/new.onnx"
 
 
 def test_whisper_model_env_override(monkeypatch):
