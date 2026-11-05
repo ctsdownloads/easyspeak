@@ -29,9 +29,17 @@ uv python install "$PY_VERSION"
 SRC_PY=$(dirname "$(dirname "$(uv python find "$PY_VERSION")")")
 rm -rf "$PREFIX"
 mkdir -p "$PREFIX/python"
-# -L dereferences symlinks so the REAL interpreter + libs land under $PREFIX.
-# (plain cp -r keeps symlinks pointing back into uv's cache, breaking relocation.)
-cp -rL "$SRC_PY"/. "$PREFIX/python/"
+# uv's version directory is a symlink into its cache, so copy what it points to.
+# Inside, the interpreter's own links (python3 -> python3.14, ...) stay links, so
+# its 30 MB executable and library aren't copied once per name.
+cp -a "$(readlink -f "$SRC_PY")"/. "$PREFIX/python/"
+
+echo ">> leaving out Tcl/Tk, IDLE and pip, which EasySpeak doesn't use"
+PY_LIB=$("$PREFIX/python/bin/python3" -I -c 'import sysconfig; print(sysconfig.get_path("stdlib"))')
+[[ "$PY_LIB" == "$PREFIX"/python/lib/* ]] || { echo "error: standard library outside the bundle: $PY_LIB" >&2; exit 1; }
+rm -rf "$PY_LIB"/{tkinter,idlelib,turtledemo,ensurepip} "$PY_LIB"/turtle.py \
+  "$PY_LIB"/lib-dynload/_tkinter.* "$PY_LIB"/site-packages/pip "$PY_LIB"/site-packages/pip-* \
+  "$PREFIX"/python/lib/{libtcl,libtk,tcl,tk,itcl,thread}* "$PREFIX"/python/bin/{idle,pip}*
 
 echo ">> installing the app and its locked dependencies into the venv"
 # uv creates the venv from the bundled interpreter, keeping its paths under
@@ -64,5 +72,8 @@ if [ -n "$ESCAPES" ]; then
   echo "$ESCAPES" | sed 's/^/  /' >&2
   exit 1
 fi
+
+echo ">> checking EasySpeak runs without what was left out"
+bash "$REPO_ROOT/tests/packaging/test_bundle.sh" "$PREFIX"
 
 echo ">> app bundle ready at $PREFIX ($(du -sh "$PREFIX" | cut -f1))"

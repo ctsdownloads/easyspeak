@@ -6,6 +6,12 @@ lists its contents, and asserts that the right files are *present* and that
 the wrong files are *absent* (no markdown, docs, tests, or dev-tooling
 config to leak into a release).
 
+The exception is `test_bundle.sh`: it runs the bundled Python, to prove that
+EasySpeak and every library it installed still load without the parts of the
+standard library the bundle leaves out. That Python only runs where the bundle
+is built, so `packaging/stage-bundle.sh` calls the script itself, in the
+container, before any package is made from the bundle.
+
 Unlike the rest of `tests/`, these are plain **bash scripts**, not pytest —
 they reach for `dpkg-deb`, `rpm`, `tar`, and `unzip` rather than importing
 `easyspeak`.
@@ -31,6 +37,7 @@ non-zero on the first missing (or forbidden) path.
 ## Layout
 
 ```sh
+test_bundle.sh         # bundled Python: no Tcl/Tk, IDLE or pip, everything still imports
 test_deb.sh            # dpkg-deb --contents: launcher, units, extension + schema present
 test_rpm.sh            # rpm --query --list: same contract for the .rpm
 test_lang.sh           # dpkg-deb + rpm: language pack ships the models, carries its own version
