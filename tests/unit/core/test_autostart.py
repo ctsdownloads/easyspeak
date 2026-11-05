@@ -116,3 +116,10 @@ def test_relative_system_config_dirs_are_ignored(home, tmp_path, monkeypatch):
 
     monkeypatch.setenv("XDG_CONFIG_DIRS", "relative")
     assert autostart.system_entries() == [Path("/etc/xdg/autostart/easyspeak.desktop")]
+
+
+def test_with_value_takes_a_backslash_literally():
+    """A value is put in as written, even with a backslash a pattern would read."""
+    text = autostart.with_value("[Desktop Entry]\nExec=easyspeak\n", "Exec", r"C:\new")
+
+    assert text == "[Desktop Entry]\nExec=C:\\new\n"

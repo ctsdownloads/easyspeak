@@ -68,7 +68,7 @@ def with_value(text, key, new):
     line = f"{key}={new}"
     pattern = rf"^{re.escape(key)}\s*=.*$"
     if re.search(pattern, text, re.MULTILINE):
-        return re.sub(pattern, line, text, flags=re.MULTILINE)
+        return re.sub(pattern, lambda _match: line, text, flags=re.MULTILINE)
     return (text if text.endswith("\n") else text + "\n") + line + "\n"
 
 

@@ -28,9 +28,73 @@ def test_install_autostart_file_writes_bundled_template(tmp_path, readlog):
 
 
 def test_install_desktop_file_writes_bundled_template(tmp_path):
+    """The launcher starts this install's own `easyspeak`."""
     with patch.object(di.Path, "home", return_value=tmp_path):
         assert di.install_desktop_file() is True
-        assert "Exec=easyspeak" in di.desktop_path().read_text()
+        assert f"Exec={di.executable()}\n" in di.desktop_path().read_text()
+
+
+@pytest.fixture(autouse=True)
+def _no_launcher(monkeypatch):
+    """Run as if started without a wrapping launcher; tests about one set it."""
+    monkeypatch.delenv("EASYSPEAK_LAUNCHER", raising=False)
+
+
+@pytest.fixture
+def venv(tmp_path, monkeypatch):
+    """An install whose interpreter is `venv/bin/python`."""
+    bin_dir = tmp_path / "venv" / "bin"
+    bin_dir.mkdir(parents=True)
+    monkeypatch.setattr(di.sys, "executable", str(bin_dir / "python"))
+    return bin_dir
+
+
+def test_executable_is_the_program_beside_the_interpreter(venv):
+    """The full path, as a project's virtual environment isn't on the session's
+    PATH, and the desktop rejects an entry whose program it can't find."""
+    (venv / "easyspeak").touch()
+
+    assert di.executable() == str(venv / "easyspeak")
+
+
+def test_executable_falls_back_to_the_name(venv):
+    """Without that program, e.g. run as `python -m`, the name is all there is."""
+    assert di.executable() == "easyspeak"
+
+
+def test_executable_prefers_a_wrapping_launcher(venv, monkeypatch):
+    """A launcher that wraps EasySpeak, as Nix's does, is started instead of the
+    program it wraps, so the environment it sets up isn't skipped."""
+    (venv / "easyspeak").touch()
+    monkeypatch.setenv("EASYSPEAK_LAUNCHER", "/nix/store/abc-easyspeak/bin/easyspeak")
+
+    assert di.executable() == "/nix/store/abc-easyspeak/bin/easyspeak"
+
+
+def test_executable_escapes_the_launcher(monkeypatch):
+    """The launcher's path is written as `Exec` spells it, too."""
+    monkeypatch.setenv("EASYSPEAK_LAUNCHER", "/opt/My Apps/easyspeak")
+
+    assert di.executable() == '"/opt/My Apps/easyspeak"'
+
+
+@pytest.mark.parametrize(
+    ("argument", "value"),
+    [
+        ("/usr/bin/easyspeak", "/usr/bin/easyspeak"),
+        ("/opt/My Apps/easyspeak", '"/opt/My Apps/easyspeak"'),
+        ("/home/o'neil/easyspeak", '"/home/o\'neil/easyspeak"'),
+        ('/a "b"/easyspeak', '"/a \\\\"b\\\\"/easyspeak"'),
+        ("/a $b `c`/easyspeak", '"/a \\\\$b \\\\`c\\\\`/easyspeak"'),
+        ("/a\\b/easyspeak", '"/a\\\\\\\\b/easyspeak"'),
+        ("/100%/easyspeak", "/100%%/easyspeak"),
+    ],
+)
+def test_exec_argument_follows_the_specification(argument, value):
+    """Reserved characters get the argument quoted, with double quotes, backticks,
+    dollar signs and backslashes escaped inside the quotes; each backslash is then
+    doubled for the value as a string; a literal `%` is doubled."""
+    assert di.exec_argument(argument) == value
 
 
 def test_install_data_file_write_failure_returns_false(tmp_path, readlog):
@@ -73,7 +137,7 @@ def test_configure_runs_exactly_the_requested_activities(items):
     [
         ("service", "[Unit]"),
         ("autostart", "X-GNOME-Autostart-enabled"),
-        ("desktop", "Exec=easyspeak"),
+        ("desktop", "Exec="),
         ("extension", '"uuid"'),  # the metadata.json manifest
     ],
 )
@@ -86,7 +150,7 @@ def test_preview_renders_each_items_artifact(item, needle, capsys):
 @pytest.mark.parametrize("text", ["no-newline", "has-newline\n"])
 def test_preview_writes_content_verbatim(capsys, text):
     """The content goes to stdout unchanged — no trailing-newline fixup."""
-    with patch.object(di, "data_text", return_value=text):
+    with patch.object(di, "entry_text", return_value=text):
         di.preview("desktop")
 
     assert capsys.readouterr().out == text
@@ -95,7 +159,7 @@ def test_preview_writes_content_verbatim(capsys, text):
 def test_preview_prints_target_path_to_stderr(capsys):
     """The `TARGET:` line goes to stderr, keeping stdout to just the content."""
     with (
-        patch.object(di, "data_text", return_value="body"),
+        patch.object(di, "entry_text", return_value="body"),
         patch.object(
             di, "desktop_path", return_value=di.Path("/dest/easyspeak.desktop")
         ),
