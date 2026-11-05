@@ -9,6 +9,9 @@ It communicates with the parent purely through stdout tokens:
 `OK` (text inserted), `NO_FOCUS` (no editable field), `NO_BACKEND`
 (PyGObject/AT-SPI not importable). Kept out of plugin discovery by the leading
 underscore in the filename.
+
+That interpreter is usually the system's Python, which can be as old as 3.10
+(Ubuntu 22.04, Linux Mint 21); `just check-system-python` keeps it loading there.
 """
 
 import contextlib

@@ -10,6 +10,10 @@ libadwaita.
 Everything GUI is imported lazily inside [`main`][core.about.main] so this module stays
 importable (for its metadata constants and version lookup) without PyGObject or a
 display present, which is how the unit suite exercises it.
+
+The tray runs it in the system's Python, for its GTK bindings, which can be as old
+as 3.10 (Ubuntu 22.04, Linux Mint 21); `just check-system-python` keeps it loading
+there.
 """
 
 import html

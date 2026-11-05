@@ -15,9 +15,8 @@ its kind (`lang` or `stt`), code and version, to fan out over.
 
 import json
 import os
-from pathlib import Path
-
 import tomllib
+from pathlib import Path
 
 KINDS = ("lang", "stt")
 

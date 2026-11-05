@@ -20,7 +20,6 @@ classifiers = [
   "Operating System :: POSIX :: Linux",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -41,7 +40,7 @@ keywords = [
   "wayland",
 ]
 readme = "README.md"
-requires-python = ">=3.10, <3.15"
+requires-python = ">=3.11, <3.15"
 dependencies = [
   # Prebuilt wheel (provides `import evdev`) for raw /dev/input hold-to-dictate;
   # avoids the source build's kernel-header requirement. Linux-only by nature.
@@ -51,11 +50,9 @@ dependencies = [
   "numpy>=2.2.6",
   "onnx-asr[hub]>=0.12",
   "onnxruntime>=1.23.2",
-  "onnxruntime<1.24 ; python_full_version < '3.11'",
   "polib>=1.2",
   "pyaudio>=0.2.14",
   "pyopen-wakeword>=1.1",
-  "tomli>=2 ; python_version < '3.11'",
 ]
 # Not listed above: the "About" window (core.about) needs PyGObject + the GTK4
 # and libadwaita typelibs. On Linux those are system packages (PyGObject's own
@@ -105,7 +102,7 @@ easyspeak = "easyspeak.core.cli:run"
 "Source Code" = "https://github.com/ctsdownloads/easyspeak"
 
 [tool.coverage.report]
-exclude_also = ["if __name__ == .__main__.:", "if sys.version_info < .3, 11.:"]
+exclude_also = ["if __name__ == .__main__.:"]
 fail_under = 99
 show_missing = true
 

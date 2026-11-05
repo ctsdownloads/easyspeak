@@ -84,7 +84,7 @@ test-js *args:
 
 # Run test suite against the given Python versions (default: all supported), show coverage
 [group('tests')]
-test-pythons *v='3.10 3.11 3.12 3.13 3.14':
+test-pythons *v='3.11 3.12 3.13 3.14':
     set -e; for py in {{ v }}; do UV_PYTHON=$py just pytest; done
     just coverage
 
@@ -253,6 +253,11 @@ check-translations:
         [ "$lang" = en ] || just translations "$lang" >/dev/null
     done
     git diff --color --exit-code -- '*.po'
+
+# Verify the helpers run by the system's Python still load on the oldest one we serve, 3.10
+[group('codestyle')]
+check-system-python:
+    uv run --no-project --python 3.10 python -I -c 'import runpy, sys; [runpy.run_path(f, run_name="helper") for f in sys.argv[1:]]' src/core/about.py src/plugins/dictation/_atspi_insert.py
 
 # Recompile the bundled GSettings schema after editing the .gschema.xml
 [group('packaging')]
