@@ -74,6 +74,18 @@ def _no_desktop_notifications(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def _fresh_session_bus():
+    """Start each test without the session-bus connection a previous one opened.
+
+    Notifications keep that connection for the whole run, so a test's mocked
+    connection would otherwise serve the next test's notifications.
+    """
+    tray_module.session_bus.cache_clear()
+    yield
+    tray_module.session_bus.cache_clear()
+
+
+@pytest.fixture(autouse=True)
 def _own_instance_lock(monkeypatch, tmp_path):
     """Keep the single-instance lock and its request off the real session.
 

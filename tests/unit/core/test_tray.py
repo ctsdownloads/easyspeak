@@ -528,7 +528,7 @@ class TestNotify:
     @staticmethod
     def _service(mock_open, capabilities):
         """A notification service with `capabilities` that accepts the call."""
-        conn = mock_open.return_value.__enter__.return_value
+        conn = mock_open.return_value
         accepted = Mock(body=())
         accepted.header.message_type = MessageType.method_return
         conn.send_and_get_reply.side_effect = [Mock(body=(capabilities,)), accepted]
@@ -557,6 +557,57 @@ class TestNotify:
         message = conn.send_and_get_reply.call_args.args[0]
         assert message.body[4] == "Voice control & more"
 
+    @patch("jeepney.io.blocking.open_dbus_connection")
+    def test_names_the_desktop_entry(self, mock_open):
+        """The desktop entry lets the desktop keep EasySpeak's notifications
+        together, under its name and icon."""
+        conn = self._service(mock_open, ["body"])
+
+        notify("EasySpeak", "Voice control")
+
+        hints = conn.send_and_get_reply.call_args.args[0].body[6]
+        assert hints == {"desktop-entry": ("s", "easyspeak")}
+
+    @patch("jeepney.io.blocking.open_dbus_connection")
+    def test_a_click_only_dismisses_it(self, mock_open):
+        """A default action takes the click, so the desktop doesn't start
+        EasySpeak again, which would greet once more."""
+        conn = self._service(mock_open, ["body", "actions"])
+
+        notify("EasySpeak", "Voice control")
+
+        actions = conn.send_and_get_reply.call_args.args[0].body[5]
+        assert actions == ["default", ""]
+
+    @patch("jeepney.io.blocking.open_dbus_connection")
+    def test_keeps_the_connection_open(self, mock_open):
+        """All notifications go through one connection, which stays open, as the
+        desktop removes an app's notifications once their connection is gone."""
+        conn = mock_open.return_value
+        accepted = Mock(body=(["body"],))
+        accepted.header.message_type = MessageType.method_return
+        conn.send_and_get_reply.return_value = accepted
+
+        assert notify("EasySpeak", "one") is True
+        assert notify("EasySpeak", "two") is True
+
+        mock_open.assert_called_once_with(bus="SESSION")
+        conn.close.assert_not_called()
+
+    @patch("jeepney.io.blocking.open_dbus_connection")
+    def test_opens_a_broken_connection_anew(self, mock_open):
+        """A connection that broke, e.g. as the session bus restarted, is closed
+        and replaced, so the notification still shows."""
+        broken, fresh = Mock(), Mock()
+        broken.send_and_get_reply.side_effect = ConnectionResetError("bus gone")
+        accepted = Mock(body=(["body"],))
+        accepted.header.message_type = MessageType.method_return
+        fresh.send_and_get_reply.return_value = accepted
+        mock_open.side_effect = [broken, fresh]
+
+        assert notify("EasySpeak", "Voice control") is True
+        broken.close.assert_called_once_with()
+
     @patch("jeepney.io.blocking.open_dbus_connection", side_effect=KeyError("bus"))
     def test_without_a_session_bus(self, mock_open):
         """No session bus to talk to means no notification, not a crash."""
@@ -565,7 +616,7 @@ class TestNotify:
     @patch("jeepney.io.blocking.open_dbus_connection")
     def test_refused_by_the_service(self, mock_open):
         """An error reply, e.g. no notification service running, means not shown."""
-        conn = mock_open.return_value.__enter__.return_value
+        conn = mock_open.return_value
         refused = Mock(body=())
         refused.header.message_type = MessageType.error
         conn.send_and_get_reply.side_effect = [refused, refused]

@@ -21,6 +21,7 @@ signals the open mic.
 
 import contextlib
 import enum
+import functools
 import html
 import logging
 import os
@@ -53,6 +54,7 @@ from .control import (
     COMMAND_UNMUTE,
     CONTROL_FILE,
 )
+from .desktop_integration import INSTALLED_DESKTOP_NAME
 from .i18n import _
 
 logger = logging.getLogger(__name__)
@@ -87,12 +89,38 @@ def on_gnome():
     return "GNOME" in os.environ.get("XDG_CURRENT_DESKTOP", "").split(":")
 
 
+@functools.cache
+def session_bus():
+    """The session-bus connection desktop notifications go through.
+
+    It stays open while EasySpeak runs: a desktop such as GNOME files an app's
+    notifications under one entry, found by their `desktop-entry` hint, and
+    removes them once the connection that sent them is gone. Opened on first use;
+    [`notify`][core.tray.notify] drops it when it breaks, to open it anew.
+    """
+    from jeepney.io.blocking import open_dbus_connection
+
+    return open_dbus_connection(bus="SESSION")
+
+
+def drop_session_bus():
+    """Close and forget the [`session_bus`][core.tray.session_bus], if open."""
+    if session_bus.cache_info().currsize:
+        with contextlib.suppress(Exception):
+            session_bus().close()
+    session_bus.cache_clear()
+
+
 def notify(summary, body):
     """Show a desktop notification; False if no notification service took it.
 
     Speaks the freedesktop Notifications protocol over D-Bus, which every desktop's
     notification service implements. jeepney is imported lazily so the dependency
-    isn't needed to load this module.
+    isn't needed to load this module. The notification names EasySpeak's desktop
+    entry, so the desktop keeps all of EasySpeak's notifications together; a
+    broken connection is opened anew, once. It has a default action, which a
+    click on it invokes: without one, a desktop such as GNOME starts the app
+    instead, and a second EasySpeak would greet again.
 
     `body` is markup, so escape its text: `<b>`, `<i>` and `<u>` show where the
     service takes markup, as GNOME's, KDE's and most others do, and are taken out
@@ -100,30 +128,42 @@ def notify(summary, body):
     [`LINE_BREAK`][core.tray.LINE_BREAK], not a newline.
     """
     from jeepney import DBusAddress, MessageType, new_method_call
-    from jeepney.io.blocking import open_dbus_connection
 
     service = "org.freedesktop.Notifications"
     address = DBusAddress(
         "/org/freedesktop/Notifications", bus_name=service, interface=service
     )
-    try:
-        with open_dbus_connection(bus="SESSION") as conn:
+    hints = {"desktop-entry": ("s", INSTALLED_DESKTOP_NAME.removesuffix(".desktop"))}
+    for _attempt in range(2):
+        try:
+            conn = session_bus()
             capabilities = conn.send_and_get_reply(
                 new_method_call(address, "GetCapabilities"), timeout=GDBUS_TIMEOUT
             ).body
+            text = body
             if not capabilities or "body-markup" not in capabilities[0]:
-                body = html.unescape(re.sub(r"</?[biu]>", "", body))
+                text = html.unescape(re.sub(r"</?[biu]>", "", body))
             message = new_method_call(
                 address,
                 "Notify",
                 "susssasa{sv}i",
-                (APPLICATION_NAME, 0, APPLICATION_ICON, summary, body, [], {}, -1),
+                (
+                    APPLICATION_NAME,
+                    0,
+                    APPLICATION_ICON,
+                    summary,
+                    text,
+                    ["default", ""],
+                    hints,
+                    -1,
+                ),
             )
             reply = conn.send_and_get_reply(message, timeout=GDBUS_TIMEOUT)
-    except Exception as exc:
-        logger.debug("No desktop notification: %s", exc)
-        return False
-    return reply.header.message_type is MessageType.method_return
+            return reply.header.message_type is MessageType.method_return
+        except Exception as exc:
+            drop_session_bus()
+            logger.debug("No desktop notification: %s", exc)
+    return False
 
 
 LINE_BREAK = "\u2028"
