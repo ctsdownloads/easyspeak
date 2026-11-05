@@ -50,7 +50,10 @@ def test_configure_collects_warnings_and_errors(capsys):
     logging.getLogger("plugins.media").warning("\nNo player %s", "found")
     logging.getLogger("easyspeak.core").error("Cannot start")
 
-    assert list(log.problems) == ["No player found", "Cannot start"]
+    assert list(log.problems) == [
+        (logging.WARNING, "No player found"),
+        (logging.ERROR, "Cannot start"),
+    ]
 
 
 def test_problems_keeps_only_the_latest():
@@ -60,7 +63,9 @@ def test_problems_keeps_only_the_latest():
     for n in range(12):
         logging.getLogger("easyspeak").warning("problem %d", n)
 
-    assert list(log.problems) == [f"problem {n}" for n in range(2, 12)]
+    assert list(log.problems) == [
+        (logging.WARNING, f"problem {n}") for n in range(2, 12)
+    ]
 
 
 @pytest.mark.parametrize(

@@ -49,6 +49,9 @@ msgstr "Entschuldigung, das habe ich nicht verstanden."
 msgid "Sorry, something went wrong with that command."
 msgstr "Entschuldigung, bei diesem Befehl ist etwas schiefgelaufen."
 
+msgid "There were warnings. The details are in the desktop notification."
+msgstr "Es gab Warnungen. Die Details stehen in der Desktop-Benachrichtigung."
+
 #, python-brace-format
 msgid "This is {name}."
 msgstr "Hier ist {name}."
