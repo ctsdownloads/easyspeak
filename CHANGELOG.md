@@ -5,6 +5,53 @@ canonical, GitHub-independent record of releases. It is updated once per
 release. The format loosely follows [Keep a Changelog](https://keepachangelog.com/),
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.14.0 · Clearer Hearing, Plainer Answers · 2026-11-05
+
+**Wi-Fi and Bluetooth by Voice, a Noise Filter for the Microphone, and
+EasySpeak Says What Went Wrong**
+
+EasySpeak now switches **Wi-Fi, Bluetooth and airplane mode** by voice, and it
+**filters steady background noise** out of the microphone, so it understands
+you better in a noisy room and says so when it can't make out what you said.
+Spoken line breaks work on their own in dictation, head tracking lets you
+choose the camera, and the mouse grid supports GNOME Shell 51.
+
+Starting EasySpeak while it already runs no longer starts a second copy: the
+running one wakes up and **greets you, also in a desktop notification**. Started
+with `-v`, that notification shows the version, desktop and the latest warnings
+and errors, such as why EasySpeak can't speak, which it now tells you. The
+packages are about 40 MB smaller, installs from source need Python 3.11 or
+newer, and the installation guide lists which Linux distribution releases suit
+which way of installing.
+
+### What's Changed
+
+- Enlarge screenshots on click by @bittner in [#231](https://github.com/ctsdownloads/easyspeak/pull/231)
+- Update dependencies and the packaging tool by @bittner in [#232](https://github.com/ctsdownloads/easyspeak/pull/232)
+- Fix negative room noise floor by @ctsdownloads in [#238](https://github.com/ctsdownloads/easyspeak/pull/238)
+- Say when speech after the wake word can't be made out by @ctsdownloads in [#239](https://github.com/ctsdownloads/easyspeak/pull/239)
+- Add voice control for Wi-Fi, Bluetooth and airplane mode by @ctsdownloads in [#240](https://github.com/ctsdownloads/easyspeak/pull/240)
+- Filter steady background noise out of the microphone by @ctsdownloads in [#241](https://github.com/ctsdownloads/easyspeak/pull/241)
+- Tidy up comments and docstrings across core and plugins by @ctsdownloads in [#245](https://github.com/ctsdownloads/easyspeak/pull/245)
+- Update outdated package dependencies by @ctsdownloads in [#246](https://github.com/ctsdownloads/easyspeak/pull/246)
+- Make spoken line breaks work on their own in dictation by @ctsdownloads in [#247](https://github.com/ctsdownloads/easyspeak/pull/247)
+- Choose the head tracking camera instead of hardcoding one by @ctsdownloads in [#248](https://github.com/ctsdownloads/easyspeak/pull/248)
+- Support GNOME Shell 51 in the grid overlay by @gagan-devv in [#250](https://github.com/ctsdownloads/easyspeak/pull/250)
+- Update outdated package dependencies by @ctsdownloads in [#251](https://github.com/ctsdownloads/easyspeak/pull/251)
+- Fix the README's Piper link, mention the Parakeet pack, link the roadmap by @ctsdownloads in [#253](https://github.com/ctsdownloads/easyspeak/pull/253)
+- Update outdated package dependencies by @ctsdownloads in [#254](https://github.com/ctsdownloads/easyspeak/pull/254)
+- Drop Python 3.10 support by @bittner in [#258](https://github.com/ctsdownloads/easyspeak/pull/258)
+- Slim down Python bundled with .deb and .rpm by @bittner in [#257](https://github.com/ctsdownloads/easyspeak/pull/257)
+- Say why speech is unavailable by @bittner in [#256](https://github.com/ctsdownloads/easyspeak/pull/256)
+- Greet from running EasySpeak instead of starting it twice by @bittner in [#259](https://github.com/ctsdownloads/easyspeak/pull/259)
+- Log in detail by default in Nix development shell by @bittner in [#260](https://github.com/ctsdownloads/easyspeak/pull/260)
+
+### New Contributors
+
+- @gagan-devv made their first contribution in [#250](https://github.com/ctsdownloads/easyspeak/pull/250)
+
+**Full Changelog**: [`0.13.0...0.14.0`](https://github.com/ctsdownloads/easyspeak/compare/0.13.0...0.14.0)
+
 ## 0.13.0 · Welcome, KDE Plasma! · 2026-10-11
 
 **EasySpeak Comes to KDE Plasma, Says What Went Wrong, and Licenses Every File
