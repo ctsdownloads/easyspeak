@@ -66,9 +66,10 @@ the module that reads each (linked to its API reference).
 | `EASYSPEAK_OFFLINE`              | `strict`                               | Stay offline; `relaxed` downloads models    |
 | `EASYSPEAK_STT`                  | `parakeet`, `whisper` if not installed | Speech model: `parakeet` or `whisper`       |
 | `EASYSPEAK_TTS`                  | `piper`                                | Reply voice engine: `piper`                 |
+| `EASYSPEAK_TTS_VOICE`            | an installed language pack's voice     | Reply voice; for Piper a voice `.onnx`      |
 | `EASYSPEAK_PIPER_BIN`            | `piper`                                | Piper TTS binary                            |
 | `EASYSPEAK_REQUIRE_WAKE_WORD`    | unset                                  | Modes wait for the wake word each command   |
-| `EASYSPEAK_PIPER_MODEL`          | an installed language pack's voice     | Deprecated Piper voice `.onnx`; honored     |
+| `EASYSPEAK_PIPER_MODEL`          |                                        | Deprecated name of `EASYSPEAK_TTS_VOICE`    |
 | `EASYSPEAK_SOUNDS_DIR`           | `/usr/share/sounds/freedesktop/stereo` | Directory of the wake chime and error bell  |
 | `EASYSPEAK_WHISPER_COMPUTE_TYPE` | `int8`                                 | CTranslate2 compute type                    |
 | `EASYSPEAK_WHISPER_CPU_THREADS`  | `0`                                    | CPU threads for transcription (`0` = auto)  |
@@ -84,7 +85,12 @@ nor allowed to download, or when `EASYSPEAK_LANGUAGE` is one Parakeet does not
 cover.
 
 `EASYSPEAK_TTS` names the reply-voice engine; Piper is the only engine yet.
-An unknown name warns at startup, and Piper speaks.
+An unknown name warns at startup, and Piper speaks. `EASYSPEAK_TTS_VOICE` names
+that engine's voice, for Piper the path to a voice `.onnx` with its `.onnx.json`
+next to it. It defaults to the voice of the pack the replies are spoken in, else
+`~/.local/share/piper/en_US-amy-medium.onnx`. Its older name,
+`EASYSPEAK_PIPER_MODEL`, still works, with a warning; `EASYSPEAK_TTS_VOICE` wins
+if both are set.
 
 `EASYSPEAK_LANGUAGE` is the language you dictate in, and the language of the
 spoken replies where they are translated (German, Italian, French and Spanish

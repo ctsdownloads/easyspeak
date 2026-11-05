@@ -11,10 +11,11 @@ constants; these honor an `EASYSPEAK_*` environment variable:
 - `EASYSPEAK_NOISE_FILTER`
 - `EASYSPEAK_OFFLINE`
 - `EASYSPEAK_PIPER_BIN`
-- `EASYSPEAK_PIPER_MODEL` (deprecated)
+- `EASYSPEAK_PIPER_MODEL` (deprecated, see `EASYSPEAK_TTS_VOICE`)
 - `EASYSPEAK_SOUNDS_DIR`
 - `EASYSPEAK_STT`
 - `EASYSPEAK_TTS`
+- `EASYSPEAK_TTS_VOICE`
 - `EASYSPEAK_WHISPER_COMPUTE_TYPE`
 - `EASYSPEAK_WHISPER_CPU_THREADS`
 - `EASYSPEAK_WHISPER_MODEL`
@@ -179,11 +180,15 @@ if REPLY_LANGUAGE != LANGUAGE:
 
 
 _piper_model_env = os.environ.get("EASYSPEAK_PIPER_MODEL")
-PIPER_MODEL = _piper_model_env or _bundled_model(
-    REPLY_LANGUAGE,
-    "piper",
-    "*.onnx",
-    default=str(Path("~/.local/share/piper/en_US-amy-medium.onnx").expanduser()),
+PIPER_MODEL = (
+    os.environ.get("EASYSPEAK_TTS_VOICE")
+    or _piper_model_env
+    or _bundled_model(
+        REPLY_LANGUAGE,
+        "piper",
+        "*.onnx",
+        default=str(Path("~/.local/share/piper/en_US-amy-medium.onnx").expanduser()),
+    )
 )
 PIPER_BIN = os.environ.get("EASYSPEAK_PIPER_BIN") or _bundled_bin(
     "piper", default="piper"
@@ -273,7 +278,9 @@ if not STT:
 
 # --- Text-to-speech engine ---
 # Piper is the reply voice and the only engine yet; EASYSPEAK_TTS exists so a
-# further engine can arrive without a second variable.
+# further engine can arrive without a second variable, and EASYSPEAK_TTS_VOICE
+# names the chosen engine's voice: for Piper, the path to its `.onnx` (see
+# PIPER_MODEL above).
 TTS_BACKENDS = ("piper",)
 TTS_WARNINGS: list[str] = []
 
@@ -284,7 +291,10 @@ if TTS not in TTS_BACKENDS:
     )
     TTS = "piper"
 if _piper_model_env:
-    TTS_WARNINGS.append("EASYSPEAK_PIPER_MODEL is deprecated and will be removed")
+    TTS_WARNINGS.append(
+        "EASYSPEAK_PIPER_MODEL is deprecated and will be removed, "
+        "use EASYSPEAK_TTS_VOICE instead"
+    )
 
 
 # --- Desktop sounds ---
