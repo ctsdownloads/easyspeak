@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://easyspeak.dev/latest/0.13.0/troubleshooting/">
+        <link rel="canonical" href="https://easyspeak.dev/latest/0.14.0/troubleshooting/">
       
       
         <link rel="prev" href="../plugins/">
@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -55,7 +55,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/diagram-overlay.css">
+      <link rel="stylesheet" href="../stylesheets/figure-overlay.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -573,6 +573,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#see-what-easyspeak-is-doing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See what EasySpeak is doing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#mouse-grid-failed-to-show-grid-is-extension-enabled" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -687,6 +698,17 @@
     <span class="md-ellipsis">
       
         Everything takes several seconds
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#easyspeak-doesnt-talk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EasySpeak doesn't talk
       
     </span>
   </a>
@@ -973,6 +995,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#see-what-easyspeak-is-doing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See what EasySpeak is doing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#mouse-grid-failed-to-show-grid-is-extension-enabled" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1094,6 +1127,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#easyspeak-doesnt-talk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EasySpeak doesn't talk
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#piper-permission-denied" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1136,6 +1180,16 @@
 
 
 <h1 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h1>
+<h2 id="see-what-easyspeak-is-doing">See what EasySpeak is doing<a class="headerlink" href="#see-what-easyspeak-is-doing" title="Permanent link">&para;</a></h2>
+<p>Started from the application menu or at login, EasySpeak runs without a
+terminal. To make it show more of what it does and where it fails, add <code>-v</code> to
+its starter: copy <code>/usr/share/applications/easyspeak.desktop</code> to
+<code>~/.local/share/applications/</code> and change <code>Exec=easyspeak</code> to
+<code>Exec=easyspeak -v</code> there. Starting EasySpeak from the menu then shows its
+version, your desktop and its language in a notification, along with the latest
+warnings and errors, and says when there were problems. To see everything it
+logs, say "Hey Jarvis, exit" to quit the running EasySpeak, then run
+<code>easyspeak -v</code> in a terminal.</p>
 <h2 id="mouse-grid-failed-to-show-grid-is-extension-enabled">Mouse grid: "Failed to show grid — is extension enabled?"<a class="headerlink" href="#mouse-grid-failed-to-show-grid-is-extension-enabled" title="Permanent link">&para;</a></h2>
 <p>You don't install the extension yourself — EasySpeak does it automatically on
 startup, copying it to
@@ -1250,13 +1304,27 @@ recording isn't stopping when you do: silence isn't being detected, so every
 utterance runs to its time cap. Check the noise floor above — if the room is
 loud enough that speech and silence look alike, move the microphone closer or set
 <code>EASYSPEAK_SILENCE_THRESHOLD</code> by hand.</p>
+<p>EasySpeak normally filters out steady noise itself and logs <code>Listening through
+the noise filter</code> at startup. If it logs <code>Noise filter unavailable</code> or <code>Noise
+filter did not start</code> instead, install <code>pw-cli</code> (<code>pipewire-utils</code> on Fedora,
+<code>pipewire-bin</code> on Debian and Ubuntu) and restart it. See
+<a href="../usage/#configuration">Configuration</a>.</p>
+<h2 id="easyspeak-doesnt-talk">EasySpeak doesn't talk<a class="headerlink" href="#easyspeak-doesnt-talk" title="Permanent link">&para;</a></h2>
+<p>If EasySpeak logs <code>Speech unavailable (…)</code> at startup, the brackets say why:</p>
+<ul>
+<li><code>no audio player found</code> — install <code>pw-play</code> (<code>pipewire-utils</code> on Fedora,
+  <code>pipewire-bin</code> on Debian and Ubuntu), <code>paplay</code> (<code>pulseaudio-utils</code>) or <code>ffplay</code>
+  (<code>ffmpeg</code>).</li>
+<li><code>piper quit: …</code> — the voice couldn't load. Check that a language pack, such as
+  <code>easyspeak-lang-en</code>, is installed.</li>
+</ul>
 <h2 id="piper-permission-denied">Piper permission denied<a class="headerlink" href="#piper-permission-denied" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>~/.local/bin/piper/piper
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>chmod<span class="w"> </span>+x<span class="w"> </span>~/.local/bin/piper/espeak-ng
 </code></pre></div>
 <h2 id="pip-install-fails-with-pyavcython-errors">pip install fails with PyAV/Cython errors<a class="headerlink" href="#pip-install-fails-with-pyavcython-errors" title="Permanent link">&para;</a></h2>
-<p>You're on an unsupported Python version. EasySpeak is tested against Python 3.10,
-3.11, 3.12, 3.13, and 3.14 — use one of those. The simplest fix is <code>uv run
+<p>You're on an unsupported Python version. EasySpeak is tested against Python 3.11,
+3.12, 3.13, and 3.14 — use one of those. The simplest fix is <code>uv run
 easyspeak</code>, which picks a compatible interpreter for you.</p>
 
 
@@ -1317,12 +1385,12 @@ easyspeak</code>, which picks a compatible interpreter for you.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow", "search.suggest"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
       
-        <script src="../javascripts/diagram-overlay.js"></script>
+        <script src="../javascripts/figure-overlay.js"></script>
       
     
   </body>

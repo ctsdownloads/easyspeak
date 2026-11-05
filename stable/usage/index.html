@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://easyspeak.dev/latest/0.13.0/usage/">
+        <link rel="canonical" href="https://easyspeak.dev/latest/0.14.0/usage/">
       
       
         <link rel="prev" href="../dependencies/">
@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -55,7 +55,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/diagram-overlay.css">
+      <link rel="stylesheet" href="../stylesheets/figure-overlay.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -520,6 +520,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#pluginsheadtrack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plugins.headtrack
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -946,6 +957,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#pluginsheadtrack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plugins.headtrack
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -986,6 +1008,9 @@ try again at your own pace — "open documents", then "louder", "louder" — wit
 repeating the wake word. It goes back to waiting for the wake word after about
 ten seconds of silence, or when a mode ended because you went quiet, which its
 spoken notice tells you.</p>
+<p>EasySpeak runs once per desktop session. Starting it again, e.g. from the
+application menu when it started at login, greets you from the running copy and
+wakes it up if it was asleep.</p>
 <h2 id="command-line-options">Command-line options<a class="headerlink" href="#command-line-options" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1057,6 +1082,11 @@ the module that reads each (linked to its API reference).</p>
 <td><code>EASYSPEAK_MODELS_DIR</code></td>
 <td><code>models/</code> beside the venv</td>
 <td>Where language packs are installed</td>
+</tr>
+<tr>
+<td><code>EASYSPEAK_NOISE_FILTER</code></td>
+<td>on</td>
+<td><code>0</code> listens to the microphone unfiltered</td>
 </tr>
 <tr>
 <td><code>EASYSPEAK_OFFLINE</code></td>
@@ -1138,6 +1168,14 @@ floor is printed at startup:</p>
 </code></pre></div>
 <p>Set the variable to skip the measurement, e.g. if you happen to be talking during
 the first second after launch.</p>
+<p>EasySpeak listens through a noise-suppressed copy of the microphone that it makes
+for itself with PipeWire, so a fan or an air filter doesn't keep every recording
+running to its time cap. Other applications keep the plain microphone, and the
+filter goes away when EasySpeak sleeps or quits. It needs <code>pw-cli</code> (in
+<code>pipewire-utils</code> on Fedora, <code>pipewire-bin</code> on Debian and Ubuntu); without it, or
+where PipeWire lacks the filter, EasySpeak logs a warning and uses the plain
+microphone. Set <code>EASYSPEAK_NOISE_FILTER=0</code> to always use the plain one. The
+filter removes steady noise, not voices, so a TV still gets heard.</p>
 <p><code>EASYSPEAK_HOTKEY</code> takes the <code>ctrl</code>/<code>shift</code>/<code>alt</code>/<code>super</code> aliases or raw evdev
 key names joined with <code>+</code> (e.g. <code>ctrl+space</code>); set it to empty, <code>off</code>, or <code>none</code>
 to turn it off, and an unrecognized key disables it too. See
@@ -1192,6 +1230,30 @@ PyGObject and the AT-SPI typelib, which the application's own virtual environmen
 usually lacks, so candidate interpreters are probed with the helper's real import
 chain and the first that works is kept. Set the variable to point straight at one
 (the Nix flake does).</p>
+<h3 id="pluginsheadtrack"><a class="autorefs autorefs-internal" title="            plugins.headtrack" href="../reference/plugins/#plugins.headtrack"><code>plugins.headtrack</code></a><a class="headerlink" href="#pluginsheadtrack" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>EASYSPEAK_CAMERA</code></td>
+<td>first found</td>
+<td>Camera head tracking looks through</td>
+</tr>
+</tbody>
+</table>
+<p>One camera owns several <code>/dev/video*</code> nodes, only one of which streams video, so
+head tracking asks the kernel which node that is and takes the lowest-numbered
+camera it finds. A machine with a single webcam needs nothing set.</p>
+<p>Where there is more than one, head tracking logs each camera with its number and
+name at startup. Set <code>EASYSPEAK_CAMERA</code> to the number of the one you want, e.g.
+<code>EASYSPEAK_CAMERA=4</code>. A capture card or a virtual camera is indistinguishable
+from a webcam to the kernel, so this is how you choose between them.</p>
 
 
 
@@ -1251,12 +1313,12 @@ chain and the first that works is kept. Set the variable to point straight at on
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow", "search.suggest"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
       
-        <script src="../javascripts/diagram-overlay.js"></script>
+        <script src="../javascripts/figure-overlay.js"></script>
       
     
   </body>

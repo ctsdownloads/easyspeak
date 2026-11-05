@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://easyspeak.dev/latest/0.13.0/contributing/">
+        <link rel="canonical" href="https://easyspeak.dev/latest/0.14.0/contributing/">
       
       
         <link rel="prev" href="../reference/plugins/">
@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -55,7 +55,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/diagram-overlay.css">
+      <link rel="stylesheet" href="../stylesheets/figure-overlay.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -1039,7 +1039,7 @@ which transparently manages virtual environments and package installation.
 uv also allows you to install several Python versions on your computer in
 parallel. We use this to test against all supported Python versions.</p>
 <h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
-<p>First install the system build dependencies (PortAudio, GCC, Python 3.10–3.14, …)
+<p>First install the system build dependencies (PortAudio, GCC, Python 3.11–3.14, …)
 as described under <a href="../installation/#install-from-source">Install from source</a>
 in the Installation guide — without them the build and run steps below will
 fail.</p>
@@ -1055,6 +1055,9 @@ application directly:</p>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="go">nix run</span>
 </code></pre></div>
+<p>In the development shell EasySpeak logs in detail, as with <code>-v</code>, so you see early
+what it does and where it fails; set <code>EASYSPEAK_LOG_LEVEL=INFO</code> for the normal
+output.</p>
 <p>The shell carries the English language pack. The others in <code>pins.toml</code> are
 fetched on demand, one command per language, and stay cached in the Nix store:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="go">easyspeak-lang de it</span>
@@ -1170,12 +1173,12 @@ and attaches its <code>.deb</code> and <code>.rpm</code> to the release.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow", "search.suggest"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
       
-        <script src="../javascripts/diagram-overlay.js"></script>
+        <script src="../javascripts/figure-overlay.js"></script>
       
     
   </body>

@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://easyspeak.dev/latest/0.13.0/installation/">
+        <link rel="canonical" href="https://easyspeak.dev/latest/0.14.0/installation/">
       
       
         <link rel="prev" href="..">
@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -55,7 +55,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/diagram-overlay.css">
+      <link rel="stylesheet" href="../stylesheets/figure-overlay.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -364,6 +364,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#distribution-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Distribution releases
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -954,6 +971,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#distribution-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Distribution releases
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1088,10 +1122,115 @@
   <a href="../compatibility/">Compatibility</a> for what works where</li>
 <li>Working microphone</li>
 <li>~2 GB disk space for models</li>
-<li>Python 3.10–3.14 — <strong>source install only</strong>; the prebuilt packages bundle their
+<li>Python 3.11–3.14 — <strong>source install only</strong>; the prebuilt packages bundle their
   own runtime</li>
 </ul>
 <p>Tested on Fedora and NixOS.</p>
+<h3 id="distribution-releases">Distribution releases<a class="headerlink" href="#distribution-releases" title="Permanent link">&para;</a></h3>
+<p>Which install path suits a release depends on the Python it ships. The prebuilt
+packages bring their own and only use the system's <code>python3</code>, 3.10 or newer,
+for the About dialog and for typing dictated text. A source install needs a
+<code>python3</code> from 3.11 to 3.14, or <a href="https://docs.astral.sh/uv/">uv</a>, which fetches
+one. The table is guidance from each release's Python, not a list of tested
+installs; the desktop must still suit EasySpeak, see
+<a href="../compatibility/">Compatibility</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Distribution</th>
+<th>Release</th>
+<th style="text-align: center;"><code>python3</code></th>
+<th style="text-align: center;">Prebuilt packages</th>
+<th style="text-align: center;">From source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Debian</td>
+<td>12 "bookworm"</td>
+<td style="text-align: center;">3.11</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>Debian</td>
+<td>13 "trixie"</td>
+<td style="text-align: center;">3.13</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>22.04 LTS</td>
+<td style="text-align: center;">3.10</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">with uv</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>24.04 LTS</td>
+<td style="text-align: center;">3.12</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>25.10</td>
+<td style="text-align: center;">3.13</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>Ubuntu</td>
+<td>26.04 LTS</td>
+<td style="text-align: center;">3.14</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>Linux Mint</td>
+<td>21.x</td>
+<td style="text-align: center;">3.10</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">with uv</td>
+</tr>
+<tr>
+<td>Linux Mint</td>
+<td>22.x</td>
+<td style="text-align: center;">3.12</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>LMDE</td>
+<td>6</td>
+<td style="text-align: center;">3.11</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>LMDE</td>
+<td>7</td>
+<td style="text-align: center;">3.13</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>Fedora</td>
+<td>43, 44</td>
+<td style="text-align: center;">3.14</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>Fedora</td>
+<td>45</td>
+<td style="text-align: center;">3.15</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">with uv</td>
+</tr>
+</tbody>
+</table>
 <h2 id="quick-install-prebuilt-packages">Quick install (prebuilt packages)<a class="headerlink" href="#quick-install-prebuilt-packages" title="Permanent link">&para;</a></h2>
 <p>The easiest path. Download the latest <strong>app</strong> package, the
 <strong><a href="https://github.com/ctsdownloads/easyspeak/releases?q=stt">Parakeet pack</a></strong> with the speech recognition model and a
@@ -1135,7 +1274,7 @@ Shell extension. See <a href="../contributing/#nixos">Contributing</a> for the d
 <p>For development, or to run the latest unreleased code, install from the repository.
 This path needs system build dependencies and a supported Python.</p>
 <h3 id="python">Python<a class="headerlink" href="#python" title="Permanent link">&para;</a></h3>
-<p>EasySpeak is tested against Python 3.10, 3.11, 3.12, 3.13, and 3.14. Fedora 43's
+<p>EasySpeak is tested against Python 3.11, 3.12, 3.13, and 3.14. Fedora 43's
 default <code>python3</code> (3.14) works out of the box.</p>
 <h3 id="1-system-packages">1. System packages<a class="headerlink" href="#1-system-packages" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span><span class="se">\</span>
@@ -1286,12 +1425,12 @@ extra to the run command and it pulls them in for you:</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow", "search.suggest"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
       
-        <script src="../javascripts/diagram-overlay.js"></script>
+        <script src="../javascripts/figure-overlay.js"></script>
       
     
   </body>

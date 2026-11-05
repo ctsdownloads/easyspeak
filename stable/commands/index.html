@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://easyspeak.dev/latest/0.13.0/commands/">
+        <link rel="canonical" href="https://easyspeak.dev/latest/0.14.0/commands/">
       
       
         <link rel="prev" href="../screenshots/">
@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -55,7 +55,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/diagram-overlay.css">
+      <link rel="stylesheet" href="../stylesheets/figure-overlay.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -624,6 +624,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#wi-fi-bluetooth-and-airplane-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wi-Fi, Bluetooth and airplane mode
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#speakers-playing-audio" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1073,6 +1084,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#wi-fi-bluetooth-and-airplane-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wi-Fi, Bluetooth and airplane mode
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#speakers-playing-audio" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1130,11 +1152,12 @@
 time to print the full list to the terminal.</p>
 <p>This page lists the English commands, which work in every language. With
 <code>EASYSPEAK_LANGUAGE</code> set to German, Italian, French or Spanish, the general,
-app, folder, media, sleep and system commands also take that language's words
-("öffne den Rechner", "lauter", "geh schlafen"), and the terminal help lists
-them in those words, described in that language; each plugin's words are its
-<code>locale/&lt;language&gt;/vocabulary.toml</code>. The grid, browser and head-tracking modes
-still take English words only, and the help shows them so.</p>
+app, folder, media, sleep, system and connectivity commands also take that
+language's words ("öffne den Rechner", "lauter", "geh schlafen"), and the
+terminal help lists them in those words, described in that language; each
+plugin's words are its <code>locale/&lt;language&gt;/vocabulary.toml</code>. The grid, browser
+and head-tracking modes still take English words only, and the help shows them
+so.</p>
 <h2 id="mouse-grid">Mouse grid<a class="headerlink" href="#mouse-grid" title="Permanent link">&para;</a></h2>
 <p>Screen splits into a 3x3 layout (like a phone keypad):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>1 2 3
@@ -1699,6 +1722,31 @@ e.g. System Settings for "settings", KCalc for "calculator" or KWrite for "edito
 </table>
 <p>Volume changes are silent — GNOME's own on-screen display and chime acknowledge
 them.</p>
+<h2 id="wi-fi-bluetooth-and-airplane-mode">Wi-Fi, Bluetooth and airplane mode<a class="headerlink" href="#wi-fi-bluetooth-and-airplane-mode" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>wifi on/off (or wireless on/off)</td>
+<td>Turn Wi-Fi on or off</td>
+</tr>
+<tr>
+<td>airplane mode on/off (or flight mode)</td>
+<td>Turn airplane mode on or off</td>
+</tr>
+<tr>
+<td>bluetooth on/off</td>
+<td>Turn Bluetooth on or off</td>
+</tr>
+</tbody>
+</table>
+<p>EasySpeak says what it changed, or that it couldn't change it. Airplane mode and
+Bluetooth use GNOME's own switches, so on KDE Plasma only Wi-Fi works.</p>
 <h2 id="speakers-playing-audio">Speakers playing audio<a class="headerlink" href="#speakers-playing-audio" title="Permanent link">&para;</a></h2>
 <p>Modes normally take a command on their own, with no wake word. That is faster, but
 a video playing through speakers reaches the microphone too, and its speech is
@@ -1837,12 +1885,12 @@ facebook, amazon, netflix, duckduckgo.&#160;<a class="footnote-backref" href="#f
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow", "search.suggest"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
       
-        <script src="../javascripts/diagram-overlay.js"></script>
+        <script src="../javascripts/figure-overlay.js"></script>
       
     
   </body>
