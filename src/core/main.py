@@ -915,8 +915,8 @@ class EasySpeak:
         logger.info("Warming up speech...")
         try:
             self.speech.ensure()
-        except OSError:
-            logger.warning("Speech unavailable; continuing without it.")
+        except OSError as exc:
+            logger.warning("Speech unavailable (%s); continuing without it.", exc)
 
         logger.info("""
 ╔══════════════════════════════════════════╗

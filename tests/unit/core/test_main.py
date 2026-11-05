@@ -1006,7 +1006,7 @@ class TestEasySpeakRun:
         readlog,
     ):
         """When warmup fails (e.g. piper missing) then run still starts."""
-        _stub_speech_warmup.side_effect = OSError()
+        _stub_speech_warmup.side_effect = OSError("piper quit: exit code 1")
         easy = EasySpeak()
         easy.plugins = [mock_plugin]
 
@@ -1018,7 +1018,7 @@ class TestEasySpeakRun:
 
         easy.run()  # must not raise
 
-        assert "Speech unavailable" in readlog().out
+        assert "Speech unavailable (piper quit: exit code 1)" in readlog().out
 
     @patch("subprocess.run")
     @patch("easyspeak.core.main.pyaudio")
