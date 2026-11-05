@@ -5,6 +5,40 @@ canonical, GitHub-independent record of releases. It is updated once per
 release. The format loosely follows [Keep a Changelog](https://keepachangelog.com/),
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.15.0 · Problems That Make Themselves Heard · 2026-11-06
+
+**Grouped Notifications, Spoken Warnings for People Who Can't See the Screen,
+and a Choice of Reply Voice**
+
+With `-v` or `--verbose`, EasySpeak now shows **every warning and error as a
+desktop notification of its own**, titled with the feature it comes from, and
+**says which feature it is**, so people who can't read the screen know what
+isn't working. Its notifications **stay together in one group**, a click only
+dismisses them, and they go away when EasySpeak quits. The detailed terminal
+output that `--verbose` used to give is now `--debug`.
+
+**`EASYSPEAK_TTS`** chooses the engine for spoken replies and
+**`EASYSPEAK_TTS_VOICE`** its voice; the older `EASYSPEAK_PIPER_MODEL` still
+works but is deprecated. Hold-to-dictate now records long sentences with pauses
+in full, and the menu entries that `easyspeak --configure` writes start the
+right program, also from a project folder or through the Nix launcher.
+
+### What's Changed
+
+- Tell warnings from problems in startup notification by @bittner in [#261](https://github.com/ctsdownloads/easyspeak/pull/261)
+- Keep normal log output in Nix development shell by @bittner in [#262](https://github.com/ctsdownloads/easyspeak/pull/262)
+- fix(dictation): pass explicit dictation limits to push-to-talk recording by @gagan-devv in [#255](https://github.com/ctsdownloads/easyspeak/pull/255)
+- Keep EasySpeak's desktop notifications together by @bittner in [#263](https://github.com/ctsdownloads/easyspeak/pull/263)
+- Announce every warning and error with -v by @bittner in [#264](https://github.com/ctsdownloads/easyspeak/pull/264)
+- Add EASYSPEAK_TTS to choose the reply-voice engine by @elifarley in [#249](https://github.com/ctsdownloads/easyspeak/pull/249)
+- Release 0.15.0 by @bittner in [#265](https://github.com/ctsdownloads/easyspeak/pull/265)
+
+### New Contributors
+
+- @elifarley made their first contribution in [#249](https://github.com/ctsdownloads/easyspeak/pull/249)
+
+**Full Changelog**: [`0.14.0...0.15.0`](https://github.com/ctsdownloads/easyspeak/compare/0.14.0...0.15.0)
+
 ## 0.14.0 · Clearer Hearing, Plainer Answers · 2026-11-05
 
 **Wi-Fi and Bluetooth by Voice, a Noise Filter for the Microphone, and
