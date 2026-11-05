@@ -121,6 +121,12 @@ to turn it off, and an unrecognized key disables it too. See
 | --------------------- | ------- | --------------------------------------------- |
 | `EASYSPEAK_LOG_LEVEL` | `INFO`  | Logging level when no `-v`/`-q` flag is given |
 
+### [`core.desktop_integration`][core.desktop_integration]
+
+| Variable             | Default | Effect                                                                                                                         |
+| -------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `EASYSPEAK_LAUNCHER` |         | Program that `--configure` writes into the menu and login entries, set by a launcher that wraps EasySpeak, such as the Nix one |
+
 ### [`plugins.dictation`][plugins.dictation]
 
 | Variable                 | Default   | Effect                                             |

@@ -220,6 +220,7 @@
 
             export UV_CACHE_DIR="''${XDG_CACHE_HOME:-$HOME/.cache}/easyspeak/uv"
             export UV_PROJECT_ENVIRONMENT="$state_dir/venv"
+            export EASYSPEAK_LAUNCHER="''${EASYSPEAK_LAUNCHER:-$0}"
             ${commonEnv}
             cd "$src_dir"
             exec uv run easyspeak "$@"
