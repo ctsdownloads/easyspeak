@@ -3,11 +3,13 @@
 import logging
 import os
 import shutil
+import subprocess
+import sys
 from importlib import import_module
 from unittest.mock import call, patch
 
 import pytest
-from easyspeak.core import cli
+from easyspeak.core import cli, instance
 
 
 def test_dunder_main_module():
@@ -26,6 +28,53 @@ def test_run(mock_easyspeak):
     cli.run([])
 
     assert mock_easyspeak.mock_calls == [call(), call().run()]
+
+
+@pytest.mark.parametrize(
+    ("argv", "command"), [([], "present"), (["-v"], "present verbose")]
+)
+@patch("easyspeak.core.main.EasySpeak")
+def test_run_while_running_greets_from_the_running_copy(
+    mock_easyspeak, argv, command, capsys
+):
+    """A second launch asks the running copy to come forward, then quits."""
+    running = instance.acquire()
+
+    cli.run(argv)
+
+    running.close()
+    mock_easyspeak.assert_not_called()
+    assert instance.CONTROL_FILE.read_text() == command
+    assert "EasySpeak is running already" in capsys.readouterr().err
+
+
+@patch("easyspeak.core.main.EasySpeak")
+def test_run_while_running_passes_on_a_verbose_environment(mock_easyspeak, monkeypatch):
+    """Verbose by `EASYSPEAK_LOG_LEVEL`, as an alternative to `-v`, asks for the
+    details, too."""
+    monkeypatch.setenv("EASYSPEAK_LOG_LEVEL", "DEBUG")
+    running = instance.acquire()
+
+    cli.run([])
+
+    running.close()
+    assert instance.CONTROL_FILE.read_text() == "present verbose"
+
+
+def test_second_launch_path_leaves_the_speech_stack_unloaded():
+    """Checking the lock needs no speech recognition, so a second launch quits
+    at once. A fresh interpreter tells, as this suite stubs those modules."""
+    check = (
+        "import sys; import easyspeak.core.cli, easyspeak.core.instance; "
+        "loaded = {'faster_whisper', 'onnx_asr', 'numpy', 'pyaudio'} & set(sys.modules); "
+        "sys.exit(', '.join(sorted(loaded)) or None)"
+    )
+
+    result = subprocess.run(
+        [sys.executable, "-c", check], capture_output=True, text=True
+    )
+
+    assert result.returncode == 0, result.stderr
 
 
 @patch("easyspeak.core.main.EasySpeak")

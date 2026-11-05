@@ -642,6 +642,8 @@ class EasySpeak:
                 logger.info("%s mode ended: reactivated", label.capitalize())
                 self._leave_unattended(label)
                 return
+            if action is TrayAction.SPOKE:
+                self._drain_feedback()
 
             remaining = deadline - time.monotonic()
             if remaining <= 0:
@@ -814,7 +816,8 @@ class EasySpeak:
         do, so a "go to sleep" just carried out releases the mic at once instead of
         keeping the follow-up window open on it, and the tray's Quit and mute reach
         the daemon while the window is open. Waking from that sleep ends the session
-        and goes back to the wake word, as a reactivation from the tray always does.
+        and goes back to the wake word, once the wake greeting has played out, as a
+        reactivation from the tray always does.
         """
         awake = True
         quiet = 0
@@ -823,8 +826,11 @@ class EasySpeak:
             if action is TrayAction.QUIT:
                 return True
             if action is TrayAction.RESUME:
+                self._drain_feedback()
                 self._reset_detector()
                 return False
+            if action is TrayAction.SPOKE:
+                self._drain_feedback()
 
             self.unrecognized = False
             self.spoke = False
@@ -872,7 +878,9 @@ class EasySpeak:
         """Load models and plugins, then run the wake-word listen loop forever.
 
         Blocks until the user quits (voice command, tray, or Ctrl-C), always releasing
-        the microphone and draining speech on the way out.
+        the microphone and draining speech on the way out. When the tray wakes
+        EasySpeak or greets a second launch, that speech plays out before the mic is
+        read again, so it can't be recorded as a wake word or command.
         """
         logger.info("Loading OpenWakeWord...")
         self.wakeword = WakeWordModel()
@@ -935,10 +943,10 @@ class EasySpeak:
             # Measure the room before listening, so silence detection matches it.
             self.calibrate_silence()
 
-            self.tray.started()
             # Start keyboard (silent) activation; no-op if disabled or no
             # /dev/input access. Plugins have registered their handlers by now.
             self.hotkey.start()
+            self.tray.started()
             logger.info("Listening for wake word...")
             audio_buffer = []
 
@@ -948,10 +956,12 @@ class EasySpeak:
                 action = self.tray.poll(self._close_stream, self._open_stream)
                 if action is TrayAction.QUIT:
                     break
-                if action is TrayAction.RESUME:
+                if action in (TrayAction.RESUME, TrayAction.SPOKE):
+                    self._drain_feedback()
                     self._reset_detector()
                     audio_buffer = []
-                    logger.info("Listening for wake word...")
+                    if action is TrayAction.RESUME:
+                        logger.info("Listening for wake word...")
                     continue
 
                 # Keyboard activation bypasses the wake word: dictate while held.

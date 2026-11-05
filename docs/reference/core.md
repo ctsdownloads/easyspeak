@@ -14,6 +14,10 @@ instance and use its small public API (`speak`, `host_run`, `transcribe`,
 
 ::: core.cli
 
+## core.instance
+
+::: core.instance
+
 ## core.config
 
 ::: core.config
@@ -37,6 +41,10 @@ instance and use its small public API (`speak`, `host_run`, `transcribe`,
 ## core.tray
 
 ::: core.tray
+
+## core.control
+
+::: core.control
 
 ## core.statusnotifier
 

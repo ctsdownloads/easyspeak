@@ -1,5 +1,17 @@
 # Troubleshooting
 
+## See what EasySpeak is doing
+
+Started from the application menu or at login, EasySpeak runs without a
+terminal. To make it show more of what it does and where it fails, add `-v` to
+its starter: copy `/usr/share/applications/easyspeak.desktop` to
+`~/.local/share/applications/` and change `Exec=easyspeak` to
+`Exec=easyspeak -v` there. Starting EasySpeak from the menu then shows its
+version, your desktop and its language in a notification, along with the latest
+warnings and errors, and says when there were problems. To see everything it
+logs, say "Hey Jarvis, exit" to quit the running EasySpeak, then run
+`easyspeak -v` in a terminal.
+
 ## Mouse grid: "Failed to show grid — is extension enabled?"
 
 You don't install the extension yourself — EasySpeak does it automatically on

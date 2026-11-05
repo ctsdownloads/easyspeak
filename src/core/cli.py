@@ -75,6 +75,8 @@ def run(argv=None):
     `EasySpeak` is imported lazily so the one-shot subcommands work without the
     audio stack (pyopen-wakeword, pyaudio, …) that `core.main` pulls in. Ctrl+C
     ends EasySpeak quietly even while that stack or its models are still loading.
+    If EasySpeak runs already, the running copy is asked to come forward instead
+    (see [`core.instance`][core.instance]).
     """
     args = parse_args(argv)
 
@@ -97,6 +99,14 @@ def run(argv=None):
         return
 
     try:
+        from . import instance
+
+        lock = instance.acquire()
+        if lock is None:
+            instance.present(verbose=log.verbose())
+            logger.info("EasySpeak is running already; it greets you instead.")
+            return
+
         from .main import EasySpeak
 
         EasySpeak().run()

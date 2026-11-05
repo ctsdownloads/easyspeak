@@ -16,6 +16,7 @@ sys.modules["faster_whisper.tokenizer"] = MagicMock(
 )
 
 
+from easyspeak.core import instance as instance_module  # noqa: E402
 from easyspeak.core import main as main_module  # noqa: E402
 from easyspeak.core import tray as tray_module  # noqa: E402
 
@@ -61,6 +62,26 @@ def _silence_desktop_sounds(monkeypatch, tmp_path_factory):
         (tray_module, "ERROR_SOUND"),
     ):
         monkeypatch.setattr(module, name, missing)
+
+
+@pytest.fixture(autouse=True)
+def _no_desktop_notifications(monkeypatch):
+    """Keep the startup greeting from popping up notifications on the desktop.
+
+    Tests about the greeting's notification patch `notify` themselves.
+    """
+    monkeypatch.setattr(tray_module, "notify", Mock(return_value=False))
+
+
+@pytest.fixture(autouse=True)
+def _own_instance_lock(monkeypatch, tmp_path):
+    """Keep the single-instance lock and its request off the real session.
+
+    Otherwise an EasySpeak running on the desktop would make every started test
+    daemon a second launch, and greet for each.
+    """
+    monkeypatch.setattr(instance_module, "LOCK_FILE", tmp_path / "easyspeak.lock")
+    monkeypatch.setattr(instance_module, "CONTROL_FILE", tmp_path / "control")
 
 
 @pytest.fixture(autouse=True)

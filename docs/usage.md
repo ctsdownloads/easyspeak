@@ -20,6 +20,10 @@ repeating the wake word. It goes back to waiting for the wake word after about
 ten seconds of silence, or when a mode ended because you went quiet, which its
 spoken notice tells you.
 
+EasySpeak runs once per desktop session. Starting it again, e.g. from the
+application menu when it started at login, greets you from the running copy and
+wakes it up if it was asleep.
+
 ## Command-line options
 
 | Flag                     | Default             | Effect                                                          |

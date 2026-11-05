@@ -21,6 +21,7 @@ signals the open mic.
 
 import contextlib
 import enum
+import html
 import logging
 import os
 import shutil
@@ -30,6 +31,7 @@ import tempfile
 import time
 from pathlib import Path
 
+from . import log
 from .about import (
     APPLICATION_ICON,
     APPLICATION_NAME,
@@ -39,7 +41,17 @@ from .about import (
     about_html,
     app_version,
 )
-from .config import ERROR_SOUND
+from .config import ERROR_SOUND, LANGUAGE
+from .control import (
+    COMMAND_ABOUT,
+    COMMAND_HELP,
+    COMMAND_MUTE,
+    COMMAND_PRESENT,
+    COMMAND_PRESENT_VERBOSE,
+    COMMAND_QUIT,
+    COMMAND_UNMUTE,
+    CONTROL_FILE,
+)
 from .i18n import _
 
 logger = logging.getLogger(__name__)
@@ -49,22 +61,12 @@ logger = logging.getLogger(__name__)
 STATE_LISTENING = "listening"
 STATE_MUTED = "muted"
 
-# Menu commands the extension writes into the control file for the daemon.
-COMMAND_QUIT = "quit"
-COMMAND_MUTE = "mute"
-COMMAND_UNMUTE = "unmute"
-COMMAND_HELP = "help"  # open the documentation page in the default browser
-COMMAND_ABOUT = "about"  # open the libadwaita About dialog
-
 ABOUT_HELPER = str(Path(__file__).with_name("about.py"))
 TRAY_HELPER = str(Path(__file__).with_name("statusnotifier.py"))
 
 # Who serves the indicator's SetState: the GNOME Shell extension, or the tray helper.
 SHELL_SERVICE = "org.gnome.Shell"
 TRAY_SERVICE = "org.easyspeak.Tray"
-
-# Shared with the extension's ScreenshotManager, which creates ~/.cache/easyspeak.
-CONTROL_FILE = Path.home() / ".cache" / "easyspeak" / "control"
 
 # How long to idle between control-file probes while the assistant is asleep.
 SLEEP_POLL_INTERVAL = 0.2
@@ -117,6 +119,7 @@ class TrayAction(enum.Enum):
     """What `Tray.poll` is telling the audio loop to do next."""
 
     CONTINUE = "continue"  # nothing happened; read audio as usual
+    SPOKE = "spoke"  # said something; let it finish before recording again
     RESUME = "resume"  # woke from sleep; restart the listen iteration
     QUIT = "quit"  # exit the daemon
 
@@ -160,18 +163,49 @@ class Tray:
         one-shot channel for *live* menu clicks, so a stale 'about'/'help'/ 'quit'
         written during a previous session (or before the daemon was running to consume
         it) must not fire the moment polling begins, which otherwise pops the About
-        window open on launch.
+        window open on launch. Only a second launch's request for details is kept, as
+        the startup greeting fulfils it.
 
         Greets the user once startup reaches a listening state, the spoken
-        counterpart of the wake chime, and the same greeting reactivation gives.
+        counterpart of the wake chime, and the same greeting reactivation gives,
+        also in a notification (see [`greet`][core.tray.Tray.greet]).
 
         Outside GNOME it starts the tray helper first.
         """
-        self.take_command()
+        details = self.take_command() == COMMAND_PRESENT_VERBOSE
         if self._service == TRAY_SERVICE:
             self._start_helper()
         self.set_state(STATE_LISTENING)
-        self._speak(_("Welcome! I'm ready."))
+        self.greet(details=details)
+
+    def greet(self, details=False):
+        """Say that EasySpeak is ready, aloud and in a desktop notification.
+
+        Verbose, or with `details` (a second launch with `-v` asks for them), the
+        notification also tells the version, desktop and language, and the latest
+        warnings and errors. If there are any, the greeting says so, too, so they're
+        noticed without looking at a terminal.
+        """
+        greeting = _("Welcome! I'm ready.")
+        self._speak(greeting)
+        details = details or log.verbose()
+        body = greeting
+        if details:
+            desktop = os.environ.get("XDG_CURRENT_DESKTOP") or "unknown desktop"
+            session = os.environ.get("XDG_SESSION_TYPE") or "unknown session"
+            facts = f"{APPLICATION_NAME} {app_version()} on {desktop} ({session})"
+            body += "\n\n" + "\n".join((f"{facts}, language {LANGUAGE}", *log.problems))
+        shown = notify(APPLICATION_NAME, html.escape(body, quote=False))
+        if details and log.problems and shown:
+            self._speak(
+                _("I ran into problems. The details are in the desktop notification.")
+            )
+
+    def present(self, details=False):
+        """Come forward for a second launch: raise the About dialog, then greet."""
+        if self.about_open():
+            self.open_about()
+        self.greet(details=details)
 
     def stopped(self):
         """Daemon is exiting; hide the indicator so no stale icon is left."""
@@ -199,6 +233,10 @@ class Tray:
         command = self.take_command()
         if command == COMMAND_QUIT:
             return TrayAction.QUIT
+        if command in (COMMAND_PRESENT, COMMAND_PRESENT_VERBOSE):
+            self._sleep_requested = False  # the later launch wants it listening
+            self.present(details=command == COMMAND_PRESENT_VERBOSE)
+            return TrayAction.SPOKE
         if self._run_menu_action(command):
             return TrayAction.CONTINUE
         if command == COMMAND_MUTE or self._sleep_requested:
@@ -271,9 +309,9 @@ class Tray:
         name = f"{APPLICATION_NAME} {app_version()}".strip()
         if notify(name, f"{COMMENTS}\n{COPYRIGHT}\nGPL-3.0 · {DOCS_URL}"):
             self._speak(
-                _("This is {name}. The details are in a notification.").format(
-                    name=name
-                )
+                _(
+                    "This is {name}. The details are in the desktop notification."
+                ).format(name=name)
             )
         else:
             self._speak(_("This is {name}.").format(name=name))
@@ -371,7 +409,8 @@ class Tray:
         `announce` says whether to speak the deactivation confirmation: True for
         a button mute, False for a voice "go to sleep" (the sleep plugin already
         spoke, so speaking again would just repeat it). Reactivation always
-        greets, matching the startup greeting.
+        greets, matching the startup greeting. A second launch of EasySpeak
+        reactivates it, too, as starting it means wanting it to listen.
 
         Freeing the stream also clears GNOME's privacy microphone indicator, an
         OS-level 'not listening' cue alongside our own muted glyph.
@@ -396,6 +435,11 @@ class Tray:
                 acquire_mic()
                 self.set_state(STATE_LISTENING)
                 self._speak(_("Welcome! I'm ready."))
+                return TrayAction.RESUME
+            if command in (COMMAND_PRESENT, COMMAND_PRESENT_VERBOSE):
+                acquire_mic()
+                self.set_state(STATE_LISTENING)
+                self.present(details=command == COMMAND_PRESENT_VERBOSE)
                 return TrayAction.RESUME
             self._run_menu_action(command)
             if time.monotonic() >= next_repush:
@@ -428,20 +472,23 @@ class Tray:
     def take_command(self):
         """Return and clear the latest menu command, or None if none is pending.
 
-        Reads the one-shot control file the extension writes, then deletes it so
-        each menu click fires exactly once. A missing file is the common case
-        (every idle iteration), so it's checked cheaply first. The delete is
-        best-effort and kept separate from the read: a command that was read
-        successfully is returned even if the unlink fails (e.g. the file vanished
-        in a race), rather than being silently dropped.
+        Claims the one-shot control file the extension writes by renaming it, then
+        reads and deletes the claimed copy, so each menu click fires exactly once.
+        A command written meanwhile lands in a new control file, for the next poll,
+        instead of being deleted unread. A missing file is the common case (every
+        idle iteration), so it's checked cheaply first. The delete is best-effort
+        and kept separate from the read: a command that was read successfully is
+        returned even if the unlink fails, rather than being silently dropped.
         """
+        claimed = self._control_file.with_name(f".{self._control_file.name}.taken")
         try:
             if not self._control_file.exists():
                 return None
-            command = self._control_file.read_text().strip()
+            self._control_file.rename(claimed)
+            command = claimed.read_text().strip()
         except OSError:
             return None
         # already gone or a transient error; the command still stands
         with contextlib.suppress(OSError):
-            self._control_file.unlink()
+            claimed.unlink()
         return command or None
