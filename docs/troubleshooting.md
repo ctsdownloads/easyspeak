@@ -172,6 +172,16 @@ filter did not start` instead, install `pw-cli` (`pipewire-utils` on Fedora,
 `pipewire-bin` on Debian and Ubuntu) and restart it. See
 [Configuration](usage.md#configuration).
 
+## EasySpeak doesn't talk
+
+If EasySpeak logs `Speech unavailable (…)` at startup, the brackets say why:
+
+- `no audio player found` — install `pw-play` (`pipewire-utils` on Fedora,
+  `pipewire-bin` on Debian and Ubuntu), `paplay` (`pulseaudio-utils`) or `ffplay`
+  (`ffmpeg`).
+- `piper quit: …` — the voice couldn't load. Check that a language pack, such as
+  `easyspeak-lang-en`, is installed.
+
 ## Piper permission denied
 
 ```bash

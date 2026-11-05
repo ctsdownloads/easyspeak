@@ -1,5 +1,6 @@
 """Tests for the core speech module (persistent piper -> player pipeline)."""
 
+import os
 import subprocess
 from unittest.mock import Mock, mock_open, patch
 
@@ -16,6 +17,37 @@ class TestSpeechPipeline:
         """Skip the post-spawn liveness wait so pipeline tests stay instant."""
         with patch("easyspeak.core.speech.SPEECH_SPAWN_GRACE", 0):
             yield
+
+    @pytest.fixture(autouse=True)
+    def _audio_player(self, tmp_path, monkeypatch):
+        """Put an audio player on the path, as on a desktop with sound.
+
+        The processes are mocked, so it never runs; tests about choosing the
+        player patch `shutil.which` themselves.
+        """
+        bin_dir = tmp_path / "bin"
+        bin_dir.mkdir()
+        (bin_dir / "pw-play").touch(mode=0o755)
+        monkeypatch.setenv("PATH", f"{bin_dir}{os.pathsep}{os.environ['PATH']}")
+
+    @pytest.fixture(autouse=True)
+    def voice_model(self, tmp_path):
+        """Point piper at a voice model that exists, as an installed pack provides."""
+        model = tmp_path / "voice.onnx"
+        model.touch()
+        with patch("easyspeak.core.speech.PIPER_MODEL", str(model)):
+            yield model
+
+    @patch("subprocess.Popen")
+    def test_ensure_names_a_missing_voice_model(self, mock_popen, voice_model):
+        """When the voice model isn't there then nothing is spawned and the error
+        says where it was looked for, as piper takes too long to fail on it."""
+        voice_model.unlink()
+
+        with pytest.raises(OSError, match=f"^no voice model at {voice_model}$"):
+            SpeechPipeline().ensure()
+
+        mock_popen.assert_not_called()
 
     @patch("shutil.which", return_value="/usr/bin/pw-play")
     @patch("subprocess.Popen")
@@ -122,6 +154,43 @@ class TestSpeechPipeline:
         player.kill.assert_called_once()
         piper.kill.assert_called_once()
         assert pipe._piper is None and pipe._player is None
+
+    @patch("shutil.which", return_value="/usr/bin/pw-play")
+    @patch("subprocess.Popen")
+    def test_ensure_says_why_the_pipeline_died(self, mock_popen, mock_which):
+        """When piper exits right after spawn then the error carries the last line
+        it wrote to stderr, and the player still running isn't blamed."""
+        player = Mock()
+        player.poll.return_value = None
+        piper = Mock()
+        piper.poll.return_value = 1
+
+        def spawn(cmd, **kwargs):
+            if cmd[0] == "pw-play":
+                return player
+            kwargs["stderr"].write(b"Loading model\nUnable to open model file\n")
+            return piper
+
+        mock_popen.side_effect = spawn
+
+        with pytest.raises(OSError, match=r"^piper quit: Unable to open model file$"):
+            SpeechPipeline().ensure()
+
+    @patch("shutil.which", return_value="/usr/bin/pw-play")
+    @patch("subprocess.Popen")
+    def test_ensure_falls_back_to_the_exit_code(self, mock_popen, mock_which):
+        """When a process that died wrote nothing to stderr then its exit code
+        is the reason, for each process that died."""
+        player = Mock()
+        player.poll.return_value = 2
+        piper = Mock()
+        piper.poll.return_value = 1
+        mock_popen.side_effect = [player, piper]
+
+        with pytest.raises(
+            OSError, match=r"^piper quit: exit code 1; pw-play quit: exit code 2$"
+        ):
+            SpeechPipeline().ensure()
 
     def test_kill_speech_swallows_reap_failure(self):
         """When wait() after kill() fails then _kill_speech still resets state."""
@@ -236,6 +305,19 @@ class TestSpeechPipeline:
         # Tried to (re)build the pipeline twice before giving up.
         assert mock_ensure.call_count == 2
 
+    def test_speak_logs_why_it_dropped_the_phrase(self, readlog):
+        """When the pipeline can't come up then the dropped phrase is logged with
+        the reason, for the verbose output."""
+        pipe = SpeechPipeline()
+
+        with patch.object(pipe, "ensure", side_effect=OSError("piper quit: boom")):
+            pipe.speak("hello")
+
+        assert (
+            "speech pipeline unavailable (piper quit: boom); dropped phrase: hello"
+            in readlog().out
+        )
+
     def test_piper_sample_rate_reads_model_json(self):
         """When the model json is readable then its sample rate is used."""
         pipe = SpeechPipeline()
@@ -282,11 +364,24 @@ class TestSpeechPipeline:
         """When no PipeWire/PulseAudio player exists then ffplay is the last resort."""
         pipe = SpeechPipeline()
 
-        with patch("shutil.which", return_value=None):
+        with patch(
+            "shutil.which",
+            side_effect=lambda p: "/bin/ffplay" if p == "ffplay" else None,
+        ):
             cmd = pipe._player_cmd(22050)
 
         assert cmd[0] == "ffplay"
         assert "-ar" in cmd and "22050" in cmd
+
+    def test_player_cmd_names_the_players_when_none_is_installed(self):
+        """When no audio player is installed then the error names the ones to install."""
+        pipe = SpeechPipeline()
+
+        with (
+            patch("shutil.which", return_value=None),
+            pytest.raises(OSError, match="pw-play, paplay or ffplay"),
+        ):
+            pipe._player_cmd(22050)
 
     def test_drain_kills_pipeline_on_timeout(self):
         """When the pipeline does not exit in time then both processes are killed."""

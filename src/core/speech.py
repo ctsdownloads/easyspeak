@@ -13,7 +13,9 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
+from pathlib import Path
 from subprocess import TimeoutExpired
 
 from .config import PIPER_BIN, PIPER_MODEL
@@ -110,20 +112,23 @@ class SpeechPipeline:
                 f"--rate={rate}",
                 "--channels=1",
             ]
-        # Last resort: ffplay (may quit on long silent gaps between utterances).
-        return [
-            "ffplay",
-            "-f",
-            "s16le",
-            "-ar",
-            str(rate),
-            "-ch_layout",
-            "mono",
-            "-nodisp",
-            "-autoexit",
-            "-i",
-            "-",
-        ]
+        if shutil.which("ffplay"):
+            # Last resort: ffplay (may quit on long silent gaps between utterances).
+            return [
+                "ffplay",
+                "-f",
+                "s16le",
+                "-ar",
+                str(rate),
+                "-ch_layout",
+                "mono",
+                "-nodisp",
+                "-autoexit",
+                "-i",
+                "-",
+            ]
+        msg = "no audio player found, install pw-play, paplay or ffplay"
+        raise OSError(msg)
 
     @staticmethod
     def _alive(proc):
@@ -133,33 +138,59 @@ class SpeechPipeline:
         """Spawn the persistent piper -> player pipeline if not already running.
 
         Raises OSError if the pipeline can't be brought up (missing binary, bad model),
-        so callers can warn once rather than silently failing per phrase.
+        so callers can warn once rather than silently failing per phrase. Its message
+        says why, from the last line a process that quit wrote to stderr: that goes to
+        an anonymous temp file, which a pipe nobody drains would fill up and block.
+        A missing voice model is checked for up front, as piper takes longer than
+        `SPEECH_SPAWN_GRACE` to give up on it.
         """
         if self._alive(self._piper) and self._alive(self._player):
             return
         self._kill_speech()  # clear out any half-dead pipeline first
+        if not Path(PIPER_MODEL).is_file():
+            msg = f"no voice model at {PIPER_MODEL}"
+            raise OSError(msg)
         rate = self._piper_sample_rate()
-        try:
-            self._player = subprocess.Popen(
-                self._player_cmd(rate),
-                stdin=subprocess.PIPE,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            self._piper = subprocess.Popen(
-                [PIPER_BIN, "--model", PIPER_MODEL, "--output-raw"],
-                stdin=subprocess.PIPE,
-                stdout=self._player.stdin,
-                stderr=subprocess.DEVNULL,
-            )
-            self._player.stdin.close()
-            time.sleep(SPEECH_SPAWN_GRACE)
-            if not (self._alive(self._piper) and self._alive(self._player)):
-                msg = "speech pipeline exited immediately after start"
-                raise OSError(msg)
-        except Exception:
-            self._kill_speech()  # don't leak a half-spawned pipeline
-            raise
+        with (
+            tempfile.TemporaryFile() as player_errlog,
+            tempfile.TemporaryFile() as piper_errlog,
+        ):
+            try:
+                player_cmd = self._player_cmd(rate)
+                self._player = subprocess.Popen(
+                    player_cmd,
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.DEVNULL,
+                    stderr=player_errlog,
+                )
+                self._piper = subprocess.Popen(
+                    [PIPER_BIN, "--model", PIPER_MODEL, "--output-raw"],
+                    stdin=subprocess.PIPE,
+                    stdout=self._player.stdin,
+                    stderr=piper_errlog,
+                )
+                self._player.stdin.close()
+                time.sleep(SPEECH_SPAWN_GRACE)
+                exited = [
+                    self._exit_reason(name, proc, errlog)
+                    for name, proc, errlog in (
+                        ("piper", self._piper, piper_errlog),
+                        (player_cmd[0], self._player, player_errlog),
+                    )
+                    if not self._alive(proc)
+                ]
+                if exited:
+                    raise OSError("; ".join(exited))
+            except Exception:
+                self._kill_speech()  # don't leak a half-spawned pipeline
+                raise
+
+    @staticmethod
+    def _exit_reason(name, proc, errlog):
+        """Say why a pipeline process quit: its last line on stderr, or exit code."""
+        errlog.seek(0)
+        lines = errlog.read().decode(errors="replace").strip().splitlines()
+        return f"{name} quit: {lines[-1] if lines else f'exit code {proc.poll()}'}"
 
     def speak(self, text):
         """Text-to-speech output.
@@ -178,9 +209,12 @@ class SpeechPipeline:
                 self._piper.stdin.write((text + "\n").encode())
                 self._piper.stdin.flush()
                 return
-            except (BrokenPipeError, OSError, ValueError):
+            except (BrokenPipeError, OSError, ValueError) as exc:
+                reason = exc
                 self._kill_speech()  # tear down the broken pipeline, then retry
-        logger.debug("speech pipeline unavailable; dropped phrase: %s", text)
+        logger.debug(
+            "speech pipeline unavailable (%s); dropped phrase: %s", reason, text
+        )
 
     @staticmethod
     def _reap(proc):

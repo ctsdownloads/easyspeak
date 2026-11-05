@@ -9,6 +9,7 @@ rather than audio leaving a speaker.
 **Note:** See integration tests for test-driving external binaries for real.
 """
 
+import os
 import sys
 from unittest.mock import MagicMock
 
@@ -23,10 +24,25 @@ sys.modules["faster_whisper.tokenizer"] = MagicMock(
     _LANGUAGE_CODES=("en", "de", "it", "fr", "es", "pt", "nl")
 )
 
-from easyspeak.core import main  # noqa: E402
+from easyspeak.core import main, speech  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
 def _no_noise_filter(monkeypatch):
     """Open the microphone directly: these scenarios stub the processes it starts."""
     monkeypatch.setattr(main, "NOISE_FILTER", False)
+
+
+@pytest.fixture(autouse=True)
+def _installed_speech(monkeypatch, tmp_path):
+    """Provide what an installed EasySpeak speaks with: a player and a voice model.
+
+    The scenarios stub the processes, so neither ever runs.
+    """
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    (bin_dir / "pw-play").touch(mode=0o755)
+    monkeypatch.setenv("PATH", f"{bin_dir}{os.pathsep}{os.environ['PATH']}")
+    model = tmp_path / "voice.onnx"
+    model.touch()
+    monkeypatch.setattr(speech, "PIPER_MODEL", str(model))
