@@ -694,6 +694,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#easyspeak-doesnt-talk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EasySpeak doesn't talk
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#piper-permission-denied" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1094,6 +1105,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#easyspeak-doesnt-talk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EasySpeak doesn't talk
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#piper-permission-denied" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1255,6 +1277,15 @@ the noise filter</code> at startup. If it logs <code>Noise filter unavailable</c
 filter did not start</code> instead, install <code>pw-cli</code> (<code>pipewire-utils</code> on Fedora,
 <code>pipewire-bin</code> on Debian and Ubuntu) and restart it. See
 <a href="../usage/#configuration">Configuration</a>.</p>
+<h2 id="easyspeak-doesnt-talk">EasySpeak doesn't talk<a class="headerlink" href="#easyspeak-doesnt-talk" title="Permanent link">&para;</a></h2>
+<p>If EasySpeak logs <code>Speech unavailable (…)</code> at startup, the brackets say why:</p>
+<ul>
+<li><code>no audio player found</code> — install <code>pw-play</code> (<code>pipewire-utils</code> on Fedora,
+  <code>pipewire-bin</code> on Debian and Ubuntu), <code>paplay</code> (<code>pulseaudio-utils</code>) or <code>ffplay</code>
+  (<code>ffmpeg</code>).</li>
+<li><code>piper quit: …</code> — the voice couldn't load. Check that a language pack, such as
+  <code>easyspeak-lang-en</code>, is installed.</li>
+</ul>
 <h2 id="piper-permission-denied">Piper permission denied<a class="headerlink" href="#piper-permission-denied" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>~/.local/bin/piper/piper
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>chmod<span class="w"> </span>+x<span class="w"> </span>~/.local/bin/piper/espeak-ng
