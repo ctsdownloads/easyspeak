@@ -9132,6 +9132,9 @@ libadwaita.</p>
 <p>Everything GUI is imported lazily inside <a class="autorefs autorefs-internal" title="            main" href="#core.about.main"><code>main</code></a> so this module stays
 importable (for its metadata constants and version lookup) without PyGObject or a
 display present, which is how the unit suite exercises it.</p>
+<p>The tray runs it in the system's Python, for its GTK bindings, which can be as old
+as 3.10 (Ubuntu 22.04, Linux Mint 21); <code>just check-system-python</code> keeps it loading
+there.</p>
 
 
 
@@ -9174,27 +9177,27 @@ no version rather than failing.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/core/about.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#core.about.app_version--source--__codelineno-0-59">59</a></span>
-<span class="normal"><a href="#core.about.app_version--source--__codelineno-0-60">60</a></span>
-<span class="normal"><a href="#core.about.app_version--source--__codelineno-0-61">61</a></span>
-<span class="normal"><a href="#core.about.app_version--source--__codelineno-0-62">62</a></span>
-<span class="normal"><a href="#core.about.app_version--source--__codelineno-0-63">63</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#core.about.app_version--source--__codelineno-0-63">63</a></span>
 <span class="normal"><a href="#core.about.app_version--source--__codelineno-0-64">64</a></span>
 <span class="normal"><a href="#core.about.app_version--source--__codelineno-0-65">65</a></span>
 <span class="normal"><a href="#core.about.app_version--source--__codelineno-0-66">66</a></span>
 <span class="normal"><a href="#core.about.app_version--source--__codelineno-0-67">67</a></span>
 <span class="normal"><a href="#core.about.app_version--source--__codelineno-0-68">68</a></span>
-<span class="normal"><a href="#core.about.app_version--source--__codelineno-0-69">69</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="core.about.app_version--source--__codelineno-0-59" name="core.about.app_version--source--__codelineno-0-59"></a><span class="k">def</span><span class="w"> </span><span class="nf">app_version</span><span class="p">():</span>
-<a id="core.about.app_version--source--__codelineno-0-60" name="core.about.app_version--source--__codelineno-0-60"></a><span class="w">    </span><span class="sd">"""Return the installed package version, or "" if it can't be determined.</span>
-<a id="core.about.app_version--source--__codelineno-0-61" name="core.about.app_version--source--__codelineno-0-61"></a>
-<a id="core.about.app_version--source--__codelineno-0-62" name="core.about.app_version--source--__codelineno-0-62"></a><span class="sd">    Read at runtime (rather than hard-coded) so the dialog always shows the version</span>
-<a id="core.about.app_version--source--__codelineno-0-63" name="core.about.app_version--source--__codelineno-0-63"></a><span class="sd">    actually installed; an editable/source checkout without dist metadata simply shows</span>
-<a id="core.about.app_version--source--__codelineno-0-64" name="core.about.app_version--source--__codelineno-0-64"></a><span class="sd">    no version rather than failing.</span>
-<a id="core.about.app_version--source--__codelineno-0-65" name="core.about.app_version--source--__codelineno-0-65"></a><span class="sd">    """</span>
-<a id="core.about.app_version--source--__codelineno-0-66" name="core.about.app_version--source--__codelineno-0-66"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="core.about.app_version--source--__codelineno-0-67" name="core.about.app_version--source--__codelineno-0-67"></a>        <span class="k">return</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="s2">"easyspeak-linux"</span><span class="p">)</span>
-<a id="core.about.app_version--source--__codelineno-0-68" name="core.about.app_version--source--__codelineno-0-68"></a>    <span class="k">except</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">PackageNotFoundError</span><span class="p">:</span>
-<a id="core.about.app_version--source--__codelineno-0-69" name="core.about.app_version--source--__codelineno-0-69"></a>        <span class="k">return</span> <span class="s2">""</span>
+<span class="normal"><a href="#core.about.app_version--source--__codelineno-0-69">69</a></span>
+<span class="normal"><a href="#core.about.app_version--source--__codelineno-0-70">70</a></span>
+<span class="normal"><a href="#core.about.app_version--source--__codelineno-0-71">71</a></span>
+<span class="normal"><a href="#core.about.app_version--source--__codelineno-0-72">72</a></span>
+<span class="normal"><a href="#core.about.app_version--source--__codelineno-0-73">73</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="core.about.app_version--source--__codelineno-0-63" name="core.about.app_version--source--__codelineno-0-63"></a><span class="k">def</span><span class="w"> </span><span class="nf">app_version</span><span class="p">():</span>
+<a id="core.about.app_version--source--__codelineno-0-64" name="core.about.app_version--source--__codelineno-0-64"></a><span class="w">    </span><span class="sd">"""Return the installed package version, or "" if it can't be determined.</span>
+<a id="core.about.app_version--source--__codelineno-0-65" name="core.about.app_version--source--__codelineno-0-65"></a>
+<a id="core.about.app_version--source--__codelineno-0-66" name="core.about.app_version--source--__codelineno-0-66"></a><span class="sd">    Read at runtime (rather than hard-coded) so the dialog always shows the version</span>
+<a id="core.about.app_version--source--__codelineno-0-67" name="core.about.app_version--source--__codelineno-0-67"></a><span class="sd">    actually installed; an editable/source checkout without dist metadata simply shows</span>
+<a id="core.about.app_version--source--__codelineno-0-68" name="core.about.app_version--source--__codelineno-0-68"></a><span class="sd">    no version rather than failing.</span>
+<a id="core.about.app_version--source--__codelineno-0-69" name="core.about.app_version--source--__codelineno-0-69"></a><span class="sd">    """</span>
+<a id="core.about.app_version--source--__codelineno-0-70" name="core.about.app_version--source--__codelineno-0-70"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="core.about.app_version--source--__codelineno-0-71" name="core.about.app_version--source--__codelineno-0-71"></a>        <span class="k">return</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="s2">"easyspeak-linux"</span><span class="p">)</span>
+<a id="core.about.app_version--source--__codelineno-0-72" name="core.about.app_version--source--__codelineno-0-72"></a>    <span class="k">except</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">PackageNotFoundError</span><span class="p">:</span>
+<a id="core.about.app_version--source--__codelineno-0-73" name="core.about.app_version--source--__codelineno-0-73"></a>        <span class="k">return</span> <span class="s2">""</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -9221,11 +9224,7 @@ does, as some models' licenses require crediting them.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/core/about.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#core.about.about_html--source--__codelineno-0-72">72</a></span>
-<span class="normal"><a href="#core.about.about_html--source--__codelineno-0-73">73</a></span>
-<span class="normal"><a href="#core.about.about_html--source--__codelineno-0-74">74</a></span>
-<span class="normal"><a href="#core.about.about_html--source--__codelineno-0-75">75</a></span>
-<span class="normal"><a href="#core.about.about_html--source--__codelineno-0-76">76</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#core.about.about_html--source--__codelineno-0-76">76</a></span>
 <span class="normal"><a href="#core.about.about_html--source--__codelineno-0-77">77</a></span>
 <span class="normal"><a href="#core.about.about_html--source--__codelineno-0-78">78</a></span>
 <span class="normal"><a href="#core.about.about_html--source--__codelineno-0-79">79</a></span>
@@ -9238,24 +9237,28 @@ does, as some models' licenses require crediting them.</p>
 <span class="normal"><a href="#core.about.about_html--source--__codelineno-0-86">86</a></span>
 <span class="normal"><a href="#core.about.about_html--source--__codelineno-0-87">87</a></span>
 <span class="normal"><a href="#core.about.about_html--source--__codelineno-0-88">88</a></span>
-<span class="normal"><a href="#core.about.about_html--source--__codelineno-0-89">89</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="core.about.about_html--source--__codelineno-0-72" name="core.about.about_html--source--__codelineno-0-72"></a><span class="k">def</span><span class="w"> </span><span class="nf">about_html</span><span class="p">():</span>
-<a id="core.about.about_html--source--__codelineno-0-73" name="core.about.about_html--source--__codelineno-0-73"></a><span class="w">    </span><span class="sd">"""Return the About information as rich text, for desktops without libadwaita.</span>
-<a id="core.about.about_html--source--__codelineno-0-74" name="core.about.about_html--source--__codelineno-0-74"></a>
-<a id="core.about.about_html--source--__codelineno-0-75" name="core.about.about_html--source--__codelineno-0-75"></a><span class="sd">    `kdialog` shows it on KDE Plasma. It carries what the dialog's legal section</span>
-<a id="core.about.about_html--source--__codelineno-0-76" name="core.about.about_html--source--__codelineno-0-76"></a><span class="sd">    does, as some models' licenses require crediting them.</span>
-<a id="core.about.about_html--source--__codelineno-0-77" name="core.about.about_html--source--__codelineno-0-77"></a><span class="sd">    """</span>
-<a id="core.about.about_html--source--__codelineno-0-78" name="core.about.about_html--source--__codelineno-0-78"></a>    <span class="n">name</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">APPLICATION_NAME</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">app_version</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
-<a id="core.about.about_html--source--__codelineno-0-79" name="core.about.about_html--source--__codelineno-0-79"></a>    <span class="n">models</span> <span class="o">=</span> <span class="s2">"&lt;br&gt;"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-<a id="core.about.about_html--source--__codelineno-0-80" name="core.about.about_html--source--__codelineno-0-80"></a>        <span class="n">html</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">holder</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">license_id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="core.about.about_html--source--__codelineno-0-81" name="core.about.about_html--source--__codelineno-0-81"></a>        <span class="k">for</span> <span class="n">title</span><span class="p">,</span> <span class="n">holder</span><span class="p">,</span> <span class="n">license_id</span> <span class="ow">in</span> <span class="n">LEGAL</span>
-<a id="core.about.about_html--source--__codelineno-0-82" name="core.about.about_html--source--__codelineno-0-82"></a>    <span class="p">)</span>
-<a id="core.about.about_html--source--__codelineno-0-83" name="core.about.about_html--source--__codelineno-0-83"></a>    <span class="k">return</span> <span class="p">(</span>
-<a id="core.about.about_html--source--__codelineno-0-84" name="core.about.about_html--source--__codelineno-0-84"></a>        <span class="sa">f</span><span class="s2">"&lt;h3&gt;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&lt;/h3&gt;"</span>
-<a id="core.about.about_html--source--__codelineno-0-85" name="core.about.about_html--source--__codelineno-0-85"></a>        <span class="sa">f</span><span class="s2">"&lt;p&gt;</span><span class="si">{</span><span class="n">html</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">COMMENTS</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/p&gt;"</span>
-<a id="core.about.about_html--source--__codelineno-0-86" name="core.about.about_html--source--__codelineno-0-86"></a>        <span class="sa">f</span><span class="s1">'&lt;p&gt;&lt;a href="</span><span class="si">{</span><span class="n">DOCS_URL</span><span class="si">}</span><span class="s1">"&gt;</span><span class="si">{</span><span class="n">html</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">DOCS_URL</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/a&gt;&lt;/p&gt;'</span>
-<a id="core.about.about_html--source--__codelineno-0-87" name="core.about.about_html--source--__codelineno-0-87"></a>        <span class="sa">f</span><span class="s2">"&lt;p&gt;</span><span class="si">{</span><span class="n">html</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">COPYRIGHT</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;br&gt;GNU General Public License v3.0&lt;/p&gt;"</span>
-<a id="core.about.about_html--source--__codelineno-0-88" name="core.about.about_html--source--__codelineno-0-88"></a>        <span class="sa">f</span><span class="s2">"&lt;p&gt;&lt;b&gt;Speech models and voices&lt;/b&gt;&lt;br&gt;</span><span class="si">{</span><span class="n">models</span><span class="si">}</span><span class="s2">&lt;/p&gt;"</span>
-<a id="core.about.about_html--source--__codelineno-0-89" name="core.about.about_html--source--__codelineno-0-89"></a>    <span class="p">)</span>
+<span class="normal"><a href="#core.about.about_html--source--__codelineno-0-89">89</a></span>
+<span class="normal"><a href="#core.about.about_html--source--__codelineno-0-90">90</a></span>
+<span class="normal"><a href="#core.about.about_html--source--__codelineno-0-91">91</a></span>
+<span class="normal"><a href="#core.about.about_html--source--__codelineno-0-92">92</a></span>
+<span class="normal"><a href="#core.about.about_html--source--__codelineno-0-93">93</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="core.about.about_html--source--__codelineno-0-76" name="core.about.about_html--source--__codelineno-0-76"></a><span class="k">def</span><span class="w"> </span><span class="nf">about_html</span><span class="p">():</span>
+<a id="core.about.about_html--source--__codelineno-0-77" name="core.about.about_html--source--__codelineno-0-77"></a><span class="w">    </span><span class="sd">"""Return the About information as rich text, for desktops without libadwaita.</span>
+<a id="core.about.about_html--source--__codelineno-0-78" name="core.about.about_html--source--__codelineno-0-78"></a>
+<a id="core.about.about_html--source--__codelineno-0-79" name="core.about.about_html--source--__codelineno-0-79"></a><span class="sd">    `kdialog` shows it on KDE Plasma. It carries what the dialog's legal section</span>
+<a id="core.about.about_html--source--__codelineno-0-80" name="core.about.about_html--source--__codelineno-0-80"></a><span class="sd">    does, as some models' licenses require crediting them.</span>
+<a id="core.about.about_html--source--__codelineno-0-81" name="core.about.about_html--source--__codelineno-0-81"></a><span class="sd">    """</span>
+<a id="core.about.about_html--source--__codelineno-0-82" name="core.about.about_html--source--__codelineno-0-82"></a>    <span class="n">name</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">APPLICATION_NAME</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">app_version</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+<a id="core.about.about_html--source--__codelineno-0-83" name="core.about.about_html--source--__codelineno-0-83"></a>    <span class="n">models</span> <span class="o">=</span> <span class="s2">"&lt;br&gt;"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+<a id="core.about.about_html--source--__codelineno-0-84" name="core.about.about_html--source--__codelineno-0-84"></a>        <span class="n">html</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">holder</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">license_id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="core.about.about_html--source--__codelineno-0-85" name="core.about.about_html--source--__codelineno-0-85"></a>        <span class="k">for</span> <span class="n">title</span><span class="p">,</span> <span class="n">holder</span><span class="p">,</span> <span class="n">license_id</span> <span class="ow">in</span> <span class="n">LEGAL</span>
+<a id="core.about.about_html--source--__codelineno-0-86" name="core.about.about_html--source--__codelineno-0-86"></a>    <span class="p">)</span>
+<a id="core.about.about_html--source--__codelineno-0-87" name="core.about.about_html--source--__codelineno-0-87"></a>    <span class="k">return</span> <span class="p">(</span>
+<a id="core.about.about_html--source--__codelineno-0-88" name="core.about.about_html--source--__codelineno-0-88"></a>        <span class="sa">f</span><span class="s2">"&lt;h3&gt;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&lt;/h3&gt;"</span>
+<a id="core.about.about_html--source--__codelineno-0-89" name="core.about.about_html--source--__codelineno-0-89"></a>        <span class="sa">f</span><span class="s2">"&lt;p&gt;</span><span class="si">{</span><span class="n">html</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">COMMENTS</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/p&gt;"</span>
+<a id="core.about.about_html--source--__codelineno-0-90" name="core.about.about_html--source--__codelineno-0-90"></a>        <span class="sa">f</span><span class="s1">'&lt;p&gt;&lt;a href="</span><span class="si">{</span><span class="n">DOCS_URL</span><span class="si">}</span><span class="s1">"&gt;</span><span class="si">{</span><span class="n">html</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">DOCS_URL</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/a&gt;&lt;/p&gt;'</span>
+<a id="core.about.about_html--source--__codelineno-0-91" name="core.about.about_html--source--__codelineno-0-91"></a>        <span class="sa">f</span><span class="s2">"&lt;p&gt;</span><span class="si">{</span><span class="n">html</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">COPYRIGHT</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;br&gt;GNU General Public License v3.0&lt;/p&gt;"</span>
+<a id="core.about.about_html--source--__codelineno-0-92" name="core.about.about_html--source--__codelineno-0-92"></a>        <span class="sa">f</span><span class="s2">"&lt;p&gt;&lt;b&gt;Speech models and voices&lt;/b&gt;&lt;br&gt;</span><span class="si">{</span><span class="n">models</span><span class="si">}</span><span class="s2">&lt;/p&gt;"</span>
+<a id="core.about.about_html--source--__codelineno-0-93" name="core.about.about_html--source--__codelineno-0-93"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -9280,27 +9283,27 @@ does, as some models' licenses require crediting them.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/core/about.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#core.about.main--source--__codelineno-0-92"> 92</a></span>
-<span class="normal"><a href="#core.about.main--source--__codelineno-0-93"> 93</a></span>
-<span class="normal"><a href="#core.about.main--source--__codelineno-0-94"> 94</a></span>
-<span class="normal"><a href="#core.about.main--source--__codelineno-0-95"> 95</a></span>
-<span class="normal"><a href="#core.about.main--source--__codelineno-0-96"> 96</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#core.about.main--source--__codelineno-0-96"> 96</a></span>
 <span class="normal"><a href="#core.about.main--source--__codelineno-0-97"> 97</a></span>
 <span class="normal"><a href="#core.about.main--source--__codelineno-0-98"> 98</a></span>
 <span class="normal"><a href="#core.about.main--source--__codelineno-0-99"> 99</a></span>
 <span class="normal"><a href="#core.about.main--source--__codelineno-0-100">100</a></span>
 <span class="normal"><a href="#core.about.main--source--__codelineno-0-101">101</a></span>
-<span class="normal"><a href="#core.about.main--source--__codelineno-0-102">102</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="core.about.main--source--__codelineno-0-92" name="core.about.main--source--__codelineno-0-92"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>  <span class="c1"># pragma: no cover - needs libadwaita and a display; run live</span>
-<a id="core.about.main--source--__codelineno-0-93" name="core.about.main--source--__codelineno-0-93"></a><span class="w">    </span><span class="sd">"""Show the About dialog and run until the user closes it."""</span>
-<a id="core.about.main--source--__codelineno-0-94" name="core.about.main--source--__codelineno-0-94"></a>    <span class="kn">import</span><span class="w"> </span><span class="nn">gi</span>
-<a id="core.about.main--source--__codelineno-0-95" name="core.about.main--source--__codelineno-0-95"></a>
-<a id="core.about.main--source--__codelineno-0-96" name="core.about.main--source--__codelineno-0-96"></a>    <span class="n">gi</span><span class="o">.</span><span class="n">require_version</span><span class="p">(</span><span class="s2">"Gtk"</span><span class="p">,</span> <span class="s2">"4.0"</span><span class="p">)</span>
-<a id="core.about.main--source--__codelineno-0-97" name="core.about.main--source--__codelineno-0-97"></a>    <span class="n">gi</span><span class="o">.</span><span class="n">require_version</span><span class="p">(</span><span class="s2">"Adw"</span><span class="p">,</span> <span class="s2">"1"</span><span class="p">)</span>
-<a id="core.about.main--source--__codelineno-0-98" name="core.about.main--source--__codelineno-0-98"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">gi.repository</span><span class="w"> </span><span class="kn">import</span> <span class="n">Adw</span><span class="p">,</span> <span class="n">Gio</span>
+<span class="normal"><a href="#core.about.main--source--__codelineno-0-102">102</a></span>
+<span class="normal"><a href="#core.about.main--source--__codelineno-0-103">103</a></span>
+<span class="normal"><a href="#core.about.main--source--__codelineno-0-104">104</a></span>
+<span class="normal"><a href="#core.about.main--source--__codelineno-0-105">105</a></span>
+<span class="normal"><a href="#core.about.main--source--__codelineno-0-106">106</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="core.about.main--source--__codelineno-0-96" name="core.about.main--source--__codelineno-0-96"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>  <span class="c1"># pragma: no cover - needs libadwaita and a display; run live</span>
+<a id="core.about.main--source--__codelineno-0-97" name="core.about.main--source--__codelineno-0-97"></a><span class="w">    </span><span class="sd">"""Show the About dialog and run until the user closes it."""</span>
+<a id="core.about.main--source--__codelineno-0-98" name="core.about.main--source--__codelineno-0-98"></a>    <span class="kn">import</span><span class="w"> </span><span class="nn">gi</span>
 <a id="core.about.main--source--__codelineno-0-99" name="core.about.main--source--__codelineno-0-99"></a>
-<a id="core.about.main--source--__codelineno-0-100" name="core.about.main--source--__codelineno-0-100"></a>    <span class="n">app</span> <span class="o">=</span> <span class="n">Adw</span><span class="o">.</span><span class="n">Application</span><span class="p">(</span><span class="n">application_id</span><span class="o">=</span><span class="n">APP_ID</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">Gio</span><span class="o">.</span><span class="n">ApplicationFlags</span><span class="o">.</span><span class="n">FLAGS_NONE</span><span class="p">)</span>
-<a id="core.about.main--source--__codelineno-0-101" name="core.about.main--source--__codelineno-0-101"></a>    <span class="n">app</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"activate"</span><span class="p">,</span> <span class="n">_present</span><span class="p">)</span>
-<a id="core.about.main--source--__codelineno-0-102" name="core.about.main--source--__codelineno-0-102"></a>    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<a id="core.about.main--source--__codelineno-0-100" name="core.about.main--source--__codelineno-0-100"></a>    <span class="n">gi</span><span class="o">.</span><span class="n">require_version</span><span class="p">(</span><span class="s2">"Gtk"</span><span class="p">,</span> <span class="s2">"4.0"</span><span class="p">)</span>
+<a id="core.about.main--source--__codelineno-0-101" name="core.about.main--source--__codelineno-0-101"></a>    <span class="n">gi</span><span class="o">.</span><span class="n">require_version</span><span class="p">(</span><span class="s2">"Adw"</span><span class="p">,</span> <span class="s2">"1"</span><span class="p">)</span>
+<a id="core.about.main--source--__codelineno-0-102" name="core.about.main--source--__codelineno-0-102"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">gi.repository</span><span class="w"> </span><span class="kn">import</span> <span class="n">Adw</span><span class="p">,</span> <span class="n">Gio</span>
+<a id="core.about.main--source--__codelineno-0-103" name="core.about.main--source--__codelineno-0-103"></a>
+<a id="core.about.main--source--__codelineno-0-104" name="core.about.main--source--__codelineno-0-104"></a>    <span class="n">app</span> <span class="o">=</span> <span class="n">Adw</span><span class="o">.</span><span class="n">Application</span><span class="p">(</span><span class="n">application_id</span><span class="o">=</span><span class="n">APP_ID</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">Gio</span><span class="o">.</span><span class="n">ApplicationFlags</span><span class="o">.</span><span class="n">FLAGS_NONE</span><span class="p">)</span>
+<a id="core.about.main--source--__codelineno-0-105" name="core.about.main--source--__codelineno-0-105"></a>    <span class="n">app</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"activate"</span><span class="p">,</span> <span class="n">_present</span><span class="p">)</span>
+<a id="core.about.main--source--__codelineno-0-106" name="core.about.main--source--__codelineno-0-106"></a>    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
