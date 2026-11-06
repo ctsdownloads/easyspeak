@@ -17,6 +17,15 @@ has plugins
 has locale/de/LC_MESSAGES/dictation.po
 has locale/de/vocabulary.toml
 
+# The .deb and .rpm are built without Git, so only packages listed in
+# pyproject.toml ship there, even though this wheel has every plugin.
+echo "Every plugin is listed in pyproject.toml's packages"
+for init in src/plugins/*/__init__.py; do
+    plugin=$(basename "$(dirname "$init")")
+    grep -qF "\"easyspeak.plugins.$plugin\"" pyproject.toml ||
+        { echo "  NOT LISTED: easyspeak.plugins.$plugin" >&2; exit 1; }
+done
+
 echo "The wheel ships the launcher data and the GNOME extension"
 has easyspeak.desktop
 has easyspeak-autostart.desktop
