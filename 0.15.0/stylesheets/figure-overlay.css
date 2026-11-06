@@ -1,0 +1,58 @@
+.mermaid,
+.md-content img:not(a img) {
+  cursor: zoom-in;
+}
+
+.figure-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  background: var(--md-default-bg-color);
+  color: var(--md-default-fg-color);
+  cursor: zoom-out;
+}
+
+.figure-overlay__bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 0.4rem 1rem;
+  font-size: 0.7rem;
+  color: var(--md-default-fg-color--light);
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+}
+
+.figure-overlay__bar button {
+  padding: 0 0.3rem;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: inherit;
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+.figure-overlay__bar button:hover {
+  color: var(--md-accent-fg-color);
+}
+
+.figure-overlay__stage {
+  display: flex;
+  flex: 1;
+  padding: 1rem;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* Auto margins centre the figure when it fits and let the stage scroll
+   when it does not, which flex centring would clip. */
+.figure-overlay .mermaid,
+.figure-overlay img {
+  flex: none;
+  max-width: none;
+  margin: auto;
+  cursor: zoom-out;
+}
