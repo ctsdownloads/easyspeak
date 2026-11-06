@@ -4,6 +4,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+    localToStageCoordinates,
+    cycleMonitorIndex,
+    resolveMonitorTarget,
     dragPath,
     clampToWorkArea,
     scrollDirectionDelta,
@@ -15,6 +18,94 @@ import {
     pickAutostartSource,
     isPrefsWindow,
 } from '../../src/gnome@easyspeak.dev/extension-helpers.js';
+
+test('localToStageCoordinates returns local coordinates unchanged without a monitor', () => {
+    assert.deepEqual(localToStageCoordinates(100, 200, null), { stageX: 100, stageY: 200 });
+    assert.deepEqual(localToStageCoordinates(100, 200, undefined), { stageX: 100, stageY: 200 });
+});
+
+test('localToStageCoordinates translates local coordinates by monitor origin', () => {
+    const laptop = { x: 0, y: 0, width: 1728, height: 1080 };
+    const external = { x: 1728, y: 0, width: 2560, height: 1440 };
+
+    assert.deepEqual(localToStageCoordinates(864, 540, laptop), { stageX: 864, stageY: 540 });
+    assert.deepEqual(localToStageCoordinates(1280, 720, external), { stageX: 3008, stageY: 720 });
+});
+
+test('localToStageCoordinates rounds fractional coordinates and defaults missing offsets', () => {
+    assert.deepEqual(localToStageCoordinates(10.4, 20.6, {}), { stageX: 10, stageY: 21 });
+});
+
+test('cycleMonitorIndex cycles between displays using modular arithmetic', () => {
+    assert.equal(cycleMonitorIndex(0, 2), 1);
+    assert.equal(cycleMonitorIndex(1, 2), 0);
+    assert.equal(cycleMonitorIndex(0, 3), 1);
+    assert.equal(cycleMonitorIndex(1, 3), 2);
+    assert.equal(cycleMonitorIndex(2, 3), 0);
+    assert.equal(cycleMonitorIndex(null, 2), 1);
+    assert.equal(cycleMonitorIndex(0, 0), 0);
+    assert.equal(cycleMonitorIndex(0, -1), 0);
+});
+
+test('resolveMonitorTarget resolves numeric indices clamped to range', () => {
+    const monitors = [
+        { index: 0, x: 0, y: 0, is_builtin: true, connector: 'eDP-1' },
+        { index: 1, x: 1728, y: 0, is_builtin: false, connector: 'DP-1' },
+    ];
+    assert.equal(resolveMonitorTarget(monitors, 1, 0), 0);
+    assert.equal(resolveMonitorTarget(monitors, 1, 1), 1);
+    assert.equal(resolveMonitorTarget(monitors, 1, 5), 1);
+    assert.equal(resolveMonitorTarget(monitors, 1, -2), 0);
+    assert.equal(resolveMonitorTarget([], 0, 1), 0);
+    assert.equal(resolveMonitorTarget(null, 0, 1), 0);
+});
+
+test('resolveMonitorTarget resolves primary and default keywords', () => {
+    const monitors = [{ index: 0 }, { index: 1 }];
+    assert.equal(resolveMonitorTarget(monitors, 1, 'primary'), 1);
+    assert.equal(resolveMonitorTarget(monitors, 1, 'default'), 1);
+    assert.equal(resolveMonitorTarget(monitors, 1, ''), 1);
+    assert.equal(resolveMonitorTarget(monitors, 1, null), 1);
+    assert.equal(resolveMonitorTarget(monitors, 1, undefined), 1);
+    assert.equal(resolveMonitorTarget(monitors, -1, 'primary'), 0);
+});
+
+test('resolveMonitorTarget resolves external and secondary keywords', () => {
+    const monitors = [{ index: 0 }, { index: 1 }];
+    assert.equal(resolveMonitorTarget(monitors, 1, 'external'), 0);
+    assert.equal(resolveMonitorTarget(monitors, 0, 'secondary'), 1);
+    assert.equal(resolveMonitorTarget(monitors, 1, 'other'), 0);
+    // Single monitor fallback
+    assert.equal(resolveMonitorTarget([{ index: 0 }], 0, 'external'), 0);
+    assert.equal(resolveMonitorTarget([{ index: 0 }], -1, 'external'), 0);
+});
+
+test('resolveMonitorTarget resolves laptop and builtin keywords', () => {
+    const monitors = [
+        { index: 0, is_builtin: true },
+        { index: 1, is_builtin: false },
+    ];
+    assert.equal(resolveMonitorTarget(monitors, 1, 'laptop'), 0);
+    assert.equal(resolveMonitorTarget(monitors, 1, 'builtin'), 0);
+    assert.equal(resolveMonitorTarget(monitors, 1, 'internal'), 0);
+
+    // Fallback when is_builtin flag is absent: picks non-primary
+    const noFlag = [{ index: 0 }, { index: 1 }];
+    assert.equal(resolveMonitorTarget(noFlag, 1, 'laptop'), 0);
+    assert.equal(resolveMonitorTarget([{ index: 0 }], 0, 'laptop'), 0);
+});
+
+test('resolveMonitorTarget parses string numbers and connector names', () => {
+    const monitors = [
+        { index: 0, connector: 'eDP-1' },
+        { index: 1, connector: 'DP-1' },
+    ];
+    assert.equal(resolveMonitorTarget(monitors, 1, '0'), 0);
+    assert.equal(resolveMonitorTarget(monitors, 0, '1'), 1);
+    assert.equal(resolveMonitorTarget(monitors, 1, 'dp-1'), 1);
+    assert.equal(resolveMonitorTarget(monitors, 1, 'edp'), 0);
+    assert.equal(resolveMonitorTarget(monitors, 1, 'unknown-display'), 1);
+});
 
 test('clampToWorkArea returns the rectangle unchanged without a work area', () => {
     assert.deepEqual(clampToWorkArea(10, 20, 30, 40, null), [10, 20, 30, 40]);

@@ -53,6 +53,9 @@ msgstr "Rechtsklick"
 msgid "Scrolled"
 msgstr "Gescrollt"
 
+msgid "Switched monitor"
+msgstr "Monitor gewechselt"
+
 msgid "The mouse grid only works on GNOME so far."
 msgstr "Das Mausraster funktioniert bisher nur unter GNOME."
 
@@ -65,6 +68,9 @@ msgstr "click - Linksklick"
 msgid "close/cancel - hide grid"
 msgstr "close/cancel - Raster ausblenden"
 
+msgid "grid on laptop/external - show grid on specific monitor"
+msgstr "grid on laptop/external - Raster auf bestimmtem Monitor anzeigen"
+
 msgid "grid/mouse/pointer - show mouse grid"
 msgstr "grid/mouse/pointer - Mausraster anzeigen"
 
@@ -76,6 +82,9 @@ msgstr "right click / double click / middle click - Rechts-, Doppel-, Mittelklic
 
 msgid "scroll up/down/left/right [N]"
 msgstr "scroll up/down/left/right [N] - scrollen"
+
+msgid "switch monitor / next monitor - cycle grid between displays"
+msgstr "switch monitor / next monitor - Raster zwischen Bildschirmen wechseln"
 
 msgid "up/down/left/right [N] - nudge position"
 msgstr "up/down/left/right [N] - Position verschieben"

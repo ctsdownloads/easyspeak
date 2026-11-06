@@ -12,6 +12,9 @@ import {
     scrollDirectionDelta,
     gridGeometry,
     dragPath,
+    localToStageCoordinates,
+    cycleMonitorIndex,
+    resolveMonitorTarget,
 } from './extension-helpers.js';
 
 // A drag is a journey, not a jump. GTK begins one only after the pointer travels
@@ -31,6 +34,11 @@ export class GridOverlay {
         this.screenW = 1920;
         this.screenH = 1080;
         this.workArea = null;
+        this._activeMonitor = null;
+        this._monitorsChangedId = Main.layoutManager.connect(
+            'monitors-changed',
+            () => this._onMonitorsChanged()
+        );
         this._pointer = null;
         this._dragging = false;
         this._dragOrigin = null;
@@ -51,14 +59,31 @@ export class GridOverlay {
         return clampToWorkArea(x, y, w, h, this.workArea);
     }
 
-    show() {
+    _getStagePoint(x, y) {
+        const monitor = this._activeMonitor || Main.layoutManager.primaryMonitor;
+        return localToStageCoordinates(x, y, monitor);
+    }
+
+    show(target = null) {
         if (this.container) this.hide();
 
-        const monitor = Main.layoutManager.primaryMonitor;
-        // Use monitor's actual dimensions, ignore what Python sends
+        const monitors = Main.layoutManager.monitors;
+        const primaryIdx = Main.layoutManager.primaryIndex;
+
+        let monitorIdx;
+        if (target !== null && target !== undefined) {
+            monitorIdx = resolveMonitorTarget(monitors, primaryIdx, target);
+        } else if (this._activeMonitor && monitors.some((m) => m.index === this._activeMonitor.index)) {
+            monitorIdx = this._activeMonitor.index;
+        } else {
+            monitorIdx = primaryIdx;
+        }
+
+        const monitor = monitors[monitorIdx] || Main.layoutManager.primaryMonitor;
+        this._activeMonitor = monitor;
+
         this.screenW = monitor.width;
         this.screenH = monitor.height;
-
         this.bounds = [0, 0, this.screenW, this.screenH];
 
         this.container = new St.Widget({
@@ -72,11 +97,67 @@ export class GridOverlay {
         this._draw();
         Main.uiGroup.add_child(this.container);
 
-        log(`EasySpeak: Grid shown ${this.screenW}x${this.screenH} at (${monitor.x},${monitor.y})`);
+        log(`EasySpeak: Grid shown on monitor ${monitor.index} (${this.screenW}x${this.screenH}) at (${monitor.x},${monitor.y})`);
+        return [this.screenW, this.screenH];
+    }
+
+    showOnMonitor(target) {
+        return this.show(target);
+    }
+
+    switchMonitor() {
+        const monitors = Main.layoutManager.monitors;
+        if (!monitors || monitors.length <= 1) {
+            log('EasySpeak: Cannot switch monitor, only 1 monitor connected');
+            return false;
+        }
+        const currentIdx = this._activeMonitor ? this._activeMonitor.index : Main.layoutManager.primaryIndex;
+        const nextIdx = cycleMonitorIndex(currentIdx, monitors.length);
+        this.show(nextIdx);
+        return true;
+    }
+
+    getAllMonitors() {
+        const primaryIdx = Main.layoutManager.primaryIndex;
+        return Main.layoutManager.monitors.map((m, idx) => ({
+            index: idx,
+            x: m.x,
+            y: m.y,
+            width: m.width,
+            height: m.height,
+            is_primary: idx === primaryIdx,
+            is_builtin: this._isBuiltinMonitor(m),
+        }));
+    }
+
+    _isBuiltinMonitor(monitor) {
+        try {
+            const monitorManager = global.backend.get_monitor_manager();
+            const logicalMonitors = monitorManager.get_logical_monitors();
+            const lm = logicalMonitors[monitor.index];
+            if (lm) {
+                const outputs = lm.get_monitors();
+                return outputs.some((o) =>
+                    typeof o.is_builtin === 'function' ? o.is_builtin() : !!o.is_builtin
+                );
+            }
+        } catch {
+            // Fallback check
+        }
+        return monitor.index === 0 && monitor.x === 0;
+    }
+
+    _onMonitorsChanged() {
+        if (!this.container) return;
+        const monitors = Main.layoutManager.monitors;
+        if (!monitors.some((m) => m.index === this._activeMonitor?.index)) {
+            this._activeMonitor = Main.layoutManager.primaryMonitor;
+        }
+        this.show(this._activeMonitor?.index ?? null);
     }
 
     getScreenSize() {
-        const monitor = Main.layoutManager.primaryMonitor;
+        const monitor = this._activeMonitor || Main.layoutManager.primaryMonitor;
         return [monitor.width, monitor.height];
     }
 
@@ -94,19 +175,21 @@ export class GridOverlay {
     }
 
     click(x, y) {
+        const { stageX, stageY } = this._getStagePoint(x, y);
         this.hide();
         const pointer = this._getPointer();
         const t = GLib.get_monotonic_time();
-        pointer.notify_absolute_motion(t, x, y);
+        pointer.notify_absolute_motion(t, stageX, stageY);
         pointer.notify_button(t + 5000, Clutter.BUTTON_PRIMARY, Clutter.ButtonState.PRESSED);
         pointer.notify_button(t + 10000, Clutter.BUTTON_PRIMARY, Clutter.ButtonState.RELEASED);
     }
 
     doubleClick(x, y) {
+        const { stageX, stageY } = this._getStagePoint(x, y);
         this.hide();
         const pointer = this._getPointer();
         const t = GLib.get_monotonic_time();
-        pointer.notify_absolute_motion(t, x, y);
+        pointer.notify_absolute_motion(t, stageX, stageY);
         pointer.notify_button(t + 5000, Clutter.BUTTON_PRIMARY, Clutter.ButtonState.PRESSED);
         pointer.notify_button(t + 10000, Clutter.BUTTON_PRIMARY, Clutter.ButtonState.RELEASED);
         pointer.notify_button(t + 60000, Clutter.BUTTON_PRIMARY, Clutter.ButtonState.PRESSED);
@@ -114,48 +197,52 @@ export class GridOverlay {
     }
 
     rightClick(x, y) {
+        const { stageX, stageY } = this._getStagePoint(x, y);
         this.hide();
         const pointer = this._getPointer();
         const t = GLib.get_monotonic_time();
-        pointer.notify_absolute_motion(t, x, y);
+        pointer.notify_absolute_motion(t, stageX, stageY);
         pointer.notify_button(t + 5000, Clutter.BUTTON_SECONDARY, Clutter.ButtonState.PRESSED);
         pointer.notify_button(t + 10000, Clutter.BUTTON_SECONDARY, Clutter.ButtonState.RELEASED);
     }
 
     middleClick(x, y) {
+        const { stageX, stageY } = this._getStagePoint(x, y);
         this.hide();
         const pointer = this._getPointer();
         const t = GLib.get_monotonic_time();
-        pointer.notify_absolute_motion(t, x, y);
+        pointer.notify_absolute_motion(t, stageX, stageY);
         pointer.notify_button(t + 5000, Clutter.BUTTON_MIDDLE, Clutter.ButtonState.PRESSED);
         pointer.notify_button(t + 10000, Clutter.BUTTON_MIDDLE, Clutter.ButtonState.RELEASED);
     }
 
     moveTo(x, y) {
+        const { stageX, stageY } = this._getStagePoint(x, y);
         const pointer = this._getPointer();
-        pointer.notify_absolute_motion(GLib.get_monotonic_time(), x, y);
+        pointer.notify_absolute_motion(GLib.get_monotonic_time(), stageX, stageY);
     }
 
     startDrag(x, y) {
         // Keep grid visible so user can navigate to end point
         this._cancelDragTimers();
+        const { stageX, stageY } = this._getStagePoint(x, y);
         const pointer = this._getPointer();
-        pointer.notify_absolute_motion(GLib.get_monotonic_time(), x, y);
+        pointer.notify_absolute_motion(GLib.get_monotonic_time(), stageX, stageY);
         pointer.notify_button(GLib.get_monotonic_time(), Clutter.BUTTON_PRIMARY,
             Clutter.ButtonState.PRESSED);
-        // Remembered so the release can travel here from there, rather than
-        // teleporting straight to the drop point.
-        this._dragOrigin = [x, y];
+        // Remembered in stage coordinates so the release can travel here from there
+        this._dragOrigin = [stageX, stageY];
         this._dragging = true;
     }
 
     endDrag(x, y) {
         if (!this._dragging) return;
+        const { stageX, stageY } = this._getStagePoint(x, y);
         this.hide();
         this._cancelDragTimers();
 
-        const [sx, sy] = this._dragOrigin ?? [x, y];
-        const path = dragPath(sx, sy, x, y, DRAG_STEPS);
+        const [sx, sy] = this._dragOrigin ?? [stageX, stageY];
+        const path = dragPath(sx, sy, stageX, stageY, DRAG_STEPS);
         const pointer = this._getPointer();
         let step = 0;
 
@@ -203,11 +290,21 @@ export class GridOverlay {
         if (this._dragging) this._releaseDragButton();
     }
 
+    destroy() {
+        this.abortDrag();
+        this.hide();
+        if (this._monitorsChangedId) {
+            Main.layoutManager.disconnect(this._monitorsChangedId);
+            this._monitorsChangedId = null;
+        }
+    }
+
     scroll(x, y, direction, clicks) {
+        const { stageX, stageY } = this._getStagePoint(x, y);
         this.hide();
         const pointer = this._getPointer();
         const t = GLib.get_monotonic_time();
-        pointer.notify_absolute_motion(t, x, y);
+        pointer.notify_absolute_motion(t, stageX, stageY);
 
         const { dx, dy } = scrollDirectionDelta(direction);
 

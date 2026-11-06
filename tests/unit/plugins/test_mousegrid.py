@@ -1018,3 +1018,103 @@ def test_the_drag_reply_cannot_start_another_drag(mock_dbus, mock_core_factory):
 
     spoken = [call.args[0].lower() for call in mock_core.speak.call_args_list]
     assert not any("mark" in phrase for phrase in spoken)
+
+
+@patch.object(mousegrid_plugin, "host_run")
+@patch.object(mousegrid_plugin, "get_screen_size", return_value=(2560, 1440))
+def test_switch_monitor_success(mock_screen_size, mock_host_run, mock_core):
+    """switch_monitor calls D-Bus SwitchMonitor, refreshes bounds and speaks."""
+    mock_host_run.return_value = Mock(returncode=0, stdout="((true,),)\n")
+    mousegrid_plugin.core = mock_core
+    result = mousegrid_plugin.switch_monitor()
+
+    assert result is True
+    assert mousegrid_plugin.grid_active is True
+    assert mousegrid_plugin.grid_bounds == (0, 0, 2560, 1440)
+    assert any("SwitchMonitor" in arg for arg in mock_host_run.call_args.args[0])
+    mock_core.speak.assert_called_once_with("Switched monitor")
+
+
+@patch.object(mousegrid_plugin, "host_run")
+def test_switch_monitor_failure(mock_host_run, mock_core):
+    """switch_monitor returns False when D-Bus call fails or reports false."""
+    mock_host_run.return_value = Mock(returncode=0, stdout="((false,),)\n")
+    mousegrid_plugin.core = mock_core
+    result = mousegrid_plugin.switch_monitor()
+
+    assert result is False
+    assert not mock_core.speak.called
+
+
+@patch.object(mousegrid_plugin, "host_run")
+def test_show_grid_on_monitor_success(mock_host_run, mock_core):
+    """show_grid_on_monitor calls D-Bus ShowOnMonitor and parses dimensions."""
+    mock_host_run.return_value = Mock(returncode=0, stdout="((2560, 1440),)\n")
+    mousegrid_plugin.core = mock_core
+
+    result = mousegrid_plugin.show_grid_on_monitor("external")
+
+    assert result is True
+    assert mousegrid_plugin.grid_active is True
+    assert mousegrid_plugin.screen_size == (2560, 1440)
+    assert mousegrid_plugin.grid_bounds == (0, 0, 2560, 1440)
+    mock_core.speak.assert_called_once_with("Grid")
+    assert any("ShowOnMonitor" in arg for arg in mock_host_run.call_args.args[0])
+    assert "external" in mock_host_run.call_args.args[0]
+
+
+@patch.object(mousegrid_plugin, "host_run", return_value=Mock(returncode=1, stdout=""))
+def test_show_grid_on_monitor_failure(mock_host_run, mock_core):
+    """show_grid_on_monitor reports unavailable when D-Bus call fails."""
+    mousegrid_plugin.core = mock_core
+    result = mousegrid_plugin.show_grid_on_monitor("laptop")
+
+    assert result is False
+    assert mousegrid_plugin.grid_active is False
+    assert mock_core.speak.called
+
+
+@pytest.mark.parametrize(
+    ("phrase", "expected_target"),
+    [
+        ("grid on laptop", "laptop"),
+        ("grid on external", "external"),
+        ("grid on builtin", "laptop"),
+        ("mouse on secondary", "external"),
+        ("pointer on primary", "primary"),
+    ],
+)
+@patch.object(mousegrid_plugin, "show_grid_on_monitor", return_value=True)
+@patch.object(mousegrid_plugin, "listen_for_grid_commands")
+def test_handle_grid_on_target_monitors(
+    mock_listen, mock_show_on_mon, phrase, expected_target, mock_core
+):
+    """handle recognises target monitor triggers and routes to show_grid_on_monitor."""
+    result = mousegrid_plugin.handle(phrase, mock_core)
+
+    assert result is True
+    mock_show_on_mon.assert_called_once_with(expected_target)
+    mock_listen.assert_called_once_with(mock_core)
+
+
+@patch.object(mousegrid_plugin, "switch_monitor", return_value=True)
+@patch.object(mousegrid_plugin, "listen_for_grid_commands")
+def test_handle_switch_monitor_command(mock_listen, mock_switch, mock_core):
+    """handle routes 'switch monitor' to switch_monitor."""
+    result = mousegrid_plugin.handle("switch monitor", mock_core)
+
+    assert result is True
+    mock_switch.assert_called_once()
+    mock_listen.assert_called_once_with(mock_core)
+
+
+@patch.object(mousegrid_plugin, "switch_monitor", return_value=True)
+def test_grid_mode_switches_monitor(mock_switch, mock_core_factory):
+    """Saying 'switch monitor' while in grid mode cycles to the next screen."""
+    mock_core = mock_core_factory(transcribe_values=["switch monitor", "close"])
+    mousegrid_plugin.grid_active = True
+    mousegrid_plugin.grid_bounds = (0, 0, 1920, 1080)
+
+    mousegrid_plugin.listen_for_grid_commands(mock_core)
+
+    mock_switch.assert_called_once()
