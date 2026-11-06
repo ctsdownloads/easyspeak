@@ -183,6 +183,7 @@ packages = [
   "easyspeak.plugins.apps",
   "easyspeak.plugins.base",
   "easyspeak.plugins.browser",
+  "easyspeak.plugins.connectivity",
   "easyspeak.plugins.dictation",
   "easyspeak.plugins.files",
   "easyspeak.plugins.headtrack",
